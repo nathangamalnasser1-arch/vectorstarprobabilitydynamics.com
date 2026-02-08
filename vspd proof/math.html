@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math & AI — VSPD × CERN Open Data</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav>
+      <a href="index.html" class="brand">VSPD × CERN Open Data</a>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="experiment.html" class="nav-link">Experiment</a>
+      <a href="math.html" class="nav-link active">Math & AI</a>
+      <a href="explanation.html" class="nav-link">Explanation</a>
+      <a href="about.html" class="nav-link">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Math & AI</h1>
+    <p>
+      This page explains the mathematics used in the visualization and how AI concepts are applied
+      conceptually (no training is required — we only use the ideas).
+    </p>
+
+    <div class="card">
+      <h2>Probability distributions</h2>
+      <p>
+        From the CMS event data we have particles with position <strong>(x, y, z)</strong> and momentum
+        <strong>(px, py, pz)</strong> at each <strong>event_index</strong>. We treat event_index as a
+        discrete time label. To get a probability density we aggregate over many particles (and optionally
+        over nearby events): we assign a scalar value proportional to the density of particles in a region,
+        e.g. via a simple kernel or histogram. So at each point in (reduced) space we have a number
+        <code>ρ ≥ 0</code> such that (after normalization) it behaves like a probability density.
+      </p>
+      <p>
+        In the <strong>standard</strong> mode we use this density directly: we map <code>ρ</code> to
+        brightness or to a radius (e.g. circle size) so that “more probability” means brighter or larger.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Vector field transformation (VSPD)</h2>
+      <p>
+        In <strong>VSPD</strong> we convert the scalar probability into a vector field. One simple approach:
+        use the gradient of the (smoothed) density, so that vectors point in the direction of steepest
+        increase of probability, with magnitude proportional to the rate of change. Another is to use
+        the momentum field: at each cell we average the momentum of particles in that cell (or nearby),
+        and display that as a vector. So we get a field <strong>v(x, y)</strong> with both direction
+        and magnitude.
+      </p>
+      <p>
+        In the demo we derive vectors from the data: e.g. from position differences between consecutive
+        event indices (displacement) or from momentum (px, py), then scale and smooth them so the arrows
+        show “probability flow” direction and strength. The exact mapping is chosen so the animation is
+        deterministic and reproducible.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Discrete time evolution (Δt)</h2>
+      <p>
+        Time is represented by <strong>event_index</strong>. The step between two consecutive event indices
+        is our discrete <strong>Δt</strong>. We do not use a continuous differential equation in the
+        browser; we advance by one event index at a time. So:
+      </p>
+      <ul>
+        <li>Particle positions (or densities) at step <code>n</code> are updated to step <code>n + 1</code>
+          using the data at <code>event_index = n + 1</code>.</li>
+        <li>Vector fields are recomputed at each step from the data at that step (and optionally
+          smoothed in space or over a short window of event indices).</li>
+      </ul>
+      <p>
+        This keeps the visualization deterministic: same data and same step index always give the same
+        frame.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>AI concepts used (conceptually)</h2>
+      <p>
+        We do not train any model here. The following AI/ML ideas are used only as concepts to design
+        the pipeline:
+      </p>
+      <ul>
+        <li><strong>Dimensionality reduction</strong> — The raw data are 3D position + 3D momentum (and energy).
+          For 2D visualization we project to (x, y) or (px, py), or use a simple projection. So we “reduce”
+          dimensions to what the screen can show, similar in spirit to PCA or t-SNE reducing high-dimensional
+          data to 2D for visualization.</li>
+        <li><strong>Vector smoothing</strong> — To avoid noisy arrows we smooth the vector field (e.g. local
+          averaging or low-pass filter). This is analogous to regularization in ML: we trade a bit of
+          fidelity for stability and interpretability.</li>
+        <li><strong>Pattern recognition</strong> — By visualizing both scalar and vector views we make it
+          easier for the eye to recognize patterns (e.g. jets, flows, clusters). The idea is the same as
+          in ML: represent data in a way that highlights structure; here the “model” is just the
+          deterministic mapping from CERN data to pixels and arrows.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Static site — CERN CMS Open Data visualization. No backend. Deterministic animations.
+  </footer>
+  <script src="main.js"></script>
+</body>
+</html>

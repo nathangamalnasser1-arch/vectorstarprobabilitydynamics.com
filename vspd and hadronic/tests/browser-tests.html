@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VSPD Hadronic – Unit tests (browser)</title>
+</head>
+<body>
+  <div id="results"></div>
+  <script src="../js/dataEngine.js"></script>
+  <script src="../js/graphController.js"></script>
+  <script src="../js/theoryContainer.js"></script>
+  <script src="../js/applicationModule.js"></script>
+  <script src="../js/temporalEvolutionView.js"></script>
+  <script>
+    (function () {
+      const out = document.getElementById('results');
+      let passed = 0, failed = 0;
+      function assert(cond, msg) {
+        if (!cond) throw new Error(msg || 'Assertion failed');
+      }
+      function run(name, fn) {
+        try {
+          fn();
+          passed++;
+          out.innerHTML += '<div style="color:green">✓ ' + name + '</div>';
+        } catch (e) {
+          failed++;
+          out.innerHTML += '<div style="color:red">✗ ' + name + ': ' + e.message + '</div>';
+        }
+      }
+
+      run('DataEngine exists and validateData', function () {
+        assert(typeof DataEngine !== 'undefined');
+        const r = DataEngine.validateData({ temperature: [-1] });
+        assert(!r.valid && r.errors.length > 0);
+      });
+      run('DataEngine runPipeline', function () {
+        const r = DataEngine.runPipeline({ deltaTNorm: 0.5, tMin: 0, tMax: 10, windowCenter: 0.5, modelVSPD: true });
+        assert(r.T_eff > 0 && r.spectrum && r.flowProfile);
+      });
+      run('GraphController state and subscribe', function () {
+        assert(typeof GraphController !== 'undefined');
+        GraphController.setDeltaTNorm(0.6);
+        assert(GraphController.getState().deltaTNorm === 0.6);
+      });
+      run('TheoryContainer init and render', function () {
+        const div = document.createElement('div');
+        div.style.width = '200px';
+        div.style.height = '200px';
+        const inst = TheoryContainer.init(div, GraphController.getState);
+        assert(inst && inst.canvas && inst.stop);
+        if (inst.stop) inst.stop();
+      });
+      run('ApplicationModule init and update', function () {
+        const div = document.createElement('div');
+        div.style.width = '300px';
+        div.style.height = '200px';
+        const inst = ApplicationModule.init(div);
+        assert(inst && inst.update);
+        ApplicationModule.update({ binCenters: [0.2, 0.4], spectrum: [1, 2], T_eff: 0.22 });
+      });
+      run('TemporalEvolutionView init', function () {
+        const div = document.createElement('div');
+        div.style.width = '400px';
+        div.style.height = '120px';
+        const inst = TemporalEvolutionView.init(div, function () { return { tMin: 0, tMax: 10, flowProfile: [], tStart: 1, tEnd: 3 }; }, function () {});
+        assert(inst && inst.render);
+      });
+
+      out.innerHTML += '<p><strong>Passed: ' + passed + ', Failed: ' + failed + '</strong></p>';
+    })();
+  </script>
+</body>
+</html>

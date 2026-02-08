@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "description": "Transverse flow profile samples for Doppler blue-shift visualization",
+    "units": { "tau": "fm/c", "r": "fm", "v": "dimensionless" }
+  },
+  "profiles": [
+    { "tau": 1, "r": 0, "v": 0 },
+    { "tau": 2, "r": 2, "v": 0.2 },
+    { "tau": 3, "r": 4, "v": 0.35 },
+    { "tau": 4, "r": 6, "v": 0.5 },
+    { "tau": 5, "r": 8, "v": 0.6 }
+  ]
+}

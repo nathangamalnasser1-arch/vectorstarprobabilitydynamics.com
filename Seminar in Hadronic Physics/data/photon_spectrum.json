@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "source": "Paquet-style thermal photon spectrum (McGill/Vanderbilt context)",
+    "units": { "p_T": "GeV", "yield": "arb", "T_local_MeV": "MeV", "T_eff_MeV": "MeV" },
+    "pipeline_stage": "Store",
+    "validated": true
+  },
+  "T_local_MeV": 250,
+  "v_transverse": 0.0,
+  "spectrum": [
+    { "p_T": 0.3, "yield_local": 12.5, "yield_effective": 12.5 },
+    { "p_T": 0.5, "yield_local": 8.2, "yield_effective": 8.2 },
+    { "p_T": 0.7, "yield_local": 5.1, "yield_effective": 5.1 },
+    { "p_T": 1.0, "yield_local": 2.8, "yield_effective": 2.8 },
+    { "p_T": 1.3, "yield_local": 1.5, "yield_effective": 1.5 },
+    { "p_T": 1.6, "yield_local": 0.82, "yield_effective": 0.82 },
+    { "p_T": 2.0, "yield_local": 0.41, "yield_effective": 0.41 },
+    { "p_T": 2.5, "yield_local": 0.18, "yield_effective": 0.18 },
+    { "p_T": 3.0, "yield_local": 0.082, "yield_effective": 0.082 },
+    { "p_T": 3.5, "yield_local": 0.038, "yield_effective": 0.038 },
+    { "p_T": 4.0, "yield_local": 0.018, "yield_effective": 0.018 }
+  ]
+}

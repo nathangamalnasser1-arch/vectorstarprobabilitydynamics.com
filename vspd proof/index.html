@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VSPD — CERN CMS Open Data Visualization</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav>
+      <a href="index.html" class="brand">VSPD × CERN Open Data</a>
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="experiment.html" class="nav-link">Experiment</a>
+      <a href="math.html" class="nav-link">Math & AI</a>
+      <a href="explanation.html" class="nav-link">Explanation</a>
+      <a href="about.html" class="nav-link">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Alternative Representations of Particle Motion</h1>
+    <p>
+      This project explores alternative ways to represent and visualize particle motion using
+      <strong>CERN CMS Open Data</strong> — real collision data from the Compact Muon Solenoid
+      experiment at the Large Hadron Collider (LHC).
+    </p>
+
+    <div class="card">
+      <h2>CERN CMS Open Data</h2>
+      <p>
+        We use <strong>CMS Open Data</strong>: simulated muon collision events released by CERN
+        for education and research. The data includes particle positions, momenta, and energies
+        ordered by event index, allowing step-by-step visualization of collision evolution.
+      </p>
+      <p>
+        The goal is not to replace quantum mechanics or standard probability interpretation,
+        but to experiment with a <strong>Vector Star Probability Dynamics (VSPD)</strong> view:
+        representing probability as a vector field (direction and magnitude) instead of only
+        a scalar (brightness or radius), and animating how that field evolves over discrete
+        time steps.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What you can do here</h2>
+      <ul>
+        <li><a href="experiment.html">Experiment</a> — Animate particle trajectories and switch between
+          standard (scalar) probability and VSPD (vector field) representations.</li>
+        <li><a href="math.html">Math & AI</a> — See the mathematics (probability, vector fields, Δt evolution)
+          and how AI concepts like dimensionality reduction and pattern recognition are used.</li>
+        <li><a href="explanation.html">Explanation</a> — Plain-language answers: what CERN data is, what a muon is,
+          scalar vs vector probability, and why an alternative representation can be useful.</li>
+        <li><a href="about.html">About</a> — Background on this project and its creator.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Static site — CERN CMS Open Data visualization. No backend. Deterministic animations.
+  </footer>
+  <script src="main.js"></script>
+</body>
+</html>

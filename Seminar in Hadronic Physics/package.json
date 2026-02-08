@@ -1,0 +1,11 @@
+{
+  "name": "nuclear-collision-visualization",
+  "description": "Thermal EM radiation from QGP — Paquet/Vanderbilt McGill context",
+  "private": true,
+  "scripts": {
+    "test": "node tests/physicsEngine.test.js && node tests/dataPipeline.test.js && node tests/validation.test.js",
+    "test:physics": "node tests/physicsEngine.test.js",
+    "test:pipeline": "node tests/dataPipeline.test.js",
+    "test:validation": "node tests/validation.test.js"
+  }
+}

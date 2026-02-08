@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explanation — VSPD × CERN Open Data</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav>
+      <a href="index.html" class="brand">VSPD × CERN Open Data</a>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="experiment.html" class="nav-link">Experiment</a>
+      <a href="math.html" class="nav-link">Math & AI</a>
+      <a href="explanation.html" class="nav-link active">Explanation</a>
+      <a href="about.html" class="nav-link">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Explanation — In Plain Language</h1>
+    <p>
+      This page explains everything in simple terms: what the data is, what we mean by probability,
+      and why we are trying an alternative representation. <strong>This does not replace quantum mechanics.</strong>
+    </p>
+
+    <div class="card">
+      <h2>What is CERN data?</h2>
+      <p>
+        <strong>CERN</strong> is the European laboratory for particle physics. It runs the Large Hadron Collider (LHC),
+        where beams of protons (or other particles) are smashed together at very high energies. Huge detectors
+        like <strong>CMS</strong> (Compact Muon Solenoid) record the debris: positions, momenta, and energies of
+        particles produced in each collision.
+      </p>
+      <p>
+        <strong>CERN Open Data</strong> is a program that releases some of this data (and simulations) to the public.
+        We use CMS Open Data — in particular, simulated <strong>muon</strong> collision events — so we can
+        visualize and reinterpret the same kind of information that physicists use, without running the real
+        experiment ourselves.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What is a muon?</h2>
+      <p>
+        A <strong>muon</strong> is a fundamental particle, similar to the electron but about 200 times heavier.
+        It has the same negative electric charge as the electron and is created in many high-energy collisions
+        (e.g. when cosmic rays hit the atmosphere, or in LHC collisions). Muons are used in CMS as one of the
+        main “signatures” of interesting physics because they are relatively easy to detect and measure. In our
+        visualization, each point or trajectory represents a muon (or other particle) with a position and
+        momentum at a given event index (time step).
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What does “probability” mean in physics?</h2>
+      <p>
+        In quantum mechanics, we don’t say “the particle is exactly here”; we say “there is a certain
+        <strong>probability</strong> of finding it here if we measure.” That probability is usually represented
+        as a number between 0 and 1 (or as a probability density). The same idea applies when we look at many
+        collision events: we can build a probability distribution over where particles tend to be and how they
+        tend to move. So when we talk about “probability” in this project, we mean: a measure of how likely
+        it is to find a particle in a given region or state, derived from the data (or from a model).
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Scalar probability vs vector probability</h2>
+      <p>
+        <strong>Scalar probability</strong> is a single number at each point: “how much” probability is there
+        (e.g. brightness or radius in our standard mode). It doesn’t tell you a “direction” of flow.
+      </p>
+      <p>
+        <strong>Vector probability (VSPD)</strong> adds direction: at each point we have not only a magnitude
+        but a vector showing the direction and strength of “probability flow.” So instead of only “how much,”
+        we see “how much and in which way it’s changing or moving” over discrete time steps. That’s what we
+        call Vector Star Probability Dynamics: probability represented and animated as a vector field.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Why is an alternative representation useful?</h2>
+      <p>
+        The standard interpretation of quantum mechanics (with scalar probability densities) is well established
+        and correct. An alternative representation can still be useful for:
+      </p>
+      <ul>
+        <li><strong>Intuition</strong> — Some people find it easier to think in terms of flows and directions.</li>
+        <li><strong>Visualization</strong> — Vector fields can reveal structure (e.g. vortices, sinks, sources)
+          that might be less obvious from scalar maps alone.</li>
+        <li><strong>Education</strong> — Comparing both views side by side can deepen understanding of what
+          “probability” means in physics.</li>
+        <li><strong>Research</strong> — Exploring alternative formulations can sometimes suggest new questions
+          or connections, even if they don’t replace the standard theory.</li>
+      </ul>
+      <p>
+        So we are not claiming that VSPD replaces quantum mechanics; we are exploring whether a vector-field
+        view of probability can be a helpful complement for visualization and understanding.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <p>
+        We use <strong>CERN CMS Open Data</strong> (simulated muon events) to animate particle motion by
+        <strong>event_index</strong>. We show two modes: <strong>Standard</strong> (probability as scalar
+        brightness/radius) and <strong>VSPD</strong> (probability as a vector field with direction and
+        magnitude, animated over time). Everything is explained in the <a href="math.html">Math & AI</a> page
+        and implemented in a fully static, deterministic way on the <a href="experiment.html">Experiment</a> page.
+        This project emphasizes that the alternative representation does <strong>not</strong> replace
+        quantum mechanics — it is an exploratory visualization and conceptual tool.
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Static site — CERN CMS Open Data visualization. No backend. Deterministic animations.
+  </footer>
+  <script src="main.js"></script>
+</body>
+</html>

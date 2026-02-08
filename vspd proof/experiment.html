@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Experiment — VSPD × CERN Open Data</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav>
+      <a href="index.html" class="brand">VSPD × CERN Open Data</a>
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="experiment.html" class="nav-link active">Experiment</a>
+      <a href="math.html" class="nav-link">Math & AI</a>
+      <a href="explanation.html" class="nav-link">Explanation</a>
+      <a href="about.html" class="nav-link">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Experiment — Particle trajectories & probability</h1>
+    <p>
+      Animate CMS muon collision events step-by-step by <strong>event_index</strong>. Toggle between
+      <strong>Standard</strong> (probability as scalar brightness/radius) and
+      <strong>VSPD</strong> (probability as a vector field with direction and magnitude).
+    </p>
+
+    <div class="experiment-wrapper">
+      <div class="experiment-canvas-container">
+        <canvas id="particleCanvas" width="800" height="500"></canvas>
+      </div>
+      <div class="controls-row">
+        <div class="toggle-group">
+          <label>
+            <input type="radio" name="mode" value="standard" checked>
+            Standard Probability Interpretation
+          </label>
+          <label>
+            <input type="radio" name="mode" value="vspd">
+            Vector Star Probability Dynamics (VSPD)
+          </label>
+        </div>
+        <div class="timeline-controls">
+          <button type="button" id="btnPrev" aria-label="Previous event">← Prev</button>
+          <input type="range" id="eventSlider" min="0" max="14" value="0" step="1" aria-label="Event index">
+          <span class="event-label" id="eventLabel">event 0</span>
+          <button type="button" id="btnNext" aria-label="Next event">Next →</button>
+          <label>
+            <input type="checkbox" id="chkPlay" aria-label="Auto play">
+            Play
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>How to read the visualization</h2>
+      <p>
+        <strong>Standard mode:</strong> Each particle is drawn as a circle. Size and brightness represent
+        probability density (derived from energy and local particle count). Brighter/larger = higher
+        probability.
+      </p>
+      <p>
+        <strong>VSPD mode:</strong> The same data is converted into a vector field. Arrows show the
+        direction and magnitude of probability flow (from momentum and density gradient). The field
+        evolves deterministically with event_index.
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Static site — CERN CMS Open Data visualization. No backend. Deterministic animations.
+  </footer>
+  <script src="main.js"></script>
+  <script src="experiment.js"></script>
+</body>
+</html>
