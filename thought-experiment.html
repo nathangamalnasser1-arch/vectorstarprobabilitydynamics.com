@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'self';">
+    <title>Thought Experiment - Vector-Star Probability Dynamics</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">VSPD</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Visualization</a></li>
+                <li><a href="thought-experiment.html" class="active">Thought Experiment</a></li>
+                <li><a href="theory.html">Theory</a></li>
+                <li><a href="comparisons.html">Comparisons</a></li>
+                <li><a href="experiments.html">Experiments</a></li>
+                <li><a href="hl-lhc-enrichment.html">HL-LHC Enrichment</a></li>
+                <li><a href="gravitational-time-microscope/index.html">Time Microscope</a></li>
+                <li><a href="Seminar%20in%20Hadronic%20Physics/index.html">Seminar in Hadronic Physics</a></li>
+                <li><a href="vspd%20and%20hadronic/index.html">VSPD and Hadronic</a></li>
+                <li><a href="vspd%20proof/index.html">VSPD Proof</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="thought-experiment">
+        <section class="page-header">
+            <h1>The Bouncing Ball Universe</h1>
+            <p class="subtitle">A thought experiment demonstrating how finite measurement duration creates probability distributions</p>
+        </section>
+
+        <section class="experiment-intro">
+            <div class="intro-card">
+                <h2>🎾 The Thought Experiment</h2>
+                <p>
+                    Imagine a room full of balls bouncing forever. Each ball doesn't just sit at one point—it leaves a "tube" as it moves,
+                    like a tiny path through spacetime. When balls hit each other, their tubes cross and bounce out in different directions.
+                    Sometimes, many balls hit at once, creating spectacular "vector stars" of arrows shooting out from the collision!
+                </p>
+                <p>
+                    If you take a picture with a slow camera shutter, you don't see the exact balls—you see a fuzzy cloud of where they
+                    might be during that exposure time. This cloud isn't magic—it's just because the camera captures the balls' motion
+                    over a finite time interval. Every bounce is real and deterministic, but our measurements only see the cloud of
+                    possible positions during that measurement window.
+                </p>
+                <div class="callout">
+                    <p><strong>Key Insight:</strong> Even in a perfectly deterministic universe of bouncing balls, finite measurement
+                    duration creates the appearance of probability distributions, just like in quantum mechanics!</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="animation-section">
+            <div class="animation-container">
+                <div class="animation-panel">
+                    <h3>Interactive Bouncing Ball Universe</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="bouncing-balls-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label for="ball-count-slider">Number of Balls: <span id="ball-count-display">50</span></label>
+                        <input type="range" id="ball-count-slider" class="ctrl-slider" min="50" max="500" value="50" oninput="window.animation?.setBallCount(parseInt(this.value))">
+                    </div>
+
+                    <div class="control-buttons">
+                        <button id="play-pause-btn" class="control-btn play-btn" onclick="window.animation?.toggle(); updatePlayPauseButton();">Pause</button>
+                        <button onclick="window.animation?.reset()" class="control-btn reset-btn">Reset</button>
+                        <button id="cloud-btn" class="control-btn cloud-btn" onclick="window.animation?.toggleProbabilityCloud(); updateCloudButton();">Probability Cloud</button>
+                        <button id="gravity-btn" class="control-btn gravity-btn" onclick="window.animation?.toggleGravitationalField(); updateGravityButton();">Gravitational Field</button>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color world-tube"></div>
+                            <span>World-Tubes (ball paths)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color vector-star"></div>
+                            <span>Vector Stars (collisions)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color probability"></div>
+                            <span>Probability Cloud</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color gravity"></div>
+                            <span>Gravitational Field</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation-panel">
+                <div class="explanation-tabs">
+                    <button class="tab-button active" data-tab="world-tubes">World-Tubes</button>
+                    <button class="tab-button" data-tab="vector-stars">Vector Stars</button>
+                    <button class="tab-button" data-tab="probability">Probability</button>
+                    <button class="tab-button" data-tab="gravity">Gravitational Effects</button>
+                </div>
+
+                <div class="explanation-content">
+                    <div id="world-tubes-tab" class="tab-content active">
+                        <h4>World-Tubes</h4>
+                        <p>The blue trails show the complete paths of each ball through spacetime. In relativity, these are called "world-tubes" - the four-dimensional tubes that particles trace through spacetime.</p>
+                        <p>Each ball follows a perfectly deterministic path, but when many balls interact, the system becomes too complex to predict exactly.</p>
+                    </div>
+
+                    <div id="vector-stars-tab" class="tab-content">
+                        <h4>Vector Stars</h4>
+                        <p>When 5 or more balls collide simultaneously, red arrows shoot out in all directions, creating a "vector star." This represents the complex momentum transfers during multi-ball collisions.</p>
+                        <p>Increase the number of balls to see more spectacular vector stars emerge from the chaos!</p>
+                    </div>
+
+                    <div id="probability-tab" class="tab-content">
+                        <h4>Probability Clouds</h4>
+                        <p>The purple cloud shows where balls are likely to be found during measurement. This emerges naturally from the finite temporal resolution of our measurements.</p>
+                        <p>Even though the balls follow deterministic paths, slow measurements blur their positions into probability distributions.</p>
+                    </div>
+
+                    <div id="gravity-tab" class="tab-content">
+                        <h4>Gravitational Time Dilation</h4>
+                        <p>The right side of the canvas represents a strong gravitational field where time runs slower. Balls in this region appear to move more slowly due to time dilation.</p>
+                        <p>This demonstrates how gravitational effects modify measurement durations, creating different probability patterns across spacetime.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="key-insights">
+            <h2>✨ Key Insights from the Thought Experiment</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">🌌</div>
+                    <h4>Deterministic Universe</h4>
+                    <p>Every ball follows perfectly predictable Newtonian physics. There are no random events or uncertainties in the underlying reality.</p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">📷</div>
+                    <h4>Measurement Creates Uncertainty</h4>
+                    <p>Our finite measurement capabilities blur the deterministic reality into probability distributions. The "uncertainty" is in our measurements, not in nature.</p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">⭐</div>
+                    <h4>Emergent Complexity</h4>
+                    <p>Simple deterministic rules create complex, unpredictable patterns when many particles interact. Vector stars emerge from multi-particle collisions.</p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">⏰</div>
+                    <h4>Time Dilation Matters</h4>
+                    <p>Gravitational time dilation affects measurement durations, changing how we perceive probability distributions in different regions of spacetime.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Vector-Star Probability Dynamics. Educational visualization.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="static/js/bouncing-balls.js"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'self';">
+    <title>Vector-Star Probability Dynamics</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">VSPD</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Visualization</a></li>
+                <li><a href="thought-experiment.html">Thought Experiment</a></li>
+                <li><a href="theory.html">Theory</a></li>
+                <li><a href="comparisons.html">Comparisons</a></li>
+                <li><a href="experiments.html">Experiments</a></li>
+                <li><a href="hl-lhc-enrichment.html">HL-LHC Enrichment</a></li>
+                <li><a href="gravitational-time-microscope/index.html">Time Microscope</a></li>
+                <li><a href="Seminar%20in%20Hadronic%20Physics/index.html">Seminar in Hadronic Physics</a></li>
+                <li><a href="vspd%20and%20hadronic/index.html">VSPD and Hadronic</a></li>
+                <li><a href="vspd%20proof/index.html">VSPD Proof</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="homepage">
+        <section class="hero">
+            <h1>Vector-Star Probability Dynamics</h1>
+            <p class="subtitle">Visualizing how finite measurement duration shapes quantum probability</p>
+        </section>
+
+        <section class="visualization-section">
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="measurement-toggle">Measurement Mode:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="measurement-toggle" checked>
+                        <label for="measurement-toggle" class="toggle-slider"></label>
+                    </div>
+                    <span class="toggle-label" id="toggle-label">Finite Δt measurement (physical)</span>
+                </div>
+
+                <div class="control-group">
+                    <label for="delta-t-slider">Measurement Duration (Δt):</label>
+                    <input type="range" id="delta-t-slider" min="0.1" max="10" step="0.1" value="2.0">
+                    <span class="slider-value" id="delta-t-value">2.0 units</span>
+                </div>
+
+                <div class="control-group">
+                    <button id="reset-button" class="reset-button">Reset to Defaults</button>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color wave-function"></div>
+                        <span>Standard Quantum (ψ²)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color vector-star"></div>
+                        <span>Vector-Star Dynamics</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color measurement-window"></div>
+                        <span>Measurement Window</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-container">
+                <div class="visualization-panel">
+                    <h3>Standard Quantum Wave Function</h3>
+                    <canvas id="wave-function-canvas" width="400" height="400"></canvas>
+                </div>
+
+                <div class="visualization-panel">
+                    <h3>Vector-Star Probability Dynamics</h3>
+                    <canvas id="vector-star-canvas" width="400" height="400"></canvas>
+                </div>
+            </div>
+
+            <div class="explanation-panel">
+                <div class="explanation-tabs">
+                    <button class="tab-button active" data-tab="overview">Overview</button>
+                    <button class="tab-button" data-tab="wave-function">Wave Function</button>
+                    <button class="tab-button" data-tab="vector-star">Vector-Star</button>
+                    <button class="tab-button" data-tab="measurement">Measurement</button>
+                </div>
+
+                <div class="explanation-content">
+                    <div id="overview-tab" class="tab-content active">
+                        <h4>What You're Seeing</h4>
+                        <p>This visualization demonstrates how finite measurement duration (Δt) creates the appearance of quantum indeterminism.</p>
+                        <p><strong>Left Side:</strong> Traditional quantum wave function ψ² (probability density)</p>
+                        <p><strong>Right Side:</strong> Vector-Star representation showing multiple micro-paths</p>
+                        <p><strong>Controls:</strong> Adjust Δt to see how measurement duration affects the outcome</p>
+                    </div>
+
+                    <div id="wave-function-tab" class="tab-content">
+                        <h4>Standard Quantum Wave Function</h4>
+                        <p>The blue curve shows |ψ|² - the probability density of finding a particle at each position.</p>
+                        <p>In instantaneous measurements (Δt = 0), this gives a sharp, deterministic prediction.</p>
+                        <p>With finite Δt, the wave function spreads during measurement, creating uncertainty.</p>
+                        <p><strong>Key Insight:</strong> The wave function itself doesn't change - our measurement process does.</p>
+                    </div>
+
+                    <div id="vector-star-tab" class="tab-content">
+                        <h4>Vector-Star Probability Dynamics</h4>
+                        <p>Each red vector represents a possible "micro-path" the system could take during measurement.</p>
+                        <p>With instantaneous measurement, only one path contributes (single vector).</p>
+                        <p>With finite Δt, multiple paths contribute simultaneously, creating superposition.</p>
+                        <p>The spread of vectors shows how measurement duration allows quantum uncertainty to emerge.</p>
+                    </div>
+
+                    <div id="measurement-tab" class="tab-content">
+                        <h4>Measurement Process</h4>
+                        <p>The yellow shaded region represents the temporal "measurement window" (Δt).</p>
+                        <p>During this time, the quantum system evolves and multiple possibilities coexist.</p>
+                        <p>This creates the observed probability distribution without requiring intrinsic indeterminism.</p>
+                        <p><strong>Result:</strong> Apparent randomness emerges from finite-duration evolution.</p>
+                    </div>
+                </div>
+
+                <div class="dynamic-explanation">
+                    <p id="explanation-text" class="highlight-text">
+                        Watch how finite measurement duration (Δt) transforms the crisp quantum wave function
+                        into the observed probability distribution. The vector-star representation shows
+                        multiple micro-paths contributing to the final measurement outcome.
+                    </p>
+                </div>
+            </div>
+
+            <div class="tutorial-panel">
+                <h3>How to Use This Visualization</h3>
+                <ol class="tutorial-steps">
+                    <li><strong>Start with Instantaneous:</strong> Toggle to "Instantaneous measurement" to see the ideal quantum prediction</li>
+                    <li><strong>Switch to Finite Δt:</strong> Toggle to "Finite Δt measurement" to see the physical reality</li>
+                    <li><strong>Adjust Δt Slider:</strong> Increase measurement duration to see probability spreading</li>
+                    <li><strong>Observe the Effect:</strong> Notice how the wave function broadens and vector paths multiply</li>
+                    <li><strong>Key Takeaway:</strong> Finite measurement time creates apparent indeterminism</li>
+                </ol>
+            </div>
+
+            <div class="insights-panel">
+                <h3>Key Insights</h3>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-icon">⏱️</div>
+                        <h4>Finite Measurement Time</h4>
+                        <p>Real measurements take time (Δt > 0). During this period, quantum systems evolve through multiple possible paths.</p>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon">🌟</div>
+                        <h4>Vector-Star Dynamics</h4>
+                        <p>Each micro-path contributes to the final measurement outcome, creating the observed probability distribution.</p>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon">🔬</div>
+                        <h4>No New Physics Required</h4>
+                        <p>This reinterpretation maintains all quantum predictions while explaining indeterminism through measurement duration.</p>
+                    </div>
+
+                    <div class="insight-card">
+                        <div class="insight-icon">🎯</div>
+                        <h4>Testable Hypothesis</h4>
+                        <p>The effects should be observable in experiments where measurement timing can be precisely controlled.</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Vector-Star Probability Dynamics. Educational visualization.</p>
+    </footer>
+
+    <script src="js/visualization.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
