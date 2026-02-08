@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data:; form-action 'self'; base-uri 'self'; frame-ancestors 'self';">
+    <title>Page 1: The Visual Proof — COSMOS Field | The Gravitational Time Microscope</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <style type="text/tailwindcss">
+        @layer components {
+            .nav-link { @apply text-slate-200 hover:text-cyan-400 transition-colors; }
+            .nav-link.active { @apply text-cyan-400 font-medium; }
+        }
+    </style>
+    <style>
+        body.gtm-site { position: relative; }
+        body.gtm-site::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: url('images/cosmos-field.png') center/cover no-repeat;
+            opacity: 0.14;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="gtm-site bg-slate-950 text-slate-200 min-h-screen font-sans antialiased">
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14">
+                <a href="index.html" class="text-cyan-400 font-semibold tracking-tight">The Gravitational Time Microscope</a>
+                <button type="button" id="nav-toggle" class="md:hidden p-2 text-slate-200 hover:text-cyan-400 rounded" aria-label="Toggle menu">
+                    <svg id="nav-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg id="nav-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <ul class="hidden md:flex gap-8 text-sm">
+                    <li><a href="../index.html" class="nav-link">VSPD</a></li>
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="experiment1-cosmos.html" class="nav-link active">Visual Proof</a></li>
+                    <li><a href="experiment2-black-hole-spectroscopy.html" class="nav-link">Precision Proof</a></li>
+                    <li><a href="experiment3-sirius-b.html" class="nav-link">Mechanistic Proof</a></li>
+                </ul>
+            </div>
+            <div id="nav-dropdown" class="hidden md:hidden pb-4 border-t border-slate-800 pt-2">
+                <ul class="flex flex-col gap-2 text-sm">
+                    <li><a href="../index.html" class="nav-link block py-2">VSPD</a></li>
+                    <li><a href="index.html" class="nav-link block py-2">Home</a></li>
+                    <li><a href="experiment1-cosmos.html" class="nav-link active block py-2">Visual Proof</a></li>
+                    <li><a href="experiment2-black-hole-spectroscopy.html" class="nav-link block py-2">Precision Proof</a></li>
+                    <li><a href="experiment3-sirius-b.html" class="nav-link block py-2">Mechanistic Proof</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <header class="mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-100 tracking-tight mb-2">Page 1: The Visual Proof</h1>
+            <p class="text-lg text-slate-400">The COSMOS Field — Hubble vs Webb</p>
+        </header>
+
+        <!-- Narrative -->
+        <section class="mb-10 text-slate-200 leading-relaxed space-y-4">
+            <p>
+                The Hubble Space Telescope gave us a first deep look at the universe’s large-scale structure, but in regions like the COSMOS field, the map of <strong class="text-slate-100">dark matter scaffolding</strong>—the invisible mass that bends light and shapes galaxies—remained a <strong class="text-slate-100">blurry picture</strong>. With the James Webb Space Telescope (Webb), the same cosmic landscape appears in <strong class="text-cyan-400">stunning detail</strong>: finer resolution and sensitivity let us trace how mass distorts the “windowpane of spacetime” with unprecedented precision.
+            </p>
+            <p>
+                Below, an <strong class="text-slate-100">image-comparison slider</strong> contrasts Hubble’s blur with Webb’s sharp view. In VSPD, “blur” arises from finite temporal propagation (Δt); the sharpening we see with better resolution is a visual analogue of the Time Microscope effect.
+            </p>
+        </section>
+
+        <!-- Interactive: Two-image comparison with range input -->
+        <section class="mb-10" aria-label="Hubble vs Webb image comparison">
+            <div class="rounded-lg overflow-hidden border border-slate-800 bg-slate-900 shadow-xl">
+                <div class="relative aspect-[4/3] max-h-[75vh] bg-slate-900 select-none touch-none">
+                    <!-- Left: Hubble (blurred 4px), full as background -->
+                    <div class="absolute inset-0">
+                        <img
+                            src="images/hubble_cosmos.jpg"
+                            alt="COSMOS field — Hubble view (blurred)"
+                            class="absolute inset-0 w-full h-full object-cover object-center"
+                            style="filter: blur(4px);"
+                            onerror="this.style.display='none'; this.nextElementSibling?.classList.remove('hidden');"
+                        />
+                        <div class="hidden absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-500 text-sm">Replace with hubble_cosmos.jpg</div>
+                        <div class="absolute top-4 left-4 px-3 py-1.5 rounded bg-slate-950/90 text-slate-200 text-sm font-medium border border-slate-600">
+                            The Blurry Picture
+                        </div>
+                    </div>
+                    <!-- Right: Webb (sharp), clipped by slider -->
+                    <div id="clip-container" class="absolute inset-0 z-[1]" style="clip-path: inset(0 0 0 50%);">
+                        <img
+                            src="images/webb_cosmos.jpg"
+                            alt="COSMOS field — Webb view (sharp)"
+                            class="absolute inset-0 w-full h-full object-cover object-center"
+                            onerror="this.style.display='none'; this.nextElementSibling?.classList.remove('hidden');"
+                        />
+                        <div class="hidden absolute inset-0 bg-slate-700 flex items-center justify-center text-slate-500 text-sm">Replace with webb_cosmos.jpg</div>
+                        <div class="absolute top-4 right-4 px-3 py-1.5 rounded bg-slate-950/90 text-cyan-400 text-sm font-medium border border-cyan-500/50">
+                            Invisible Scaffolding in Stunning Detail
+                        </div>
+                    </div>
+                    <!-- Divider -->
+                    <div
+                        id="slider-track"
+                        class="absolute top-0 bottom-0 w-1 cursor-ew-resize z-10 flex items-center justify-center bg-indigo-500"
+                        style="left: 50%;"
+                        role="slider"
+                        aria-valuenow="50"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-label="Compare Hubble (left) and Webb (right)"
+                        tabindex="0"
+                    >
+                        <div class="absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-indigo-500 border-2 border-slate-200 shadow flex items-center justify-center text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Range input: primary control, works on mobile -->
+            <div class="mt-4 flex items-center gap-4">
+                <span class="text-slate-500 text-sm shrink-0 w-20">Hubble</span>
+                <input type="range" id="slider-input" min="0" max="100" value="50" class="flex-1 h-3 rounded-full bg-slate-700 accent-cyan-400 cursor-pointer">
+                <span class="text-slate-500 text-sm shrink-0 w-20 text-right">Webb</span>
+            </div>
+            <!-- Caption per design spec -->
+            <figure class="mt-6">
+                <figcaption class="text-slate-400 text-sm leading-relaxed border-l-2 border-indigo-500 pl-4">
+                    Webb’s ability to measure how mass bends the “windowpane of spacetime” with twice the sharpness of Hubble demonstrates the “sharpening” effect predicted when we probe deeper into gravitational fields.
+                </figcaption>
+            </figure>
+        </section>
+
+        <!-- Scientific context -->
+        <section>
+            <h2 class="text-xl font-semibold text-indigo-500 mb-3">Scientific Context</h2>
+            <p class="text-slate-200 leading-relaxed">
+                In VSPD, what we observe is a projection of world-tubes through a finite temporal aperture (Δt). Gravitational time dilation effectively reduces that aperture in strong fields, sharpening the projection—just as Webb’s mirror sharpens the image of the dark matter scaffolding. This comparison illustrates that sharpening: the same cosmic field, two levels of resolution, and a direct visual analogue of the Time Microscope.
+            </p>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-800 mt-16 py-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center text-slate-500 text-sm">
+            The Gravitational Time Microscope — VSPD research. COSMOS field for educational use.
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var clip = document.getElementById('clip-container');
+            var track = document.getElementById('slider-track');
+            var input = document.getElementById('slider-input');
+            var pct = 50;
+
+            function setPct(value) {
+                pct = Math.max(0, Math.min(100, value));
+                clip.style.clipPath = 'inset(0 0 0 ' + pct + '%)';
+                track.style.left = pct + '%';
+                if (input) input.value = pct;
+                track.setAttribute('aria-valuenow', Math.round(pct));
+            }
+
+            input.addEventListener('input', function () { setPct(Number(input.value)); });
+
+            track.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                function move(ev) {
+                    var rect = track.parentElement.getBoundingClientRect();
+                    setPct(((ev.clientX - rect.left) / rect.width) * 100);
+                }
+                function up() {
+                    document.removeEventListener('mousemove', move);
+                    document.removeEventListener('mouseup', up);
+                }
+                document.addEventListener('mousemove', move);
+                document.addEventListener('mouseup', up);
+                move(e);
+            });
+
+            track.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowLeft') setPct(pct - 5);
+                else if (e.key === 'ArrowRight') setPct(pct + 5);
+            });
+        })();
+
+        document.getElementById('nav-toggle')?.addEventListener('click', function () {
+            var d = document.getElementById('nav-dropdown');
+            var o = document.getElementById('nav-icon-open');
+            var c = document.getElementById('nav-icon-close');
+            d.classList.toggle('hidden');
+            o.classList.toggle('hidden');
+            c.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
