@@ -1,0 +1,406 @@
+/* Python Documentation Style */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333;
+    background: #fff;
+}
+
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: #f8f8f8;
+    border-right: 1px solid #e0e0e0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 0;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.sidebar-header h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.sidebar-header h1 a {
+    color: #3776ab;
+    text-decoration: none;
+}
+
+.sidebar-header h1 a:hover {
+    text-decoration: underline;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: #666;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-nav li {
+    padding: 0;
+}
+
+.sidebar-nav li a {
+    display: block;
+    padding: 8px 20px;
+    color: #333;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-nav li a:hover {
+    background: #e8e8e8;
+    border-left-color: #3776ab;
+}
+
+.nav-section {
+    padding: 15px 20px 8px !important;
+    font-weight: 600;
+    font-size: 13px;
+    color: #666;
+    text-transform: uppercase;
+    border-left: none !important;
+}
+
+.nav-section:hover {
+    background: transparent !important;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 900px;
+}
+
+.document {
+    width: 100%;
+}
+
+.document h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+    font-weight: 400;
+}
+
+.document h2 {
+    font-size: 24px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #1a1a1a;
+    font-weight: 400;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+.document h3 {
+    font-size: 20px;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+.document p {
+    margin-bottom: 15px;
+}
+
+.document ul, .document ol {
+    margin-left: 30px;
+    margin-bottom: 15px;
+}
+
+.document li {
+    margin-bottom: 8px;
+}
+
+.document a {
+    color: #3776ab;
+    text-decoration: none;
+}
+
+.document a:hover {
+    text-decoration: underline;
+}
+
+.abstract {
+    background: #f0f7ff;
+    border-left: 4px solid #3776ab;
+    padding: 20px;
+    margin: 30px 0;
+    border-radius: 3px;
+}
+
+.quick-links {
+    margin: 30px 0;
+}
+
+.quick-links ul {
+    list-style: none;
+    margin-left: 0;
+}
+
+.quick-links li {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.quick-links li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #3776ab;
+}
+
+.content-body {
+    line-height: 1.8;
+}
+
+.content-body pre {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 15px;
+    overflow-x: auto;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 20px 0;
+}
+
+.content-body code {
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 13px;
+}
+
+.tutorial-levels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.tutorial-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 20px;
+    background: #fafafa;
+}
+
+.tutorial-card h2 {
+    border: none;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.tutorial-card h2 a {
+    color: #3776ab;
+}
+
+.theory-list {
+    list-style: none;
+    margin-left: 0;
+}
+
+.theory-list li {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #fafafa;
+    border-left: 3px solid #3776ab;
+    border-radius: 3px;
+}
+
+.tutorial-nav {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tutorial-nav a {
+    color: #3776ab;
+    font-weight: 500;
+}
+
+/* Math rendering */
+.katex {
+    font-size: 1.1em;
+}
+
+/* Floating Grok button */
+.grok-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.grok-fab:hover {
+    background: #000;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.30);
+}
+
+.grok-fab:active {
+    transform: translateY(0);
+}
+
+/* Diagram / SVG block */
+.diagram-container {
+    margin: 30px 0;
+    text-align: center;
+}
+
+.diagram-container svg {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background: #fafafa;
+}
+
+.diagram-container.diagram-dark svg {
+    background: #1a1a1a;
+    border-color: #444;
+}
+
+/* Callout / info box (reuse abstract look) */
+.callout {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f0f7ff;
+    border-left: 3px solid #3776ab;
+    border-radius: 3px;
+}
+
+/* Animation container and controls */
+.animation-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 30px 0;
+    align-items: start;
+}
+
+.animation-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.controls-panel {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 5px;
+}
+
+.controls-panel .ctrl-row {
+    margin-bottom: 10px;
+}
+
+.controls-panel .ctrl-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.controls-panel .ctrl-buttons {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.ctrl-btn {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.ctrl-btn-primary { background: #3776ab; color: #fff; }
+.ctrl-btn-secondary { background: #666; color: #fff; }
+.ctrl-btn-cloud { background: #9b59b6; color: #fff; }
+.ctrl-btn-gravity { background: #e67e22; color: #fff; }
+
+.ctrl-slider {
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Pre blocks (comparisons, experiments) */
+.document pre.styled {
+    white-space: pre-wrap;
+    font-family: inherit;
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 3px;
+}
+
+@media (max-width: 1024px) {
+    .animation-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .animation-container {
+        grid-template-columns: 1fr;
+    }
+}
