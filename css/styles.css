@@ -74,10 +74,18 @@ a:hover {
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
     min-height: 60px;
     gap: 1rem;
+}
+
+.nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
 }
 
 .nav-brand {
@@ -93,6 +101,13 @@ a:hover {
     margin: 0;
     padding: 0;
     align-items: center;
+}
+
+.nav-menu li {
+    flex: 0 0 auto;
+}
+
+.nav-primary {
     flex-wrap: nowrap;
     overflow-x: auto;
     min-width: 0;
@@ -100,8 +115,16 @@ a:hover {
     -webkit-overflow-scrolling: touch;
 }
 
-.nav-menu li {
-    flex: 0 0 auto;
+.nav-secondary {
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-color);
+}
+
+.nav-secondary a {
+    font-size: 0.92rem;
+    padding: 6px 12px;
 }
 
 .nav-menu a {
@@ -1649,8 +1672,18 @@ input:checked + .toggle-slider:before {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .nav-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
     .nav-menu {
         gap: 15px;
+    }
+
+    .nav-secondary {
+        gap: 10px 14px;
     }
 
     .hero h1 {
