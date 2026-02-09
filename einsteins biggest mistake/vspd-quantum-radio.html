@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VSPD Quantum Radio & Time Microscope</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <style>
+    [data-mode="expert"] .kid-only { display: none !important; }
+    [data-mode="kid"] .expert-only { display: none !important; }
+    #p5-container canvas { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen antialiased" data-mode="kid">
+  <div class="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Header & Mode Toggle -->
+    <header class="flex flex-wrap items-center justify-between gap-4 mb-10 border-b border-amber-500/30 pb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold text-amber-400 tracking-tight">
+        VSPD Quantum Radio & Time Microscope
+      </h1>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-slate-400 kid-only">Kid Mode</span>
+        <span class="text-sm text-slate-400 expert-only">Expert Mode</span>
+        <button
+          id="mode-toggle"
+          type="button"
+          class="relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-amber-500/50 bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+          role="switch"
+          aria-checked="false"
+        >
+          <span class="pointer-events-none inline-block h-7 w-7 transform rounded-full bg-amber-500 shadow ring-0 transition translate-x-1" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- The Hook / Formalism -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-amber-400 mb-4 kid-only">The Camera Shutter Idea</h2>
+      <h2 class="text-xl font-semibold text-amber-400 mb-4 expert-only">The Formalism</h2>
+      <div class="prose prose-invert prose-slate max-w-none">
+        <p class="kid-only text-slate-300 leading-relaxed">
+          Quantum things sometimes look like <strong class="text-blue-400">blurry waves</strong> not because they are truly fuzzy, but because our "shutter speed" is too slow. When you take a photo of something fast with a slow shutter, you get motion blur. Here, the "shutter" is how long we look at the quantum system—the <strong class="text-amber-400">measurement time</strong> \( \Delta t \). If \( \Delta t \) is big, we see a blur; if we could make it very small (like a super-fast shutter), we'd see clear "dots" (particles).
+        </p>
+        <p class="expert-only text-slate-300 leading-relaxed">
+          The wave function \( \psi \) lives in a <strong class="text-amber-400">Hilbert space</strong> \( \mathcal{H} \)—a complete inner product space over \( \mathbb{C} \), with convergence formalized via Lebesgue integration (\( L^2 \)). Measurement is modeled as a projection over a temporal window \( \Delta t \); when \( \Delta t > 0 \), the observed outcome is a coherent sum of micro-paths within that window, yielding the apparent "wave" statistics. As \( \Delta t \to 0 \), the effective basis narrows and the description becomes effectively deterministic.
+        </p>
+      </div>
+    </section>
+
+    <!-- The Star / Electronic Parallels -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-amber-400 mb-4 kid-only">The Magic Heavy Star (Sirius B)</h2>
+      <h2 class="text-xl font-semibold text-amber-400 mb-4 expert-only">Electronic Parallels & Selectivity</h2>
+      <div class="prose prose-invert prose-slate max-w-none">
+        <p class="kid-only text-slate-300 leading-relaxed">
+          <strong class="text-amber-400">Sirius B</strong> is a very dense white dwarf—a "magic heavy star." Near it, time runs slower (like a slow-motion button for the universe). So when we "look" at quantum stuff from there (or in that kind of gravity), our measurement window effectively gets shorter. The blur turns back into clear dots: we see the "wave" sharpen into something like a single path (particle-like behavior).
+        </p>
+        <p class="expert-only text-slate-300 leading-relaxed">
+          In radio engineering, <strong class="text-amber-400">regeneration</strong> and <strong class="text-amber-400">Q-multipliers</strong> improve selectivity by narrowing the bandwidth of the filter. Gravitational time dilation plays an analogous role: it narrows the effective temporal window of observation (the "measurement bandwidth"), increasing the effective Q of the observation. The result is a sharper, more deterministic-looking outcome—the same mathematical structure as a high-Q resonant circuit.
+        </p>
+      </div>
+    </section>
+
+    <!-- Radio Idea / Experimentation -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-amber-400 mb-4 kid-only">The Volume Knob (Potentiometer)</h2>
+      <h2 class="text-xl font-semibold text-amber-400 mb-4 expert-only">Experimentation: Delayed-Choice Quantum Eraser</h2>
+      <div class="prose prose-invert prose-slate max-w-none">
+        <p class="kid-only text-slate-300 leading-relaxed">
+          Imagine a volume knob on a radio. Turning it changes how much sound you hear. Here, changing <strong class="text-amber-400">\( \Delta t \)</strong> is like turning that knob: it changes how much of the "blur" we see. Small \( \Delta t \) = less blur (more like one clear dot). Big \( \Delta t \) = more blur (wave-like). The yellow window in the animation below is that "sensitivity" — how long we're "listening" to the quantum system.
+        </p>
+        <p class="expert-only text-slate-300 leading-relaxed">
+          The <strong class="text-amber-400">Delayed-Choice Quantum Eraser</strong> consensus: there is no retrocausality. Interference fringes are <em>anomalous weak values</em> that emerge only through sub-ensemble selection—i.e., post-selecting on which-detector information. The apparent "wave" or "particle" behavior is determined by which temporal (and which-path) information is retained or discarded, consistent with VSPD: the measurement window and selection rules fix the effective statistics.
+        </p>
+      </div>
+    </section>
+
+    <!-- Interactive VSPD Visualizer -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-amber-400 mb-4">Interactive VSPD Visualizer</h2>
+      <p class="text-slate-400 text-sm mb-4 kid-only">Play with the measurement time and the "Sirius B" slow-motion button. Red = paths, Blue = blur (wave), Yellow = how long we look.</p>
+      <p class="text-slate-400 text-sm mb-4 expert-only">Yellow region: \( \Delta t \). Red: micro-path vectors. Blue: \( |\psi|^2 \). Sirius B toggle applies gravitational time dilation (shrinks effective \( \Delta t \)).</p>
+      <div id="p5-container" class="rounded-xl overflow-hidden border border-amber-500/30 bg-slate-900/80 shadow-xl"></div>
+      <div class="mt-4 flex flex-wrap gap-6 items-center">
+        <div class="flex items-center gap-2">
+          <label for="dt-slider" class="text-sm text-slate-400 whitespace-nowrap">Δt (measurement window)</label>
+          <input id="dt-slider" type="range" min="0" max="100" value="60" class="w-40 sm:w-52 h-2 rounded-lg appearance-none bg-slate-700 accent-amber-500" />
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-400">Sirius B time microscope</span>
+          <button id="sirius-toggle" type="button" class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-amber-500/50 bg-slate-800 transition-colors" role="switch" aria-checked="false">
+            <span id="sirius-knob" class="inline-block h-6 w-6 transform rounded-full bg-amber-500 shadow transition translate-x-1" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mathematical Resolution -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-amber-400 mb-4">Mathematical Resolution</h2>
+      <div class="space-y-6 text-slate-300">
+        <div class="expert-only space-y-2">
+          <p class="text-sm text-slate-400">Vector–star summation: the observed state is the coherent sum of micro-paths over the measurement window.</p>
+          <div class="bg-slate-800/60 rounded-lg p-4 overflow-x-auto">
+            \[ \Psi_{\text{obs}} = \sum_{i=1}^{n} \vec{v}_i \]
+          </div>
+        </div>
+        <div class="kid-only">
+          <p class="text-sm text-slate-400 mb-2">The blur we see is the sum of many tiny paths we can't tell apart because we look for a short time.</p>
+        </div>
+
+        <div class="expert-only space-y-2">
+          <p class="text-sm text-slate-400">Redshift engine: gravitational redshift from Hubble's Balmer-line measurements on Sirius B.</p>
+          <div class="bg-slate-800/60 rounded-lg p-4 overflow-x-auto">
+            \[ z = \frac{\lambda_{\text{obs}} - \lambda_{\text{rest}}}{\lambda_{\text{rest}}} \]
+          </div>
+        </div>
+        <div class="kid-only">
+          <p class="text-sm text-slate-400">Heavy stars stretch light (redshift); that same effect makes time run slower there—our "time microscope."</p>
+        </div>
+
+        <div class="expert-only space-y-2">
+          <p class="text-sm text-slate-400">Selectivity (Q): narrowing the temporal bandwidth corresponds to the Quality Factor of a regenerative circuit.</p>
+          <div class="bg-slate-800/60 rounded-lg p-4 overflow-x-auto">
+            \[ Q \propto \frac{1}{\Delta t_{\text{eff}}} \quad \text{(higher } Q \text{ → sharper, more deterministic outcome)} \]
+          </div>
+        </div>
+        <div class="kid-only">
+          <p class="text-sm text-slate-400">Making the "window" shorter (like Sirius B) is like tuning a radio to one station—we see one clear "dot" instead of blur.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer: References -->
+    <footer class="border-t border-amber-500/30 pt-6 mt-8">
+      <h3 class="text-sm font-semibold text-amber-400 mb-3">References & Testing VSPD</h3>
+      <p class="text-slate-400 text-sm mb-3">Suggested empirical test: use decay-time resolution in LHCb Run 2 data to probe the dependence of apparent quantum statistics on \( \Delta t \).</p>
+      <ul class="flex flex-wrap gap-4 text-sm">
+        <li>
+          <a href="http://opendata.cern.ch/docs/about/cms" class="text-amber-400 hover:text-amber-300 underline" target="_blank" rel="noopener">CERN Open Data Portal</a>
+        </li>
+        <li>
+          <a href="http://opendata.cern.ch/record/1501" class="text-amber-400 hover:text-amber-300 underline" target="_blank" rel="noopener">LHCb Run 2 (CERN Open Data)</a>
+        </li>
+        <li>
+          <a href="https://opendata.cern.ch/search?page=1&size=20&q=LHCb" class="text-amber-400 hover:text-amber-300 underline" target="_blank" rel="noopener">LHCb datasets (search)</a>
+        </li>
+      </ul>
+    </footer>
+  </div>
+
+  <script>
+    // Mode toggle: kid ↔ expert
+    const body = document.body;
+    const modeToggle = document.getElementById('mode-toggle');
+    const modeSpan = modeToggle.querySelector('span');
+
+    function setMode(isExpert) {
+      body.setAttribute('data-mode', isExpert ? 'expert' : 'kid');
+      modeToggle.setAttribute('aria-checked', isExpert);
+      if (isExpert) {
+        modeSpan.classList.remove('translate-x-1');
+        modeSpan.classList.add('translate-x-7');
+      } else {
+        modeSpan.classList.add('translate-x-1');
+        modeSpan.classList.remove('translate-x-7');
+      }
+      if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+    }
+
+    modeToggle.addEventListener('click', () => {
+      const isExpert = body.getAttribute('data-mode') === 'expert';
+      setMode(!isExpert);
+    });
+
+    // Sirius B toggle
+    const siriusToggle = document.getElementById('sirius-toggle');
+    const siriusKnob = document.getElementById('sirius-knob');
+    let siriusOn = false;
+
+    siriusToggle.addEventListener('click', () => {
+      siriusOn = !siriusOn;
+      siriusToggle.setAttribute('aria-checked', siriusOn);
+      siriusKnob.classList.toggle('translate-x-1', !siriusOn);
+      siriusKnob.classList.toggle('translate-x-6', siriusOn);
+    });
+  </script>
+
+  <script>
+    (function() {
+      const dtSlider = document.getElementById('dt-slider');
+      let dtValue = 0.6;
+      let siriusActive = false;
+
+      dtSlider.addEventListener('input', () => { dtValue = dtSlider.value / 100; });
+
+      function getSiriusActive() {
+        return document.getElementById('sirius-toggle').getAttribute('aria-checked') === 'true';
+      }
+
+      new p5(function(p) {
+        let t = 0;
+        const w = 800;
+        const h = 400;
+        const cx = w / 2;
+        const baseY = h * 0.65;
+
+        p.setup = function() {
+          const can = p.createCanvas(w, h);
+          can.parent('p5-container');
+          p.pixelDensity(1);
+        };
+
+        p.draw = function() {
+          siriusActive = getSiriusActive();
+          dtValue = dtSlider.value / 100;
+
+          const dt = 0.02 + 0.28 * dtValue;
+          const dtEff = siriusActive ? dt * 0.25 : dt;
+          t += 0.015;
+
+          p.background(15, 23, 42);
+
+          const windowW = Math.max(40, w * 0.5 * dtEff);
+          const windowLeft = cx - windowW / 2;
+          const windowRight = cx + windowW / 2;
+
+          p.fill(250, 204, 21, 28);
+          p.noStroke();
+          p.rect(windowLeft, 0, windowW, h);
+
+          p.stroke(250, 204, 21, 0.5);
+          p.strokeWeight(1);
+          p.line(windowLeft, 0, windowLeft, h);
+          p.line(windowRight, 0, windowRight, h);
+
+          const nPaths = Math.max(1, Math.floor(3 + 18 * dtValue));
+          const pathVectors = [];
+          for (let i = 0; i < nPaths; i++) {
+            const phase = (i / nPaths) * p.TWO_PI + t * 0.5;
+            const amp = 60 + 40 * p.sin(phase * 0.7);
+            const dx = 80 * p.cos(phase);
+            pathVectors.push({ x: cx + dx, y: baseY - amp, angle: phase * 0.3 });
+          }
+
+          p.push();
+          p.translate(cx, baseY);
+          const sumX = pathVectors.reduce((a, v) => a + (v.x - cx), 0) / nPaths;
+          const sumY = pathVectors.reduce((a, v) => a + (v.y - baseY), 0) / nPaths;
+          p.pop();
+
+          for (let i = 0; i < pathVectors.length; i++) {
+            const v = pathVectors[i];
+            const alpha = 80 + 120 / (1 + nPaths * 0.3);
+            p.stroke(239, 68, 68, alpha);
+            p.strokeWeight(2);
+            p.noFill();
+            p.line(cx, baseY, v.x, v.y);
+            p.fill(239, 68, 68);
+            p.noStroke();
+            p.circle(v.x, v.y, 5);
+          }
+
+          const sigma = 30 + 120 * dtValue * (siriusActive ? 0.4 : 1);
+          const steps = 80;
+          p.noStroke();
+          for (let i = 0; i <= steps; i++) {
+            const x = (i / steps) * w;
+            let dens = 0;
+            for (const v of pathVectors) {
+              const d = (x - v.x) * (x - v.x);
+              dens += p.exp(-d / (2 * sigma * sigma));
+            }
+            dens /= pathVectors.length;
+            const ht = Math.min(120, dens * 180);
+            p.fill(59, 130, 246, 90);
+            p.rect(x, baseY, w / steps + 1, -ht);
+          }
+
+          if (nPaths <= 2 && dtValue < 0.15) {
+            p.stroke(239, 68, 68);
+            p.strokeWeight(3);
+            p.line(cx, baseY, cx + sumX, baseY + sumY);
+            p.fill(239, 68, 68);
+            p.noStroke();
+            p.circle(cx + sumX, baseY + sumY, 10);
+          }
+
+          p.fill(250, 204, 21, 0.6);
+          p.noStroke();
+          p.textSize(11);
+          p.text('Δt (measurement window)', cx - 55, 22);
+          p.text('Red: paths  |  Blue: |ψ|²', 12, h - 10);
+        };
+      });
+    })();
+  </script>
+</body>
+</html>

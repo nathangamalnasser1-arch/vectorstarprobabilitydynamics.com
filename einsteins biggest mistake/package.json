@@ -1,0 +1,10 @@
+{
+  "name": "vspd-quantum-radio",
+  "private": true,
+  "scripts": {
+    "test": "node vspd-quantum-radio.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}
