@@ -38,6 +38,13 @@
       text-align: center;
       font-size: 0.9375rem;
     }
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 3rem;
+    }
     .btn {
       display: inline-block;
       padding: 0.75rem 1.5rem;
@@ -46,10 +53,14 @@
       color: #fff;
       font-weight: 500;
       text-decoration: none;
-      margin-bottom: 3rem;
       transition: background 0.2s;
     }
     .btn:hover { background: #d97d00; }
+    .btn.secondary {
+      background: #1f2937;
+      color: #e5e7eb;
+    }
+    .btn.secondary:hover { background: #111827; }
     article {
       max-width: 42rem;
       width: 100%;
@@ -95,7 +106,10 @@
       Texas Hold'em with 118 element cards.<br>
       Community-driven hierarchy. Real-time multiplayer.
     </p>
-    <a href="https://periodictablepoker.com/play" class="btn">Play now</a>
+    <div class="cta">
+      <a href="https://periodictablepoker.com/play" class="btn">Play now</a>
+      <a href="Periodic%20Table%20Poker.pdf" class="btn secondary" download>Download PDF</a>
+    </div>
 
     <article>
       <p class="intro">Hi everybody, Good news everyone! Let me introduce you to new games.</p>
