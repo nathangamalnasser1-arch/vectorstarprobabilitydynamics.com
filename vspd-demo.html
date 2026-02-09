@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector-Star Probability Dynamics (VSPD)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            vspd: {
+              dark: '#0f0f14',
+              card: '#16161d',
+              accent: '#e63946',
+              wave: '#3b82f6',
+              window: '#fbbf24',
+              text: '#e2e8f0',
+              muted: '#94a3b8',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700&display=swap');
+    body { font-family: 'Outfit', sans-serif; }
+    .math-block { font-family: 'JetBrains Mono', monospace; }
+    #vspd-canvas { border-radius: 0.5rem; }
+    .mjx-math { font-size: 1.05em !important; }
+  </style>
+</head>
+<body class="bg-vspd-dark text-vspd-text min-h-screen antialiased">
+  <div class="max-w-5xl mx-auto px-4 py-8 md:py-12">
+    <!-- Header -->
+    <header class="mb-10">
+      <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">
+        Vector-Star Probability Dynamics
+      </h1>
+      <p class="text-vspd-muted mt-2 text-lg">
+        Quantum randomness as an emergent effect of finite measurement duration (Δt &gt; 0)
+      </p>
+    </header>
+
+    <!-- Mode Toggle -->
+    <div class="flex items-center gap-4 mb-8 p-4 rounded-xl bg-vspd-card border border-slate-700/50">
+      <span class="text-vspd-muted text-sm font-medium">Explanation mode:</span>
+      <button id="mode-toggle" type="button" class="relative inline-flex h-8 w-28 rounded-full bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-vspd-wave">
+        <span id="mode-knob" class="inline-block h-6 w-14 m-1 rounded-full bg-vspd-wave shadow transform transition-transform duration-200 translate-x-0"></span>
+        <span id="mode-label" class="absolute inset-0 flex items-center justify-between px-3 text-xs font-medium">
+          <span class="text-vspd-muted">Kid</span>
+          <span class="text-white">Expert</span>
+        </span>
+      </button>
+      <span id="mode-name" class="text-vspd-wave font-semibold">Kid Mode</span>
+    </div>
+
+    <!-- Kid Mode Content -->
+    <div id="content-kid" class="space-y-8">
+      <section class="rounded-xl bg-vspd-card p-6 border border-slate-700/50">
+        <h2 class="text-xl font-semibold text-white mb-4">The Camera Shutter Idea</h2>
+        <p class="text-vspd-text leading-relaxed">
+          Quantum particles aren't "everywhere at once." They move incredibly fast. When we measure them with a slow "shutter" (a long measurement time Δt), we get a blur—like a photo of a racing car with a slow camera. The blur looks like a spread-out wave, but it's really many fast paths smeared together.
+        </p>
+        <p class="text-vspd-text leading-relaxed mt-4">
+          The <strong class="text-vspd-window">Magic Star</strong> (Sirius B) helps us see them clearly. Near this dense star, time runs a bit slower (like a "time microscope"). That effectively shortens our measurement window, so we see sharper, less blurry behavior—closer to what the particle is "really" doing.
+        </p>
+      </section>
+    </div>
+
+    <!-- Expert Mode Content -->
+    <div id="content-expert" class="space-y-8 hidden">
+      <section class="rounded-xl bg-vspd-card p-6 border border-slate-700/50">
+        <h2 class="text-xl font-semibold text-white mb-4">Rigorous Framework</h2>
+        <p class="text-vspd-text leading-relaxed">
+          In Hilbert Space, completeness requires the Lebesgue integral: every Cauchy sequence of square-integrable functions converges to a limit within the space. The wave function \(|\psi\rangle\) during a measurement window \(\Delta t\) is represented as a sum over orthonormal basis elements (e.g., sine/cosine in Fourier decomposition). For the state to remain a valid wave function throughout \(\Delta t\), the sequence of partial sums must converge in the \(L^2\) norm—i.e., the Cauchy condition must hold so that the limit lies in the same Hilbert Space.
+        </p>
+        <p class="text-vspd-text leading-relaxed mt-4">
+          The apparent "spread" of \(|\psi|^2\) with increasing \(\Delta t\) reflects the inclusion of more micro-path vectors \(\vec{v}_i\) in the observable superposition \(\Psi_{\text{obs}} = \sum_i \vec{v}_i\), each contributing from orthonormal directions in the space.
+        </p>
+      </section>
+    </div>
+
+    <!-- Interactive Visualization -->
+    <section class="rounded-xl bg-vspd-card p-6 border border-slate-700/50 mt-8">
+      <h2 class="text-xl font-semibold text-white mb-4">Measurement Window Visualization</h2>
+      <div class="flex flex-col md:flex-row gap-6 items-start">
+        <div class="flex-1 min-w-0">
+          <canvas id="vspd-canvas" width="600" height="320" class="w-full max-w-full h-auto bg-slate-900/80"></canvas>
+          <div class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-vspd-muted mb-2">Measurement duration Δt</label>
+              <input id="dt-slider" type="range" min="0" max="100" value="0" class="w-full h-2 rounded-lg appearance-none bg-slate-700 accent-vspd-wave">
+              <span id="dt-value" class="text-sm text-vspd-wave font-mono mt-1 inline-block">0</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="sirius-toggle" type="checkbox" class="rounded border-slate-600 bg-slate-700 text-vspd-window focus:ring-vspd-window">
+              <label for="sirius-toggle" class="text-sm font-medium text-vspd-text">Sirius B — Time Microscope (sharpen wave)</label>
+            </div>
+          </div>
+        </div>
+        <div class="md:w-56 text-sm text-vspd-muted space-y-2">
+          <p><span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span> Red: micro-path vectors</p>
+          <p><span class="inline-block w-3 h-3 rounded-full bg-blue-500 mr-2"></span> Blue: \(|\psi|^2\)</p>
+          <p><span class="inline-block w-3 h-3 rounded-sm bg-yellow-400/40 mr-2"></span> Yellow: measurement window</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mathematical Resolution -->
+    <section class="rounded-xl bg-vspd-card p-6 border border-slate-700/50 mt-8">
+      <h2 class="text-xl font-semibold text-white mb-6">Mathematical Resolution</h2>
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-lg font-medium text-vspd-wave mb-2">1. The Redshift Engine</h3>
+          <div class="bg-slate-900/60 p-4 rounded-lg overflow-x-auto my-3">
+            \[ z = \frac{\lambda_{\text{observed}} - \lambda_{\text{rest}}}{\lambda_{\text{rest}}} \]
+          </div>
+          <p class="text-vspd-text text-sm leading-relaxed">
+            This is the mechanistic proof of time dilation: light emitted in a gravitational well is redshifted when observed from outside. The Hubble Space Telescope measures this via Balmer lines (e.g., H\(\alpha\)). Larger \(z\) means stronger gravitational time dilation—the "engine" that powers the Time Microscope.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-lg font-medium text-vspd-wave mb-2">2. The Vector-Star Summation</h3>
+          <div class="bg-slate-900/60 p-4 rounded-lg overflow-x-auto my-3">
+            \[ \Psi_{\text{obs}} = \sum_{i=1}^{n} \vec{v}_i \]
+          </div>
+          <p class="text-vspd-text text-sm leading-relaxed">
+            \(\vec{v}_i\) are individual micro-path vectors in Hilbert Space that contribute to the observed state during the \(\Delta t\) interval. As \(\Delta t\) increases, \(n\) grows and the superposition includes more vectors, producing the broadened \(|\psi|^2\).
+          </p>
+        </div>
+        <div>
+          <h3 class="text-lg font-medium text-vspd-wave mb-2">3. The Hilbert Space Inner Product</h3>
+          <div class="bg-slate-900/60 p-4 rounded-lg overflow-x-auto my-3">
+            \[ \langle f \mid g \rangle = \int f^*(x)\, g(x)\, dx \]
+          </div>
+          <p class="text-vspd-text text-sm leading-relaxed">
+            This inner product measures "distance" and "angles" between state vectors. The probability density \(|\psi|^2\) is obtained from \(\langle \psi \mid \psi \rangle\); it quantifies how much of the state lies along each basis direction and thus the observable spread during the measurement window.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sirius B Case Study -->
+    <section class="rounded-xl bg-vspd-card p-6 border border-slate-700/50 mt-8">
+      <h2 class="text-xl font-semibold text-white mb-4">The Mechanistic Proof: Sirius B</h2>
+      <p class="text-vspd-text leading-relaxed mb-4">
+        Sirius B is a white dwarf with a very high mass-to-radius ratio. That ratio creates a deep gravitational well at its surface. General relativity predicts that clocks run slower in stronger gravitational fields—so spectral lines emitted from Sirius B's atmosphere are <em>gravitationally redshifted</em> when we observe them from Earth.
+      </p>
+      <p class="text-vspd-text leading-relaxed mb-4">
+        Hubble spectroscopy measures this redshift in Balmer lines (e.g., H\(\alpha\), H\(\beta\)). The measured \(z\) matches the predicted value from \(z \approx GM/(c^2 R)\) for the star's mass \(M\) and radius \(R\). This is the mechanistic proof: the same time dilation that produces the redshift can be interpreted in VSPD as a "Time Microscope"—near Sirius B, the effective \(\Delta t\) for a local measurement is reduced, sharpening the wave function and reducing the apparent quantum blur.
+      </p>
+      <p class="text-vspd-text leading-relaxed">
+        Thus the observable (redshift) is directly linked to the framework's engine: time dilation that alters the effective measurement duration and hence the vector-star summation.
+      </p>
+    </section>
+
+    <!-- Key Insights -->
+    <section class="rounded-xl bg-vspd-card p-6 border border-slate-700/50 mt-8">
+      <h2 class="text-xl font-semibold text-white mb-6">Key Insights</h2>
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="flex gap-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-vspd-wave/20 flex items-center justify-center text-2xl">⏱</div>
+          <div>
+            <h3 class="font-semibold text-white">Finite Measurement Time</h3>
+            <p class="text-sm text-vspd-muted mt-1">Δt &gt; 0 causes apparent spread; not intrinsic indeterminism.</p>
+          </div>
+        </div>
+        <div class="flex gap-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center text-2xl">✦</div>
+          <div>
+            <h3 class="font-semibold text-white">Vector-Star Dynamics</h3>
+            <p class="text-sm text-vspd-muted mt-1">Observed state is a sum of micro-path vectors in Hilbert Space.</p>
+          </div>
+        </div>
+        <div class="flex gap-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-vspd-window/20 flex items-center justify-center text-2xl">🔬</div>
+          <div>
+            <h3 class="font-semibold text-white">Testable Hypothesis</h3>
+            <p class="text-sm text-vspd-muted mt-1">Redshift (e.g., Sirius B) probes time dilation and effective Δt.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      // Mode toggle
+      var expertMode = false;
+      var modeToggle = document.getElementById('mode-toggle');
+      var modeKnob = document.getElementById('mode-knob');
+      var modeName = document.getElementById('mode-name');
+      var contentKid = document.getElementById('content-kid');
+      var contentExpert = document.getElementById('content-expert');
+
+      function setMode(isExpert) {
+        expertMode = isExpert;
+        contentKid.classList.toggle('hidden', isExpert);
+        contentExpert.classList.toggle('hidden', !isExpert);
+        modeName.textContent = isExpert ? 'Expert Mode' : 'Kid Mode';
+        modeKnob.style.transform = isExpert ? 'translateX(4.5rem)' : 'translateX(0)';
+      }
+
+      modeToggle.addEventListener('click', function () {
+        setMode(!expertMode);
+      });
+
+      // Canvas visualization
+      var canvas = document.getElementById('vspd-canvas');
+      var ctx = canvas.getContext('2d');
+      var dtSlider = document.getElementById('dt-slider');
+      var dtValue = document.getElementById('dt-value');
+      var siriusToggle = document.getElementById('sirius-toggle');
+
+      function draw() {
+        var W = canvas.width;
+        var H = canvas.height;
+        var dtRaw = Number(dtSlider.value);
+        var siriusOn = siriusToggle.checked;
+        var effectiveDt = siriusOn ? dtRaw * 0.25 : dtRaw; // Time Microscope reduces effective Δt
+        var t = effectiveDt / 100;
+
+        ctx.fillStyle = 'rgb(15, 15, 20)';
+        ctx.fillRect(0, 0, W, H);
+
+        var cx = W * 0.5;
+        var cy = H * 0.55;
+        var scaleX = 0.35 * W;
+        var scaleY = 50;
+
+        // Measurement window (yellow band)
+        var windowW = Math.max(40, 80 + t * 200);
+        var left = cx - windowW / 2;
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.15)';
+        ctx.fillRect(left, 0, windowW, H);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(left, 0, windowW, H);
+
+        // Micro-path vectors (red)
+        var n = Math.max(1, Math.floor(1 + effectiveDt / 12));
+        for (var i = 0; i < n; i++) {
+          var angle = -Math.PI / 2 + (i - (n - 1) / 2) * 0.2 * t;
+          var len = 60 + 40 * (1 - t * 0.5);
+          var x2 = cx + Math.cos(angle) * len * scaleX / 80;
+          var y2 = cy + Math.sin(angle) * len * scaleY / 50;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = 'rgba(230, 57, 70, 0.9)';
+          ctx.lineWidth = n === 1 ? 3 : 2;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(x2, y2, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#e63946';
+          ctx.fill();
+        }
+
+        // Wave function |ψ|² (blue curve, width grows with Δt)
+        var sigma = 15 + t * 120;
+        ctx.beginPath();
+        for (var x = 0; x <= W; x += 2) {
+          var u = (x - cx) / sigma;
+          var y = cy - 80 * Math.exp(-u * u);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.9)';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.12)';
+        ctx.lineTo(W, H);
+        ctx.lineTo(0, H);
+        ctx.closePath();
+        ctx.fill();
+
+        requestAnimationFrame(draw);
+      }
+
+      dtSlider.addEventListener('input', function () {
+        dtValue.textContent = (Number(dtSlider.value) / 100).toFixed(2);
+      });
+      dtValue.textContent = (Number(dtSlider.value) / 100).toFixed(2);
+
+      draw();
+    })();
+  </script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+  </script>
+</body>
+</html>
