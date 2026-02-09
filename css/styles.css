@@ -89,11 +89,19 @@ a:hover {
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 30px;
+    gap: 16px;
     margin: 0;
     padding: 0;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.nav-menu li {
+    flex: 0 0 auto;
 }
 
 .nav-menu a {
