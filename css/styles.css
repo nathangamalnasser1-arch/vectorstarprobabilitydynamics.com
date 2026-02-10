@@ -6,45 +6,40 @@
 }
 
 :root {
-    /* Unified theme: slate + amber (light) */
-    --bg-primary: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --bg-tertiary: #e2e8f0;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-accent: #475569;
-    --border-color: #cbd5e1;
-    --nav-bg: rgba(248, 250, 252, 0.95);
-    --card-bg: #ffffff;
-    --shadow: rgba(15, 23, 42, 0.08);
+    /* CERN-Technical Time Microscope Theme */
+    --cern-slate-dark: #1e293b;
+    --cern-slate-grey: #64748b;
+    --cern-amber: #f59e0b;
+    --cern-amber-glow: rgba(245, 158, 11, 0.15);
+    --cern-glass-bg: rgba(30, 41, 59, 0.7);
+    
+    /* Unified theme variables (dark) */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-accent: #cbd5e1;
+    --border-color: rgba(245, 158, 11, 0.3);
+    --nav-bg: rgba(15, 23, 42, 0.95);
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --shadow: rgba(0, 0, 0, 0.3);
     --accent-color: #f59e0b;
-    --accent-hover: #d97706;
+    --accent-hover: #fbbf24;
     --wave-function-color: #64748b;
     --vector-star-color: #ea580c;
     --measurement-window-color: rgba(245, 158, 11, 0.25);
 }
 
-[data-theme="dark"] {
-    /* Unified theme: slate + amber (dark) */
-    --bg-primary: #1e293b;
-    --bg-secondary: #0f172a;
-    --bg-tertiary: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-accent: #cbd5e1;
-    --border-color: #64748b;
-    --nav-bg: rgba(15, 23, 42, 0.95);
-    --card-bg: #334155;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --accent-color: #f59e0b;
-    --accent-hover: #fbbf24;
-}
-
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text-primary);
     background-color: var(--bg-primary);
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(245, 158, 11, 0.02) 50px, rgba(245, 158, 11, 0.02) 51px),
+        repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(245, 158, 11, 0.02) 50px, rgba(245, 158, 11, 0.02) 51px);
+    background-attachment: fixed;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -57,8 +52,9 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Navigation */
+/* Navigation (Legacy - Hidden by default, sidebar is primary) */
 .navbar {
+    display: none;
     position: fixed;
     top: 0;
     width: 100%;
@@ -143,15 +139,17 @@ a:hover {
 
 /* Main Content */
 main {
-    margin-top: 120px;
-    min-height: calc(100vh - 120px);
+    margin-top: 0;
+    min-height: 100vh;
+    padding: 3rem 4rem;
 }
 
 /* Page Headers */
 .page-header {
     text-align: center;
     padding: 60px 20px 40px;
-    background-color: var(--bg-secondary);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .page-header h1 {
@@ -396,8 +394,10 @@ input:checked + .toggle-slider:before {
     text-align: left;
     padding: 30px;
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
     max-width: 1000px;
     margin: 0 auto;
 }
@@ -556,16 +556,19 @@ input:checked + .toggle-slider:before {
 }
 
 .insight-card {
-    background-color: var(--bg-secondary);
+    background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     padding: 25px;
     border-radius: 10px;
     border-left: 4px solid var(--accent-color);
+    box-shadow: 0 4px 12px var(--shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .insight-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--shadow);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
 }
 
 .insight-icon {
@@ -655,9 +658,11 @@ input:checked + .toggle-slider:before {
 
 .animation-panel {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
     text-align: center;
 }
 
@@ -685,9 +690,11 @@ input:checked + .toggle-slider:before {
 /* Controls Panel */
 .thought-experiment .controls-panel {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .thought-experiment .control-group {
@@ -1254,15 +1261,18 @@ input:checked + .toggle-slider:before {
 
 .takeaway-card {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
     text-align: center;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .takeaway-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
 }
 
 .takeaway-icon {
@@ -1369,10 +1379,18 @@ input:checked + .toggle-slider:before {
 
 .concept-card {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
     text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.concept-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
 }
 
 .concept-card h3 {
@@ -1398,14 +1416,17 @@ input:checked + .toggle-slider:before {
 
 .interpretation-card {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 4px 6px var(--shadow);
-    transition: transform 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .interpretation-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
 }
 
 .interpretation-card h2 {
@@ -1447,9 +1468,11 @@ input:checked + .toggle-slider:before {
     margin: 0 auto;
     text-align: center;
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     padding: 40px;
     border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .statement-box h2 {
@@ -1476,14 +1499,17 @@ input:checked + .toggle-slider:before {
 
 .experiment-card {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 4px 6px var(--shadow);
-    transition: transform 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .experiment-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
 }
 
 .experiment-card h2 {
@@ -1532,9 +1558,11 @@ input:checked + .toggle-slider:before {
 .bio-content,
 .methodology {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .bio-content h2,
@@ -1602,9 +1630,11 @@ input:checked + .toggle-slider:before {
 
 .contact-form {
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
     padding: 40px;
     border-radius: 12px;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .contact-form h3 {
@@ -1665,9 +1695,16 @@ input:checked + .toggle-slider:before {
 .footer {
     text-align: center;
     padding: 20px;
-    background-color: var(--bg-secondary);
+    background: transparent;
     color: var(--text-secondary);
     border-top: 1px solid var(--border-color);
+    margin-right: 300px;
+}
+
+@media (max-width: 1024px) {
+    .footer {
+        margin-right: 0;
+    }
 }
 
 /* Responsive Design */
@@ -1720,31 +1757,31 @@ input:checked + .toggle-slider:before {
     }
 }
 
-/* Fixed Vertical Sidebar Navigation (CERN-style for index, adaptable for others) */
+/* Fixed Vertical Sidebar Navigation - Time Microscope Theme */
 .sidebar-nav {
     position: fixed;
     right: 0;
     top: 0;
     height: 100vh;
     width: 280px;
-    background: rgba(30, 41, 59, 0.7);
+    background: var(--cern-glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-left: 1px solid #f59e0b;
+    border-left: 1px solid var(--cern-amber);
     padding: 2rem 1.5rem;
     overflow-y: auto;
     z-index: 1000;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .sidebar-nav h3 {
-    color: #f59e0b;
+    color: var(--cern-amber);
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin: 0 0 1rem 0;
-    border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.5rem;
 }
 
@@ -1759,7 +1796,7 @@ input:checked + .toggle-slider:before {
 }
 
 .sidebar-nav a {
-    color: #cbd5e1;
+    color: var(--text-accent);
     text-decoration: none;
     font-size: 0.875rem;
     transition: all 0.2s ease;
@@ -1770,9 +1807,9 @@ input:checked + .toggle-slider:before {
 
 .sidebar-nav a:hover,
 .sidebar-nav a.active {
-    color: #f59e0b;
-    border-left-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.15);
+    color: var(--cern-amber);
+    border-left-color: var(--cern-amber);
+    background: var(--cern-amber-glow);
     text-decoration: none;
 }
 
@@ -2026,10 +2063,11 @@ input:checked + .toggle-slider:before {
     position: sticky;
     top: 80px;
     background-color: var(--card-bg);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.25rem;
-    box-shadow: 0 4px 6px var(--shadow);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .simple-explanation-sidebar h3 {
