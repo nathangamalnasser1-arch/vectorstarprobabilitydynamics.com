@@ -1853,29 +1853,9 @@ input:checked + .toggle-slider:before {
     }
 }
 
-/* Dark mode toggle button (optional) */
+/* Dark mode toggle button (removed) */
 .theme-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: var(--accent-color);
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    box-shadow: 0 4px 8px var(--shadow);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-}
-
-.theme-toggle:hover {
-    background-color: var(--accent-hover);
+    display: none;
 }
 
 /* Animation classes for canvas elements */
