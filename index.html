@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; frame-src https://w.soundcloud.com; form-action 'self'; base-uri 'self'; frame-ancestors 'self';">
     <title>Vector-Star Probability Dynamics - The Time Microscope</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -22,6 +22,49 @@
             margin-right: 300px;
             padding: 3rem 4rem;
             max-width: 1200px;
+        }
+
+        /* SoundCloud Player - Top Right */
+        .soundcloud-player {
+            position: fixed;
+            top: 1rem;
+            right: 310px;
+            width: 350px;
+            z-index: 999;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .soundcloud-player iframe {
+            border-radius: 4px;
+        }
+
+        .soundcloud-caption {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .soundcloud-caption a {
+            color: #f59e0b;
+            text-decoration: none;
+        }
+
+        .soundcloud-caption a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1024px) {
+            .soundcloud-player {
+                position: static;
+                margin: 0 auto 2rem;
+                max-width: 100%;
+            }
         }
 
         /* Hero Section */
@@ -371,6 +414,15 @@
             <li><a href="about.html">About VSPD</a></li>
         </ul>
     </nav>
+
+    <!-- SoundCloud Player -->
+    <div class="soundcloud-player">
+        <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2263584596&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+        <div class="soundcloud-caption">
+            <a href="https://soundcloud.com/nathan-nasser-870696316" title="nathan nasser" target="_blank">nathan nasser</a> · 
+            <a href="https://soundcloud.com/nathan-nasser-870696316/quantum_uncertainty_is_just_mo" title="Quantum_Uncertainty_Is_Just_Motion_Blur" target="_blank">Quantum_Uncertainty_Is_Just_Motion_Blur</a>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main-content">
