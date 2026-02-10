@@ -13,16 +13,16 @@
     --cern-amber-glow: rgba(245, 158, 11, 0.15);
     --cern-glass-bg: rgba(30, 41, 59, 0.7);
     
-    /* Unified theme variables (dark) */
+    /* Unified theme variables (dark with Webb background) */
     --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
+    --bg-secondary: rgba(30, 41, 59, 0.5);
     --bg-tertiary: #334155;
     --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
     --text-accent: #cbd5e1;
     --border-color: rgba(245, 158, 11, 0.3);
     --nav-bg: rgba(15, 23, 42, 0.95);
-    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-bg: rgba(30, 41, 59, 0.5);
     --shadow: rgba(0, 0, 0, 0.3);
     --accent-color: #f59e0b;
     --accent-hover: #fbbf24;
@@ -37,9 +37,14 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-primary);
     background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(245, 158, 11, 0.02) 50px, rgba(245, 158, 11, 0.02) 51px),
-        repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(245, 158, 11, 0.02) 50px, rgba(245, 158, 11, 0.02) 51px);
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.92)),
+        repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(245, 158, 11, 0.03) 50px, rgba(245, 158, 11, 0.03) 51px),
+        repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(245, 158, 11, 0.03) 50px, rgba(245, 158, 11, 0.03) 51px),
+        url('../gravitational-time-microscope/images/webb_cosmos.jpg');
     background-attachment: fixed;
+    background-size: auto, auto, auto, cover;
+    background-position: center, center, center, center;
+    background-blend-mode: normal, overlay, overlay, normal;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -148,7 +153,7 @@ main {
 .page-header {
     text-align: center;
     padding: 60px 20px 40px;
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, transparent 100%);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -1709,6 +1714,11 @@ input:checked + .toggle-slider:before {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    body {
+        background-size: auto, auto, auto, 200% auto;
+        background-position: center, center, center, center top;
+    }
+
     .nav-row {
         flex-direction: column;
         align-items: flex-start;
@@ -1764,9 +1774,9 @@ input:checked + .toggle-slider:before {
     top: 0;
     height: 100vh;
     width: 280px;
-    background: var(--cern-glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-left: 1px solid var(--cern-amber);
     padding: 2rem 1.5rem;
     overflow-y: auto;
