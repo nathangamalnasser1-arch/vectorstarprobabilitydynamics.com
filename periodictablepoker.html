@@ -97,16 +97,28 @@
       text-decoration: none;
     }
     nav a:hover { color: #22d3ee; }
+    .content-wrapper {
+      display: flex;
+      gap: 2rem;
+      max-width: 68rem;
+      width: 100%;
+      align-items: flex-start;
+    }
+    .sidebar-block {
+      flex-shrink: 0;
+      width: 320px;
+      position: sticky;
+      top: 2rem;
+    }
     .video-container {
       position: relative;
       width: 100%;
-      max-width: 56rem;
-      margin: 0 auto 3rem;
       padding-bottom: 56.25%; /* 16:9 aspect ratio */
       height: 0;
       overflow: hidden;
       border-radius: 0.5rem;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      background: #1f2937;
     }
     .video-container iframe {
       position: absolute;
@@ -115,6 +127,20 @@
       width: 100%;
       height: 100%;
       border: none;
+    }
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+    @media (max-width: 900px) {
+      .content-wrapper {
+        flex-direction: column;
+      }
+      .sidebar-block {
+        width: 100%;
+        position: static;
+        max-width: 32rem;
+      }
     }
   </style>
 </head>
@@ -130,10 +156,14 @@
       <a href="Periodic%20Table%20Poker.pdf" class="btn secondary" download>Download PDF</a>
     </div>
 
-    <div class="video-container">
-      <iframe src="https://www.youtube.com/embed/xWZV6ydx2No" title="Periodic Table Poker" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    </div>
+    <div class="content-wrapper">
+      <aside class="sidebar-block">
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/xWZV6ydx2No" title="Periodic Table Poker" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+      </aside>
 
+      <div class="main-content">
     <article>
       <p class="intro">Hi everybody, Good news everyone! Let me introduce you to new games.</p>
       <p>This is a card game to learn science. You will have to use all the knowledge and the internet to come up with the best set of elements of the periodic table (as a poker hand) and if needed you will have to come up with a scientific explanation why.</p>
@@ -152,6 +182,8 @@
       <a href="https://periodictablepoker.com/login">Log in</a>
       <a href="https://periodictablepoker.com/register">Register</a>
     </nav>
+      </div>
+    </div>
   </main>
 </body>
 </html>
