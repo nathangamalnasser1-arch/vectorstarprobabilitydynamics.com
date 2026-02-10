@@ -1720,6 +1720,84 @@ input:checked + .toggle-slider:before {
     }
 }
 
+/* Fixed Vertical Sidebar Navigation (CERN-style for index, adaptable for others) */
+.sidebar-nav {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 1px solid #f59e0b;
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-nav h3 {
+    color: #f59e0b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 1rem 0;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 0.75rem;
+}
+
+.sidebar-nav a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    display: block;
+    padding: 0.5rem;
+    border-left: 2px solid transparent;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    color: #f59e0b;
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.15);
+    text-decoration: none;
+}
+
+/* Main content adjustment for sidebar */
+.main-content-with-sidebar {
+    margin-right: 300px;
+    padding: 3rem 4rem;
+}
+
+/* Responsive sidebar */
+@media (max-width: 1024px) {
+    .sidebar-nav {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-left: none;
+        border-bottom: 1px solid #f59e0b;
+    }
+
+    .main-content-with-sidebar {
+        margin-right: 0;
+        padding: 2rem 1.5rem;
+    }
+}
+
 /* Dark mode toggle button (optional) */
 .theme-toggle {
     position: fixed;

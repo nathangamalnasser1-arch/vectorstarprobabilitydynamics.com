@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
-        /* CERN-Technical Theme Override */
+        /* CERN-Technical Theme Override for Index Page */
         :root {
             --cern-slate-dark: #1e293b;
             --cern-slate-grey: #64748b;
@@ -30,62 +30,7 @@
             padding: 0;
         }
 
-        /* Fixed Vertical Sidebar Navigation */
-        .sidebar-nav {
-            position: fixed;
-            right: 0;
-            top: 0;
-            height: 100vh;
-            width: 280px;
-            background: var(--cern-glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-left: 1px solid var(--cern-amber);
-            padding: 2rem 1.5rem;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .sidebar-nav h3 {
-            color: var(--cern-amber);
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin: 0 0 1rem 0;
-            border-bottom: 1px solid rgba(245, 158, 11, 0.3);
-            padding-bottom: 0.5rem;
-        }
-
-        .sidebar-nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 2rem 0;
-        }
-
-        .sidebar-nav li {
-            margin-bottom: 0.75rem;
-        }
-
-        .sidebar-nav a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-            display: block;
-            padding: 0.5rem;
-            border-left: 2px solid transparent;
-        }
-
-        .sidebar-nav a:hover,
-        .sidebar-nav a.active {
-            color: var(--cern-amber);
-            border-left-color: var(--cern-amber);
-            background: var(--cern-amber-glow);
-        }
-
-        /* Main Content Area */
+        /* Main Content Area for Index */
         .main-content {
             margin-right: 300px;
             padding: 3rem 4rem;
