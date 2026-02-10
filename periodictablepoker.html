@@ -97,6 +97,25 @@
       text-decoration: none;
     }
     nav a:hover { color: #22d3ee; }
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 56rem;
+      margin: 0 auto 3rem;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      height: 0;
+      overflow: hidden;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -109,6 +128,10 @@
     <div class="cta">
       <a href="https://periodictablepoker.com/play" class="btn">Play now</a>
       <a href="Periodic%20Table%20Poker.pdf" class="btn secondary" download>Download PDF</a>
+    </div>
+
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/xWZV6ydx2No" title="Periodic Table Poker" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
 
     <article>
