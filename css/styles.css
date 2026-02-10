@@ -145,8 +145,16 @@ a:hover {
 /* Main Content */
 main {
     margin-top: 0;
+    margin-right: 300px;
     min-height: 100vh;
     padding: 3rem 4rem;
+}
+
+@media (max-width: 1024px) {
+    main {
+        margin-right: 0;
+        padding: 2rem 1.5rem;
+    }
 }
 
 /* Page Headers */
