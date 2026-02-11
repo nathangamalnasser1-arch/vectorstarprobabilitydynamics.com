@@ -441,8 +441,8 @@
       var mathSection = document.getElementById('math-section');
       if (modeKid && modeExpert) {
         modeKid.click();
-        ok(!introKid.classList.contains('hidden') && introExpert.classList.contains('hidden'), 'Kid mode shows kid intro');
-        ok(mathSection.classList.contains('hidden'), 'Kid mode hides math section');
+        ok(!introKid.classList.contains('hidden') && introExpert.classList.contains('hidden'), 'Beginner mode shows beginner intro');
+        ok(mathSection.classList.contains('hidden'), 'Beginner mode hides math section');
         modeExpert.click();
         ok(introKid.classList.contains('hidden') && !introExpert.classList.contains('hidden'), 'Expert mode shows expert intro');
         ok(!mathSection.classList.contains('hidden'), 'Expert mode shows math section');
@@ -468,10 +468,10 @@
         dcToggle.checked = false;
       }
 
-      // 6. Explanations (kid) visible in kid mode
+      // 6. Explanations (beginner) visible in beginner mode
       modeKid && modeKid.click();
       var explainSiriusKid = document.getElementById('explain-sirius-kid');
-      ok(!explainSiriusKid.classList.contains('hidden'), 'Kid mode shows Sirius B (kid) explanation');
+      ok(!explainSiriusKid.classList.contains('hidden'), 'Beginner mode shows Sirius B (beginner) explanation');
 
       log('\nTotal: ' + pass + ' passed, ' + fail + ' failed');
     }
