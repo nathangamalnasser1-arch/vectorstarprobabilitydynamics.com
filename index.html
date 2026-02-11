@@ -31,13 +31,11 @@
             }
         }
 
-        /* SoundCloud Player - Top Right */
+        /* SoundCloud Player - Bottom of page */
         .soundcloud-player {
-            position: fixed;
-            top: 1rem;
-            right: 310px;
-            width: 350px;
-            z-index: 999;
+            margin: 4rem auto 2rem;
+            max-width: 500px;
+            width: 100%;
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(245, 158, 11, 0.3);
@@ -67,13 +65,6 @@
         }
 
         @media (max-width: 1024px) {
-            .soundcloud-player {
-                position: static;
-                margin: 0 auto 2rem;
-                max-width: 100%;
-                width: 100%;
-            }
-            
             body {
                 background-size: auto, auto, auto, 200% auto;
             }
@@ -427,15 +418,6 @@
         </ul>
     </nav>
 
-    <!-- SoundCloud Player -->
-    <div class="soundcloud-player">
-        <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2263584596&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
-        <div class="soundcloud-caption">
-            <a href="https://soundcloud.com/nathan-nasser-870696316" title="nathan nasser" target="_blank">nathan nasser</a> · 
-            <a href="https://soundcloud.com/nathan-nasser-870696316/quantum_uncertainty_is_just_mo" title="Quantum_Uncertainty_Is_Just_Motion_Blur" target="_blank">Quantum_Uncertainty_Is_Just_Motion_Blur</a>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <main class="main-content">
         <!-- Hero Section -->
@@ -652,6 +634,15 @@
             <a href="thought-experiment.html" class="cta-button">Enter Interactive Sandbox</a>
             <a href="https://github.com/nathangamalnasser1-arch/vectorstarprobabilitydynamics.com" class="cta-button secondary" target="_blank" rel="noopener noreferrer">View on GitHub</a>
         </section>
+
+        <!-- SoundCloud Player -->
+        <div class="soundcloud-player">
+            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2263584596&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+            <div class="soundcloud-caption">
+                <a href="https://soundcloud.com/nathan-nasser-870696316" title="nathan nasser" target="_blank">nathan nasser</a> · 
+                <a href="https://soundcloud.com/nathan-nasser-870696316/quantum_uncertainty_is_just_mo" title="Quantum_Uncertainty_Is_Just_Motion_Blur" target="_blank">Quantum_Uncertainty_Is_Just_Motion_Blur</a>
+            </div>
+        </div>
 
         <!-- Footer -->
         <footer style="text-align: center; padding: 3rem 0 2rem; color: var(--cern-slate-grey); font-size: 0.875rem; border-top: 1px solid rgba(245, 158, 11, 0.2); margin-top: 4rem;">
