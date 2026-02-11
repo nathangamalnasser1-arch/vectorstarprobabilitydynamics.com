@@ -53,11 +53,11 @@
       <button id="mode-toggle" type="button" class="relative inline-flex h-8 w-28 rounded-full bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-vspd-wave">
         <span id="mode-knob" class="inline-block h-6 w-14 m-1 rounded-full bg-vspd-wave shadow transform transition-transform duration-200 translate-x-0"></span>
         <span id="mode-label" class="absolute inset-0 flex items-center justify-between px-3 text-xs font-medium">
-          <span class="text-vspd-muted">Kid</span>
+          <span class="text-vspd-muted">Beginner</span>
           <span class="text-white">Expert</span>
         </span>
       </button>
-      <span id="mode-name" class="text-vspd-wave font-semibold">Kid Mode</span>
+      <span id="mode-name" class="text-vspd-wave font-semibold">Beginner</span>
     </div>
 
     <!-- Kid Mode Content -->
@@ -203,7 +203,7 @@
         expertMode = isExpert;
         contentKid.classList.toggle('hidden', isExpert);
         contentExpert.classList.toggle('hidden', !isExpert);
-        modeName.textContent = isExpert ? 'Expert Mode' : 'Kid Mode';
+        modeName.textContent = isExpert ? 'Expert Mode' : 'Beginner';
         modeKnob.style.transform = isExpert ? 'translateX(4.5rem)' : 'translateX(0)';
       }
 
