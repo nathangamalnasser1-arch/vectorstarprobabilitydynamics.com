@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VSPD & Hadronic Physics: A New Measurement Paradigm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="nav-bar">
+    <span class="title">VSPD & Hadronic Physics: A New Measurement Paradigm</span>
+    <nav class="nav-tabs">
+      <button type="button" data-module="explanation" class="active">Explanation</button>
+      <button type="button" data-module="theory">Theory</button>
+      <button type="button" data-module="application">Application</button>
+      <button type="button" data-module="synthesis">Synthesis</button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <!-- Explanation: plain-language overview so the site is easier to understand -->
+    <section id="module-explanation" class="module active">
+      <div class="section-card explanation-card">
+        <h2>What is this site about?</h2>
+        <p class="explanation-lead">This showcase connects a quantum-mechanics idea (VSPD) with how we interpret photon spectra from heavy-ion collisions. Below is a short guide to the concepts and what each part of the page does.</p>
+
+        <h3>Core idea</h3>
+        <ul class="explanation-list">
+          <li><strong>VSPD (Vector-Star Probability Dynamics)</strong> is a way of thinking about quantum uncertainty: not as pure randomness, but as a consequence of <strong>how long</strong> we measure (the measurement duration, written Δt). The longer Δt, the more “paths” or possibilities get summed, and the more spread-out (uncertain) the result looks.</li>
+          <li><strong>Hadronic physics</strong> here means heavy-ion collisions that create a hot, expanding medium (Quark-Gluon Plasma, QGP). Photons emitted from this plasma have an energy spectrum. Experimentally we often fit an “effective temperature” (T<sub>eff</sub>) from the slope of that spectrum.</li>
+          <li>The <strong>link</strong>: maybe part of what we call “effective temperature” comes from the <strong>duration of the measurement</strong> and the way the plasma expands in time, not only from the plasma’s “true” temperature. This site lets you change Δt and the measurement window and see how the spectrum and T<sub>eff</sub> respond.</li>
+        </ul>
+
+        <h3>What you see on each tab</h3>
+        <ul class="explanation-list">
+          <li><strong>Theory (Vector-Star):</strong> The red lines are “micro-paths.” Think of them as many possible contributions that add up when we measure over a time Δt. When you increase Δt (e.g. in the Synthesis tab), the number of red lines grows—that’s the idea that <strong>longer measurement duration</strong> means more paths and more apparent spread.</li>
+          <li><strong>Application (Photon spectrum):</strong> This is a simulated photon energy spectrum in GeV (0.1–1.0 GeV). The vertical axis is logarithmic. The <strong>inverse slope</strong> of this curve is what we call the effective temperature T<sub>eff</sub>. So when the slope changes (because you change Δt or the measurement window), T<sub>eff</sub> changes too.</li>
+          <li><strong>Synthesis:</strong> Here you can (1) move the <strong>slider</strong> to change Δt / plasma expansion, (2) choose the <strong>model</strong> (VSPD vs standard), and (3) <strong>drag the yellow band</strong> on the time graph to change the measurement window. The graph shows the plasma’s evolution in time; the yellow band is the interval over which we “collect” the spectrum. The spectrum and T<sub>eff</sub> below update as you change these. The regression line shows how T<sub>eff</sub> depends on Δt when we try to “control for” expansion (to avoid spurious correlations).</li>
+        </ul>
+
+        <h3>Key terms</h3>
+        <dl class="explanation-terms">
+          <dt>Δt (delta t)</dt>
+          <dd>Measurement duration: the length of time over which we imagine gathering the photon signal. In VSPD, larger Δt means more micro-paths are summed and the spectrum can look “warmer” (larger T<sub>eff</sub>).</dd>
+          <dt>Vector-Star / micro-paths</dt>
+          <dd>Individual contributions (the red vectors) that are combined over the measurement window. They represent different possible outcomes that add up to the observed distribution.</dd>
+          <dt>Effective temperature (T<sub>eff</sub>)</dt>
+          <dd>A number we get from the slope of the photon energy spectrum. It looks like a temperature but can mix real thermal effects with effects of flow and measurement duration.</dd>
+          <dt>Measurement window (yellow band)</dt>
+          <dd>The time interval (on the Synthesis graph) over which the spectrum is integrated. Dragging the edges changes this interval and thus Δt for the calculation.</dd>
+          <dt>VSPD vs Standard model</dt>
+          <dd>VSPD interprets part of the spectrum shape as coming from <strong>duration</strong> (Δt) and flow. The standard view treats it as mainly <strong>intrinsic</strong> thermal randomness. The toggle lets you compare the two interpretations.</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="module-theory" class="module">
+      <div class="section-card">
+        <h2>Vector-Star Rendering</h2>
+        <p class="measurement-hint">Each red line is a “micro-path”: one possible contribution. More lines appear when Δt is larger (use the Synthesis tab and move the slider). This illustrates how <strong>longer measurement duration</strong> adds more paths and increases the apparent spread (superposition from duration).</p>
+        <div id="theory-canvas-container" class="canvas-container theory"></div>
+      </div>
+    </section>
+
+    <section id="module-application" class="module">
+      <div class="section-card">
+        <h2>Hadronic Spectral Analysis</h2>
+        <p class="measurement-hint">Simulated photon energy spectrum (horizontal axis: energy in GeV; vertical axis: log of rate). The <strong>inverse slope</strong> of the curve is the effective temperature T<sub>eff</sub> (shown in gold). It changes when you change Δt or the measurement window in the Synthesis tab.</p>
+        <div id="application-canvas-container" class="canvas-container"></div>
+      </div>
+    </section>
+
+    <section id="module-synthesis" class="module">
+      <div class="section-card">
+        <h2>Δt / Plasma Expansion</h2>
+        <p class="explanation-inline">Use the slider and the yellow band to see how the spectrum and T<sub>eff</sub> depend on measurement duration.</p>
+        <div class="synthesis-control">
+          <label for="delta-t-slider">Δ t / Plasma expansion (measurement duration)</label>
+          <input type="range" id="delta-t-slider" min="0.05" max="1" step="0.01" value="0.5">
+          <span class="control-hint">Larger = longer measurement time → more micro-paths and usually a different T<sub>eff</sub>.</span>
+        </div>
+        <div class="model-toggle">
+          <label for="model-select">Model:</label>
+          <select id="model-select">
+            <option value="vspd">VSPD (duration-driven)</option>
+            <option value="standard">Standard statistical</option>
+          </select>
+          <span class="control-hint">VSPD: randomness from Δt and flow. Standard: from intrinsic thermal noise.</span>
+        </div>
+        <p class="measurement-hint">Drag the <strong>left or right edge</strong> of the yellow band on the graph below to change the measurement window. The spectrum and T<sub>eff</sub> update as you drag.</p>
+        <div id="temporal-canvas-container" class="canvas-container temporal"></div>
+        <div id="application-synthesis-container" class="canvas-container" style="min-height: 320px; margin-top: 1rem;"></div>
+        <div id="regression-display" class="measurement-hint" style="margin-top: 0.75rem;"></div>
+      </div>
+    </section>
+    <footer style="text-align: center; padding: 1.5rem; font-size: 0.875rem; color: #64748b; border-top: 1px solid rgba(148, 163, 184, 0.2); margin-top: 2rem;">White Paper Author: Nathan Gamal Nasser</footer>
+  </main>
+
+  <script src="js/dataEngine.js"></script>
+  <script src="js/graphController.js"></script>
+  <script src="js/theoryContainer.js"></script>
+  <script src="js/applicationModule.js"></script>
+  <script src="js/temporalEvolutionView.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

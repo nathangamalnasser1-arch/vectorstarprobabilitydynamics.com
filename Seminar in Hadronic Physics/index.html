@@ -2,107 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Thermal Photons from QGP — Nuclear Collision Visualization</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <meta http-equiv="refresh" content="0; url=../seminar-hadronic-physics/">
+  <script>location.replace('../seminar-hadronic-physics/');</script>
+  <title>Redirecting...</title>
 </head>
 <body>
-  <header>
-    <h1>Thermal EM Radiation from Deconfined Nuclear Matter</h1>
-    <p class="subtitle">Based on Jean-François Paquet (Vanderbilt) / McGill Physics seminar — dN<sup>γ</sup>/d²p<sub>T</sub> dy & effective temperature</p>
-  </header>
-
-  <nav class="track-tabs">
-    <button type="button" class="active" data-track="beginner" aria-pressed="true">Beginner — "So What?"</button>
-    <button type="button" data-track="expert" aria-pressed="false">Expert — T(x,τ), u<sup>μ</sup></button>
-  </nav>
-
-  <main>
-    <section id="explanation-beginner" class="explanation-panel">
-      <h3>Why does the spectrum look "hotter" when the plasma expands?</h3>
-      <p><span class="analogy">Heat wave analogy:</span> A heat wave (like the Doppler shift) can make two things go up together—e.g. ice cream sales and drowning rates—so they appear correlated. The real cause is the heat wave. Here, <strong>transverse expansion</strong> is the real cause: it blue-shifts the photons, so the spectrum looks like it has a <strong>higher temperature</strong> than the true local one. That "measured heat" is the <strong>effective temperature</strong> T<sub>eff</sub>.</p>
-      <p><strong>Takeaway:</strong> The "motion blur" of the collision makes the data look more energetic. Toggle "Local" vs "Effective" below to see how expansion stretches the spectrum.</p>
-    </section>
-
-    <section id="explanation-expert" class="explanation-panel hidden">
-      <h3>Technical: T(x,τ), u<sup>μ</sup>, and Lorentz-invariant spectrum</h3>
-      <p>Thermal photon yield follows a Boltzmann-like distribution. The <strong>inverse slope</strong> of the spectrum dN<sup>γ</sup>/d²p<sub>T</sub> dy (in GeV) gives 1/T<sub>eff</sub>. Transverse flow u<sup>μ</sup> blue-shifts the distribution:</p>
-      <p class="formula">T<sub>eff</sub> ≈ T<sub>local</sub> √[(1+v)/(1−v)]</p>
-      <p>The Lorentz boost modifies the invariant distribution E dN<sup>γ</sup>/d³p; transverse expansion increases the spectral density at higher p<sub>T</sub> (spectral hardening).</p>
-    </section>
-
-    <section class="controls">
-      <div class="control-group">
-        <label for="T-local">T<sub>local</sub> (MeV)</label>
-        <input type="range" id="T-local" min="150" max="400" value="250" step="10">
-        <span class="value" id="T-local-value">250</span>
-      </div>
-      <div class="control-group">
-        <label for="v-transverse">Transverse flow v</label>
-        <input type="range" id="v-transverse" min="0" max="85" value="0" step="1">
-        <span class="value" id="v-transverse-value">0.00</span>
-      </div>
-      <div class="control-group">
-        <label for="spectrum-mode">Spectrum</label>
-        <select id="spectrum-mode">
-          <option value="local">Local temperature</option>
-          <option value="effective">Effective (with flow)</option>
-        </select>
-      </div>
-    </section>
-
-    <section class="viz-container">
-      <h3>Photon energy spectrum (dN<sup>γ</sup>/d²p<sub>T</sub> dy) — inverse slope → T<sub>eff</sub></h3>
-      <div id="spectrum-chart"></div>
-      <p id="inverse-slope-display" class="value"></p>
-    </section>
-
-    <section class="viz-container">
-      <h3>Transverse expansion u<sup>μ</sup> (schematic)</h3>
-      <div id="expansion-viz"></div>
-    </section>
-
-    <section class="explanation-panel">
-      <h3>Physics takeaway</h3>
-      <table class="takeaway-table">
-        <thead>
-          <tr><th>Concept</th><th>Non-specialist</th><th>Expert</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Doppler shift</td>
-            <td class="beginner-col">"Motion blur" that makes data look more energetic</td>
-            <td class="expert-col">Blue-shift of thermal distribution due to u<sup>μ</sup></td>
-          </tr>
-          <tr>
-            <td>Effective temperature</td>
-            <td class="beginner-col">"Measured heat" including the explosion's speed</td>
-            <td class="expert-col">T<sub>eff</sub> ≈ T<sub>local</sub> √[(1+v)/(1−v)]</td>
-          </tr>
-          <tr>
-            <td>Energy spectrum</td>
-            <td class="beginner-col">"Light signature" of the exploding nuclear matter</td>
-            <td class="expert-col">dN<sup>γ</sup>/d²p<sub>T</sub> dy vs p<sub>T</sub> (GeV)</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="explanation-panel">
-      <h3>Validation (causal correlation)</h3>
-      <p>Expansion → spectral hardening is enforced by hydrodynamic causality. No spurious relationships (e.g. Redskins Rule / stork statistics).</p>
-      <span id="validation-badge" class="validation-badge valid">Causal check: v → T<sub>eff</sub> consistent</span>
-    </section>
-  </main>
-
-  <footer>
-    Thermal photon visualization — Research context: Jean-François Paquet (Vanderbilt) / McGill seminar. GeV-photon data cross-referenced to hydrodynamic thermal emission. Static site: D3.js + physics engine.
-  </footer>
-
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="js/physicsEngine.js"></script>
-  <script src="js/dataPipeline.js"></script>
-  <script src="js/validation.js"></script>
-  <script src="js/app.js"></script>
+  <p>Redirecting to <a href="../seminar-hadronic-physics/">Hadronic Physics</a>...</p>
 </body>
 </html>

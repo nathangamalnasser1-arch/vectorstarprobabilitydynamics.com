@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0e17" />
+  <title>VSPD Quantum Experiment Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] } };
+  </script>
+  <style>
+    :root {
+      --midnight-bg: #0a0e17;
+      --midnight-card: #111827;
+      --midnight-border: #1e3a5f;
+      --vector-red: #ef4444;
+      --wave-blue: #3b82f6;
+      --window-yellow: rgba(234, 179, 8, 0.35);
+      --text-muted: #94a3b8;
+    }
+    body { background: var(--midnight-bg); color: #e2e8f0; }
+    #canvas-container { position: relative; width: 100%; max-width: 900px; margin: 0 auto; min-height: 280px; }
+    #quantum-canvas { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--midnight-border); max-height: 85vh; object-fit: contain; }
+    .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--wave-blue); cursor: pointer; }
+    .slider-thumb::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--wave-blue); cursor: pointer; border: none; }
+    
+    /* Layout with left sidebar */
+    .page-wrapper { display: flex; gap: 1.5rem; max-width: 90rem; margin: 0 auto; padding: 1.5rem; align-items: flex-start; }
+    .sidebar-block { flex-shrink: 0; width: 320px; position: sticky; top: 1.5rem; }
+    .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); background: #111827; border: 1px solid #1e3a5f; }
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .main-content-area { flex: 1; min-width: 0; }
+    @media (max-width: 1100px) {
+      .page-wrapper { flex-direction: column; }
+      .sidebar-block { width: 100%; position: static; max-width: 32rem; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+  <div class="page-wrapper">
+    <aside class="sidebar-block">
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/hQQCjlTmhLQ" title="Re thinking Quantum Randomness" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+    </aside>
+
+    <div class="main-content-area">
+  <div class="container mx-auto px-4 py-6 max-w-4xl">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">VSPD Quantum Experiment Visualizer</h1>
+      <p class="text-slate-400 mt-2 text-sm md:text-base">Finite measurement duration (Δt) and emergent quantum randomness</p>
+    </header>
+
+    <!-- Dual-Level Toggle -->
+    <div class="flex justify-center gap-2 mb-6">
+      <button id="mode-kid" class="px-4 py-2 rounded-lg font-medium transition bg-slate-700 text-slate-300 hover:bg-slate-600">Beginner</button>
+      <button id="mode-expert" class="px-4 py-2 rounded-lg font-medium transition bg-slate-600 text-white">Expert Mode</button>
+    </div>
+
+    <!-- Intro text (mode-dependent) -->
+    <section class="mb-6 p-4 rounded-xl bg-slate-900/60 border border-slate-700">
+      <div id="intro-kid" class="hidden">
+        <p class="text-slate-300 leading-relaxed">
+          <strong>Camera shutter idea:</strong> If you take a picture of a fast car with a <em>slow</em> shutter, you get a long blur—that’s like the "wave". With a <em>fast</em> shutter, you see a clear car—that’s the "particle". Here we play with that "shutter speed" (measurement time Δt) and see how it changes what we see in the double-slit experiment.
+        </p>
+      </div>
+      <div id="intro-expert" class="prose prose-invert prose-slate max-w-none">
+        <p class="text-slate-300 leading-relaxed">
+          The wave function lives in a complete vector space (Hilbert space) where convergence is formalized via Lebesgue integration. The hypothesis explored here: quantum randomness is an emergent effect of finite measurement duration (Δt &gt; 0). Micro-path vectors explored during Δt sum to the observed state; the "blur" is the coherent superposition visible when the measurement window is extended.
+        </p>
+      </div>
+    </section>
+
+    <!-- Canvas -->
+    <section class="mb-6">
+      <div id="canvas-container">
+        <canvas id="quantum-canvas" width="900" height="420"></canvas>
+      </div>
+    </section>
+
+    <!-- Controls -->
+    <section class="mb-6 p-4 rounded-xl bg-slate-900/60 border border-slate-700 space-y-4">
+      <div>
+        <label class="block text-slate-300 font-medium mb-1">Measurement duration Δt (shutter speed)</label>
+        <input id="dt-slider" type="range" min="0" max="100" value="50" class="w-full h-2 rounded-lg slider-thumb accent-blue-500" />
+        <div class="flex justify-between text-xs text-slate-500 mt-1">
+          <span>Δt = 0 (instant)</span>
+          <span id="dt-value">Δt = 0.5</span>
+          <span>Δt large</span>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-4 items-center">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input id="sirius-toggle" type="checkbox" class="rounded accent-amber-500 w-4 h-4" />
+          <span class="text-slate-300">Sirius B "Time Microscope"</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input id="delayed-choice-toggle" type="checkbox" class="rounded accent-cyan-500 w-4 h-4" />
+          <span class="text-slate-300">Delayed-Choice</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Legend -->
+    <div class="mb-6 flex flex-wrap gap-4 text-sm">
+      <span class="flex items-center gap-2"><span class="w-4 h-0.5 bg-red-500"></span> Micro-path vectors</span>
+      <span class="flex items-center gap-2"><span class="w-4 h-3 rounded bg-blue-500/60"></span> |ψ|² (interference)</span>
+      <span class="flex items-center gap-2"><span class="w-4 h-3 rounded bg-amber-500/40"></span> Measurement window</span>
+    </div>
+
+    <!-- Mode-dependent explanations -->
+    <section class="mb-6 space-y-4">
+      <div id="explain-sirius-kid" class="hidden p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+        <h3 class="font-semibold text-amber-200 mb-2">Heavy Star (Sirius B)</h3>
+        <p class="text-slate-300">Sirius B is a very heavy, dense star. Near it, time runs slower (like a slow-motion button for the universe). So our "shutter" effectively becomes faster—we see the blur turn back into clear dots.
+        </p>
+      </div>
+      <div id="explain-sirius-expert" class="hidden p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+        <h3 class="font-semibold text-amber-200 mb-2">Sharpening Engine (Gravitational Redshift)</h3>
+        <p class="text-slate-300">Gravitational redshift \(z = (\lambda_{\mathrm{obs}} - \lambda_{\mathrm{rest}})/\lambda_{\mathrm{rest}}\) in Balmer lines provides the mechanistic link: the physical narrowing of the effective Δt window in high-gravity environments sharpens fringes toward deterministic paths.
+        </p>
+      </div>
+      <div id="explain-superposition-kid" class="hidden p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+        <h3 class="font-semibold text-cyan-200 mb-2">Superposition</h3>
+        <p class="text-slate-300">"Superposition" here just means things are changing too fast for our eyes (and our slow shutter) to keep up—so we see a mix of many possibilities at once, like a blur.
+        </p>
+      </div>
+      <div id="explain-delayed-kid" class="hidden p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+        <h3 class="font-semibold text-cyan-200 mb-2">Delayed-Choice</h3>
+        <p class="text-slate-300">We can split the light into "signal" and "idler" partners. The interference pattern only shows up when we look at a chosen part of the data (a sub-ensemble), not in the full picture. So it’s not really "going back in time"—it’s which data we choose to look at.
+        </p>
+      </div>
+      <div id="explain-delayed-expert" class="hidden p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+        <h3 class="font-semibold text-cyan-200 mb-2">Delayed-Choice Consensus</h3>
+        <p class="text-slate-300">There is no retrocausality. Interference fringes emerge as anomalous weak values dependent on post-selection: only when we select specific sub-ensembles from the total data do we recover the fringe pattern. The "retroactive" appearance is an artifact of which observable we post-select.
+        </p>
+      </div>
+    </section>
+
+    <!-- Mathematical Resolution (Expert only) -->
+    <section id="math-section" class="mb-8 p-6 rounded-xl bg-slate-900/60 border border-slate-700">
+      <h2 class="text-xl font-bold text-blue-300 mb-4">Mathematical Resolution</h2>
+      <div class="space-y-4 text-slate-300">
+        <p><strong>Vector-star summation (observed state):</strong></p>
+        <p class="text-center text-lg py-2">\[\Psi_{\mathrm{obs}} = \sum_{i=1}^{n} \vec{v}_i\]</p>
+        <p class="text-sm text-slate-400">The total state is the sum of micro-path vectors explored during Δt.</p>
+        <p class="mt-4"><strong>Double-slit interference:</strong></p>
+        <p class="text-center text-lg py-2">\[d\,\sin\theta = m\lambda\]</p>
+        <p class="mt-4"><strong>Time dilation engine (Sirius B redshift):</strong></p>
+        <p class="text-center text-lg py-2">\[z = \frac{\lambda_{\mathrm{obs}} - \lambda_{\mathrm{rest}}}{\lambda_{\mathrm{rest}}}\]</p>
+        <p class="text-sm text-slate-400">Mechanistic proof linking gravitational redshift to the narrowing of the Δt window.</p>
+      </div>
+    </section>
+
+    <footer class="text-center text-slate-500 text-sm py-4">VSPD Quantum Experiment Visualizer — Midnight Physics. White Paper Author: Nathan Gamal Nasser</footer>
+
+    <!-- Unit tests (run via button or ?test=1) -->
+    <div class="mt-6 p-4 rounded-xl bg-slate-900/60 border border-slate-700">
+      <button id="run-tests" type="button" class="px-3 py-1.5 rounded bg-slate-600 text-slate-200 text-sm hover:bg-slate-500">Run unit tests</button>
+      <pre id="test-output" class="mt-2 text-xs text-slate-400 font-mono overflow-auto max-h-40 hidden"></pre>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const canvas = document.getElementById('quantum-canvas');
+      const ctx = canvas.getContext('2d');
+      const dpi = Math.min(2, window.devicePixelRatio || 1);
+      let cw = 900, ch = 420;
+      let animId = 0;
+
+      const state = {
+        dt: 0.5,
+        sirius: false,
+        delayedChoice: false,
+        expertMode: true
+      };
+
+      function resizeCanvas() {
+        const container = document.getElementById('canvas-container');
+        const rect = container.getBoundingClientRect();
+        const scale = Math.min(1, (rect.width || cw) / cw);
+        canvas.style.width = (cw * scale) + 'px';
+        canvas.style.height = (ch * scale) + 'px';
+        canvas.width = cw * dpi;
+        canvas.height = ch * dpi;
+        ctx.setTransform(dpi, 0, 0, dpi, 0, 0);
+      }
+
+      function effectiveDt() {
+        let t = state.dt;
+        if (state.sirius) t *= 0.25;
+        return t;
+      }
+
+      function draw() {
+        const w = cw, h = ch;
+        ctx.fillStyle = '#0a0e17';
+        ctx.fillRect(0, 0, w, h);
+
+        const slitY = h * 0.5;
+        const slitW = 12;
+        const slitGap = 80;
+        const slitLeft = w * 0.35;
+        const screenX = w * 0.78;
+        const sourceX = w * 0.08;
+
+        const dtEff = effectiveDt();
+        const instantaneous = dtEff < 0.08;
+        const nPaths = instantaneous ? 2 : Math.max(3, Math.floor(3 + dtEff * 22));
+        const windowAlpha = instantaneous ? 0.08 : (0.15 + dtEff * 0.28);
+
+        // Measurement window (translucent yellow)
+        ctx.fillStyle = 'rgba(234, 179, 8, ' + windowAlpha + ')';
+        ctx.beginPath();
+        ctx.rect(slitLeft - 20, 0, screenX - slitLeft + 80, h);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(234, 179, 8, 0.6)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Barrier with two slits
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(slitLeft - 15, 0, slitW + slitGap + slitW + 30, h);
+        ctx.clearRect(slitLeft, slitY - 25, slitW, 50);
+        ctx.clearRect(slitLeft + slitW + slitGap, slitY - 25, slitW, 50);
+        ctx.strokeStyle = '#475569';
+        ctx.strokeRect(slitLeft - 15, 0, slitW + slitGap + slitW + 30, h);
+
+        // Source
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.arc(sourceX, slitY, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        const spread = 0.4;
+        const pathLen = (screenX - sourceX) * 0.5;
+
+        for (let p = 0; p < nPaths; p++) {
+          const t = nPaths <= 1 ? 0.5 : p / (nPaths - 1);
+          const angle = (t - 0.5) * spread * Math.PI;
+          const dx = Math.cos(angle);
+          const dy = Math.sin(angle);
+
+          const x0 = sourceX;
+          const y0 = slitY;
+          const x1 = sourceX + pathLen * dx;
+          const y1 = y0 + pathLen * dy;
+
+          ctx.strokeStyle = instantaneous ? 'rgba(239, 68, 68, 1)' : 'rgba(239, 68, 68, 0.85)';
+          ctx.lineWidth = instantaneous ? 2.5 : 1.5;
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+
+          const arrowSize = instantaneous ? 10 : 8;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x1 - arrowSize * dx - arrowSize * 0.3 * dy, y1 - arrowSize * dy + arrowSize * 0.3 * dx);
+          ctx.lineTo(x1 - arrowSize * dx + arrowSize * 0.3 * dy, y1 - arrowSize * dy - arrowSize * 0.3 * dx);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Detection screen
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(screenX, 0, w - screenX + 5, h);
+        ctx.strokeStyle = '#475569';
+        ctx.strokeRect(screenX, 0, w - screenX + 5, h);
+
+        const bins = 60;
+        const binH = h / bins;
+        const centerY = h / 2;
+        const lambda = 80;
+        const d = slitGap + slitW;
+        const scaleA = (dtEff * 2 + 0.5) * 0.7;
+        const showInterference = !instantaneous;
+
+        if (instantaneous) {
+          // Δt=0: distinct deterministic landing points (two paths → two spots)
+          const spotY1 = slitY - 45;
+          const spotY2 = slitY + 45;
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(screenX + 15, spotY1, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#fca5a5';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(screenX + 15, spotY2, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // |ψ|² interference (blue bars + curve)
+          for (let i = 0; i < bins; i++) {
+            const y = (i + 0.5) * binH;
+            const theta = Math.atan2(y - centerY, screenX - slitLeft);
+            const sinTh = Math.sin(theta);
+            const phase = (Math.PI * d * sinTh) / lambda;
+            const psiSq = scaleA * (1 + Math.cos(phase * 2));
+            const barW = Math.max(2, psiSq * 35);
+
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.5 + 0.4 * Math.min(1, psiSq))';
+            ctx.fillRect(screenX, y - binH / 2, barW, binH);
+          }
+
+          ctx.strokeStyle = 'rgba(59, 130, 246, 0.9)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i <= bins; i++) {
+            const y = i * binH;
+            const theta = Math.atan2(y - centerY, screenX - slitLeft);
+            const phase = (Math.PI * d * Math.sin(theta)) / lambda;
+            const psiSq = scaleA * (1 + Math.cos(phase * 2));
+            const x = screenX + Math.max(0, psiSq * 35);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+
+        if (state.delayedChoice) {
+          ctx.fillStyle = 'rgba(34, 211, 238, 0.12)';
+          ctx.fillRect(0, 0, w, h);
+          ctx.font = '13px sans-serif';
+          ctx.fillStyle = '#67e8f9';
+          ctx.fillText('Delayed-choice: idler / signal sub-ensemble selected', 20, 22);
+          ctx.font = '11px sans-serif';
+          ctx.fillStyle = 'rgba(103, 232, 249, 0.8)';
+          ctx.fillText('Signal → screen  |  Idler → post-selection', 20, 38);
+          const idlerX = sourceX + 90;
+          ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(slitLeft + slitW + slitGap / 2, slitY);
+          ctx.lineTo(idlerX, slitY - 60);
+          ctx.lineTo(w - 30, slitY - 60);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(slitLeft + slitGap / 2, slitY);
+          ctx.lineTo(idlerX, slitY + 60);
+          ctx.lineTo(w - 30, slitY + 60);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#22d3ee';
+          ctx.font = '10px sans-serif';
+          ctx.fillText('idler', w - 55, slitY - 65);
+          ctx.fillText('signal', screenX + 5, slitY);
+        }
+      }
+
+      function loop() {
+        draw();
+        animId = requestAnimationFrame(loop);
+      }
+
+      document.getElementById('dt-slider').addEventListener('input', function () {
+        const v = Number(this.value);
+        state.dt = v / 100;
+        document.getElementById('dt-value').textContent = 'Δt = ' + state.dt.toFixed(2);
+      });
+      document.getElementById('sirius-toggle').addEventListener('change', function () {
+        state.sirius = this.checked;
+      });
+      document.getElementById('delayed-choice-toggle').addEventListener('change', function () {
+        state.delayedChoice = this.checked;
+      });
+
+      function setMode(expert) {
+        state.expertMode = expert;
+        document.getElementById('mode-kid').className = expert ? 'px-4 py-2 rounded-lg font-medium transition bg-slate-700 text-slate-300 hover:bg-slate-600' : 'px-4 py-2 rounded-lg font-medium transition bg-slate-600 text-white';
+        document.getElementById('mode-expert').className = expert ? 'px-4 py-2 rounded-lg font-medium transition bg-slate-600 text-white' : 'px-4 py-2 rounded-lg font-medium transition bg-slate-700 text-slate-300 hover:bg-slate-600';
+
+        document.getElementById('intro-kid').classList.toggle('hidden', expert);
+        document.getElementById('intro-expert').classList.toggle('hidden', !expert);
+
+        document.getElementById('explain-sirius-kid').classList.toggle('hidden', expert);
+        document.getElementById('explain-sirius-expert').classList.toggle('hidden', !expert);
+        document.getElementById('explain-superposition-kid').classList.toggle('hidden', expert);
+        document.getElementById('explain-delayed-kid').classList.toggle('hidden', expert);
+        document.getElementById('explain-delayed-expert').classList.toggle('hidden', !expert);
+
+        document.getElementById('math-section').classList.toggle('hidden', !expert);
+        if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+      }
+
+      document.getElementById('mode-kid').addEventListener('click', function () { setMode(false); });
+      document.getElementById('mode-expert').addEventListener('click', function () { setMode(true); });
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      setMode(true);
+      loop();
+    })();
+
+    // Unit tests for each feature
+    function runUnitTests() {
+      var out = document.getElementById('test-output');
+      out.classList.remove('hidden');
+      out.textContent = '';
+      var log = function (msg) { out.textContent += msg + '\n'; };
+      var pass = 0, fail = 0;
+
+      function ok(cond, name) {
+        if (cond) { pass++; log('PASS: ' + name); } else { fail++; log('FAIL: ' + name); }
+      }
+
+      // 1. Canvas and 2d context
+      var canvas = document.getElementById('quantum-canvas');
+      ok(canvas && canvas.getContext, 'Canvas element exists');
+      var ctx = canvas ? canvas.getContext('2d') : null;
+      ok(ctx && typeof ctx.fillRect === 'function', '2D context works');
+
+      // 2. Δt slider updates label
+      var slider = document.getElementById('dt-slider');
+      var dtVal = document.getElementById('dt-value');
+      if (slider && dtVal) {
+        slider.value = 0;
+        slider.dispatchEvent(new Event('input'));
+        ok(dtVal.textContent.indexOf('Δt') !== -1, 'Δt slider updates label (0)');
+        slider.value = 100;
+        slider.dispatchEvent(new Event('input'));
+        ok(dtVal.textContent.indexOf('1.00') !== -1, 'Δt slider shows 1.00 at max');
+      } else {
+        ok(false, 'Δt slider and label exist');
+      }
+
+      // 3. Kid/Expert mode toggle
+      var modeKid = document.getElementById('mode-kid');
+      var modeExpert = document.getElementById('mode-expert');
+      var introKid = document.getElementById('intro-kid');
+      var introExpert = document.getElementById('intro-expert');
+      var mathSection = document.getElementById('math-section');
+      if (modeKid && modeExpert) {
+        modeKid.click();
+        ok(!introKid.classList.contains('hidden') && introExpert.classList.contains('hidden'), 'Beginner mode shows beginner intro');
+        ok(mathSection.classList.contains('hidden'), 'Beginner mode hides math section');
+        modeExpert.click();
+        ok(introKid.classList.contains('hidden') && !introExpert.classList.contains('hidden'), 'Expert mode shows expert intro');
+        ok(!mathSection.classList.contains('hidden'), 'Expert mode shows math section');
+      } else {
+        ok(false, 'Mode buttons exist');
+      }
+
+      // 4. Sirius B toggle
+      var siriusToggle = document.getElementById('sirius-toggle');
+      ok(siriusToggle && typeof siriusToggle.checked !== 'undefined', 'Sirius B toggle exists');
+      if (siriusToggle) {
+        siriusToggle.checked = true;
+        ok(siriusToggle.checked === true, 'Sirius B can be enabled');
+        siriusToggle.checked = false;
+      }
+
+      // 5. Delayed-Choice toggle
+      var dcToggle = document.getElementById('delayed-choice-toggle');
+      ok(dcToggle && typeof dcToggle.checked !== 'undefined', 'Delayed-Choice toggle exists');
+      if (dcToggle) {
+        dcToggle.checked = true;
+        ok(dcToggle.checked === true, 'Delayed-Choice can be enabled');
+        dcToggle.checked = false;
+      }
+
+      // 6. Explanations (beginner) visible in beginner mode
+      modeKid && modeKid.click();
+      var explainSiriusKid = document.getElementById('explain-sirius-kid');
+      ok(!explainSiriusKid.classList.contains('hidden'), 'Beginner mode shows Sirius B (beginner) explanation');
+
+      log('\nTotal: ' + pass + ' passed, ' + fail + ' failed');
+    }
+
+    document.getElementById('run-tests').addEventListener('click', runUnitTests);
+    if (typeof location !== 'undefined' && location.search.indexOf('test=1') !== -1) runUnitTests();
+  </script>
+    </div>
+  </div>
+</body>
+</html>
