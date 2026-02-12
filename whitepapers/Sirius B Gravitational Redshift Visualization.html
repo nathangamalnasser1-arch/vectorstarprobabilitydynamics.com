@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)file:///C:/Users/natha/Documents/siriu%20b%20math/sirius-b-redshift.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sirius B Gravitational Redshift Visualization</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --border-color: #30363d;
+            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, var(--accent-blue), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .takeaway {
+            max-width: 640px;
+            margin: 24px auto 0;
+            padding: 16px 20px;
+            background: rgba(63, 185, 80, 0.12);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .takeaway strong {
+            color: var(--accent-green);
+        }
+
+        section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            color: var(--accent-blue);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        td {
+            font-weight: 500;
+        }
+
+        tr:last-child th,
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .formula-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+
+        .formula-box span {
+            color: var(--accent-orange);
+        }
+
+        .variable-list {
+            margin: 16px 0;
+        }
+
+        .variable-list dt {
+            font-weight: 600;
+            color: var(--accent-green);
+            margin-top: 12px;
+        }
+
+        .variable-list dd {
+            margin: 4px 0 0 20px;
+            color: var(--text-secondary);
+        }
+
+        .calculation-results {
+            display: grid;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .calc-item {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .calc-item .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .calc-item .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            padding: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .bar-group {
+            margin: 20px 0;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .bar-wrapper {
+            height: 36px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: fit-content;
+        }
+
+        .bar-theoretical .bar-fill {
+            background: linear-gradient(90deg, #238636, #3fb950);
+        }
+
+        .bar-observed .bar-fill {
+            background: linear-gradient(90deg, #1f6feb, #58a6ff);
+        }
+
+        .explanation {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .explanation p {
+            margin: 12px 0;
+        }
+
+        .explanation p:first-child {
+            margin-top: 0;
+        }
+
+        .comparison-note {
+            background: rgba(210, 153, 34, 0.15);
+            border: 1px solid var(--accent-orange);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .comparison-note strong {
+            color: var(--accent-orange);
+        }
+
+        .plain-english-box {
+            background: rgba(88, 166, 255, 0.12);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .plain-english-box p {
+            margin: 0;
+        }
+
+        .wavelength-diagram {
+            margin: 28px 0;
+            padding: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .diagram-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .wave-row {
+            margin: 8px 0;
+        }
+
+        .wave-svg {
+            width: 100%;
+            max-width: 280px;
+            height: 40px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .arrow-down {
+            color: var(--accent-orange);
+            font-size: 0.9rem;
+            margin: 12px 0;
+        }
+
+        .chart-intro {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .z-meaning {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .white-paper-credit {
+            margin-top: 40px;
+            padding: 24px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .white-paper-inner {
+            text-align: center;
+            color: #24292f;
+        }
+
+        .white-paper-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #57606a;
+            margin-bottom: 4px;
+        }
+
+        .white-paper-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .white-paper-author {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #0969da;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            section {
+                padding: 16px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            .formula-box {
+                font-size: 1rem;
+            }
+        }
+        .gtm-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 12px 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        .gtm-nav a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+        .gtm-nav a:hover {
+            text-decoration: underline;
+        }
+        .gtm-nav .sep {
+            color: var(--text-secondary);
+        }
+        .gtm-nav .current {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="gtm-nav" aria-label="Breadcrumb">
+            <a href="index.html">The Gravitational Time Microscope</a>
+            <span class="sep">›</span>
+            <a href="experiment3-sirius-b.html">Mechanistic Proof (Sirius B)</a>
+            <span class="sep">›</span>
+            <span class="current">Visualization</span>
+        </nav>
+        <header>
+            <h1>Sirius B Gravitational Redshift Visualization</h1>
+            <p class="subtitle">A demonstration of gravitational time dilation at the surface of a white dwarf</p>
+            <div class="takeaway">
+                <strong>The big idea:</strong> Light escaping Sirius B loses energy and stretches (shifts red). We predict how much with Einstein's formula; telescopes measure it. They agree — so General Relativity works!
+            </div>
+        </header>
+
+        <section>
+            <h2>1. Sirius B Data</h2>
+            <table>
+                <tbody><tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Mass</td>
+                    <td>1.017 M☉ (solar masses)</td>
+                </tr>
+                <tr>
+                    <td>Radius</td>
+                    <td>0.0084 R☉ (~5,850 km)</td>
+                </tr>
+                <tr>
+                    <td>Surface velocity shift</td>
+                    <td>80.65 km/s</td>
+                </tr>
+                <tr>
+                    <td>Surface temperature</td>
+                    <td>25,000 K</td>
+                </tr>
+                <tr>
+                    <td>Distance from Earth</td>
+                    <td>8.6 light-years</td>
+                </tr>
+            </tbody></table>
+        </section>
+
+        <section>
+            <h2>2. Gravitational Redshift Formula</h2>
+            <div class="formula-box">
+                <span>z</span> = <span>GM</span> / (<span>R</span> · <span>c</span>²)
+            </div>
+            <dl class="variable-list">
+                <dt>z</dt>
+                <dd>Gravitational redshift — the fractional change in wavelength (Δλ/λ) or frequency of light escaping a gravitational well</dd>
+                <dt>G</dt>
+                <dd>Gravitational constant ≈ 6.67430 × 10⁻¹¹ m³/(kg·s²)</dd>
+                <dt>M</dt>
+                <dd>Mass of the compact object (in kg)</dd>
+                <dt>R</dt>
+                <dd>Radius at the emission surface (in m)</dd>
+                <dt>c</dt>
+                <dd>Speed of light ≈ 2.998 × 10⁸ m/s</dd>
+            </dl>
+        </section>
+
+        <section>
+            <h2>3. Calculations</h2>
+            <div class="calculation-results" id="calculations">
+            <div class="calc-item">
+                <div class="label">Mass in SI units</div>
+                <div class="value">2.023e+30 kg</div>
+            </div>
+            <div class="calc-item">
+                <div class="label">Radius in SI units</div>
+                <div class="value">5.844e+6 m (5844 km)</div>
+            </div>
+            <div class="calc-item">
+                <div class="label">Theoretical z (GM / Rc²)</div>
+                <div class="value">z = 2.570507e-4</div>
+            </div>
+            <div class="calc-item">
+                <div class="label">Observed z (v/c = 80.65 km/s ÷ c)</div>
+                <div class="value">z = 2.690194e-4</div>
+            </div>
+        </div>
+            <div class="comparison-note" id="comparisonNote">
+            <strong>Comparison:</strong> The observed redshift agrees with the theoretical prediction to within 4.66%. 
+            This close agreement provides observational support for General Relativity in the strong-field regime near a white dwarf.
+        </div>
+        </section>
+
+        <section>
+            <h2>4. What Does "Redshift" Actually Mean?</h2>
+            <div class="plain-english-box">
+                <p><strong>In plain English:</strong> Light leaving Sirius B has to "climb" out of its strong gravity. Like a ball rolling uphill, it loses energy. For light, that means each wave gets slightly longer — shifted toward the red end of the spectrum. We measure this as a "velocity" of about <strong>80 km/s</strong> (equivalent to the star moving away at that speed).</p>
+            </div>
+            <div class="wavelength-diagram">
+                <div class="diagram-label">At surface of Sirius B — tight, short waves (bluer)</div>
+                <div class="wave-row">
+                    <svg viewBox="0 0 200 30" class="wave-svg">
+                        <path d="M0 15 Q10 3 20 15 Q30 27 40 15 Q50 3 60 15 Q70 27 80 15 Q90 3 100 15 Q110 27 120 15 Q130 3 140 15 Q150 27 160 15 Q170 3 180 15 Q190 27 200 15" stroke="#58a6ff" stroke-width="2.5" fill="none"></path>
+                    </svg>
+                </div>
+                <div class="arrow-down">↓ Light climbs out of gravity well — loses energy, waves stretch</div>
+                <div class="diagram-label">As seen from Earth — longer waves (redshifted)</div>
+                <div class="wave-row">
+                    <svg viewBox="0 0 200 30" class="wave-svg">
+                        <path d="M0 15 Q25 3 50 15 Q75 27 100 15 Q125 3 150 15 Q175 27 200 15" stroke="#ff7b72" stroke-width="2.5" fill="none"></path>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>5. Theoretical vs Observed Redshift</h2>
+            <p class="chart-intro">Einstein's formula predicts a value. Telescopes measure what we actually see. They match closely — that confirms General Relativity!</p>
+            <p class="z-meaning">(<strong>z ≈ 0.00027</strong> means each light wave is stretched by about 0.027% — tiny, but measurable with precise spectrographs.)</p>
+            <div class="chart-container">
+                <p class="chart-title">Comparison of gravitational redshift values</p>
+                <div class="bar-group bar-theoretical">
+                    <div class="bar-label">
+                        <span>Predicted by Einstein's formula</span>
+                        <span id="theoreticalLabel">z = 2.57 × 10⁻⁴</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar-fill" id="barTheoretical" style="width: 95.551%;">2.57 × 10⁻⁴</div>
+                    </div>
+                </div>
+                <div class="bar-group bar-observed">
+                    <div class="bar-label">
+                        <span>Measured by telescopes (80.65 km/s shift)</span>
+                        <span id="observedLabel">z = 2.69 × 10⁻⁴</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar-fill" id="barObserved" style="width: 100%;">2.69 × 10⁻⁴</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>6. Explanatory Notes</h2>
+            <div class="explanation">
+                <p>
+                    <strong>Gravitational time dilation:</strong> This visualization demonstrates the gravitational redshift predicted by General Relativity. Light escaping from the intense gravitational field near the surface of Sirius B loses energy, causing its wavelength to stretch (redshift) and its frequency to decrease. Equivalently, time runs slower in stronger gravitational fields — a clock at the surface of Sirius B would tick more slowly than a clock far away.
+                </p>
+                <p>
+                    <strong>Why Sirius B?</strong> Sirius B is a white dwarf, the dense remnant of a star. With roughly the mass of the Sun compressed into a sphere only slightly larger than Earth, its surface gravity is enormously stronger than the Sun's. This makes the gravitational redshift measurable, unlike the much smaller effect on the Sun.
+                </p>
+                <p>
+                    <strong>Astronomical observation:</strong> This result comes from spectroscopic observations of light from Sirius B, not from a laboratory experiment. Astronomers measure the Doppler-like shift in spectral lines and interpret it as gravitational redshift. The close agreement between the observed value and the theoretical prediction from Einstein's General Relativity provides strong confirmation of the theory.
+                </p>
+            </div>
+        </section>
+
+        <footer class="white-paper-credit">
+            <div class="white-paper-inner">
+                <div class="white-paper-label">White Paper</div>
+                <div class="white-paper-title">Sirius B Gravitational Redshift Visualization</div>
+                <div class="white-paper-author">Nathan Gamal Nasser</div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Physical constants
+        const G = 6.67430e-11;        // m³/(kg·s²)
+        const c = 2.99792458e8;       // m/s
+        const M_sun = 1.989e30;       // kg
+        const R_sun = 6.957e8;        // m
+
+        // Sirius B data
+        const massSolar = 1.017;
+        const radiusSolar = 0.0084;
+        const velocityShiftKmS = 80.65;  // km/s
+
+        // Convert to SI
+        const massKg = massSolar * M_sun;
+        const radiusM = radiusSolar * R_sun;
+
+        // Theoretical z: z = GM / (R c²)
+        const zTheoretical = (G * massKg) / (radiusM * c * c);
+
+        // Observed z: for small shifts, z ≈ v/c (relativistic Doppler for escape)
+        const velocityMS = velocityShiftKmS * 1000;
+        const zObserved = velocityMS / c;
+
+        // Format scientific notation
+        function sciNot(x, decimals = 4) {
+            const exp = Math.floor(Math.log10(Math.abs(x)));
+            const mantissa = x / Math.pow(10, exp);
+            return mantissa.toFixed(decimals) + ' × 10' + (exp >= 0 ? '⁺' : '') + exp;
+        }
+
+        // Populate calculations section
+        const calcDiv = document.getElementById('calculations');
+        calcDiv.innerHTML = `
+            <div class="calc-item">
+                <div class="label">Mass in SI units</div>
+                <div class="value">${massKg.toExponential(3)} kg</div>
+            </div>
+            <div class="calc-item">
+                <div class="label">Radius in SI units</div>
+                <div class="value">${radiusM.toExponential(3)} m (${(radiusM / 1000).toFixed(0)} km)</div>
+            </div>
+            <div class="calc-item">
+                <div class="label">Theoretical z (GM / Rc²)</div>
+                <div class="value">z = ${zTheoretical.toExponential(6)}</div>
+            </div>
+            <div class="calc-item">
+                <div class="label">Observed z (v/c = ${velocityShiftKmS} km/s ÷ c)</div>
+                <div class="value">z = ${zObserved.toExponential(6)}</div>
+            </div>
+        `;
+
+        // Comparison note
+        const percentDiff = Math.abs(zObserved - zTheoretical) / zTheoretical * 100;
+        const comparisonNote = document.getElementById('comparisonNote');
+        comparisonNote.innerHTML = `
+            <strong>Comparison:</strong> The observed redshift agrees with the theoretical prediction to within ${percentDiff.toFixed(2)}%. 
+            This close agreement provides observational support for General Relativity in the strong-field regime near a white dwarf.
+        `;
+
+        // Bar chart (scale to make bars visible; z values are ~2.7e-4, so use z × 10⁴ as scale)
+        const scale = 1e4;
+        const maxZ = Math.max(zTheoretical, zObserved) * scale;
+        const barWidthTheoretical = (zTheoretical * scale / maxZ) * 100;
+        const barWidthObserved = (zObserved * scale / maxZ) * 100;
+
+        document.getElementById('theoreticalLabel').textContent = `z = ${(zTheoretical * 1e4).toFixed(2)} × 10⁻⁴`;
+        document.getElementById('observedLabel').textContent = `z = ${(zObserved * 1e4).toFixed(2)} × 10⁻⁴`;
+
+        // Animate bars on load
+        requestAnimationFrame(() => {
+            document.getElementById('barTheoretical').style.width = barWidthTheoretical + '%';
+            document.getElementById('barTheoretical').textContent = (zTheoretical * 1e4).toFixed(2) + ' × 10⁻⁴';
+            document.getElementById('barObserved').style.width = barWidthObserved + '%';
+            document.getElementById('barObserved').textContent = (zObserved * 1e4).toFixed(2) + ' × 10⁻⁴';
+        });
+    </script>
+
+
+</body></html>
