@@ -81,14 +81,14 @@
                 <div class="controls-panel">
                     <div class="control-group">
                         <label for="ball-count-slider">Number of Balls: <span id="ball-count-display">50</span></label>
-                        <input type="range" id="ball-count-slider" class="ctrl-slider" min="50" max="500" value="50" oninput="window.animation?.setBallCount(parseInt(this.value))">
+                        <input type="range" id="ball-count-slider" class="ctrl-slider" min="50" max="500" value="50">
                     </div>
 
                     <div class="control-buttons">
-                        <button id="play-pause-btn" class="control-btn play-btn" onclick="window.animation?.toggle(); updatePlayPauseButton();">Pause</button>
-                        <button onclick="window.animation?.reset()" class="control-btn reset-btn">Reset</button>
-                        <button id="cloud-btn" class="control-btn cloud-btn" onclick="window.animation?.toggleProbabilityCloud(); updateCloudButton();">Probability Cloud</button>
-                        <button id="gravity-btn" class="control-btn gravity-btn" onclick="window.animation?.toggleGravitationalField(); updateGravityButton();">Gravitational Field</button>
+                        <button id="play-pause-btn" class="control-btn play-btn">Pause</button>
+                        <button id="reset-btn" class="control-btn reset-btn">Reset</button>
+                        <button id="cloud-btn" class="control-btn cloud-btn">Probability Cloud</button>
+                        <button id="gravity-btn" class="control-btn gravity-btn">Gravitational Field</button>
                     </div>
 
                     <div class="legend">

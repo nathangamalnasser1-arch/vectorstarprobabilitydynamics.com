@@ -610,7 +610,54 @@ class BouncingBallsAnimation {
     }
     
     setupControls() {
-        // Controls can be added here if needed
+        const playBtn = document.getElementById('play-pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const cloudBtn = document.getElementById('cloud-btn');
+        const gravityBtn = document.getElementById('gravity-btn');
+        const slider = document.getElementById('ball-count-slider');
+
+        if (playBtn) {
+            playBtn.addEventListener('click', () => {
+                this.toggle();
+                this.updatePlayPauseButton();
+            });
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.reset());
+        }
+        if (cloudBtn) {
+            cloudBtn.addEventListener('click', () => {
+                this.toggleProbabilityCloud();
+                this.updateCloudButton();
+            });
+        }
+        if (gravityBtn) {
+            gravityBtn.addEventListener('click', () => {
+                this.toggleGravitationalField();
+                this.updateGravityButton();
+            });
+        }
+        if (slider) {
+            slider.addEventListener('input', () => {
+                const count = parseInt(slider.value, 10);
+                this.setBallCount(count);
+            });
+        }
+    }
+
+    updatePlayPauseButton() {
+        const btn = document.getElementById('play-pause-btn');
+        if (btn) btn.textContent = this.isRunning ? 'Pause' : 'Play';
+    }
+
+    updateCloudButton() {
+        const btn = document.getElementById('cloud-btn');
+        if (btn) btn.textContent = this.showProbabilityCloud ? 'Vector Stars' : 'Probability Cloud';
+    }
+
+    updateGravityButton() {
+        const btn = document.getElementById('gravity-btn');
+        if (btn) btn.textContent = this.gravitationalField ? 'Hide Gravity' : 'Gravitational Field';
     }
     
     toggle() {
@@ -660,16 +707,5 @@ class BouncingBallsAnimation {
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('bouncing-balls-canvas')) {
         window.animation = new BouncingBallsAnimation('bouncing-balls-canvas');
-        
-        // Sync slider with display
-        const slider = document.getElementById('ball-count-slider');
-        if (slider) {
-            slider.addEventListener('input', function() {
-                const display = document.getElementById('ball-count-display');
-                if (display) {
-                    display.textContent = this.value;
-                }
-            });
-        }
     }
 });
