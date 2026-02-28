@@ -63,3 +63,35 @@ test("mobile mode activates on small screens", () => {
   assert.equal(game.isMobileSingleCardWidth(768), true);
   assert.equal(game.isMobileSingleCardWidth(900), false);
 });
+
+test("calculates hebrew gematria totals and per-letter values", () => {
+  const game = loadGameScript();
+  const details = game.calculateGematriaDetails("שלום");
+
+  assert.equal(details.scriptType, "hebrew");
+  assert.equal(details.total, 376);
+  assert.equal(details.letters.map((item) => item.value).join(","), "300,30,6,40");
+});
+
+test("calculates english gematria totals with A1-Z26 mapping", () => {
+  const game = loadGameScript();
+  const details = game.calculateGematriaDetails("cab");
+
+  assert.equal(details.scriptType, "english");
+  assert.equal(details.total, 6);
+  assert.equal(details.letters.map((item) => item.value).join(","), "3,1,2");
+});
+
+test("detects mixed script input", () => {
+  const game = loadGameScript();
+  assert.equal(game.getInputScriptType("shalom שלום"), "mixed");
+});
+
+test("returns local synonym suggestions for known english and hebrew words", () => {
+  const game = loadGameScript();
+  const englishSynonyms = game.buildFallbackSynonyms("light", "english");
+  const hebrewSynonyms = game.buildFallbackSynonyms("שלום", "hebrew");
+
+  assert.equal(englishSynonyms.includes("glow"), true);
+  assert.equal(hebrewSynonyms.includes("שלווה"), true);
+});

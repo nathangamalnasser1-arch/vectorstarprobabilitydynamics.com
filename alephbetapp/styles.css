@@ -35,6 +35,29 @@ body {
   font-size: 1.05rem;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin: 1rem 0 1.2rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  border: 1px solid #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tab-button.is-active {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
 .letters-track {
   display: flex;
   gap: 0.9rem;
@@ -106,6 +129,64 @@ body {
   margin: 0.5rem 0 0;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.gematria-card {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.09);
+  padding: 1rem;
+}
+
+.gematria-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.gematria-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.7rem;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.gematria-button {
+  margin-top: 0.65rem;
+  border: 0;
+  border-radius: 10px;
+  background: #0f5dc2;
+  color: #ffffff;
+  padding: 0.55rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gematria-total,
+.gematria-script {
+  margin: 0.7rem 0 0;
+  font-weight: 700;
+}
+
+.gematria-heading {
+  margin: 1rem 0 0.4rem;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+}
+
+.gematria-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.gematria-list li {
+  margin: 0.2rem 0;
 }
 
 @media (max-width: 768px) {

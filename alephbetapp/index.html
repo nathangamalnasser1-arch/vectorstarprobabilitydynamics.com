@@ -10,14 +10,44 @@
     <main class="app">
       <header class="hero">
         <h1>Alephbet Explorer</h1>
-        <p>Swipe through Hebrew letters, then tap to hear the letter, a sample word, and its meaning.</p>
+        <p>Learn letters and calculate gematria for Hebrew or English words and phrases.</p>
       </header>
 
-      <section aria-label="Hebrew alephbet letters">
+      <div class="tabs" role="tablist" aria-label="Learning tools">
+        <button class="tab-button is-active" type="button" role="tab" aria-selected="true" data-tab-target="explorerPanel">
+          Explorer
+        </button>
+        <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab-target="gematriaPanel">
+          Gematria Calculator
+        </button>
+      </div>
+
+      <section id="explorerPanel" data-tab-panel aria-label="Hebrew alephbet letters">
         <div class="letters-track" id="lettersTrack"></div>
+        <p class="note" id="statusText">Tap a letter card to hear it.</p>
       </section>
 
-      <p class="note" id="statusText">Tap a letter card to hear it.</p>
+      <section id="gematriaPanel" data-tab-panel hidden aria-label="Gematria calculator">
+        <div class="gematria-card">
+          <label for="gematriaInput" class="gematria-label">Enter an English or Hebrew word/phrase</label>
+          <textarea
+            id="gematriaInput"
+            class="gematria-input"
+            rows="3"
+            placeholder="Examples: peace, שלום, love and light"
+          ></textarea>
+          <button id="gematriaCalculate" class="gematria-button" type="button">Calculate</button>
+
+          <p class="gematria-total" id="gematriaTotal">Total: 0</p>
+          <p class="gematria-script" id="gematriaScript">Detected script: unknown</p>
+
+          <h2 class="gematria-heading">Letter Values</h2>
+          <ul class="gematria-list" id="gematriaBreakdown"></ul>
+
+          <h2 class="gematria-heading">Synonyms (same or close meaning)</h2>
+          <ul class="gematria-list" id="gematriaSynonyms"></ul>
+        </div>
+      </section>
     </main>
 
     <script src="./script.js"></script>
