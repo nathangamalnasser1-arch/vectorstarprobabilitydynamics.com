@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page 1: The Visual Proof — COSMOS Field | Better Terminology</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-brand">← VSPD</a>
+      <div class="nav-links">
+        <a href="index.html">Framework</a>
+        <a href="visual-validation.html" class="active">Visual Validation</a>
+        <a href="precision-analysis.html">Precision Analysis</a>
+        <a href="empirical-engine.html">Empirical Engine</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="section">
+    <header style="margin-bottom:2.5rem;">
+      <h1 style="font-size:1.875rem;font-weight:700;color:#f1f5f9;margin-bottom:0.5rem;">Page 1: The Visual Proof</h1>
+      <p style="font-size:1.125rem;color:#94a3b8;">The COSMOS Field — Hubble vs Webb</p>
+    </header>
+
+    <section style="margin-bottom:2.5rem;">
+      <p style="margin-bottom:1rem;color:#e2e8f0;line-height:1.7;">The Hubble Space Telescope gave us a first deep look at the universe's large-scale structure, but in regions like the COSMOS field, the map of <strong style="color:#f1f5f9">dark matter scaffolding</strong>—the invisible mass that bends light and shapes galaxies—remained a <strong style="color:#f1f5f9">blurry picture</strong>. With the James Webb Space Telescope (Webb), the same cosmic landscape appears in <strong style="color:#22d3ee">stunning detail</strong>: finer resolution and sensitivity let us trace how mass distorts the "windowpane of spacetime" with unprecedented precision.</p>
+      <p style="margin-bottom:1rem;color:#e2e8f0;line-height:1.7;">Below, an <strong style="color:#f1f5f9">image-comparison slider</strong> contrasts Hubble's blur with Webb's sharp view. In VSPD, "blur" arises from finite temporal propagation (Δt); the sharpening we see with better resolution is a visual analogue of the Time Microscope effect.</p>
+    </section>
+
+    <section aria-label="Hubble vs Webb image comparison">
+      <div class="comp-container">
+        <div class="comp-inner">
+          <div class="comp-left" style="position:absolute;inset:0;">
+            <img src="images/hubble_cosmos.jpg" alt="COSMOS field — Hubble view (blurred)" style="filter:blur(4px)">
+            <span class="comp-label comp-label-left">The Blurry Picture</span>
+          </div>
+          <div id="comp-clip" class="comp-clip" style="clip-path:inset(0 0 0 50%);">
+            <img src="images/webb_cosmos.jpg" alt="COSMOS field — Webb view (sharp)">
+            <span class="comp-label comp-label-right">Invisible Scaffolding in Stunning Detail</span>
+          </div>
+          <div id="comp-track" class="comp-handle" style="left:50%;" role="slider" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" aria-label="Compare Hubble and Webb" tabindex="0"></div>
+        </div>
+      </div>
+      <div class="comp-range">
+        <span>Hubble</span>
+        <input type="range" id="comp-input" min="0" max="100" value="50">
+        <span>Webb</span>
+      </div>
+      <figure style="margin-top:1.5rem;">
+        <figcaption style="border-left:2px solid #6366f1;padding-left:1rem;font-size:0.875rem;color:#94a3b8;line-height:1.6;">Webb's ability to measure how mass bends the "windowpane of spacetime" with twice the sharpness of Hubble demonstrates the "sharpening" effect predicted when we probe deeper into gravitational fields.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2 style="font-size:1.25rem;font-weight:600;color:#6366f1;margin-bottom:0.75rem;">Scientific Context</h2>
+      <p style="color:#e2e8f0;line-height:1.7;">In VSPD, what we observe is a projection of world-tubes through a finite temporal aperture (Δt). Gravitational time dilation effectively reduces that aperture in strong fields, sharpening the projection—just as Webb's mirror sharpens the image of the dark matter scaffolding. This comparison illustrates that sharpening: the same cosmic field, two levels of resolution, and a direct visual analogue of the Time Microscope.</p>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

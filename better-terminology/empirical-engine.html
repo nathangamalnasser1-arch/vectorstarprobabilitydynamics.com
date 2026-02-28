@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mechanistic Foundation: Sirius B Relativistic Redshift | Better Terminology</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-brand">← VSPD</a>
+      <div class="nav-links">
+        <a href="index.html">Framework</a>
+        <a href="visual-validation.html">Visual Validation</a>
+        <a href="precision-analysis.html">Precision Analysis</a>
+        <a href="empirical-engine.html" class="active">Empirical Engine</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="section">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+      <h1 style="font-size:1.5rem;font-weight:600;color:#fff;">Mechanistic Foundation: Sirius B Relativistic Redshift</h1>
+      <details>
+        <summary class="info-trigger">What does this visualization mean?</summary>
+        <div class="info-panel">
+          <p><strong>The four squares:</strong> Markers for the same four hydrogen "fingerprint" wavelengths (Balmer series). The <strong>top row</strong> is where they appear normally. The <strong>bottom row</strong> is where they appear when we look at light from Sirius B—shifted right because gravitational redshift makes the light redder.</p>
+          <p><strong>The slider:</strong> "Adjust gravitational gradient" changes how strong the gravity is. When you move it right, the bottom squares move further right (more redshift).</p>
+        </div>
+      </details>
+    </div>
+    <p style="margin-bottom:2rem;color:#a1a1aa;">Hubble spectroscopy of the white dwarf Sirius B focuses on the Balmer series. The high surface gravity produces measurable gravitational redshift, acting as a natural laboratory for relativistic narrowing of measurement epochs.</p>
+
+    <div class="spectrum-box">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;">
+        <h3>Balmer series — Standard vs. Sirius B (relativistic redshift)</h3>
+        <div class="spectrum-slider">
+          <span style="font-size:0.75rem;color:#71717a;">Adjust gravitational gradient</span>
+          <input type="range" id="spectrum-slider" min="0.5" max="2" step="0.1" value="1">
+          <span id="spectrum-display" style="width:2rem;text-align:right;font-size:0.75rem;color:#3b82f6;">1.0×</span>
+        </div>
+      </div>
+      <div style="position:relative;height:6rem;width:100%;margin-top:0.5rem;">
+        <svg viewBox="0 0 100 100" style="width:100%;height:100%;" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="spectrum" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#3b0f3b"/>
+              <stop offset="25%" stop-color="#4a0a4a"/>
+              <stop offset="50%" stop-color="#0a2a4a"/>
+              <stop offset="75%" stop-color="#0a4a2a"/>
+              <stop offset="100%" stop-color="#4a2a0a"/>
+            </linearGradient>
+          </defs>
+          <rect x="0" y="40" width="100" height="20" fill="url(#spectrum)" opacity="0.4"/>
+          <g id="spectrum-std"></g>
+          <g id="spectrum-sb"></g>
+        </svg>
+      </div>
+      <div style="margin-top:0.5rem;display:flex;justify-content:space-between;font-size:0.75rem;color:#71717a;">
+        <span>400 nm</span>
+        <span>700 nm</span>
+      </div>
+      <div class="spectrum-legend" style="margin-top:0.5rem;">
+        <span><span style="display:inline-block;width:0.25rem;height:1px;background:#6366f1;vertical-align:middle;margin-right:0.25rem;"></span>Standard Balmer</span>
+        <span><span style="display:inline-block;width:0.25rem;height:1px;background:#3b82f6;vertical-align:middle;margin-right:0.25rem;"></span>Sirius B (redshifted)</span>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

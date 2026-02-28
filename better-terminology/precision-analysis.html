@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precision Validation: Gravitational Wave Spectroscopy | Better Terminology</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-brand">← VSPD</a>
+      <div class="nav-links">
+        <a href="index.html">Framework</a>
+        <a href="visual-validation.html">Visual Validation</a>
+        <a href="precision-analysis.html" class="active">Precision Analysis</a>
+        <a href="empirical-engine.html">Empirical Engine</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="section">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+      <h1 style="font-size:1.5rem;font-weight:600;color:#fff;">Precision Validation: Gravitational Wave Spectroscopy</h1>
+      <details>
+        <summary class="info-trigger">What does this visualization mean?</summary>
+        <div class="info-panel">
+          <p><strong>Top (waveform):</strong> A simplified representation of a gravitational-wave signal (e.g. GW250114). The wiggles are the "ringdown" after two compact objects merge—the remnant black hole vibrates and emits gravitational waves at specific frequencies called quasinormal modes.</p>
+          <p><strong>Bottom (colored bars):</strong> A spectrogram-style view—how much power is in different frequency bands. Each bar corresponds to one of the dominant tones. In VSPD, these tones are linked to extended spacetime structures (coherent geodesic bundles) that are only clearly resolvable when the measurement epoch is narrow enough.</p>
+        </div>
+      </details>
+    </div>
+    <p style="margin-bottom:2rem;color:#a1a1aa;">The GW250114 event provides a precision test of the VSPD framework. Under extreme gravitational resolution—in the strong-field regime of merging compact objects—deterministic quasinormal modes are identified. These resonant frequencies correspond to extended spacetime structures and appear clearly only when the effective measurement epoch is sufficiently narrowed.</p>
+
+    <div class="waveform-box">
+      <h3>GW250114 — Deterministic quasinormal modes (extended spacetime structures)</h3>
+      <div class="waveform-svg">
+        <svg viewBox="0 0 200 128" style="width:100%;height:100%;" preserveAspectRatio="none">
+          <polyline id="waveform-poly" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,64 200,64"/>
+        </svg>
+      </div>
+      <div class="freq-bars">
+        <div class="freq-bar" style="height:48px;"></div>
+        <div class="freq-bar" style="height:60px;"></div>
+        <div class="freq-bar" style="height:36px;"></div>
+        <div class="freq-bar" style="height:28px;"></div>
+        <div class="freq-bar" style="height:32px;"></div>
+      </div>
+      <div style="margin-top:0.25rem;display:flex;justify-content:space-between;font-size:0.75rem;color:#71717a;">
+        <span>80 Hz</span>
+        <span>320 Hz</span>
+      </div>
+      <p style="margin-top:0.75rem;font-size:0.75rem;color:#71717a;">Resonant frequencies of coherent geodesic bundles under extreme gravitational resolution.</p>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function(){
+      var poly = document.getElementById('waveform-poly');
+      if (!poly) return;
+      var TONE_FREQUENCIES = [80, 120, 180, 250, 320];
+      var TONE_AMPLITUDES = [0.7, 1, 0.6, 0.4, 0.5];
+      var t = 0;
+      function draw() {
+        t += 0.02;
+        var pts = [];
+        for (var i = 0; i < 200; i++) {
+          var ti = (i/200)*4 + t*0.1, y = 0;
+          for (var j = 0; j < 5; j++) y += TONE_AMPLITUDES[j]*Math.sin(2*Math.PI*TONE_FREQUENCIES[j]*ti*0.01)*Math.exp(-ti*0.15);
+          pts.push((i/199)*200 + ',' + (64 + y*40));
+        }
+        poly.setAttribute('points', pts.join(' '));
+      }
+      setInterval(draw, 32);
+    })();
+  </script>
+</body>
+</html>

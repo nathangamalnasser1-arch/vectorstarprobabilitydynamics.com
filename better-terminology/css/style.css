@@ -1,0 +1,187 @@
+/* Better Terminology - Static site styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #050505;
+  color: #e4e4e7;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url('../images/webb_cosmos.jpg') center/cover no-repeat;
+  opacity: 0.12;
+  z-index: -1;
+  pointer-events: none;
+}
+a { color: #3b82f6; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Nav */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid #1e1e2e;
+  background: rgba(5, 5, 5, 0.9);
+  backdrop-filter: blur(12px);
+}
+.nav-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand { font-size: 0.875rem; font-weight: 500; color: #a1a1aa; }
+.nav-brand:hover { color: #3b82f6; text-decoration: none; }
+.nav-links { display: flex; gap: 0.5rem; }
+.nav-links a {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #a1a1aa;
+}
+.nav-links a:hover { color: #e4e4e7; text-decoration: none; }
+.nav-links a.active { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+
+/* Info popup (details/summary) */
+.info-trigger {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(24, 24, 27, 0.8);
+  border: 1px solid #27272a;
+  border-radius: 0.25rem;
+  color: #a1a1aa;
+  cursor: pointer;
+}
+.info-trigger:hover { color: #3b82f6; }
+.info-panel {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(9, 9, 11, 0.9);
+  border: 1px solid #27272a;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+.info-panel p + p { margin-top: 0.5rem; }
+
+/* Hero */
+.hero {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.hero .gradient { background: linear-gradient(to right, #3b82f6, #6366f1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { margin-top: 1.5rem; max-width: 32rem; font-size: 1.125rem; color: #a1a1aa; }
+
+/* Content sections */
+.section { max-width: 56rem; margin: 0 auto; padding: 2rem 1rem; }
+.theory-section {
+  border-top: 1px solid rgba(30, 30, 46, 0.8);
+  background: rgba(10, 10, 15, 0.85);
+  padding: 2rem 1rem;
+}
+.theory-section h2 { font-size: 1.5rem; font-weight: 600; color: #fff; margin-bottom: 1rem; }
+.theory-section p { color: #a1a1aa; margin-bottom: 1rem; line-height: 1.7; }
+
+/* Image comparison */
+.comp-container {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #334155;
+  background: #0f172a;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+.comp-inner {
+  position: relative;
+  aspect-ratio: 4/3;
+  max-height: 75vh;
+  background: #0f172a;
+}
+.comp-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.comp-clip { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
+.comp-label {
+  position: absolute;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(2, 6, 23, 0.9);
+}
+.comp-label-left { top: 1rem; left: 1rem; color: #e2e8f0; border: 1px solid #475569; }
+.comp-label-right { top: 1rem; right: 1rem; color: #22d3ee; border: 1px solid rgba(34, 211, 238, 0.5); }
+.comp-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: ew-resize;
+  z-index: 10;
+  background: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.comp-handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.comp-range {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.comp-range span { font-size: 0.875rem; color: #64748b; width: 5rem; }
+.comp-range span:last-child { text-align: right; }
+.comp-range input { flex: 1; height: 0.75rem; cursor: pointer; accent-color: #22d3ee; }
+
+/* Waveform / Spectrogram */
+.waveform-box {
+  border-radius: 0.5rem;
+  border: 1px solid #27272a;
+  background: #0a0a0f;
+  padding: 1rem 1.5rem;
+}
+.waveform-box h3 { font-size: 0.875rem; color: #a1a1aa; margin-bottom: 0.75rem; }
+.waveform-svg { width: 100%; height: 8rem; border: 1px solid #27272a; border-radius: 0.25rem; background: #050505; }
+.freq-bars { display: flex; gap: 2px; margin-top: 0.75rem; }
+.freq-bar { flex: 1; min-height: 8px; border-radius: 2px; background: linear-gradient(to bottom, #6366f1, #3b82f6); }
+
+/* Spectrum chart */
+.spectrum-box {
+  border-radius: 0.5rem;
+  border: 1px solid #27272a;
+  background: #0a0a0f;
+  padding: 1rem 1.5rem;
+}
+.spectrum-box h3 { font-size: 0.875rem; color: #a1a1aa; margin-bottom: 0.75rem; }
+.spectrum-slider { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+.spectrum-slider input { width: 8rem; accent-color: #3b82f6; }
+.spectrum-legend { display: flex; gap: 1.5rem; margin-top: 0.5rem; font-size: 0.75rem; color: #71717a; }
