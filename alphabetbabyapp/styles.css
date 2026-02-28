@@ -35,6 +35,33 @@ body {
   font-size: 1.15rem;
 }
 
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+.tab-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  background: #bfdbfe;
+  color: #1e3a8a;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tab-button.is-active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.lesson-panel[hidden] {
+  display: none;
+}
+
 .letters-track {
   display: flex;
   gap: 0.9rem;
@@ -84,6 +111,30 @@ body {
   background: #dbeafe;
 }
 
+.animal-card {
+  min-width: 220px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.animal-image {
+  width: 78%;
+  max-width: 190px;
+  border-radius: 14px;
+  display: block;
+}
+
+.animal-name {
+  font-size: clamp(1.3rem, 2.8vw, 1.8rem);
+  font-weight: 800;
+}
+
 .note {
   text-align: center;
   margin: 0.5rem 0 0;
@@ -109,5 +160,9 @@ body {
     aspect-ratio: auto;
     border-radius: 0;
     scroll-snap-align: start;
+  }
+
+  .letters-track.is-mobile-single .animal-card {
+    min-height: 62vh;
   }
 }

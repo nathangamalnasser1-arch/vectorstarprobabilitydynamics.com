@@ -10,11 +10,41 @@
     <main class="app">
       <header class="hero">
         <h1>Alphabet Explorer</h1>
-        <p>Swipe through letters and tap to hear each one.</p>
+        <p>Swipe through lessons and hear the sounds.</p>
       </header>
 
-      <section aria-label="Alphabet letters">
+      <nav class="tab-bar" aria-label="Learning tabs">
+        <button
+          class="tab-button is-active"
+          type="button"
+          id="lettersTabButton"
+          data-panel="lettersPanel"
+          aria-selected="true"
+        >
+          Letters
+        </button>
+        <button
+          class="tab-button"
+          type="button"
+          id="farmTabButton"
+          data-panel="farmPanel"
+          aria-selected="false"
+        >
+          Farm Animals
+        </button>
+      </nav>
+
+      <section id="lettersPanel" class="lesson-panel" aria-label="Alphabet letters">
         <div class="letters-track" id="lettersTrack"></div>
+      </section>
+
+      <section
+        id="farmPanel"
+        class="lesson-panel"
+        aria-label="Farm animals"
+        hidden
+      >
+        <div class="letters-track animal-track" id="animalTrack"></div>
       </section>
 
       <p class="note" id="statusText">Tap a letter to hear it.</p>

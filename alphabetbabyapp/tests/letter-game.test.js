@@ -39,3 +39,10 @@ test("mobile single-card mode activates for small widths", () => {
   assert.equal(game.isMobileSingleCardWidth(500), true);
   assert.equal(game.isMobileSingleCardWidth(769), false);
 });
+
+test("farm animals include horse and sound phrase", () => {
+  const game = loadGameScript();
+  const horse = game.FARM_ANIMALS.find((animal) => animal.name === "Horse");
+  assert.ok(horse);
+  assert.equal(game.getAnimalSoundPhrase(horse), "Horse says Neigh");
+});
