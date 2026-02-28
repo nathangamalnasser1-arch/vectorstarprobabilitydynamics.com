@@ -1,0 +1,132 @@
+:root {
+  color-scheme: light;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #eef8ff 0%, #fff8e8 100%);
+  color: #1f2937;
+}
+
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #0f5dc2;
+}
+
+.hero p {
+  margin: 0.4rem 0 0;
+  font-size: 1.05rem;
+}
+
+.letters-track {
+  display: flex;
+  gap: 0.9rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1rem 0.25rem 1.2rem;
+  scroll-snap-type: x mandatory;
+}
+
+.letter-card {
+  min-width: 220px;
+  border: 0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.09);
+  padding: 1rem 0.8rem 1.1rem;
+  cursor: pointer;
+  scroll-snap-align: center;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.letter-card:hover,
+.letter-card:focus-visible {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+  outline: 3px solid #60a5fa;
+}
+
+.letter-card.is-speaking {
+  background: #dbeafe;
+}
+
+.letter-hebrew {
+  margin: 0;
+  direction: rtl;
+  font-size: clamp(3.8rem, 7vw, 5.2rem);
+  line-height: 1;
+  color: #0f172a;
+}
+
+.letter-name {
+  margin: 0.5rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f5dc2;
+}
+
+.letter-pronounce {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.letter-word {
+  margin: 0.45rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.letter-definition {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.note {
+  text-align: center;
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .letters-track.is-mobile-single {
+    flex-direction: column;
+    gap: 0;
+    height: 62vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0;
+    scroll-snap-type: y mandatory;
+  }
+
+  .letters-track.is-mobile-single .letter-card {
+    width: 100%;
+    min-width: 100%;
+    min-height: 62vh;
+    border-radius: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    scroll-snap-align: start;
+  }
+}
