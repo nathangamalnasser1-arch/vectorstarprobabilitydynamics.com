@@ -1714,6 +1714,15 @@ input:checked + .toggle-slider:before {
     margin-right: 300px;
 }
 
+.footer-link {
+    color: var(--cern-amber);
+    text-decoration: none;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 1024px) {
     .footer {
         margin-right: 0;
