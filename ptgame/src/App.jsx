@@ -104,6 +104,10 @@ function App() {
           onClose={advanceCard}
         />
       )}
+
+      <footer className="mt-8 text-slate-500 text-xs">
+        © 2026 Nathan Gamal Nasser. All Rights Reserved.
+      </footer>
     </div>
   );
 }
