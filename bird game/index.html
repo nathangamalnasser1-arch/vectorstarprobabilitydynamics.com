@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bird in the Forest</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      overflow-x: hidden;
+      min-height: 100vh;
+      background: #1a2a1a;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #c8e6c8;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+    h1 {
+      margin-bottom: 0.25rem;
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      font-weight: 600;
+      color: #c8e6c8;
+    }
+    .hint {
+      margin-bottom: 0.5rem;
+      font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+      color: #a8d8a8;
+      text-align: center;
+    }
+    .game-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #gameCanvas {
+      display: block;
+      border: 3px solid #2d4a2d;
+      border-radius: 4px;
+      background: #2a4a2a;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bird in the Forest</h1>
+  <p class="hint">Arrow keys · Space to shoot (clouds = 2 pts, birds = 1 pt)</p>
+  <div class="game-container">
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const GAME_WIDTH = 800;
+    const GAME_HEIGHT = 500;
+
+    function resizeCanvasForDevice() {
+      const header = 90;
+      const maxW = window.innerWidth - 16;
+      const maxH = Math.max(200, window.innerHeight - header);
+      const ratio = GAME_WIDTH / GAME_HEIGHT;
+      let w = maxW;
+      let h = maxW / ratio;
+      if (h > maxH) {
+        h = maxH;
+        w = h * ratio;
+      }
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+    }
+
+    resizeCanvasForDevice();
+    window.addEventListener('resize', resizeCanvasForDevice);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(resizeCanvasForDevice, 100);
+    });
+
+    const bird = {
+      x: 120,
+      y: canvas.height / 2 - 20,
+      w: 52,
+      h: 38,
+      vx: 0,
+      vy: 0,
+      speed: 4,
+      wingPhase: 0
+    };
+
+    const trees = [];
+    const treeWidth = 80;
+    const treeGap = 220;
+    let scrollX = 0;
+    let score = 0;
+    let lives = 3;
+    let gameOver = false;
+    let invincibleUntil = 0;
+    let gameStartTime = performance.now();
+
+    const obstacleBirds = [];
+    const OBSTACLE_BIRD_GAP = 380;
+    const BIRD_DOUBLE_INTERVAL_MS = 10000;
+    const OBSTACLE_BIRD_RADIUS = 18;
+    const OBSTACLE_CHASE_SPEED = 2.0;
+    const OBSTACLE_DASH_SPEED = 4.2;
+    const OBSTACLE_DASH_DURATION_MS = 380;
+    const OBSTACLE_DASH_CHANCE_PER_FRAME = 0.004;
+
+    const clouds = [];
+    const CLOUD_GAP = 420;
+    const CLOUD_RADIUS = 38;
+    const MAX_CLOUDS = 4;
+
+    const feathers = [];
+    const FEATHER_SPEED = 9;
+    const FEATHER_RADIUS = 4;
+    const FEATHER_COOLDOWN_MS = 280;
+    let lastFeatherTime = 0;
+
+    const INVINCIBLE_MS = 1800;
+    const explosions = [];
+    const BIRD_HIT_RADIUS = 22;
+    const EXPLOSION_DURATION = 450;
+
+    function addTree(x) {
+      trees.push({
+        x,
+        dead: false,
+        exploding: false,
+        explosionStart: 0,
+        trunkHeight: 80 + Math.random() * 60,
+        trunkWidth: 25 + Math.random() * 15,
+        foliageRadius: 55 + Math.random() * 35,
+        hue: 100 + Math.random() * 40
+      });
+    }
+
+    function initTrees() {
+      trees.length = 0;
+      for (let x = 0; x < canvas.width + treeGap * 4; x += treeGap) {
+        addTree(x);
+      }
+    }
+    initTrees();
+
+    function ensureContinuousTrees() {
+      let maxTreeX = trees.length ? Math.max(...trees.map(t => t.x)) : 0;
+      while (maxTreeX - scrollX < canvas.width + treeGap) {
+        addTree(maxTreeX + treeGap);
+        maxTreeX += treeGap;
+      }
+      for (let i = trees.length - 1; i >= 0; i--) {
+        if (trees[i].x - scrollX < -treeGap * 2) trees.splice(i, 1);
+      }
+    }
+
+    function drawSky() {
+      const skyH = canvas.height * 0.45;
+      const midH = canvas.height * 0.25;
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(0, 0, canvas.width, skyH);
+      ctx.fillStyle = '#98d8a8';
+      ctx.fillRect(0, skyH, canvas.width, midH);
+      ctx.fillStyle = '#5a8a5a';
+      ctx.fillRect(0, skyH + midH, canvas.width, canvas.height - skyH - midH);
+    }
+
+    function ensureClouds() {
+      const rightmost = clouds.length ? Math.max(...clouds.map(c => c.x)) : scrollX;
+      if (rightmost - scrollX < canvas.width - CLOUD_GAP && clouds.length < MAX_CLOUDS) {
+        clouds.push({
+          x: scrollX + canvas.width + 80 + Math.random() * 120,
+          y: 60 + Math.random() * (canvas.height * 0.5),
+          wigglePhase: Math.random() * Math.PI * 2
+        });
+      }
+      for (let i = clouds.length - 1; i >= 0; i--) {
+        if (clouds[i].x - scrollX < -80) clouds.splice(i, 1);
+      }
+    }
+
+    function drawClouds() {
+      const now = performance.now() * 0.002;
+      clouds.forEach(c => {
+        const sx = c.x - scrollX;
+        if (sx < -100 || sx > canvas.width + 100) return;
+        const wobble = Math.sin(now + c.wigglePhase) * 4;
+        const cy = c.y + wobble;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(sx - 12, cy, CLOUD_RADIUS * 0.7, 0, Math.PI * 2);
+        ctx.arc(sx + 8, cy - 8, CLOUD_RADIUS * 0.85, 0, Math.PI * 2);
+        ctx.arc(sx + 18, cy + 4, CLOUD_RADIUS * 0.6, 0, Math.PI * 2);
+        ctx.arc(sx, cy + 6, CLOUD_RADIUS * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawTrees() {
+      trees.forEach(t => {
+        if (t.dead || t.exploding) return;
+        const x = t.x - scrollX;
+        if (x < -t.foliageRadius * 2) return;
+        if (x > canvas.width + t.foliageRadius * 2) return;
+
+        const trunkBottom = canvas.height;
+        const trunkTop = trunkBottom - t.trunkHeight;
+        const trunkLeft = x - t.trunkWidth / 2;
+
+        ctx.fillStyle = '#3d2817';
+        ctx.fillRect(trunkLeft, trunkTop, t.trunkWidth, t.trunkHeight);
+
+        const foliageY = trunkTop - 15;
+        ctx.fillStyle = `hsl(${t.hue}, 48%, 32%)`;
+        ctx.beginPath();
+        ctx.arc(x, foliageY, t.foliageRadius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawExplosions(now) {
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        const ex = explosions[i];
+        const elapsed = now - ex.startTime;
+        if (elapsed >= EXPLOSION_DURATION) {
+          explosions.splice(i, 1);
+          continue;
+        }
+        const t = elapsed / EXPLOSION_DURATION;
+        const radius = 15 + t * 80;
+        const alpha = 1 - t;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = '#ff8c00';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(ex.x, ex.y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#ffc832';
+        ctx.beginPath();
+        ctx.arc(ex.x, ex.y, radius * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+        ex.particles.forEach(p => {
+          const px = ex.x + p.dx * t * 120;
+          const py = ex.y + p.dy * t * 120;
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = alpha * (1 - t);
+          ctx.beginPath();
+          ctx.arc(px, py, 3 + (1 - t) * 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = '#1a2a1a';
+      ctx.fillRect(10, 10, 120, 56);
+      ctx.strokeStyle = '#4a6a4a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(10, 10, 120, 56);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 22px "Segoe UI", system-ui, sans-serif';
+      ctx.fillText('Score: ' + score, 22, 34);
+      ctx.fillStyle = lives > 1 ? '#feb2b2' : '#e53e3e';
+      ctx.font = 'bold 18px "Segoe UI", system-ui, sans-serif';
+      ctx.fillText('Lives: ' + lives, 22, 56);
+    }
+
+    function spawnFeather() {
+      const now = performance.now();
+      if (now - lastFeatherTime < FEATHER_COOLDOWN_MS) return;
+      lastFeatherTime = now;
+      const worldX = bird.x + scrollX + BIRD_HIT_RADIUS + 6;
+      const y = bird.y - 2;
+      feathers.push({
+        x: worldX,
+        y,
+        vx: FEATHER_SPEED
+      });
+    }
+
+    function updateFeathers() {
+      for (let i = feathers.length - 1; i >= 0; i--) {
+        const f = feathers[i];
+        f.x += f.vx;
+        const sx = f.x - scrollX;
+        if (sx > canvas.width + 40 || sx < -40) {
+          feathers.splice(i, 1);
+        }
+      }
+    }
+
+    function drawFeathers() {
+      feathers.forEach(f => {
+        const sx = f.x - scrollX;
+        if (sx < -40 || sx > canvas.width + 40) return;
+        ctx.save();
+        ctx.translate(sx, f.y);
+        ctx.rotate(-Math.PI * 0.05);
+        ctx.fillStyle = '#fef3c7';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 10, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+
+    function drawObstacleBird(ob) {
+      const sx = ob.x - scrollX;
+      if (sx < -40 || sx > canvas.width + 40) return;
+      const scale = 0.65;
+      const flap = Math.sin(ob.wingPhase) * 0.6;
+      const wingAngle = flap * Math.PI * 0.4;
+      ctx.save();
+      ctx.translate(sx, ob.y);
+      ctx.scale(scale, scale);
+      ctx.rotate(Math.PI);
+      ctx.fillStyle = ob.color || '#4a5568';
+      ctx.strokeStyle = '#2d3748';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 14, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.save();
+      ctx.rotate(wingAngle);
+      ctx.beginPath();
+      ctx.ellipse(-8, 0, 12, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = ob.wingColor || '#718096';
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.rotate(-wingAngle);
+      ctx.beginPath();
+      ctx.ellipse(-8, 0, 10, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = '#1a202c';
+      ctx.beginPath();
+      ctx.arc(10, -2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#2d3748';
+      ctx.beginPath();
+      ctx.moveTo(14, 0);
+      ctx.lineTo(20, 0);
+      ctx.lineTo(14, -1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ob.wingPhase += 0.2;
+    }
+
+    function getObstacleBirdCount() {
+      const elapsed = performance.now() - gameStartTime;
+      const intervals = Math.floor(elapsed / BIRD_DOUBLE_INTERVAL_MS);
+      return Math.min(Math.pow(2, intervals), 16);
+    }
+
+    function ensureObstacleBirds() {
+      const rightmost = obstacleBirds.length ? Math.max(...obstacleBirds.map(b => b.x)) : scrollX;
+      if (rightmost - scrollX < canvas.width - OBSTACLE_BIRD_GAP) {
+        const colors = ['#4a5568', '#2c5282', '#553c9a', '#744210'];
+        const wingColors = ['#718096', '#2b6cb0', '#6b46c1', '#975a16'];
+        const n = getObstacleBirdCount();
+        const baseX = scrollX + canvas.width + 60 + Math.random() * 100;
+        for (let k = 0; k < n; k++) {
+          const i = Math.floor(Math.random() * colors.length);
+          obstacleBirds.push({
+            x: baseX + k * (OBSTACLE_BIRD_GAP / Math.max(n, 1)) + (Math.random() * 40 - 20),
+            y: 70 + Math.random() * (canvas.height - 140),
+            wingPhase: Math.random() * Math.PI * 2,
+            color: colors[i],
+            wingColor: wingColors[i],
+            hp: 2,
+            hasDashed: false,
+            dashUntil: 0
+          });
+        }
+      }
+      for (let i = obstacleBirds.length - 1; i >= 0; i--) {
+        if (obstacleBirds[i].x - scrollX < -60) obstacleBirds.splice(i, 1);
+      }
+    }
+
+    function updateChasingBirds() {
+      const now = performance.now();
+      const minY = 50;
+      const maxY = canvas.height - 50;
+      obstacleBirds.forEach(ob => {
+        if (ob.dashUntil > now) {
+          const dy = bird.y - ob.y;
+          if (Math.abs(dy) > 2) ob.y += Math.sign(dy) * OBSTACLE_DASH_SPEED;
+          ob.x -= OBSTACLE_DASH_SPEED * 0.7;
+        } else {
+          if (!ob.hasDashed && Math.random() < OBSTACLE_DASH_CHANCE_PER_FRAME) {
+            ob.hasDashed = true;
+            ob.dashUntil = now + OBSTACLE_DASH_DURATION_MS;
+          }
+          let dy = bird.y - ob.y;
+          const dist = Math.abs(dy);
+          if (dist > 5) {
+            dy = (dy / dist) * OBSTACLE_CHASE_SPEED;
+            ob.y += dy;
+          }
+        }
+        ob.y = Math.max(minY, Math.min(maxY, ob.y));
+      });
+    }
+
+    function checkFeatherHits() {
+      for (let fi = feathers.length - 1; fi >= 0; fi--) {
+        const f = feathers[fi];
+        const fx = f.x - scrollX;
+        let hit = false;
+        for (let ci = clouds.length - 1; ci >= 0; ci--) {
+          const c = clouds[ci];
+          const cx = c.x - scrollX;
+          if (Math.hypot(fx - cx, f.y - c.y) < FEATHER_RADIUS + CLOUD_RADIUS) {
+            clouds.splice(ci, 1);
+            feathers.splice(fi, 1);
+            score += 2;
+            hit = true;
+            break;
+          }
+        }
+        if (hit) continue;
+        for (let bi = obstacleBirds.length - 1; bi >= 0; bi--) {
+          const ob = obstacleBirds[bi];
+          const sx = ob.x - scrollX;
+          const dx = fx - sx;
+          const dy = f.y - ob.y;
+          if (Math.hypot(dx, dy) < FEATHER_RADIUS + OBSTACLE_BIRD_RADIUS) {
+            ob.hp = (ob.hp || 2) - 1;
+            feathers.splice(fi, 1);
+            if (ob.hp <= 0) {
+              obstacleBirds.splice(bi, 1);
+              score++;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    function checkObstacleBirdCollision() {
+      const now = performance.now();
+      if (now < invincibleUntil) return;
+      for (let i = obstacleBirds.length - 1; i >= 0; i--) {
+        const ob = obstacleBirds[i];
+        const sx = ob.x - scrollX;
+        const dx = bird.x - sx;
+        const dy = bird.y - ob.y;
+        if (Math.hypot(dx, dy) < BIRD_HIT_RADIUS + OBSTACLE_BIRD_RADIUS) {
+          lives--;
+          invincibleUntil = now + INVINCIBLE_MS;
+          obstacleBirds.splice(i, 1);
+          if (lives <= 0) gameOver = true;
+          break;
+        }
+      }
+    }
+
+    function checkTreeCollision() {
+      const now = performance.now();
+      trees.forEach(t => {
+        if (t.dead || t.exploding) return;
+        const treeScreenX = t.x - scrollX;
+        const foliageY = canvas.height - t.trunkHeight - 15;
+        const dx = bird.x - treeScreenX;
+        const dy = bird.y - foliageY;
+        const dist = Math.hypot(dx, dy);
+        if (dist < t.foliageRadius + BIRD_HIT_RADIUS) {
+          t.exploding = true;
+          t.explosionStart = now;
+          score++;
+          const particles = [];
+          const colors = ['#ff6b00', '#ff9500', '#ffcc00', '#8B4513', '#228B22'];
+          for (let i = 0; i < 18; i++) {
+            const a = (i / 18) * Math.PI * 2 + Math.random();
+            particles.push({
+              dx: Math.cos(a),
+              dy: Math.sin(a),
+              color: colors[i % colors.length]
+            });
+          }
+          explosions.push({
+            x: treeScreenX,
+            y: foliageY,
+            startTime: now,
+            particles
+          });
+        }
+      });
+    }
+
+    function finishExplodedTrees() {
+      const now = performance.now();
+      trees.forEach(t => {
+        if (t.exploding && now - t.explosionStart > EXPLOSION_DURATION) {
+          t.dead = true;
+        }
+      });
+    }
+
+    function drawBird() {
+      const flap = Math.sin(bird.wingPhase) * 0.65;
+      const wingAngle = flap * Math.PI * 0.5;
+      ctx.save();
+      ctx.translate(bird.x, bird.y);
+      const facing = bird.vx < 0 ? -1 : 1;
+      if (facing < 0) ctx.scale(-1, 1);
+
+      const cx = 0, cy = 0;
+
+      function wingPath(side) {
+        const s = side;
+        ctx.beginPath();
+        ctx.moveTo(-4 * s, 2);
+        ctx.quadraticCurveTo(-20 * s, -6, -26 * s, -16);
+        ctx.quadraticCurveTo(-22 * s, -4, -16 * s, 2);
+        ctx.quadraticCurveTo(-10 * s, 5, -4 * s, 2);
+        ctx.closePath();
+      }
+
+      function drawWing(side, angle, alpha) {
+        ctx.save();
+        ctx.rotate(angle * side);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#6B4423';
+        ctx.strokeStyle = '#4A2F1A';
+        ctx.lineWidth = 1.2;
+        wingPath(side);
+        ctx.fill();
+        ctx.stroke();
+        const primaries = [
+          [-8 * side, 0], [-16 * side, -6], [-22 * side, -12],
+          [-10 * side, -1], [-18 * side, -8], [-24 * side, -14]
+        ];
+        for (let i = 0; i < primaries.length; i += 2) {
+          ctx.beginPath();
+          ctx.moveTo(-4 * side, 2);
+          ctx.lineTo(primaries[i][0], primaries[i][1]);
+          ctx.lineTo(primaries[i + 1][0], primaries[i + 1][1]);
+          ctx.strokeStyle = '#5D3A1A';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      drawWing(1, wingAngle, 0.95);
+      drawWing(-1, wingAngle, 0.85);
+
+      ctx.fillStyle = '#b8860b';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 16, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#5D3A1A';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-14, 4);
+      ctx.lineTo(-18, 8);
+      ctx.lineTo(-14, 6);
+      ctx.lineTo(-16, 10);
+      ctx.lineTo(-12, 7);
+      ctx.lineTo(-14, 4);
+      ctx.fillStyle = '#8B4513';
+      ctx.fill();
+      ctx.strokeStyle = '#5D3A1A';
+      ctx.stroke();
+
+      ctx.fillStyle = '#cd853f';
+      ctx.beginPath();
+      ctx.arc(14, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#5D3A1A';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.arc(17, -2, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#2c1810';
+      ctx.beginPath();
+      ctx.moveTo(22, 0);
+      ctx.lineTo(28, -1.5);
+      ctx.lineTo(28, 1.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#1a0f0a';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.restore();
+      bird.wingPhase += 0.28;
+    }
+
+    function update() {
+      if (gameOver) return;
+      bird.x += bird.vx;
+      bird.y += bird.vy;
+      bird.x = Math.max(bird.w, Math.min(canvas.width - bird.w, bird.x));
+      bird.y = Math.max(bird.h, Math.min(canvas.height - bird.h, bird.y));
+      bird.vx *= 0.92;
+      bird.vy *= 0.92;
+      scrollX += 1.2;
+      ensureContinuousTrees();
+      ensureClouds();
+      ensureObstacleBirds();
+      updateChasingBirds();
+      updateFeathers();
+      checkFeatherHits();
+      checkTreeCollision();
+      checkObstacleBirdCollision();
+      finishExplodedTrees();
+    }
+
+    function resetGame() {
+      bird.x = 120;
+      bird.y = canvas.height / 2 - 20;
+      bird.vx = 0;
+      bird.vy = 0;
+      scrollX = 0;
+      score = 0;
+      lives = 3;
+      gameOver = false;
+      gameStartTime = performance.now();
+      invincibleUntil = performance.now() + 1200;
+      obstacleBirds.length = 0;
+      clouds.length = 0;
+      feathers.length = 0;
+      explosions.length = 0;
+      initTrees();
+    }
+
+    function loop(now = 0) {
+      update();
+      drawSky();
+      drawTrees();
+      drawClouds();
+      drawExplosions(now || performance.now());
+      drawFeathers();
+      for (const ob of obstacleBirds) drawObstacleBird(ob);
+      if (invincibleUntil > (now || performance.now()) && Math.floor((now || performance.now()) / 80) % 2 === 0) {
+        ctx.globalAlpha = 0.6;
+      }
+      drawBird();
+      ctx.globalAlpha = 1;
+      drawScore();
+      if (gameOver) {
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 48px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 20);
+        ctx.font = '22px "Segoe UI", system-ui, sans-serif';
+        ctx.fillText('Press R to restart', canvas.width / 2, canvas.height / 2 + 30);
+        ctx.textAlign = 'left';
+      }
+      requestAnimationFrame(loop);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (gameOver) {
+        if (e.key === 'r' || e.key === 'R') { resetGame(); e.preventDefault(); }
+        return;
+      }
+      switch (e.key) {
+        case 'ArrowLeft':  bird.vx = -bird.speed; e.preventDefault(); break;
+        case 'ArrowRight': bird.vx = bird.speed;  e.preventDefault(); break;
+        case 'ArrowUp':    bird.vy = -bird.speed; e.preventDefault(); break;
+        case 'ArrowDown':  bird.vy = bird.speed;  e.preventDefault(); break;
+        case ' ':
+        case 'Spacebar':
+          spawnFeather();
+          e.preventDefault();
+          break;
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (gameOver) return;
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'ArrowRight': bird.vx = 0; e.preventDefault(); break;
+        case 'ArrowUp':
+        case 'ArrowDown':  bird.vy = 0; e.preventDefault(); break;
+      }
+    });
+
+    loop();
+  </script>
+</body>
+</html>
