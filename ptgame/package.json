@@ -1,8 +1,6 @@
 {
   "name": "ptgame",
   "private": true,
-  "author": "Nathan Gamal Nasser",
-  "license": "UNLICENSED",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

@@ -10,11 +10,6 @@
   }
 }
 
-/* 200% zoom only for the game area (card + grid), not the whole page */
-.ptgame-zoom {
-  zoom: 2;
-}
-
 /* Shake animation for wrong placement */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }

@@ -71,7 +71,7 @@ function App() {
         </p>
       </header>
 
-      <div className="ptgame-zoom flex flex-wrap items-start justify-center gap-8 max-w-6xl">
+      <div className="flex flex-wrap items-start justify-center gap-8 max-w-6xl">
         <aside className="flex flex-col items-center gap-4 w-64">
           <CurrentCard element={currentCard} />
           <div className="flex flex-col items-center gap-1">

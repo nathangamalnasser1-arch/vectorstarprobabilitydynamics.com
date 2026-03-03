@@ -71,9 +71,6 @@ To modify or extend the site:
 3. Update `js/visualization.js` for animation changes
 4. Update `js/main.js` for general functionality
 
-## License & Copyright
+## License
 
-© 2026 Nathan Gamal Nasser. All Rights Reserved.
-
-This work is proprietary. See [LICENSE](LICENSE) and [LEGAL.md](LEGAL.md) for terms.
 Educational content for Vector-Star Probability Dynamics theory.
