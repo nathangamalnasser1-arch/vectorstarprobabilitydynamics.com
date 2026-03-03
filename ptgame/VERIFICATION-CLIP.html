@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Periodic Placement – verification</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    ul { line-height: 1.6; }
+    a { color: #0ea5e9; }
+    .ok { color: #22c55e; }
+  </style>
+</head>
+<body>
+  <h1>Periodic Placement – verification clip</h1>
+  <p>Checked on the live site:</p>
+  <ul>
+    <li class="ok"><strong>Natapps page</strong> – &ldquo;Periodic Placement&rdquo; card is present with description and &ldquo;Play Now&rdquo; link.</li>
+    <li class="ok"><strong>Play Now</strong> – Link goes to <code>ptgame/dist/index.html</code> and the game page loads (title: &ldquo;Periodic Placement&rdquo;).</li>
+    <li class="ok"><strong>Base path fix</strong> – Vite <code>base: '/ptgame/dist/'</code> set and project rebuilt so JS/CSS load correctly when the app is under <code>/ptgame/dist/</code>.</li>
+  </ul>
+  <p><strong>Live links:</strong></p>
+  <ul>
+    <li><a href="https://www.vectorstarprobabilitydynamics.com/natapps.html" target="_blank" rel="noopener">Natapps</a></li>
+    <li><a href="https://www.vectorstarprobabilitydynamics.com/ptgame/dist/index.html" target="_blank" rel="noopener">Periodic Placement game</a></li>
+  </ul>
+</body>
+</html>
