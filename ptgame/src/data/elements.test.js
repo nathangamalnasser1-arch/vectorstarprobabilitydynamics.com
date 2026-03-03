@@ -3,6 +3,7 @@ import {
   getElements,
   getFact,
   getNumberAtSlot,
+  getElectronShells,
   shuffleArray,
   getGridMatrix,
   getAllSlots,
@@ -56,5 +57,13 @@ describe('elements data', () => {
     expect(getFact(80)).toContain('liquid');
     expect(getFact(118)).toContain('heaviest');
     expect(getFact(50)).toBe(null);
+  });
+
+  it('getElectronShells returns correct shell counts', () => {
+    expect(getElectronShells(1)).toEqual([1]);
+    expect(getElectronShells(2)).toEqual([2]);
+    expect(getElectronShells(11)).toEqual([2, 8, 1]);
+    expect(getElectronShells(18)).toEqual([2, 8, 8]);
+    expect(getElectronShells(118).reduce((a, b) => a + b, 0)).toBe(118);
   });
 });

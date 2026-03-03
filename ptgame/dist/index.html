@@ -2,27 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/ptgame/dist/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Periodic Placement</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/ptgame/dist/assets/index-8iVZr0zM.js"></script>
-    <link rel="stylesheet" crossorigin href="/ptgame/dist/assets/index-BwWPHvuL.css">
+    <script type="module" crossorigin src="/assets/index-DvHdZekC.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-COaTaFHk.css">
   </head>
   <body>
-    <!-- #region agent log -->
-    <script>
-      (function(){
-        var loc = document.location;
-        fetch('http://127.0.0.1:7324/ingest/f2c1928c-8379-4c6b-9904-e45d86333c39',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'597398'},body:JSON.stringify({sessionId:'597398',location:'ptgame/index.html',message:'ptgame page load',data:{href:loc.href,protocol:loc.protocol,origin:loc.origin},timestamp:Date.now(),hypothesisId:'H1_H4'})}).catch(function(){});
-        window.addEventListener('error',function(e){
-          if(!e.message||e.filename) fetch('http://127.0.0.1:7324/ingest/f2c1928c-8379-4c6b-9904-e45d86333c39',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'597398'},body:JSON.stringify({sessionId:'597398',location:'ptgame/index.html',message:'resource or script error',data:{msg:e.message,src:e.filename||e.target&&e.target.src,type:e.type},timestamp:Date.now(),hypothesisId:'H2'})}).catch(function(){});
-        },true);
-      })();
-    </script>
-    <!-- #endregion -->
     <div id="root"></div>
   </body>
 </html>

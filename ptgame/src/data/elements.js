@@ -255,6 +255,21 @@ export function getFact(number) {
   return ELEMENT_FACTS[number] ?? null;
 }
 
+/** Maximum electrons per shell (Bohr model): n=1,2,3,4,5,6,7 */
+const SHELL_CAPACITIES = [2, 8, 8, 18, 18, 32, 32];
+
+/** Returns array of electrons per shell, e.g. [2, 8, 1] for sodium (11). */
+export function getElectronShells(atomicNumber) {
+  const shells = [];
+  let remaining = atomicNumber;
+  for (const cap of SHELL_CAPACITIES) {
+    if (remaining <= 0) break;
+    shells.push(Math.min(remaining, cap));
+    remaining -= cap;
+  }
+  return shells;
+}
+
 export function shuffleArray(arr) {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {

@@ -3,7 +3,6 @@ import { getElements, shuffleArray, getFact, getNumberAtSlot } from './data/elem
 import { PeriodicGrid } from './components/PeriodicGrid';
 import { CurrentCard } from './components/CurrentCard';
 import { FactPopup } from './components/FactPopup';
-import { Timer } from './components/Timer';
 
 const TOTAL = 118;
 
@@ -11,9 +10,6 @@ function App() {
   const [deck] = useState(() => shuffleArray(getElements()));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [placed, setPlaced] = useState(new Set());
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [startTime, setStartTime] = useState(null);
-  const [stoppedAt, setStoppedAt] = useState(null);
   const [factPopup, setFactPopup] = useState(null); // { name, fact }
   const [wrongSlot, setWrongSlot] = useState(null);
 
@@ -25,11 +21,6 @@ function App() {
       const expectedNumber = getNumberAtSlot(row, col);
       if (expectedNumber === null) return;
 
-      if (!timerRunning) {
-        setTimerRunning(true);
-        setStartTime(Date.now());
-      }
-
       if (expectedNumber !== currentNumber) {
         setWrongSlot({ row, col });
         const t = setTimeout(() => setWrongSlot(null), 400);
@@ -40,16 +31,11 @@ function App() {
       setPlaced(nextPlaced);
       setWrongSlot(null);
 
-      if (nextPlaced.size === TOTAL) {
-        setStoppedAt(Date.now());
-        setTimerRunning(false);
-      }
-
       const name = deck.find((e) => e.number === expectedNumber)?.name ?? `Element ${expectedNumber}`;
       const fact = getFact(expectedNumber) ?? `${name} is element number ${expectedNumber} on the periodic table.`;
-      setFactPopup({ name, fact });
+      setFactPopup({ name, fact, number: expectedNumber });
     },
-    [currentNumber, timerRunning, deck, placed]
+    [currentNumber, deck, placed]
   );
 
   function advanceCard() {
@@ -76,14 +62,9 @@ function App() {
           <CurrentCard element={currentCard} />
           <div className="flex flex-col items-center gap-1">
             <span className="text-slate-400 text-sm">Cards left: <strong className="text-slate-200">{cardsRemaining}</strong></span>
-            <Timer
-              running={timerRunning}
-              startTime={startTime}
-              stoppedAt={stoppedAt}
-            />
           </div>
           {gameComplete && (
-            <p className="text-emerald-400 font-medium">Complete! Time above.</p>
+            <p className="text-emerald-400 font-medium">Complete!</p>
           )}
         </aside>
 
@@ -100,6 +81,7 @@ function App() {
       {factPopup && (
         <FactPopup
           elementName={factPopup.name}
+          elementNumber={factPopup.number}
           fact={factPopup.fact}
           onClose={advanceCard}
         />
