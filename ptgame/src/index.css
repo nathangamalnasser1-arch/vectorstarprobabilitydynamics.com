@@ -4,11 +4,15 @@
   body {
     @apply bg-slate-950 text-slate-100 antialiased;
     font-family: 'Outfit', system-ui, sans-serif;
-    zoom: 2;
   }
   .font-mono {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
+}
+
+/* 200% zoom only for the game area (card + grid), not the whole page */
+.ptgame-zoom {
+  zoom: 2;
 }
 
 /* Shake animation for wrong placement */

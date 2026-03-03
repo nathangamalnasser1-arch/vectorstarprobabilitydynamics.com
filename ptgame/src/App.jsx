@@ -16,7 +16,6 @@ function App() {
   const [stoppedAt, setStoppedAt] = useState(null);
   const [factPopup, setFactPopup] = useState(null); // { name, fact }
   const [wrongSlot, setWrongSlot] = useState(null);
-  const [timerEnabled, setTimerEnabled] = useState(true);
 
   const currentCard = currentIndex < deck.length ? deck[currentIndex] : null;
   const currentNumber = currentCard?.number ?? null;
@@ -26,7 +25,7 @@ function App() {
       const expectedNumber = getNumberAtSlot(row, col);
       if (expectedNumber === null) return;
 
-      if (timerEnabled && !timerRunning) {
+      if (!timerRunning) {
         setTimerRunning(true);
         setStartTime(Date.now());
       }
@@ -41,7 +40,7 @@ function App() {
       setPlaced(nextPlaced);
       setWrongSlot(null);
 
-      if (nextPlaced.size === TOTAL && timerEnabled) {
+      if (nextPlaced.size === TOTAL) {
         setStoppedAt(Date.now());
         setTimerRunning(false);
       }
@@ -50,7 +49,7 @@ function App() {
       const fact = getFact(expectedNumber) ?? `${name} is element number ${expectedNumber} on the periodic table.`;
       setFactPopup({ name, fact });
     },
-    [currentNumber, timerRunning, timerEnabled, deck, placed]
+    [currentNumber, timerRunning, deck, placed]
   );
 
   function advanceCard() {
@@ -72,35 +71,19 @@ function App() {
         </p>
       </header>
 
-      <div className="flex flex-wrap items-start justify-center gap-8 max-w-6xl">
+      <div className="ptgame-zoom flex flex-wrap items-start justify-center gap-8 max-w-6xl">
         <aside className="flex flex-col items-center gap-4 w-64">
           <CurrentCard element={currentCard} />
           <div className="flex flex-col items-center gap-1">
             <span className="text-slate-400 text-sm">Cards left: <strong className="text-slate-200">{cardsRemaining}</strong></span>
-            <label className="flex items-center gap-2 text-slate-400 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={timerEnabled}
-                onChange={(e) => setTimerEnabled(e.target.checked)}
-                disabled={timerRunning || placed.size > 0}
-                className="rounded border-slate-500"
-              />
-              Use timer
-            </label>
-            {timerEnabled ? (
-              <Timer
-                running={timerRunning}
-                startTime={startTime}
-                stoppedAt={stoppedAt}
-              />
-            ) : (
-              <span className="font-mono text-slate-500 text-sm">Timer off</span>
-            )}
+            <Timer
+              running={timerRunning}
+              startTime={startTime}
+              stoppedAt={stoppedAt}
+            />
           </div>
           {gameComplete && (
-            <p className="text-emerald-400 font-medium">
-              Complete!{timerEnabled && ' Time above.'}
-            </p>
+            <p className="text-emerald-400 font-medium">Complete! Time above.</p>
           )}
         </aside>
 
@@ -121,10 +104,6 @@ function App() {
           onClose={advanceCard}
         />
       )}
-
-      <footer className="mt-8 text-slate-500 text-xs">
-        © 2026 Nathan Gamal Nasser. All Rights Reserved.
-      </footer>
     </div>
   );
 }
