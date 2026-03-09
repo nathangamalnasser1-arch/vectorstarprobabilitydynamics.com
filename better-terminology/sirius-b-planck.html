@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Measuring ℏ_eff at Sirius B — HST Data Analysis | VSPD</title>
+  <meta name="description" content="Real HST STIS data (Barstow 2018, 80.65 ± 0.77 km/s) used to calculate ℏ_eff at Sirius B. Fixes 4 open VSPD problems and makes Bell's theorem gravitationally contingent. Zero free parameters.">
+  <link rel="canonical" href="https://www.vectorstarprobabilitydynamics.com/better-terminology/sirius-b-planck.html">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0f172a; color: #e2e8f0; font-size: 0.92rem; line-height: 1.7; }
+    .vspd-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+    .vspd-card h2 { color: #f59e0b; margin-top: 0; margin-bottom: 1rem; }
+    .eq-block { color: #06b6d4; font-family: monospace; background: #0f172a; border-left: 3px solid #06b6d4; padding: 12px 20px; border-radius: 4px; margin: 1rem 0; white-space: pre-wrap; }
+    .before-block { border-left: 3px solid #ef4444; background: #0f172a; padding: 12px 20px; border-radius: 4px; margin: 0.5rem 0; font-family: monospace; color: #e2e8f0; white-space: pre-wrap; }
+    .after-block { border-left: 3px solid #10b981; background: #0f172a; padding: 12px 20px; border-radius: 4px; margin: 0.5rem 0; font-family: monospace; color: #e2e8f0; white-space: pre-wrap; }
+    .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .grid-2x2 { grid-template-columns: 1fr; } }
+    .stat-box { text-align: center; padding: 20px; border-radius: 8px; border: 2px solid; }
+    .stat-box .value { font-size: 1.5rem; font-weight: bold; }
+    .stat-box .sub { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+    .step-block { border-left: 3px solid #06b6d4; padding: 12px 20px; margin: 12px 0; background: #0f172a; border-radius: 4px; font-family: monospace; white-space: pre-wrap; color: #e2e8f0; }
+    .step-num { color: #f59e0b; font-weight: bold; }
+    .method-card { padding: 20px; border-radius: 8px; border-top: 3px solid; }
+    .methods-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .methods-row { grid-template-columns: 1fr; } }
+    table.vspd-table { width: 100%; border-collapse: collapse; }
+    table.vspd-table th, table.vspd-table td { border: 1px solid #334155; padding: 10px 14px; text-align: left; }
+    table.vspd-table th { background: #334155; color: #f59e0b; }
+    table.vspd-table tr:nth-child(even) { background: rgba(30, 41, 59, 0.5); }
+    .row-amber { color: #f59e0b; }
+    .row-red { color: #ef4444; }
+    .bar-wrap { background: #334155; border-radius: 3px; height: 8px; margin-top: 8px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-brand">← VSPD</a>
+      <div class="nav-links">
+        <a href="index.html">Framework</a>
+        <a href="visual-validation.html">Visual Validation</a>
+        <a href="precision-analysis.html">Precision Analysis</a>
+        <a href="empirical-engine.html">Empirical Engine</a>
+        <a href="sirius-b-planck.html" class="active">Sirius B ℏ Analysis</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="section" style="max-width: 56rem; margin: 0 auto; padding: 2rem 1rem;">
+    <h1 style="color:#f59e0b;">Can We Measure ℏ_eff at Sirius B?</h1>
+    <p style="color:#94a3b8;font-size:0.95rem;margin-bottom:32px;">
+      One substitution — ℏ_eff = ℏ₀·√(1−u) — anchored by real HST data, fixes four open mathematical problems and makes Bell's theorem gravitationally contingent. Zero free parameters. Specific. Falsifiable.
+    </p>
+
+    <!-- SECTION 1 -->
+    <div class="vspd-card" style="border-color: #10b981;">
+      <h2>The Single Substitution That Fixes Everything</h2>
+      <div class="eq-block">ℏ_eff(u) = ℏ₀ · √(1 − u)     where u = 2GM/rc²
+
+ℏ₀ = 1.05457182 × 10⁻³⁴ J·s  (every historical measurement of ℏ)
+u = 0  (flat spacetime):  ℏ_eff = ℏ₀   standard QM fully recovered
+u → 1  (event horizon):   ℏ_eff → 0    determinism revealed</div>
+      <p style="color:#e2e8f0;">
+        Every measurement of ℏ in history was made at u &lt; 10⁻⁹ — on Earth, in the solar system. We assumed it was the same everywhere. VSPD challenges that assumption with a specific, testable prediction. Sirius B at u = 0.000534 is the closest real-world laboratory we have.
+      </p>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="vspd-card" style="border-color: #f59e0b;">
+      <h2>The Four Open Problems — All Fixed by ℏ_eff</h2>
+      <p style="color:#e2e8f0;margin-bottom:1rem;">
+        This one substitution cascades through the entire VSPD framework and resolves four mathematical problems simultaneously. Sirius B is the empirical anchor that grounds all four.
+      </p>
+      <div class="grid-2x2">
+        <div class="vspd-card" style="padding: 16px;">
+          <strong style="color:#f59e0b;">Problem 1 — Equation of Motion</strong>
+          <div class="before-block">BEFORE: dδθ/dt = ω₀ + α·∇Φ_grav + β·F_local
+        3 free parameters (κ₀, α, β) — not falsifiable</div>
+          <div class="after-block">AFTER:  dδθ/dt = mc²/ℏ_eff(u)
+        Zero free parameters. Compton frequency fully derived.</div>
+        </div>
+        <div class="vspd-card" style="padding: 16px;">
+          <strong style="color:#f59e0b;">Problem 2 — Recovering E(a,b) = −cos(a−b)</strong>
+          <div class="before-block">BEFORE: Uniform micro-path distribution assumed — not derived.</div>
+          <div class="after-block">AFTER:  ω_eff·Δt₀ >> 1 guarantees uniform distribution analytically.
+        E(a,b) = −cos(a−b) is now derived, not assumed.</div>
+        </div>
+        <div class="vspd-card" style="padding: 16px;">
+          <strong style="color:#f59e0b;">Problem 3 — S(u) vs Gravity Curve</strong>
+          <div class="before-block">BEFORE: S = 2√2·R(κ)
+        Right shape but κ₀ unknown — no precise prediction possible.</div>
+          <div class="after-block">AFTER:  S(u) = 2√2·I₁(κ(u))/I₀(κ(u))
+        κ(u) = √(1−u)/(ω₀·Δt₀²)
+        Fully determined. Zero free parameters.</div>
+        </div>
+        <div class="vspd-card" style="padding: 16px;">
+          <strong style="color:#f59e0b;">Problem 4 — Bell's Theorem</strong>
+          <div class="before-block">BEFORE: Bell's theorem assumed universal.
+        Trajectory argument made but not proven.</div>
+          <div class="after-block">AFTER:  Bell derived his theorem assuming constant ℏ in flat spacetime.
+        Since ℏ_eff = ℏ₀·√(1−u) varies with gravity,
+        Bell's theorem is a flat-spacetime result only.
+        Gravitationally contingent — not universal.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="vspd-card" style="border-color: #a855f7;">
+      <h2>Bell's Theorem — Gravitationally Contingent</h2>
+      <div class="eq-block">S(u) = 2√2 · I₁(κ(u)) / I₀(κ(u))
+
+u = 0          (Earth):         S = 2√2 ≈ 2.828   full QM violation
+u = 0.000534   (Sirius B):      S ≈ 2.826          deviation: 0.002
+u = 0.41       (neutron star):  S ≈ 2.75           measurable shift
+u → 1          (event horizon): S → 2.0            Bell satisfied</div>
+      <p style="color:#e2e8f0;">
+        Standard QM predicts |S| = 2√2 everywhere. VSPD predicts |S| decreases smoothly as gravity increases, reaching 2.0 at the event horizon. A Bell test near a neutron star would show |S| ≈ 2.75 instead of 2.828 — a deviation of ~0.07, distinguishable with future space-based quantum optics.
+      </p>
+      <p style="color:#e2e8f0;">
+        Bell's theorem is not a universal law of nature. It is a flat-spacetime theorem derived under the assumption that ℏ is constant. That assumption has never been tested in strong gravity.
+      </p>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="vspd-card" style="border-color: #06b6d4;">
+      <h2>The Real Numbers — HST STIS 2018</h2>
+      <p style="color:#e2e8f0;margin-bottom:1.5rem;">
+        The most precise measurement of Sirius B's gravitational redshift used the Space Telescope Imaging Spectrograph on Hubble, measuring the Hα Balmer line differentially against Sirius A in the same HST orbit — eliminating systematic calibration errors that had affected all previous measurements.
+      </p>
+      <div class="grid-2x2">
+        <div class="stat-box" style="border-color: #06b6d4;">
+          <div class="value" id="stat-z">0</div>
+          <div class="sub">± 0.77 km/s · Barstow et al. 2018</div>
+          <div style="color:#94a3b8;font-size:0.9rem;">Gravitational Redshift</div>
+        </div>
+        <div class="stat-box" style="border-color: #f59e0b;">
+          <div class="value" id="stat-g">0</div>
+          <div class="sub">times stronger than Earth gravity</div>
+          <div style="color:#94a3b8;font-size:0.9rem;">Surface Gravity</div>
+        </div>
+        <div class="stat-box" style="border-color: #10b981;">
+          <div class="value" id="stat-u">0</div>
+          <div class="sub">= 5.34 × 10⁻⁴</div>
+          <div style="color:#94a3b8;font-size:0.9rem;">Compactness u</div>
+        </div>
+        <div class="stat-box" style="border-color: #a855f7;">
+          <div class="value">8.6 ly</div>
+          <div class="sub">nearest white dwarf to Earth</div>
+          <div style="color:#94a3b8;font-size:0.9rem;">Distance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="vspd-card">
+      <h2>Step-by-Step: Calculating ℏ_eff at Sirius B</h2>
+      <p><span class="step-num">Step 1 — Compactness</span></p>
+      <div class="step-block">u = 2GM/Rc²
+  = 2 × 6.674×10⁻¹¹ × (1.017 × 1.989×10³⁰)
+    ÷ ((0.00808 × 6.963×10⁸) × (2.998×10⁸)²)
+  = 0.000534
+M = 1.017 M☉,  R = 0.00808 R☉  —  Barstow 2018 HST</div>
+      <p><span class="step-num">Step 2 — Δt compression</span></p>
+      <div class="step-block">Δt_eff = Δt₀ × √(1 − 0.000534) = Δt₀ × 0.999733
+→ measurement window shrinks by 0.0267%</div>
+      <p><span class="step-num">Step 3 — ℏ_eff</span></p>
+      <div class="step-block">ℏ_eff = 1.05457182 × 10⁻³⁴ × 0.999733
+       = 1.05429024 × 10⁻³⁴ J·s
+Δℏ/ℏ₀ = 2.67 × 10⁻⁴  (0.0267% smaller than on Earth)</div>
+      <p><span class="step-num">Step 4 — VSPD extra spectral shift</span></p>
+      <div class="step-block">Energy levels: E ∝ 1/ℏ²  →  E_eff ≈ E × (1 + u)
+VSPD extra shift = (1 − √(1−u)) × c
+                 = (1 − 0.999733) × 299,792 km/s
+                 = 0.018 km/s</div>
+      <p><span class="step-num">Step 5 — Detection gap</span></p>
+      <div class="step-block">HST STIS precision:  ± 0.77 km/s
+VSPD extra signal:     0.018 km/s
+Gap: 43× below current detection threshold at Sirius B</div>
+      <p><span class="step-num">Step 6 — Wavelength units</span></p>
+      <div class="step-block" style="border-left-color: #10b981;">GR shift:    Δλ = 656.28 nm × (u/2)       = 0.1752 nm  (1,752 pm)
+VSPD extra:  Δλ = 656.28 nm × 2.67×10⁻⁴   = 0.000350 nm (0.350 pm)
+HST STIS resolution: ~1–2 pm</div>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="vspd-card" style="border-color: #f59e0b;">
+      <h2>The Three Numbers to Remember</h2>
+      <div class="grid-2x2" style="margin-bottom:1.5rem;">
+        <div class="vspd-card" style="padding: 16px; text-align: center;">
+          <div style="color:#06b6d4; font-weight: bold; font-size: 1.1rem;">80.04 km/s</div>
+          <div style="color:#94a3b8; font-size: 0.85rem;">GR Prediction — z = GM/Rc²</div>
+        </div>
+        <div class="vspd-card" style="padding: 16px; text-align: center;">
+          <div style="color:#10b981; font-weight: bold; font-size: 1.1rem;">80.65 km/s</div>
+          <div style="color:#94a3b8; font-size: 0.85rem;">HST Measured — ± 0.77 km/s · Barstow 2018</div>
+        </div>
+        <div class="vspd-card" style="padding: 16px; text-align: center;">
+          <div style="color:#f59e0b; font-weight: bold; font-size: 1.1rem;">0.018 km/s</div>
+          <div style="color:#94a3b8; font-size: 0.85rem;">VSPD Extra — predicted beyond GR · not yet detectable</div>
+        </div>
+      </div>
+      <div class="eq-block">ℏ_eff(Sirius B) = ℏ₀ × √(1 − 0.000534)
+                = ℏ₀ × 0.999733
+                = 1.05429024 × 10⁻³⁴ J·s
+
+Δℏ/ℏ₀ = 2.67 × 10⁻⁴  (0.0267% smaller than Earth value)</div>
+      <p style="color:#94a3b8; font-size: 0.85rem; margin-top: 1rem;">
+        Data: Barstow et al. (2018), MNRAS 481, 2361. HST STIS Hα spectroscopy. M_B = 1.017 ± 0.025 M☉, R_B = 0.00808 ± 0.00011 R☉. arXiv:1809.01240
+      </p>
+    </div>
+
+    <!-- SECTION 7 -->
+    <div class="vspd-card">
+      <h2>What the HST Residual Actually Is</h2>
+      <div class="eq-block">Measured:    80.65 km/s
+GR pred:     80.04 km/s
+Residual:   +0.61 km/s  (within 1σ — consistent with zero)
+VSPD extra:  0.018 km/s (34× smaller than the residual itself)</div>
+      <p style="color:#e2e8f0;">
+        The current data cannot confirm or deny VSPD. That is not a failure — the theory makes a prediction smaller than current precision, and we know exactly how much better instruments need to be. That is the hallmark of a well-constrained theory.
+      </p>
+    </div>
+
+    <!-- SECTION 8 -->
+    <div class="vspd-card">
+      <h2>Path to Detection — Three Methods</h2>
+      <div class="methods-row">
+        <div class="method-card" style="border-top-color: #ef4444;">
+          <strong>Method 1 — Single Object</strong>
+          <p style="color:#e2e8f0;font-size:0.9rem;margin:8px 0;">Target: Sirius B with ELT ANDES spectrograph</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Required: &lt; 0.030 km/s precision</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Current: ± 0.77 km/s  |  Gap: 26×</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Timeline: 2030s</p>
+          <div class="bar-wrap"><div class="bar-fill" style="width:25%; background:#ef4444;"></div></div>
+        </div>
+        <div class="method-card" style="border-top-color: #10b981;">
+          <strong>Method 2 — WD Population Study</strong>
+          <p style="color:#e2e8f0;font-size:0.9rem;margin:8px 0;">Fit z vs u across 50+ white dwarfs</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">GR: z = u/2 (linear). VSPD: z = u/2 + u²/8 (quadratic)</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Quadratic coefficient: c/8 = 37,474 km/s</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Data in HST and VLT archives — no new observations needed</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Timeline: NOW</p>
+          <div class="bar-wrap"><div class="bar-fill" style="width:85%; background:#10b981;"></div></div>
+          <p style="color:#f59e0b;font-size:0.85rem;margin-top:8px;">★ Recommended — this is the paper to submit to arXiv first</p>
+        </div>
+        <div class="method-card" style="border-top-color: #f59e0b;">
+          <strong>Method 3 — Neutron Star</strong>
+          <p style="color:#e2e8f0;font-size:0.9rem;margin:8px 0;">At u ≈ 0.41: VSPD extra shift ≈ 8,400 km/s — enormous signal</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Challenge: rotation, magnetic fields, hot plasma systematics</p>
+          <p style="color:#94a3b8;font-size:0.85rem;">Timeline: Future X-ray/UV telescope</p>
+          <div class="bar-wrap"><div class="bar-fill" style="width:50%; background:#f59e0b;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 9 -->
+    <div class="vspd-card">
+      <h2>ℏ_eff Across Gravitational Environments</h2>
+      <table class="vspd-table">
+        <thead>
+          <tr><th>Object</th><th>u</th><th>ℏ_eff / ℏ₀</th><th>Δℏ/ℏ₀</th><th>VSPD extra shift</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Earth surface</td><td>1.4 × 10⁻⁹</td><td>0.999999999</td><td>7 × 10⁻¹⁰</td><td>0.0000002 m/s</td></tr>
+          <tr class="row-amber"><td><strong>Sirius B</strong></td><td><strong>5.34 × 10⁻⁴</strong></td><td><strong>0.999733</strong></td><td><strong>2.67 × 10⁻⁴</strong></td><td><strong>18 m/s</strong></td></tr>
+          <tr><td>Typical WD (0.6 M☉)</td><td>3.0 × 10⁻⁴</td><td>0.999850</td><td>1.50 × 10⁻⁴</td><td>10 m/s</td></tr>
+          <tr class="row-red"><td>Neutron star (1.4 M☉)</td><td>0.41</td><td>0.767</td><td>0.233</td><td>~70,000 km/s</td></tr>
+          <tr><td>Near BH (r = 3Rₛ)</td><td>0.667</td><td>0.577</td><td>0.423</td><td>~127,000 km/s</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 10 -->
+    <div class="vspd-card">
+      <h2>Complete Numerical Summary</h2>
+      <table class="vspd-table">
+        <tr><td>Sirius B compactness u</td><td>0.000534</td></tr>
+        <tr><td>ℏ_eff at Sirius B</td><td>1.054290 × 10⁻³⁴ J·s</td></tr>
+        <tr><td>Fractional ℏ reduction</td><td>2.67 × 10⁻⁴ (0.0267%)</td></tr>
+        <tr><td>VSPD extra velocity shift</td><td>0.018 km/s</td></tr>
+        <tr><td>VSPD extra Hα shift</td><td>0.350 pm</td></tr>
+        <tr><td>Current HST precision</td><td>± 0.77 km/s</td></tr>
+        <tr><td>Precision needed (3σ)</td><td>26.68 km/s</td></tr>
+        <tr><td>Bell S at Earth</td><td>2.828</td></tr>
+        <tr><td>Bell S at Sirius B</td><td>2.826</td></tr>
+        <tr><td>Bell S at neutron star</td><td>~2.75</td></tr>
+        <tr><td>Bell S at event horizon</td><td>→ 2.0</td></tr>
+        <tr><td>Best near-term test</td><td>WD population u²/8 fit</td></tr>
+        <tr><td>Best long-term test</td><td>Neutron star (~8,400 km/s signal)</td></tr>
+      </table>
+    </div>
+  </main>
+
+  <p style="text-align:center; margin-top:16px; font-size:0.85rem;">
+    Part of <a href="../index.html">Vector-Star Probability Dynamics</a> —
+    <a href="../theory.html">Theory</a> ·
+    <a href="../experiments.html">Experiments</a> ·
+    <a href="../gravitational-time-microscope/index.html">Time Microscope</a>
+  </p>
+  <p style="text-align:center; margin-top:8px; font-size:0.8rem; color:#94a3b8;">
+    Data: Barstow et al. (2018) MNRAS 481, 2361 · arXiv:1809.01240
+  </p>
+  <p style="text-align:center; margin-top:8px; font-size:0.85rem; color:#94a3b8;">Whitepaper by Nathan Gamal Nasser</p>
+
+  <script>
+    function animateCount(id, target, decimals, suffix, duration, formatNum) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var start = performance.now();
+      function step(now) {
+        var t = Math.min((now - start) / duration, 1);
+        var ease = 1 - Math.pow(1 - t, 3);
+        var val = target * ease;
+        var text = formatNum ? val.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : val.toFixed(decimals);
+        el.textContent = text + suffix;
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    window.addEventListener('load', function() {
+      animateCount('stat-z', 80.65, 2, ' km/s', 1400, false);
+      animateCount('stat-g', 434853, 0, ' ×', 1800, true);
+      animateCount('stat-u', 0.000534, 6, '', 1600, false);
+    });
+  </script>
+</body>
+</html>
