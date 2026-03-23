@@ -293,6 +293,7 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <li><a href="#japan">Japan</a></li>
     <li><a href="#locations">Conchagua</a></li>
     <li><a href="#locations" onclick="setTimeout(()=>switchLoc('mt'),10)">Mtl Pop-Up</a></li>
+    <li><a href="#locations" onclick="setTimeout(()=>switchLoc('solo'),10)" style="color:#f5e233">Solo Inline</a></li>
     <li><a href="#coin">SPC Coin</a></li>
     <li><a href="#brands">Brands</a></li>
     <li><a href="#investment">Investors</a></li>
@@ -353,6 +354,10 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <button id="ltab-mt" onclick="switchLoc('mt')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
       MONTREAL — POP-UP
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Weekend Festival · Olympic Stadium · Vans Park · Any Venue</div>
+    </button>
+    <button id="ltab-solo" onclick="switchLoc('solo')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
+      SOLO INLINE — SPONSOR
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Montreal's #1 Inline Shop · Festival Partner · solo-inline.com</div>
     </button>
   </div>
 
@@ -870,6 +875,89 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
         </div>
       </div>
     </div>
+
+  <!-- SOLO INLINE SPONSOR -->
+  <div id="loc-solo" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:32px">
+      <div style="background:var(--bg2);padding:40px 36px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--yellow);margin-bottom:20px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Featured Montreal Sponsor</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:4px;color:var(--white);margin-bottom:4px;line-height:1">SOLO INLINE</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--yellow);margin-bottom:20px">Montreal's #1 Inline Skate Shop · Est. Montreal, QC</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px">Solo Inline is the reference in Canada for everything inline skating — aggressive, urban, speed, off-road, and kids. Two stores (Montreal + Toronto), decades of expertise, and a community that lives the sport. They are the natural Montreal partner for a Skatepark City festival: their athletes shop there, their staff skates, and their brands are the exact inventory that fills every inline skate store in the city's Market Terrace.</p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Montreal HQ:</span> 4306 Sainte-Catherine E, Montreal — walk distance from Olympic Stadium</p></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Toronto store:</span> Stack Market, 28 Bathurst St — expanding nationally</p></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Brands stocked:</span> USD, Rollerblade, Powerslide, Razors, K2, Seba, FR Skates, IQON, Kaltik, Them Skates and 30+ more</p></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Skate to Ski programme:</span> already runs a cross-discipline transition programme — exact alignment with SPC multi-sport model</p></div>
+        </div>
+        <a href="https://solo-inline.com/en" target="_blank" rel="noopener" style="display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:12px 24px;border:1px solid var(--yellow);color:var(--yellow);text-decoration:none;text-transform:uppercase;transition:all .2s" onmouseover="this.style.background='var(--yellow)';this.style.color='#000'" onmouseout="this.style.background='transparent';this.style.color='var(--yellow)'">Visit Solo Inline →</a>
+      </div>
+      <div style="background:var(--bg3);padding:40px 36px;border-left:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--yellow);margin-bottom:20px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">The Partnership Pitch</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:20px">Solo Inline is the only Canadian inline skate shop with two locations, a national audience, and a cross-sport programme already in operation. For the Skatepark City Montreal festival, they are the natural equipment partner — rental desk, gear sales, brand activations, and the credibility that comes from being the shop the Montreal inline community trusts.</p>
+        <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);margin-bottom:20px">
+          <div style="padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:10px">
+            <div style="font-size:12px;color:var(--muted)">Equipment rental desk at festival gate</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">SPC only</div>
+          </div>
+          <div style="padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:10px">
+            <div style="font-size:12px;color:var(--muted)">Pop-up gear store inside the festival perimeter</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">SPC only</div>
+          </div>
+          <div style="padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:10px">
+            <div style="font-size:12px;color:var(--muted)">Add to SPC competition prize pool</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">SPC or cash</div>
+          </div>
+          <div style="padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:10px">
+            <div style="font-size:12px;color:var(--muted)">Named catch guard equipment supplier</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">Exclusive</div>
+          </div>
+          <div style="padding:12px 16px;background:var(--bg2);display:grid;grid-template-columns:1fr auto;gap:10px">
+            <div style="font-size:12px;color:var(--muted)">Permanent inline store — future Skatepark City franchise cities</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">Right of first refusal</div>
+          </div>
+        </div>
+        <div style="padding:16px 18px;border:1px solid rgba(245,226,51,.3);background:rgba(245,226,51,.05)">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--yellow);margin-bottom:6px">THE PITCH LINE</div>
+          <p style="font-size:13px;color:var(--white);line-height:1.7;font-style:italic">"You are Montreal's inline shop. We are building Montreal's inline festival. Everything you stock is what our athletes wear. Everything your customers want is what our city is. Let's run this together."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRANDS SOLO STOCKS -->
+    <div style="padding:24px 28px;border:1px solid var(--border);background:var(--bg2)" class="reveal">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--yellow);margin-bottom:16px;text-transform:uppercase">Brands Solo Inline stocks — all relevant to Skatepark City inline category</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">USD Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Rollerblade</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Powerslide</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Razors Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">K2 Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Seba Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">FR Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">IQON Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Kaltik</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Them Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Bont Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Ground Control</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Kizer Frames</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Undercover Wheels</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Eulogy Wheels</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Dead Wheels</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">BONES Bearings</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">G-Form</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Pro-Tec</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Ennui</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Impala Skate</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Roces</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Wizard Skating</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Mesmer Skates</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">Rollance</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">50/50 Frames</span>
+        <span style="font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border:1px solid rgba(245,226,51,.2);color:var(--muted)">+ more</span>
+      </div>
+    </div>
+  </div>
 
   </div><!-- end loc-mt -->
 
@@ -2616,9 +2704,9 @@ reveals.forEach(r=>io.observe(r));
 
 // LOCATION TABS
 function switchLoc(loc){
-  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt'};
-  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt'};
-  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)'};
+  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo'};
+  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo'};
+  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)'};
   Object.values(panels).forEach(id=>document.getElementById(id).style.display='none');
   Object.values(tabs).forEach(id=>{
     const b=document.getElementById(id);
