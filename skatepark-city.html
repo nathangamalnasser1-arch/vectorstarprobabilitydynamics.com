@@ -294,6 +294,7 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <li><a href="#locations">Conchagua</a></li>
     <li><a href="#locations" onclick="setTimeout(()=>switchLoc('mt'),10)">Mtl Pop-Up</a></li>
     <li><a href="#locations" onclick="setTimeout(()=>switchLoc('solo'),10)" style="color:#f5e233">Solo Inline</a></li>
+    <li><a href="#locations" onclick="setTimeout(()=>switchLoc('gl'),10)" style="color:#60a5fa">Greenland?</a></li>
     <li><a href="#coin">SPC Coin</a></li>
     <li><a href="#brands">Brands</a></li>
     <li><a href="#investment">Investors</a></li>
@@ -358,6 +359,10 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <button id="ltab-solo" onclick="switchLoc('solo')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
       SOLO INLINE — SPONSOR
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Montreal's #1 Inline Shop · Festival Partner · solo-inline.com</div>
+    </button>
+    <button id="ltab-gl" onclick="switchLoc('gl')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
+      GREENLAND — PHASE ?
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Nuuk · Permafrost · Negotiating with 3 governments · TBD</div>
     </button>
   </div>
 
@@ -958,6 +963,127 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
       </div>
     </div>
   </div>
+
+  <!-- GREENLAND PANEL -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="loc-gl" style="display:none">
+
+    <!-- HERO STATS -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#60a5fa;line-height:1">0–3,000m</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Elevation · it is a glacier</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#60a5fa;line-height:1">−30°C</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Average winter · not ideal</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#60a5fa;line-height:1">TBD</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Land price · ask 3 governments</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#60a5fa;line-height:1">Phase ?</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Timeline · watching the news</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#60a5fa;line-height:1">836K km²</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Available land · mostly ice</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;margin-bottom:48px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#60a5fa;margin-bottom:24px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">The Greenland thesis</div>
+
+        <div style="border-left:3px solid #60a5fa;padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Everyone Else Is Buying It</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The United States wants it. Denmark says no. Greenland says they want independence. Three governments are currently arguing about who owns 836,000 km² of the world's largest island. In our assessment, this creates a land acquisition window. We are monitoring the situation closely. We have not made an offer yet. We are, however, prepared to.</p>
+        </div>
+
+        <div style="border-left:3px solid #60a5fa;padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">The Climate Challenge</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Greenland's average winter temperature is −30°C. This presents some challenges for outdoor skateboarding. However, Nuuk, the capital, sits at 64°N — comparable to Reykjavik — and reaches 10°C in summer. This gives us approximately 6 weeks of viable outdoor skating per year. We consider this acceptable for a city of 100,000 people. The indoor dome will be very large.</p>
+        </div>
+
+        <div style="border-left:3px solid #60a5fa;padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">The Gravity-Powered Delivery System</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Our standard delivery model uses citizens on rollerblades to guide gravity-powered pallet sleds. In Greenland, we have provisionally replaced rollerblading citizens with dog sleds. The counterweight return system remains unchanged. The dogs are not paid in SPC. This is under review.</p>
+        </div>
+
+        <div style="border-left:3px solid #60a5fa;padding-left:20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">The Ice Sheet Question</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The Greenland ice sheet covers 80% of the island and is up to 3km thick. Our structural engineering team has confirmed that 3D-printed concrete does not adhere well to permafrost. We are exploring solutions. Current leading candidate: build on the southern coast, which is technically ice-free and has fjords. The fjords are scenic and will be good for content.</p>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Site analysis — Greenland vs other SPC locations</div>
+        <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);margin-bottom:28px">
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Year-round outdoor skating</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">El Salvador ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">Greenland ✗</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Temperature above 0°C</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">El Salvador ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#f5e233">Greenland 6wks/yr</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Land cost per m²</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">$1–4 ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#60a5fa">Ask Trump</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Delivery system viable</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">Rollerblades ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#f5e233">Dog sleds TBC</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Government to negotiate with</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">1 ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">3 (and counting)</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">3D print on permafrost</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">N/A ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">Under review</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Polar bears</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">None ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">Yes</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Fjord content potential</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Low</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">Extremely high ✓</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">International media attention</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">High ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">Maximum ✓</div>
+          </div>
+        </div>
+
+        <!-- WHAT WE NEED -->
+        <div style="padding:24px 28px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.04)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#60a5fa;margin-bottom:12px">What we need to proceed</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:#60a5fa;flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">Clarity on who owns Greenland — any of the three parties will do</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:#60a5fa;flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">A structural engineer willing to work on permafrost</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:#60a5fa;flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">A warm-weather lawyer who will travel to Nuuk in February</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:#60a5fa;flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">Resolution of the dog sled / SPC wage policy question</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:#60a5fa;flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">One investor brave enough to put money into a skatepark on a glacier</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM SERIOUS BIT -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)">
+      <div style="background:var(--bg2);padding:28px 32px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#60a5fa;margin-bottom:12px;text-transform:uppercase">The part that is actually not a joke</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9">Southern Greenland around Nuuk has a fjord coastline, genuine extreme sports tourism (ice climbing, dog sledding, snowkiting), a population of 56,000 that punches well above its weight in outdoor culture, and a government actively seeking economic development partners that are not the United States. A winter extreme sports city there is not impossible. It is just very cold and very far. We are keeping the tab open.</p>
+      </div>
+      <div style="background:var(--bg3);padding:28px 32px;border-left:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#60a5fa;margin-bottom:12px;text-transform:uppercase">Current status</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:12px 16px;border:1px solid rgba(96,165,250,.2);background:rgba(96,165,250,.05);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6">Phase: <span style="color:#60a5fa">Watching the news</span></div>
+          <div style="padding:12px 16px;border:1px solid rgba(96,165,250,.2);background:rgba(96,165,250,.05);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6">Land acquisition: <span style="color:#60a5fa">Pending geopolitical resolution</span></div>
+          <div style="padding:12px 16px;border:1px solid rgba(96,165,250,.2);background:rgba(96,165,250,.05);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6">SPC coin economy: <span style="color:#60a5fa">Will work fine in any temperature</span></div>
+          <div style="padding:12px 16px;border:1px solid rgba(96,165,250,.2);background:rgba(96,165,250,.05);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6">GoFundMe: <span style="color:#60a5fa">We will set one up if you donate seriously</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end loc-gl -->
 
   </div><!-- end loc-mt -->
 
@@ -2704,9 +2830,9 @@ reveals.forEach(r=>io.observe(r));
 
 // LOCATION TABS
 function switchLoc(loc){
-  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo'};
-  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo'};
-  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)'};
+  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo',gl:'loc-gl'};
+  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo',gl:'ltab-gl'};
+  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)',gl:'#60a5fa'};
   Object.values(panels).forEach(id=>document.getElementById(id).style.display='none');
   Object.values(tabs).forEach(id=>{
     const b=document.getElementById(id);
