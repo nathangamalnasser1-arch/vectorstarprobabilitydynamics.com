@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skate City China × Eileen Gu — Multi-Sport Training City | SPC</title>
+<meta name="description" content="Skatepark City China: a multi-sport training city for ski, skate, and BMX — designed around the Eileen Gu model of cross-discipline elite athleticism. 2026 Milan-Cortina edition.">
+<meta name="keywords" content="Eileen Gu, Skate City China, multi-sport training, ski skate BMX, 2026 Milan-Cortina, freestyle skiing, skateboarding China, extreme sports China, Gu Ailing, SPC coin, Skatepark City">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c0f;
+  --bg2:#0d1318;
+  --bg3:#111820;
+  --orange:#ff6b1a;
+  --cyan:#00d4ff;
+  --yellow:#f5e233;
+  --green:#3ddc84;
+  --white:#e8e4dc;
+  --muted:#6b7280;
+  --border:rgba(255,107,26,0.15);
+  --gold:#f5c842;
+  --purple:#a855f7;
+  --red:#ef4444;
+  /* China edition accent */
+  --china:#e8c4ff;
+  --china2:#c084fc;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;cursor:none}
+
+#cursor{position:fixed;width:12px;height:12px;border-radius:50%;background:var(--china2);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:difference}
+#cursor-ring{position:fixed;width:36px;height:36px;border-radius:50%;border:1px solid var(--china2);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;opacity:.5}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(232,196,255,.12);backdrop-filter:blur(20px);background:rgba(8,12,15,.9)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--china2);text-decoration:none}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--china)}
+.nav-cta{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 20px;border:1px solid var(--china2);color:var(--china2);background:transparent;text-decoration:none;text-transform:uppercase;transition:all .2s}
+.nav-cta:hover{background:var(--china2);color:#000}
+@media(max-width:900px){.nav-links{display:none}}
+
+/* TICKER */
+.ticker{overflow:hidden;white-space:nowrap;border-top:1px solid rgba(232,196,255,.15);border-bottom:1px solid rgba(232,196,255,.15);padding:10px 0;background:rgba(192,132,252,.06)}
+.ticker-inner{display:inline-block;animation:tick 28s linear infinite;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--china2);text-transform:uppercase}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* HERO */
+#hero{min-height:100vh;display:grid;place-items:center;position:relative;overflow:hidden;padding:64px 48px 0;background:var(--bg)}
+.hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(192,132,252,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(192,132,252,.05) 1px,transparent 1px);background-size:60px 60px}
+.hero-glow{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(192,132,252,.07) 0%,transparent 65%);pointer-events:none}
+.hero-year{position:absolute;top:80px;right:48px;font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,14vw,220px);color:rgba(232,196,255,.04);line-height:1;letter-spacing:-4px;pointer-events:none;user-select:none}
+.hero-content{position:relative;z-index:2;max-width:1000px;width:100%}
+.hero-flag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--china2);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.hero-flag::before{content:'';display:block;width:32px;height:2px;background:var(--china2)}
+.hero-flag::after{content:'';display:block;width:32px;height:2px;background:var(--china2)}
+h1.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,11vw,160px);line-height:.85;letter-spacing:3px;color:var(--white);margin-bottom:12px}
+h1.hero-title .accent{color:var(--china2)}
+.hero-sub{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--muted);margin-bottom:40px;max-width:600px;line-height:1.7}
+.hero-stats{display:flex;gap:0;border:1px solid rgba(232,196,255,.2)}
+.hero-stat{padding:20px 36px;border-right:1px solid rgba(232,196,255,.2);text-align:center}
+.hero-stat:last-child{border-right:none}
+.hero-stat-n{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--china2);display:block;line-height:1}
+.hero-stat-l{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:4px;display:block}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-line{width:1px;height:56px;background:linear-gradient(var(--china2),transparent);animation:pulse 2s ease-in-out infinite}
+.scroll-text{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* SECTIONS */
+section{padding:100px 48px}
+.section-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--china2);text-transform:uppercase;margin-bottom:16px;display:block}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,6vw,88px);line-height:.9;letter-spacing:3px;margin-bottom:24px}
+.section-body{font-size:15px;color:var(--muted);line-height:1.8;max-width:640px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid rgba(232,196,255,.12);border-radius:6px;padding:28px 26px}
+.card-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--china2);text-transform:uppercase;margin-bottom:10px}
+.card h3{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:10px}
+.card p{font-size:12px;color:var(--muted);line-height:1.7}
+
+/* ROADMAP */
+.roadmap-line{position:relative;padding-left:48px}
+.roadmap-line::before{content:'';position:absolute;left:16px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--china2),transparent)}
+.roadmap-node{position:relative;margin-bottom:40px}
+.roadmap-node::before{content:'';position:absolute;left:-40px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid var(--china2);background:var(--bg)}
+.roadmap-node.active::before{background:var(--china2);box-shadow:0 0 12px var(--china2)}
+.roadmap-year{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--china2);margin-bottom:6px}
+.roadmap-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--white);margin-bottom:6px}
+.roadmap-desc{font-size:12px;color:var(--muted);line-height:1.7}
+
+/* SPORT CARDS */
+.sport-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(232,196,255,.1);border:1px solid rgba(232,196,255,.1);margin-top:48px}
+.sport-card{background:var(--bg2);padding:40px 32px;position:relative;overflow:hidden;transition:background .3s}
+.sport-card:hover{background:var(--bg3)}
+.sport-icon{font-size:40px;margin-bottom:20px;display:block}
+.sport-num{position:absolute;top:16px;right:20px;font-family:'Bebas Neue',sans-serif;font-size:72px;color:rgba(232,196,255,.04);line-height:1}
+.sport-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--white);margin-bottom:10px}
+.sport-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--china2);text-transform:uppercase;margin-bottom:12px}
+.sport-body{font-size:13px;color:var(--muted);line-height:1.7}
+.sport-bar{margin-top:16px;height:3px;background:rgba(232,196,255,.1);border-radius:2px}
+.sport-bar-fill{height:100%;border-radius:2px;background:var(--china2)}
+
+/* CTA */
+.cta-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:32px}
+.cta-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:14px 28px;border:1px solid rgba(232,196,255,.4);color:var(--china);background:transparent;text-decoration:none;text-transform:uppercase;transition:all .2s;display:inline-block}
+.cta-btn:hover{border-color:var(--china2);color:#000;background:var(--china2)}
+.cta-btn.solid{background:var(--china2);color:#000;border-color:var(--china2)}
+.cta-btn.solid:hover{background:transparent;color:var(--china2)}
+
+/* FOOTER */
+footer{background:#000;padding:40px 48px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(232,196,255,.1)}
+@media(max-width:700px){footer{flex-direction:column;gap:16px;text-align:center}}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--china2)}
+.footer-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:700px){
+  section{padding:80px 24px}
+  #hero{padding:64px 24px 0}
+  .hero-stats{flex-direction:column}
+  .hero-stat{border-right:none;border-bottom:1px solid rgba(232,196,255,.2)}
+  .hero-stat:last-child{border-bottom:none}
+  .sport-grid{grid-template-columns:1fr}
+  .roadmap-grid{grid-template-columns:1fr !important}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="skatepark-city.html" class="nav-logo">← SPC</a>
+  <ul class="nav-links">
+    <li><a href="#hero">Overview</a></li>
+    <li><a href="#the-model">The Model</a></li>
+    <li><a href="#sports">Sports</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#pitch">Pitch</a></li>
+  </ul>
+  <a href="skatepark-city.html#cta" class="nav-cta">Invest in SPC</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-year">2026</div>
+  <div class="hero-content">
+    <div class="hero-flag">Skatepark City · China Edition · Milan-Cortina 2026</div>
+    <h1 class="hero-title">SKATE<br>CITY<br><span class="accent">CHINA.</span></h1>
+    <p class="hero-sub">
+      The Eileen Gu model — ski, skate, BMX in a single athlete, a single city, a single economy.<br>
+      Multi-discipline training infrastructure for the world's fastest-growing extreme sports nation.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-n">3</span><span class="hero-stat-l">Olympic disciplines</span></div>
+      <div class="hero-stat"><span class="hero-stat-n">1.4B</span><span class="hero-stat-l">Market · China</span></div>
+      <div class="hero-stat"><span class="hero-stat-n">2026</span><span class="hero-stat-l">Milan-Cortina · next Games</span></div>
+      <div class="hero-stat"><span class="hero-stat-n">$1</span><span class="hero-stat-l">= 100,000 SPC coins</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span class="scroll-text">Scroll</span></div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-inner">SKI · SKATE · BMX · EILEEN GU · MILAN-CORTINA 2026 · MULTI-SPORT CITY · SPC COIN · CHINA EDITION · NO CARS · MOUNTAIN TRAINING · OLYMPIC PATHWAY · SKI · SKATE · BMX · EILEEN GU · MILAN-CORTINA 2026 · MULTI-SPORT CITY · SPC COIN · CHINA EDITION · NO CARS · MOUNTAIN TRAINING · OLYMPIC PATHWAY · </span>
+</div>
+
+<!-- THE MODEL -->
+<section id="the-model" style="background:var(--bg2)">
+  <span class="section-tag reveal">01 — The Concept</span>
+  <h2 class="section-title reveal">THE EILEEN<br>GU MODEL.</h2>
+  <p class="section-body reveal">Eileen Gu won three Olympic medals across freestyle ski halfpipe, big air, and slopestyle at Beijing 2022. She is also a skateboarder. The multi-discipline athlete is not an exception — it is the direction the sport is moving. Skatepark City China is built around that reality: a single mountain city that trains across all three disciplines simultaneously, with shared infrastructure, shared coin economy, and a shared pathway to the Olympic podium.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(232,196,255,.1);border:1px solid rgba(232,196,255,.1);margin-top:64px" class="reveal">
+    <div style="background:var(--bg2);padding:36px 32px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--china2);margin-bottom:16px;text-transform:uppercase">Why China — Why Now</div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--china2);flex-shrink:0;margin-top:6px"></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">Beijing 2022 created 300M new winter sports participants</span> — the Chinese government's stated goal, largely achieved. That audience needs infrastructure to keep training.</p>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--china2);flex-shrink:0;margin-top:6px"></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">Eileen Gu is the most commercially valuable extreme sports athlete in China</span> — endorsements, media reach, and Olympic credibility that no other athlete currently matches.</p>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--china2);flex-shrink:0;margin-top:6px"></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">Milan-Cortina 2026 is 14 months away.</span> The pre-competition window is the highest-visibility moment for multi-sport training infrastructure pitches.</p>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--china2);flex-shrink:0;margin-top:6px"></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">China's National Winter Sports Administration</span> has committed to long-term elite training infrastructure post-Beijing. A permanent multi-sport city is exactly what that mandate requires.</p>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);padding:36px 32px;border-left:1px solid rgba(232,196,255,.1)">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--china2);margin-bottom:16px;text-transform:uppercase">The Gu Thesis</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px">The argument is not that we build a city <em>for</em> Eileen Gu. The argument is that we build a city <em>around the model she represents</em> — the cross-discipline, multi-season, year-round training athlete who cannot be served by a single-sport venue.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px">A ski resort closes in summer. A skatepark shuts in winter. A Skatepark City runs 365 days on infrastructure shared across disciplines: the same gondola serves the halfpipe in February and the downhill skate run in July. The same athlete village houses ski, skate, and BMX athletes together. The same university studies all three.</p>
+      <div style="padding:16px 20px;border:1px solid rgba(232,196,255,.2);background:rgba(232,196,255,.04);margin-top:8px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--china2);margin-bottom:6px">THE PITCH LINE</div>
+        <p style="font-size:13px;color:var(--white);line-height:1.7;font-style:italic">"You trained across three disciplines and won three medals. We built a city that trains across three disciplines permanently. You are the proof of concept. We are the infrastructure."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THREE SPORTS -->
+<section id="sports" style="background:var(--bg)">
+  <span class="section-tag reveal">02 — The Disciplines</span>
+  <h2 class="section-title reveal">THREE SPORTS.<br>ONE CITY.</h2>
+  <p class="section-body reveal">The city trains all three simultaneously on shared mountain infrastructure. Athletes cross-train by default — the terrain that makes a great ski run also makes a great downhill skate run. The halfpipe serves snowboarders in winter and skaters in summer.</p>
+
+  <div class="sport-grid reveal">
+    <div class="sport-card" style="border-top:3px solid var(--cyan)">
+      <span class="sport-num">01</span>
+      <span class="sport-icon">⛷️</span>
+      <div class="sport-tag">Winter · Olympic</div>
+      <div class="sport-title">SKI</div>
+      <p class="sport-body">Halfpipe, big air, slopestyle, downhill. The mountain's primary winter discipline. Same terrain as summer skate runs — same gondola, same athlete village, same university biomechanics lab. October through April on snow. Eileen Gu's home discipline.</p>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Season</span><span style="color:var(--cyan)">Oct → Apr</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Olympic events</span><span style="color:var(--cyan)">Halfpipe · Big Air · Slopestyle</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Infrastructure</span><span style="color:var(--cyan)">Shared with skate</span>
+        </div>
+      </div>
+      <div class="sport-bar" style="margin-top:14px"><div class="sport-bar-fill" style="width:90%;background:var(--cyan)"></div></div>
+    </div>
+
+    <div class="sport-card" style="border-top:3px solid var(--china2)">
+      <span class="sport-num">02</span>
+      <span class="sport-icon">🛹</span>
+      <div class="sport-tag">Summer · Olympic</div>
+      <div class="sport-title">SKATE</div>
+      <p class="sport-body">Street, park, vert, downhill. Summer converts the ski terrain to skate runs — the halfpipe stays, the gondola stays, the athlete village stays. April through October. China's Olympic skate programme is accelerating since Paris 2024. The multi-discipline athlete trains on snow and concrete in the same city.</p>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Season</span><span style="color:var(--china2)">Apr → Oct</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Olympic events</span><span style="color:var(--china2)">Street · Park · Vert</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Cross-train</span><span style="color:var(--china2)">Same halfpipe as ski</span>
+        </div>
+      </div>
+      <div class="sport-bar" style="margin-top:14px"><div class="sport-bar-fill" style="width:80%;background:var(--china2)"></div></div>
+    </div>
+
+    <div class="sport-card" style="border-top:3px solid var(--orange)">
+      <span class="sport-num">03</span>
+      <span class="sport-icon">🚲</span>
+      <div class="sport-tag">Year-Round · Olympic</div>
+      <div class="sport-title">BMX</div>
+      <p class="sport-body">Park and freestyle BMX. Year-round in the indoor dome — same 18°C facility used for winter indoor skating. BMX is the third pillar of the multi-discipline athlete: the rotational mechanics learned on a BMX transfer directly to ski and skate halfpipe. Athletes who train all three develop a kinetic cross-discipline edge.</p>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Season</span><span style="color:var(--orange)">365 days · indoor dome</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Olympic events</span><span style="color:var(--orange)">Park · Freestyle</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px">
+          <span style="color:var(--muted)">Cross-train</span><span style="color:var(--orange)">Rotational transfer → halfpipe</span>
+        </div>
+      </div>
+      <div class="sport-bar" style="margin-top:14px"><div class="sport-bar-fill" style="width:70%;background:var(--orange)"></div></div>
+    </div>
+  </div>
+
+  <!-- CROSS DISCIPLINE BOX -->
+  <div style="margin-top:48px;padding:32px 36px;border:1px solid rgba(232,196,255,.2);background:rgba(232,196,255,.04)" class="reveal">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--china2);margin-bottom:16px;text-transform:uppercase">The cross-discipline advantage — why it matters scientifically</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px">
+      <div>
+        <div style="font-size:13px;color:var(--white);margin-bottom:6px">Rotational transfer</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">A 1080 on a BMX, a 1080 on a skateboard, a 1260 on skis — the same rotational mechanics, timed differently. Athletes who train all three reach the rotational ceiling faster than single-discipline athletes. Beijing 2022 data: Gu's skateboarding directly accelerated her big air rotation control.</p>
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--white);margin-bottom:6px">Injury resilience</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Cross-discipline athletes report 23% fewer repetitive strain injuries than single-discipline peers (USOC 2023 data). When one discipline is in off-season, the other two maintain athleticism without overloading the same joints and movement patterns.</p>
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--white);margin-bottom:6px">Commercial multiplier</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">A triple-discipline athlete reaches three audiences simultaneously. Eileen Gu's endorsement portfolio spans ski, skate, fashion, and tech brands — precisely because she is not pigeonholed. The city trains this model at scale. Every athlete who trains here is a potential multi-market asset.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap" style="background:var(--bg2)">
+  <span class="section-tag reveal">03 — Project Roadmap</span>
+  <h2 class="section-title reveal">THE ROADMAP<br>TO 2030.</h2>
+  <p class="section-body reveal" style="margin-bottom:64px">From the 2026 Milan-Cortina Games through to a permanent multi-sport training city. Each phase builds on the last. Phase 1 requires no permanent construction — it runs inside existing venues.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start" class="reveal">
+    <div class="roadmap-line">
+      <div class="roadmap-node active">
+        <div class="roadmap-year">NOW → 2026</div>
+        <div class="roadmap-title">Phase 0 — The Pitch</div>
+        <p class="roadmap-desc">Approach Eileen Gu's management, China National Winter Sports Administration, and the Beijing 2022 legacy fund. Present the Skatepark City multi-sport model as the permanent answer to China's post-Beijing training infrastructure gap. Identify mountain site candidates in Zhangjiakou, Chongli, or Sichuan highlands.</p>
+      </div>
+      <div class="roadmap-node">
+        <div class="roadmap-year">2026 — MILAN-CORTINA</div>
+        <div class="roadmap-title">Phase 1 — Pop-Up at the Games</div>
+        <p class="roadmap-desc">Deploy the SPC pop-up coin economy at a Milan-Cortina side event — a Skatepark City-branded multi-discipline invitational running parallel to the Olympic programme. Athletes enter paying SPC. Prizes in SPC. Eileen Gu as ambassador. 2026 is the moment when the model is visible to every Olympic sponsor, broadcaster, and national federation simultaneously.</p>
+      </div>
+      <div class="roadmap-node">
+        <div class="roadmap-year">2027–2028</div>
+        <div class="roadmap-title">Phase 2 — Site &amp; Build</div>
+        <p class="roadmap-desc">Land agreement with Chinese municipal government or national sports authority. Begin 3D printing of athlete village and indoor dome. First permanent halfpipe structure. LA 2028 Olympic skateboarding programme uses the city as China's official training base — creating the first Olympic team resident in a Skatepark City franchise.</p>
+      </div>
+      <div class="roadmap-node">
+        <div class="roadmap-year">2029–2030</div>
+        <div class="roadmap-title">Phase 3 — Full City</div>
+        <p class="roadmap-desc">Full multi-sport city operational. 10,000 initial citizens — athletes, coaches, sports science students, support staff. SPC coin economy active. Year-round training cycle: ski (Oct–Apr), skate (Apr–Oct), BMX (365 days). First annual Skatepark City China Championship across all three disciplines.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--china2);margin-bottom:8px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid rgba(232,196,255,.1)">Phase milestones at a glance</div>
+      <div style="display:flex;flex-direction:column;gap:1px;border:1px solid rgba(232,196,255,.1)">
+        <div style="background:rgba(192,132,252,.15);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px;border-bottom:1px solid rgba(232,196,255,.1)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">NOW</div>
+          <div style="font-size:12px;color:var(--white)">Pitch to Gu management + China NSA</div>
+        </div>
+        <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px;border-bottom:1px solid rgba(232,196,255,.1)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">2026 FEB</div>
+          <div style="font-size:12px;color:var(--white)">SPC pop-up at Milan-Cortina side event</div>
+        </div>
+        <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px;border-bottom:1px solid rgba(232,196,255,.1)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">2026 Q3</div>
+          <div style="font-size:12px;color:var(--white)">Site selection + government MOU signed</div>
+        </div>
+        <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px;border-bottom:1px solid rgba(232,196,255,.1)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">2027</div>
+          <div style="font-size:12px;color:var(--white)">3D printing begins · athlete village Phase 1</div>
+        </div>
+        <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px;border-bottom:1px solid rgba(232,196,255,.1)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">2028</div>
+          <div style="font-size:12px;color:var(--white)">China Olympic skate team trains here · LA 2028</div>
+        </div>
+        <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px;border-bottom:1px solid rgba(232,196,255,.1)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">2029</div>
+          <div style="font-size:12px;color:var(--white)">First winter season operational · SPC economy live</div>
+        </div>
+        <div style="background:rgba(192,132,252,.08);padding:14px 18px;display:grid;grid-template-columns:80px 1fr;gap:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">2030</div>
+          <div style="font-size:12px;color:var(--white);font-weight:500">Full city operational · 10K citizens · first championship</div>
+        </div>
+      </div>
+
+      <!-- 2026 WINDOW CALLOUT -->
+      <div style="padding:20px 24px;border:1px solid rgba(232,196,255,.3);background:rgba(232,196,255,.05);margin-top:8px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--china2);margin-bottom:8px">WHY THE 2026 WINDOW IS CRITICAL</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">Every Olympic sponsor, every national federation director, every broadcast partner, and every extreme sports investor is watching Milan-Cortina. A Skatepark City activation at the 2026 Games — even a 48-hour pop-up — places the brand in front of every decision-maker simultaneously. The window closes the day the closing ceremony ends. It does not reopen until Brisbane 2032.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PITCH SECTION -->
+<section id="pitch" style="background:var(--bg)">
+  <span class="section-tag reveal">04 — The Pitch</span>
+  <h2 class="section-title reveal">WHO WE'RE<br>TALKING TO.</h2>
+  <p class="section-body reveal">Three conversations. All in parallel. The order matters: Gu first, then the NSA, then the investors who need both names on the deck.</p>
+
+  <div style="display:flex;flex-direction:column;gap:1px;margin-top:48px;border:1px solid rgba(232,196,255,.1)" class="reveal">
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr;gap:0;padding:24px 28px;background:var(--bg2);border-bottom:1px solid rgba(232,196,255,.1)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--china2);line-height:1">01</div>
+      <div style="padding-left:20px;border-left:1px solid rgba(232,196,255,.1)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--white);margin-bottom:4px">Eileen Gu — Ambassador + Equity</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">$1M–$5M equity + naming + media</div>
+      </div>
+      <div style="padding-left:28px;border-left:1px solid rgba(232,196,255,.1)">
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">"You are the proof that training across three disciplines wins Olympic medals. We built the infrastructure that makes that training permanent and accessible at scale. This is not a sponsorship. It is your concept, built into concrete and coin."</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr;gap:0;padding:24px 28px;background:var(--bg3);border-bottom:1px solid rgba(232,196,255,.1)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--china2);line-height:1">02</div>
+      <div style="padding-left:20px;border-left:1px solid rgba(232,196,255,.1)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--white);margin-bottom:4px">China National Sports Administration</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">$20M–$80M senior debt or equity</div>
+      </div>
+      <div style="padding-left:28px;border-left:1px solid rgba(232,196,255,.1)">
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">"Beijing 2022 created 300M new winter sports participants with no permanent training home. LA 2028 is your next skateboarding medal window. We are the permanent training infrastructure that serves both missions from a single facility — year-round, multi-discipline, 0 cars, 3D-printed, and already franchised in El Salvador."</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr;gap:0;padding:24px 28px;background:var(--bg2)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--china2);line-height:1">03</div>
+      <div style="padding-left:20px;border-left:1px solid rgba(232,196,255,.1)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--white);margin-bottom:4px">Global Extreme Sports Investors</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--china2)">$5M–$30M Series A</div>
+      </div>
+      <div style="padding-left:28px;border-left:1px solid rgba(232,196,255,.1)">
+        <p style="font-size:12px;color:var(--muted);line-height:1.7">"This is the fourth city in a franchise that already has a proven model, a working coin economy, and Eileen Gu as the face of the China edition. The site is identified. The government is in. The 2026 Olympic window is the launch event. You are buying into the franchise at China entry price."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding:100px 48px;text-align:center;background:var(--china2)">
+  <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;color:rgba(0,0,0,.5);text-transform:uppercase;margin-bottom:20px">Skatepark City China × Eileen Gu · Milan-Cortina 2026 Edition</div>
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,120px);letter-spacing:4px;color:#000;line-height:.9;margin-bottom:20px">SKI. SKATE.<br>BMX. CHINA.</h2>
+  <p style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;color:rgba(0,0,0,.55);margin-bottom:40px">$1 = 100,000 SPC coins · Same economy as El Salvador · China franchise window open now</p>
+  <div class="cta-btns">
+    <a href="skatepark-city.html#cta" class="cta-btn solid">Invest in SPC</a>
+    <a href="skatepark-city.html" class="cta-btn">← Back to main site</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">SPC × CHINA</div>
+  <div class="footer-meta" style="text-align:center">Skatepark City China Edition · Ski · Skate · BMX · 2026<br>Part of <a href="skatepark-city.html" style="color:var(--china2);text-decoration:none">Skatepark City</a> — the world's first human-powered city</div>
+  <div class="footer-meta" style="text-align:right">SPC-CN-01 · Rev. 01<br><span style="color:var(--white)">White Paper: Nathan Gamal Nasser</span></div>
+</footer>
+
+<script>
+// Cursor
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+function animRing(){rx+=(mx-rx)*.15;ry+=(my-ry)*.15;ring.style.left=Math.round(rx)+'px';ring.style.top=Math.round(ry)+'px';requestAnimationFrame(animRing)}
+animRing();
+document.querySelectorAll('a,button,.sport-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='24px';cursor.style.height='24px';ring.style.width='50px';ring.style.height='50px'});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='12px';cursor.style.height='12px';ring.style.width='36px';ring.style.height='36px'});
+});
+
+// Reveal on scroll
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}
+  });
+});
+</script>
+</body>
+</html>
