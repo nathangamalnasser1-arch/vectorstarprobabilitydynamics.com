@@ -222,6 +222,9 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
 .mode-desc{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
 
 /* MOBILE RESPONSIVE */
+/* ── PREVENT HORIZONTAL SCROLL ── */
+html,body{overflow-x:hidden;max-width:100%}
+
 @media(max-width:700px){
   .gfm-grid{grid-template-columns:1fr 1fr !important}
 }
@@ -232,20 +235,62 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
   nav{padding:0 24px}
   .nav-links{display:none}
   section{padding:80px 24px}
-  .city-layout,.delivery-visual,.house-grid,.stadium-layout,.charter-content{grid-template-columns:1fr;gap:48px}
-  .feature-grid,.invest-grid{grid-template-columns:1fr}
+  #hero{padding:64px 20px 0;overflow:hidden}
+  /* Hero title — prevent clipping */
+  h1.hero-title{font-size:clamp(40px,12vw,90px);letter-spacing:1px;word-break:break-word}
+  .hero-year{display:none}
+  .hero-sub{font-size:11px;letter-spacing:1px}
+  /* Hero stats stacked */
   .hero-stats{flex-direction:column}
   .hero-stat{border-right:none;border-bottom:1px solid var(--border)}
   .hero-stat:last-child{border-bottom:none}
-  h1.hero-title{font-size:clamp(60px,18vw,120px)}
-  .license-tier{grid-template-columns:60px 1fr;gap:16px}
+  /* Location tabs — wrap to 2-col grid */
+  .loc-tabs{flex-wrap:wrap !important}
+  .loc-tabs button{flex:1 1 50% !important;min-width:50%;border-left:none !important;border-bottom:1px solid var(--border) !important}
+  /* Attribute selector overrides for inline repeat() grids */
+  [style*="repeat(5,1fr)"]{grid-template-columns:1fr 1fr 1fr !important}
+  [style*="repeat(4,1fr)"]{grid-template-columns:1fr 1fr !important}
+  [style*="repeat(3,1fr)"]{grid-template-columns:1fr !important}
+  [style*="1fr 1fr 1fr"]{grid-template-columns:1fr !important}
+  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+  /* Exceptions — keep 2-col where it still fits */
+  .scale-content.active[style*="1fr 1fr"]{grid-template-columns:1fr 1fr !important}
+  .modes-grid{grid-template-columns:1fr 1fr !important}
+  /* Named class grids */
+  .city-layout,.delivery-visual,.house-grid,.stadium-layout,.charter-content{grid-template-columns:1fr !important;gap:32px}
+  .feature-grid,.invest-grid{grid-template-columns:1fr !important}
+  .uni-programs{grid-template-columns:1fr !important}
+  /* Licensing row */
+  .license-tier{grid-template-columns:60px 1fr !important;gap:16px}
   .tier-speed,.tier-zones{display:none}
-  .modes-grid{grid-template-columns:1fr 1fr}
-  .uni-programs{grid-template-columns:1fr}
-  .scale-content.active{grid-template-columns:1fr 1fr}
+  /* Sport cards grid (inline-styled) */
+  .sport-grid{grid-template-columns:1fr !important}
+  /* Footer */
   footer{flex-direction:column;gap:16px;text-align:center}
+  /* CTA buttons */
+  .cta-btns{flex-direction:column;align-items:center}
+  /* Disable custom cursor on touch */
   #cursor,#cursor-ring{display:none}
   body{cursor:auto}
+  /* Text overflow safety */
+  .section-tag,.section-title,.section-body{word-break:break-word;max-width:100%}
+  /* Ticker contained */
+  .ticker{max-width:100vw;overflow:hidden}
+  /* GoFundMe grid */
+  .gfm-grid{grid-template-columns:1fr 1fr !important}
+}
+@media(max-width:540px){
+  .loc-tabs button{flex:1 1 100% !important;min-width:100%}
+  [style*="repeat(5,1fr)"]{grid-template-columns:1fr 1fr !important}
+  [style*="repeat(4,1fr)"]{grid-template-columns:1fr 1fr !important}
+  [style*="repeat(3,1fr)"]{grid-template-columns:1fr !important}
+  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+  h1.hero-title{font-size:clamp(36px,10vw,72px)}
+  .gfm-grid{grid-template-columns:1fr !important}
+  section{padding:60px 18px}
+  #hero{padding:56px 18px 0}
+  .modes-grid{grid-template-columns:1fr !important}
+  .scale-content.active{grid-template-columns:1fr !important}
 }
 </style>
 </head>
@@ -315,7 +360,7 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
   <p class="section-body reveal" style="margin-bottom:48px">Same city. Same charter. Same concept. Two mountains, two countries, two phases. Pick a site to explore the full city description.</p>
 
   <!-- LOCATION TABS -->
-  <div style="display:flex;gap:0;border:1px solid var(--border);width:100%;margin-bottom:48px" class="reveal">
+  <div style="display:flex;gap:0;border:1px solid var(--border);width:100%;margin-bottom:48px" class="reveal loc-tabs">
     <button id="ltab-sv" onclick="switchLoc('sv')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:var(--orange);color:#000;border:none;cursor:pointer;transition:all .2s;text-align:left;border-right:1px solid var(--border)">
       EL SALVADOR — PHASE 1
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,0,0,.6);margin-top:4px;font-weight:400">Miramundo · Chalatenango · 2,300m · Build 2031</div>
