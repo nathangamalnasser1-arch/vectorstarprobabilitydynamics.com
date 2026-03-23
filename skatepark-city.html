@@ -285,6 +285,7 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <li><a href="#stadium">Stadium</a></li>
     <li><a href="#printers">Printers</a></li>
     <li><a href="#japan">Japan</a></li>
+    <li><a href="#locations">Conchagua</a></li>
     <li><a href="#coin">SPC Coin</a></li>
     <li><a href="#brands">Brands</a></li>
     <li><a href="#investment">Investors</a></li>
@@ -333,9 +334,13 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
       EL SALVADOR — PHASE 1
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,0,0,.6);margin-top:4px;font-weight:400">Miramundo · Chalatenango · 2,300m · Build 2031</div>
     </button>
-    <button id="ltab-jp" onclick="switchLoc('jp')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left">
+    <button id="ltab-jp" onclick="switchLoc('jp')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
       JAPAN — PHASE 2
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Tohoku Mountain · Depop Town · Dual Season · Build 2034</div>
+    </button>
+    <button id="ltab-cu" onclick="switchLoc('cu')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
+      CONCHAGUA — PHASE 3
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Conchagua Volcano · La Unión · Pacific Coast · New Airport · Build 2037</div>
     </button>
   </div>
 
@@ -567,6 +572,127 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     </div>
 
   </div><!-- end loc-jp -->
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- CONCHAGUA PANEL                                          -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="loc-cu" style="display:none">
+
+    <!-- HERO STATS -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1">1,243m</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Volcano summit</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1">26°C</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Avg · tropical coastal</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1">15 min</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">To Pacific Ocean beaches</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1">$0.5–2</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Per m² · volcanic slope</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green);line-height:1">Phase 3</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Build 2037 · 100K target</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;margin-bottom:48px">
+      <div>
+        <!-- WHY CONCHAGUA -->
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:24px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Why Conchagua changes everything</div>
+
+        <div style="border-left:3px solid var(--green);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">The New Pacific Airport</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">El Salvador's new Pacific Airport (Aeropuerto del Pacífico) is being developed in the La Unión region — less than 30 minutes from Conchagua volcano. A second international airport in El Salvador's east changes everything: direct international access without routing through San Salvador, shorter travel times from the US East Coast, South America, and Asia, and new logistics routes for construction supply chains. Conchagua City is the only extreme sports destination in the world that will sit between a new international airport and the Pacific Ocean.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--green);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">La Unión Deep-Water Port</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">La Unión is home to the largest deep-water port on the Pacific coast of Central America. Construction materials, 3D-printing equipment, gondola hardware, and supply chain logistics all arrive by sea at near-zero transport premium. This is not available to Miramundo or Japan Mountain. The port is 20 minutes from the volcano base — meaning the build phase for Conchagua City has the lowest material cost of any site in the franchise.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--green);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Volcanic Terrain — A Different Product</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Conchagua is not a copy of Miramundo — it is a different extreme sports product entirely. Volcanic basalt creates a unique natural surface for downhill runs. The crater and flanks of an active-dormant stratovolcano produce a dramatic visual backdrop unlike any skate city on earth. At 1,243m with a direct Pacific Ocean view, every downhill run ends with the ocean in sight. That visual alone is a content machine — no other skate venue on the planet offers it.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--green);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Pacific Beach Access — A Second Economy</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Fifteen minutes from the volcano base, the Gulf of Fonseca and Pacific beaches provide a second revenue stream that neither Miramundo nor Japan Mountain can offer. Surf, kitesurfing, sailing, and beach culture creates a natural dual-city model — skate on the volcano, surf on the coast. Citizens of Conchagua City are 15 minutes from world-class Pacific surf. That combination has never existed in one destination.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--green);padding-left:20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">El Salvador Government Priority Zone</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">La Unión is a designated Special Economic Zone under the El Salvador government's economic development plan — the same legal framework that accelerated Miramundo's permitting. Tax incentives, reduced regulatory friction, and government infrastructure investment (airport, port, road upgrades) are already in motion. Conchagua City benefits from the wave of investment the El Salvador government has committed to the eastern region. The infrastructure is being built for us before we arrive.</p>
+        </div>
+      </div>
+
+      <div>
+        <!-- CONCHAGUA STATS -->
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Site advantages at a glance</div>
+        <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);margin-bottom:32px">
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">New Pacific Airport (La Unión region)</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">Under dev.</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Airport to volcano base</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">&lt; 30 min</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">La Unión deep-water port</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">20 min</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Pacific Ocean beaches</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">15 min</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Land cost per m²</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">$0.5–2</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Special Economic Zone status</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">Active</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Volcano elevation</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">1,243m</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Terrain type</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">Volcanic basalt</div>
+          </div>
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Year-round temp (base)</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">24–28°C</div>
+          </div>
+          <div style="background:var(--bg3);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px">
+            <div style="font-size:12px;color:var(--muted)">Gulf of Fonseca — 3 nations</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap">ES · HN · NI</div>
+          </div>
+        </div>
+
+        <!-- DUAL ECONOMY -->
+        <div style="border:1px solid rgba(61,220,132,.3);padding:24px 28px;background:rgba(61,220,132,.04);margin-bottom:24px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:12px">The dual economy no other skate city has</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Morning:</span> Downhill skate runs on volcanic basalt, ocean visible from every course</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Afternoon:</span> Pacific surf, Gulf of Fonseca sailing, kitesurfing, beach sessions</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Evening:</span> Volcano summit sunset, 360° Pacific + Gulf panorama — broadcast content gold</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6"><span style="color:var(--white)">Year-round:</span> No seasonal shutdown — tropical climate keeps everything open 365 days</p></div>
+          </div>
+        </div>
+
+        <!-- BUILD COST -->
+        <div style="padding:24px 28px;border:1px solid rgba(61,220,132,.2);background:rgba(61,220,132,.03)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:12px">Build cost advantage — Phase 3</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">By Phase 3, the printer fleet is owned and amortised. La Unión port delivers materials at near-zero transport cost. El Salvador SEZ tax incentives apply. Conchagua City is projected to build at <span style="color:var(--white)">55–60% of Phase 1 per-capita cost</span> — the cheapest city in the franchise, with the best logistical access of all three sites.</p>
+          <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)">
+            <div style="background:var(--bg2);padding:14px 18px"><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green)">55%</div><div style="font-size:11px;color:var(--muted);margin-top:2px">of Phase 1 per-capita cost</div></div>
+            <div style="background:var(--bg2);padding:14px 18px"><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green)">2037</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Target groundbreaking</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:24px 28px;border:1px solid rgba(61,220,132,.2);background:rgba(61,220,132,.04)">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:12px">Why Conchagua is Phase 3, not Phase 1</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9">Conchagua's warmer climate (26°C base) means downhill skating requires covered cooling zones and shade architecture not needed at Miramundo. The Pacific Airport is still in development — by 2037 it will be operational, maximising the access advantage. And the franchise proof needs to exist before the third city launches. Build Miramundo. Prove the model. Build Japan. Prove the international model. Then walk into La Unión with three operating cities and a charter that has already changed two countries. <span style="color:var(--white)">Conchagua is the Pacific gateway — and it will be the most profitable city in the network.</span></p>
+    </div>
+
+  </div><!-- end loc-cu -->
 
 </section>
 
@@ -2091,20 +2217,21 @@ reveals.forEach(r=>io.observe(r));
 function switchLoc(loc){
   const sv=document.getElementById('loc-sv');
   const jp=document.getElementById('loc-jp');
+  const cu=document.getElementById('loc-cu');
   const tbSv=document.getElementById('ltab-sv');
   const tbJp=document.getElementById('ltab-jp');
+  const tbCu=document.getElementById('ltab-cu');
+  [sv,jp,cu].forEach(p=>p.style.display='none');
+  [tbSv,tbJp,tbCu].forEach(b=>{b.style.background='transparent';b.style.color='var(--muted)';b.querySelector('div').style.opacity='.5';});
   if(loc==='sv'){
-    sv.style.display='block';jp.style.display='none';
-    tbSv.style.background='var(--orange)';tbSv.style.color='#000';
-    tbJp.style.background='transparent';tbJp.style.color='var(--muted)';
-    tbJp.querySelector('div').style.opacity='.5';
-    tbSv.querySelector('div').style.opacity='1';
+    sv.style.display='block';
+    tbSv.style.background='var(--orange)';tbSv.style.color='#000';tbSv.querySelector('div').style.opacity='1';
+  } else if(loc==='jp'){
+    jp.style.display='block';
+    tbJp.style.background='var(--cyan)';tbJp.style.color='#000';tbJp.querySelector('div').style.opacity='1';
   } else {
-    sv.style.display='none';jp.style.display='block';
-    tbJp.style.background='var(--cyan)';tbJp.style.color='#000';
-    tbSv.style.background='transparent';tbSv.style.color='var(--muted)';
-    tbSv.querySelector('div').style.opacity='.5';
-    tbJp.querySelector('div').style.opacity='1';
+    cu.style.display='block';
+    tbCu.style.background='var(--green)';tbCu.style.color='#000';tbCu.querySelector('div').style.opacity='1';
   }
 }
 
