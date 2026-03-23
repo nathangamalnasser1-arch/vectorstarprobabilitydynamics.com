@@ -246,6 +246,12 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
 .mode-desc{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
 
 /* MOBILE RESPONSIVE */
+@media(max-width:700px){
+  .gfm-grid{grid-template-columns:1fr 1fr !important}
+}
+@media(max-width:420px){
+  .gfm-grid{grid-template-columns:1fr !important}
+}
 @media(max-width:900px){
   nav{padding:0 24px}
   .nav-links{display:none}
@@ -2345,11 +2351,42 @@ renderBrands('all');
   <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;color:rgba(0,0,0,.5);text-transform:uppercase;margin-bottom:20px">Phase 1 Raise — $28M target · Miramundo, Chalatenango · 2,300m</div>
   <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,120px);letter-spacing:4px;color:#000;line-height:.9;margin-bottom:20px">INVEST IN<br>THE FUTURE</h2>
   <p style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;color:rgba(0,0,0,.55);margin-bottom:40px">One arena naming slot remaining · Competition media rights open · Equity rounds close Q3 2031</p>
-  <div style="display:flex;justify-content:center;margin-bottom:48px">
-    <div style="background:#000;border-radius:12px;padding:24px 32px;display:inline-block;min-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:#ff6b1a;text-transform:uppercase;margin-bottom:12px;text-align:center">Support the build</div>
+  <div class="gfm-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1100px;margin:0 auto 48px;padding:0 16px">
+
+    <!-- El Salvador -->
+    <div style="background:#000;border-radius:12px;padding:20px 20px 16px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:#ff6b1a;text-transform:uppercase;margin-bottom:4px;text-align:center">Phase 1</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;text-align:center;margin-bottom:12px">El Salvador</div>
       <div class="gfm-embed" data-url="https://www.gofundme.com/f/skate-city-mbz9w/widget/small?sharesheet=undefined&attribution_id=sl:3a8027b9-66f4-40bb-8aa2-c143c6e6cb99"></div>
     </div>
+
+    <!-- Montreal Pop-Up -->
+    <div style="background:#000;border-radius:12px;padding:20px 20px 16px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:#f5e233;text-transform:uppercase;margin-bottom:4px;text-align:center">Pop-Up Festival</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;text-align:center;margin-bottom:12px">Montreal</div>
+      <div class="gfm-embed" data-url="https://www.gofundme.com/f/skatepark-city-montreal/widget/small?sharesheet=undefined&attribution_id=sl:8925483b-41b8-41d5-ac23-b20d2aae2463"></div>
+    </div>
+
+    <!-- Japan — coming soon -->
+    <div style="background:#000;border-radius:12px;padding:20px 20px 16px;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:.6">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:#00d4ff;text-transform:uppercase;margin-bottom:4px;text-align:center">Phase 2</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;text-align:center;margin-bottom:12px">Japan</div>
+      <div style="border:1px solid rgba(0,212,255,.2);border-radius:6px;padding:20px 12px;text-align:center">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:#00d4ff;margin-bottom:6px">Coming soon</div>
+        <div style="font-size:11px;color:#6b7280;line-height:1.5">Tohoku Mountain · 2034<br>Campaign launching 2031</div>
+      </div>
+    </div>
+
+    <!-- Conchagua — coming soon -->
+    <div style="background:#000;border-radius:12px;padding:20px 20px 16px;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:.6">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:#3ddc84;text-transform:uppercase;margin-bottom:4px;text-align:center">Phase 3</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;text-align:center;margin-bottom:12px">Conchagua</div>
+      <div style="border:1px solid rgba(61,220,132,.2);border-radius:6px;padding:20px 12px;text-align:center">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:#3ddc84;margin-bottom:6px">Coming soon</div>
+        <div style="font-size:11px;color:#6b7280;line-height:1.5">La Unión Volcano · 2037<br>Campaign launching 2034</div>
+      </div>
+    </div>
+
   </div>
   <div class="cta-btns">
     <a href="#" class="cta-btn solid">Request pitch deck</a>
