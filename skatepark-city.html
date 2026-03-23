@@ -286,6 +286,7 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <li><a href="#printers">Printers</a></li>
     <li><a href="#japan">Japan</a></li>
     <li><a href="#locations">Conchagua</a></li>
+    <li><a href="#locations" onclick="setTimeout(()=>switchLoc('mt'),10)">Mtl Pop-Up</a></li>
     <li><a href="#coin">SPC Coin</a></li>
     <li><a href="#brands">Brands</a></li>
     <li><a href="#investment">Investors</a></li>
@@ -341,6 +342,10 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     <button id="ltab-cu" onclick="switchLoc('cu')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
       CONCHAGUA — PHASE 3
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Conchagua Volcano · La Unión · Pacific Coast · New Airport · Build 2037</div>
+    </button>
+    <button id="ltab-mt" onclick="switchLoc('mt')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
+      MONTREAL — POP-UP
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Weekend Festival · Olympic Stadium · Vans Park · Any Venue</div>
     </button>
   </div>
 
@@ -693,6 +698,133 @@ footer{background:#000;padding:40px 48px;display:flex;justify-content:space-betw
     </div>
 
   </div><!-- end loc-cu -->
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- MONTREAL PANEL                                           -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="loc-mt" style="display:none">
+
+    <!-- HERO STATS -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--yellow);line-height:1">48 hr</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Weekend festival format</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--yellow);line-height:1">Any</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Venue · stadium · park · street</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--yellow);line-height:1">SPC</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Full coin economy activated</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--yellow);line-height:1">$1</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Entry → 100,000 SPC coins</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--yellow);line-height:1">∞</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Replicable · any city · any time</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;margin-bottom:48px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--yellow);margin-bottom:24px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Skatepark City — the pop-up model</div>
+
+        <div style="border-left:3px solid var(--yellow);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">The Same System. Any Venue.</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The Skatepark City charter, coin economy, competition rules, and SPC infrastructure are not locked to a mountain. The entire system — SPC entry fees, SPC prize pools, sponsor add-ons in SPC or cash, the $1 = 100,000 coin rate — can be deployed at any skate venue in the world for a weekend. Montreal Olympic Stadium, the Vans Skatepark, a street plaza, a car park. Same rules. Same coin. Same economy. The city is the permanent version. The festival is the touring version.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--yellow);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Montreal — Why Here First</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Montreal has one of the strongest skate cultures in North America, a world-class outdoor summer festival scene (Jazz Fest, Osheaga, F1 Grand Prix), and the Olympic Stadium — a venue with 56,000 seats that has been looking for a reason to fill them since 1976. The inclined tower (175m, the tallest in the world) is a natural gondola anchor. The 360° concourse is already a pump track. The stadium bowl is the world's largest potential indoor skatepark. A Skatepark City weekend festival at the Olympic Stadium is the proof-of-concept event that shows every city on earth what the permanent version looks like.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--yellow);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Vans Skatepark — The Competition Venue</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The Vans Skatepark in Montreal (and any Vans Park Series venue globally) is the ideal competition partner. Athletes enter paying SPC. The prize pool is in SPC. Vans sponsors the event by adding to the pot in SPC or cash — their choice. Spectators buy SPC at the gate to access the coin economy for the weekend. Every transaction inside the festival perimeter runs on SPC. When the weekend ends, every attendee still holds their SPC coins — which are worth more if the city grows. The festival is not a one-way transaction. It is an onboarding event.</p>
+        </div>
+
+        <div style="border-left:3px solid var(--yellow);padding-left:20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);margin-bottom:8px">Olympic Stadium — The Flagship Event</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The tower's funicular becomes the festival gondola. The concourse becomes a continuous skate loop. The bowl floor becomes the main competition arena. The underground mall connection becomes the market terrace. Everything that Skatepark City runs permanently on a mountain, the Olympic Stadium runs for 48 hours in a building. The Régie des installations olympiques has been actively seeking tenants and events — a Skatepark City weekend festival that fills 56,000 seats and generates international media coverage is exactly the kind of partnership they cannot turn down.</p>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">How the pop-up system works</div>
+
+        <!-- SYSTEM FLOW -->
+        <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);margin-bottom:28px">
+          <div style="background:var(--bg3);padding:18px 20px;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--yellow);line-height:1">01</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:3px">SPC gate opens</div><div style="font-size:12px;color:var(--muted);line-height:1.6">Entry desk converts fiat to SPC at the standard $1 = 100,000 rate. Smart-chip wristband issued. Wallet loaded. Same gateway as the permanent city.</div></div>
+          </div>
+          <div style="background:var(--bg2);padding:18px 20px;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--yellow);line-height:1">02</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:3px">SPC-only inside the perimeter</div><div style="font-size:12px;color:var(--muted);line-height:1.6">Food, merchandise, competition entry, obstacle access, gondola/tower ride — all SPC. The festival perimeter is a temporary mandatory coin zone. Every vendor terminal runs SPC only.</div></div>
+          </div>
+          <div style="background:var(--bg3);padding:18px 20px;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--yellow);line-height:1">03</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:3px">Competition runs — SPC-CR-01</div><div style="font-size:12px;color:var(--muted);line-height:1.6">Athletes pay SPC to enter. Prize pot in SPC. Sponsors (Vans, Red Bull, GoPro) add to pot in SPC or cash — converted at gate. Same rule as the permanent city.</div></div>
+          </div>
+          <div style="background:var(--bg2);padding:18px 20px;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--yellow);line-height:1">04</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:3px">Weekend ends — coins stay</div><div style="font-size:12px;color:var(--muted);line-height:1.6">Attendees leave with SPC in their wallet. Those coins are worth more if Skatepark City (the permanent version) grows. The festival is onboarding, not spending. Every attendee is now a coin holder.</div></div>
+          </div>
+          <div style="background:var(--bg3);padding:18px 20px;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--yellow);line-height:1">05</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:3px">Repeat anywhere</div><div style="font-size:12px;color:var(--muted);line-height:1.6">Barcelona, Tokyo, New York, Paris — any competition, any skatepark, any stadium. Same terminal. Same wristband. Same SPC. The pop-up model scales to every major skate event on the global calendar.</div></div>
+          </div>
+        </div>
+
+        <!-- VENUE CARDS -->
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Target venues — first activations</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:14px 18px;border:1px solid rgba(245,226,51,.2);background:rgba(245,226,51,.04);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">
+            <div>
+              <div style="font-size:13px;color:var(--white);margin-bottom:2px">Olympic Stadium, Montreal</div>
+              <div style="font-size:11px;color:var(--muted)">56K seats · 175m tower · world's longest concourse loop</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">FLAGSHIP</div>
+          </div>
+          <div style="padding:14px 18px;border:1px solid rgba(245,226,51,.15);background:rgba(245,226,51,.02);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">
+            <div>
+              <div style="font-size:13px;color:var(--white);margin-bottom:2px">Vans Skatepark — any VPS venue</div>
+              <div style="font-size:11px;color:var(--muted)">Vans Park Series · SPC sponsor integration · global circuit</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">SERIES PARTNER</div>
+          </div>
+          <div style="padding:14px 18px;border:1px solid rgba(245,226,51,.15);background:rgba(245,226,51,.02);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">
+            <div>
+              <div style="font-size:13px;color:var(--white);margin-bottom:2px">Street League Skateboarding stops</div>
+              <div style="font-size:11px;color:var(--muted)">SLS · existing stadium infrastructure · global TV broadcast</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">COMPETITION</div>
+          </div>
+          <div style="padding:14px 18px;border:1px solid rgba(245,226,51,.15);background:rgba(245,226,51,.02);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">
+            <div>
+              <div style="font-size:13px;color:var(--white);margin-bottom:2px">X Games / Red Bull events</div>
+              <div style="font-size:11px;color:var(--muted)">Built-in audience · sponsor coin add-ons · media rights</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">PARTNERSHIP</div>
+          </div>
+          <div style="padding:14px 18px;border:1px solid rgba(245,226,51,.15);background:rgba(245,226,51,.02);display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">
+            <div>
+              <div style="font-size:13px;color:var(--white);margin-bottom:2px">Olympic Games 2028 — LA</div>
+              <div style="font-size:11px;color:var(--muted)">Skateboarding · breaking · BMX · SPC pilot at Olympic venue</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--yellow);white-space:nowrap">TARGET 2028</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM BOX -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)">
+      <div style="background:var(--bg2);padding:28px 32px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--yellow);margin-bottom:12px;text-transform:uppercase">The permanent city is the product. The pop-up is the ad.</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9">Every Skatepark City festival weekend is a marketing event for the permanent city. 50,000 people experience the SPC coin economy for 48 hours. They leave with coins. They follow what happens next. When Miramundo opens in 2031, those 50,000 people already have wallets, already understand the system, and already have a reason to visit. The pop-up model does not compete with the permanent city — it builds the audience for it.</p>
+      </div>
+      <div style="background:var(--bg3);padding:28px 32px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--yellow);margin-bottom:12px;text-transform:uppercase">What the venue gets</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">A fully operational coin economy that drives every transaction — higher per-head spend than standard ticketing</p></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">International media attention — first skate festival running a live coin economy at 50,000-seat scale</p></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">Sponsor integration via SPC prize additions — Vans, Red Bull, GoPro all contributing to the pot</p></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:5px;height:5px;border-radius:50%;background:var(--yellow);flex-shrink:0;margin-top:5px"></div><p style="font-size:12px;color:var(--muted);line-height:1.6">Zero infrastructure cost — the SPC terminal system is portable. We bring it. We set it up. We take it down.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end loc-mt -->
 
 </section>
 
@@ -2215,24 +2347,17 @@ reveals.forEach(r=>io.observe(r));
 
 // LOCATION TABS
 function switchLoc(loc){
-  const sv=document.getElementById('loc-sv');
-  const jp=document.getElementById('loc-jp');
-  const cu=document.getElementById('loc-cu');
-  const tbSv=document.getElementById('ltab-sv');
-  const tbJp=document.getElementById('ltab-jp');
-  const tbCu=document.getElementById('ltab-cu');
-  [sv,jp,cu].forEach(p=>p.style.display='none');
-  [tbSv,tbJp,tbCu].forEach(b=>{b.style.background='transparent';b.style.color='var(--muted)';b.querySelector('div').style.opacity='.5';});
-  if(loc==='sv'){
-    sv.style.display='block';
-    tbSv.style.background='var(--orange)';tbSv.style.color='#000';tbSv.querySelector('div').style.opacity='1';
-  } else if(loc==='jp'){
-    jp.style.display='block';
-    tbJp.style.background='var(--cyan)';tbJp.style.color='#000';tbJp.querySelector('div').style.opacity='1';
-  } else {
-    cu.style.display='block';
-    tbCu.style.background='var(--green)';tbCu.style.color='#000';tbCu.querySelector('div').style.opacity='1';
-  }
+  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt'};
+  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt'};
+  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)'};
+  Object.values(panels).forEach(id=>document.getElementById(id).style.display='none');
+  Object.values(tabs).forEach(id=>{
+    const b=document.getElementById(id);
+    b.style.background='transparent';b.style.color='var(--muted)';b.querySelector('div').style.opacity='.5';
+  });
+  document.getElementById(panels[loc]).style.display='block';
+  const tb=document.getElementById(tabs[loc]);
+  tb.style.background=colors[loc];tb.style.color='#000';tb.querySelector('div').style.opacity='1';
 }
 
 // SCALE TABS
