@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rival Boxing Golden Glove — RBGG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-pale: #F5E9C4;
+    --black: #000000;
+    --near-black: #0A0A0A;
+    --dark: #111111;
+    --dark2: #161616;
+    --white: #F7F4EE;
+    --gray: #888888;
+    --red: #B81C2E;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── NAVBAR ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.92) 0%, transparent 100%);
+    backdrop-filter: blur(2px);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(247,244,238,0.6);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-back {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(247,244,238,0.5);
+    text-decoration: none;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-back:hover { color: var(--white); }
+
+  /* ─── HERO ─── */
+  #hero {
+    position: relative;
+    height: 100vh;
+    min-height: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .hero-bg-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 680px;
+    height: 680px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.08);
+    animation: pulseRing 6s ease-in-out infinite;
+  }
+
+  .hero-bg-ring:nth-child(2) {
+    width: 500px; height: 500px;
+    border-color: rgba(201,168,76,0.12);
+    animation-delay: -2s;
+  }
+
+  .hero-bg-ring:nth-child(3) {
+    width: 340px; height: 340px;
+    border-color: rgba(201,168,76,0.18);
+    animation-delay: -4s;
+  }
+
+  @keyframes pulseRing {
+    0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%,-50%) scale(1.04); opacity: 0.6; }
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 0.3s;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .hero-eyebrow::before,
+  .hero-eyebrow::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .hero-glove-icon {
+    font-size: 64px;
+    line-height: 1;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 30px rgba(201,168,76,0.4));
+    animation: floatGlove 4s ease-in-out infinite;
+  }
+
+  @keyframes floatGlove {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(56px, 8vw, 110px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .hero-title span {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-subtitle-line {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 4vw, 52px);
+    letter-spacing: 0.3em;
+    color: rgba(247,244,238,0.25);
+    margin-bottom: 36px;
+  }
+
+  .hero-divider {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 0 auto 32px;
+    opacity: 0.6;
+  }
+
+  .hero-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(16px, 2vw, 22px);
+    font-weight: 300;
+    color: rgba(247,244,238,0.65);
+    letter-spacing: 0.06em;
+    max-width: 520px;
+    margin: 0 auto 48px;
+  }
+
+  .hero-year-badge {
+    display: inline-block;
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 10px 28px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 1.4s;
+  }
+
+  .hero-scroll span {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(247,244,238,0.3);
+  }
+
+  .scroll-bar {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, rgba(201,168,76,0.5), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* ─── SECTIONS ─── */
+  section { position: relative; }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ─── WHAT IS RBGG ─── */
+  #what {
+    padding: 140px 0;
+    background: var(--near-black);
+    overflow: hidden;
+  }
+
+  .what-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(40px, 5vw, 68px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 32px;
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .section-body {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: rgba(247,244,238,0.65);
+    margin-bottom: 20px;
+  }
+
+  .what-right {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .glove-3d-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+  }
+
+  .glove-3d-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.04) 50%, transparent 75%);
+    animation: rotateGlow 8s linear infinite;
+  }
+
+  @keyframes rotateGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .glove-3d-ring {
+    position: absolute;
+    inset: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .glove-3d-ring:nth-child(2) { inset: 50px; border-color: rgba(201,168,76,0.3); }
+  .glove-3d-ring:nth-child(3) { inset: 80px; border-color: rgba(201,168,76,0.15); animation: counterRotate 12s linear infinite; }
+
+  @keyframes counterRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+
+  .glove-emoji-large {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    font-size: 120px;
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.5)) drop-shadow(0 8px 24px rgba(0,0,0,0.8));
+    animation: floatGlove 4s ease-in-out infinite;
+  }
+
+  .stat-row {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(201,168,76,0.12);
+  }
+
+  .stat-item { flex: 1; }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(247,244,238,0.35);
+  }
+
+  /* ─── CRITERIA ─── */
+  #criteria {
+    padding: 140px 0;
+    background: var(--black);
+  }
+
+  .criteria-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .dual-standard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: rgba(201,168,76,0.08);
+  }
+
+  .criterion-card {
+    background: var(--dark);
+    padding: 64px 52px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.4s;
+  }
+
+  .criterion-card:hover { background: var(--dark2); }
+
+  .criterion-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .criterion-card:hover::before { opacity: 1; }
+
+  .criterion-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 120px;
+    font-weight: 700;
+    color: rgba(201,168,76,0.06);
+    position: absolute;
+    top: -10px; right: 32px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .criterion-icon {
+    font-size: 36px;
+    margin-bottom: 24px;
+    display: block;
+    filter: drop-shadow(0 0 12px rgba(201,168,76,0.3));
+  }
+
+  .criterion-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .criterion-subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    margin-bottom: 28px;
+    opacity: 0.8;
+  }
+
+  .criterion-body {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(247,244,238,0.55);
+  }
+
+  .criterion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+  }
+
+  .tag {
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 5px 14px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.7);
+  }
+
+  /* ─── TROPHY ─── */
+  #trophy {
+    padding: 140px 0;
+    background: var(--near-black);
+    overflow: hidden;
+  }
+
+  .trophy-layout {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 100px;
+    align-items: center;
+  }
+
+  .trophy-showcase {
+    position: relative;
+  }
+
+  .trophy-pedestal {
+    position: relative;
+    background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: 64px 48px;
+    text-align: center;
+  }
+
+  .trophy-pedestal::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(145deg, rgba(201,168,76,0.25), transparent 40%, transparent 60%, rgba(201,168,76,0.1));
+    z-index: -1;
+  }
+
+  .trophy-glove-display {
+    font-size: 140px;
+    line-height: 1;
+    display: block;
+    margin-bottom: 24px;
+    filter: 
+      drop-shadow(0 0 60px rgba(201,168,76,0.6))
+      drop-shadow(0 0 20px rgba(201,168,76,0.4))
+      drop-shadow(0 8px 40px rgba(0,0,0,0.9));
+    animation: floatGlove 4s ease-in-out infinite;
+  }
+
+  .trophy-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .trophy-edition {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: rgba(247,244,238,0.3);
+  }
+
+  .trophy-badge {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--black);
+    border: 1px solid var(--gold);
+    padding: 6px 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .trophy-features {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .trophy-feature {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .trophy-feature:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 8px;
+    box-shadow: 0 0 8px rgba(201,168,76,0.5);
+  }
+
+  .feature-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .feature-desc {
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: rgba(247,244,238,0.5);
+  }
+
+  /* ─── PAST WINNERS / INAUGURAL ─── */
+  #winners {
+    padding: 140px 0;
+    background: var(--black);
+  }
+
+  .winners-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 64px;
+  }
+
+  .inaugural-card {
+    background: var(--dark);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .inaugural-inner {
+    padding: 72px 64px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .inaugural-text .section-label { margin-bottom: 16px; }
+
+  .inaugural-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .inaugural-title em { font-style: italic; color: var(--gold); }
+
+  .inaugural-body {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: rgba(247,244,238,0.5);
+    margin-bottom: 32px;
+  }
+
+  .criteria-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(247,244,238,0.6);
+  }
+
+  .check-item::before {
+    content: '✓';
+    font-size: 11px;
+    color: var(--gold);
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(201,168,76,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .inaugural-card-right {
+    border-left: 1px solid rgba(201,168,76,0.08);
+    padding-left: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .versus-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .fighter-slot {
+    background: rgba(201,168,76,0.04);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: 28px 24px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .fighter-slot::after {
+    content: 'TBA';
+    position: absolute;
+    top: 50%; right: 20px;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: rgba(201,168,76,0.3);
+  }
+
+  .fighter-slot-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.5);
+    margin-bottom: 8px;
+  }
+
+  .fighter-slot-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: rgba(247,244,238,0.2);
+    letter-spacing: 0.05em;
+  }
+
+  .vs-divider {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--gold);
+    padding: 12px 0;
+    letter-spacing: 0.2em;
+    opacity: 0.7;
+  }
+
+  .announcement-cta {
+    margin-top: 28px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.4);
+  }
+
+  /* ─── FROM RUSS ─── */
+  #russ {
+    padding: 140px 0;
+    background: var(--dark);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #russ::before {
+    content: '"';
+    position: absolute;
+    top: -40px;
+    left: -20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 500px;
+    font-style: italic;
+    color: rgba(201,168,76,0.03);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .russ-layout {
+    display: grid;
+    grid-template-columns: 0.4fr 0.6fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .russ-identity {
+    position: sticky;
+    top: 100px;
+  }
+
+  .russ-avatar {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: linear-gradient(145deg, #1c1c1c, #0d0d0d);
+    border: 1px solid rgba(201,168,76,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .russ-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  }
+
+  .russ-avatar-placeholder {
+    font-size: 80px;
+    opacity: 0.15;
+  }
+
+  .russ-photo-label {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    text-align: center;
+  }
+
+  .russ-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+
+  .russ-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.8;
+  }
+
+  .russ-quote {
+    padding-top: 8px;
+  }
+
+  .quote-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 0.5;
+    margin-bottom: 32px;
+    display: block;
+    opacity: 0.5;
+  }
+
+  .quote-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--white);
+    margin-bottom: 40px;
+  }
+
+  .quote-body {
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(247,244,238,0.55);
+    margin-bottom: 20px;
+  }
+
+  .quote-signature {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(201,168,76,0.1);
+  }
+
+  .signature-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(201,168,76,0.3), transparent);
+  }
+
+  .signature-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  /* ─── FOOTER / CTA ─── */
+  #footer-cta {
+    padding: 100px 0;
+    background: var(--black);
+    border-top: 1px solid rgba(201,168,76,0.08);
+    text-align: center;
+  }
+
+  .footer-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 300;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+
+  .footer-title em { font-style: italic; color: var(--gold); }
+
+  .footer-sub {
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: rgba(247,244,238,0.35);
+    margin-bottom: 48px;
+    text-transform: uppercase;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 80px;
+  }
+
+  .footer-links a {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(247,244,238,0.4);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-bottom {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(247,244,238,0.2);
+    text-transform: uppercase;
+  }
+
+  .footer-bottom span { color: var(--gold); opacity: 0.5; }
+
+  /* ─── GOLD LINE SEPARATOR ─── */
+  .gold-sep {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+  }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .section-inner { padding: 0 24px; }
+    .what-grid, .trophy-layout, .russ-layout, .inaugural-inner {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .dual-standard { grid-template-columns: 1fr; }
+    .winners-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .inaugural-card-right { border-left: none; padding-left: 0; border-top: 1px solid rgba(201,168,76,0.08); padding-top: 40px; }
+    .stat-row { gap: 24px; }
+    .russ-identity { position: static; }
+    .footer-links { flex-direction: column; align-items: center; gap: 20px; }
+    #what, #criteria, #trophy, #winners, #russ { padding: 80px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://rivalboxing.ca" class="nav-logo">← Rival Boxing</a>
+  <ul class="nav-links">
+    <li><a href="#what">About</a></li>
+    <li><a href="#criteria">Criteria</a></li>
+    <li><a href="#trophy">The Trophy</a></li>
+    <li><a href="#winners">Inaugural</a></li>
+    <li><a href="#russ">From Russ</a></li>
+  </ul>
+  <a href="https://rivalboxing.ca" class="nav-back">rivalboxing.ca ↗</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-ring"></div>
+  <div class="hero-bg-ring"></div>
+  <div class="hero-bg-ring"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Rival Boxing — Est. 2002</div>
+    <div class="hero-glove-icon">🥊</div>
+    <h1 class="hero-title">The Rival Boxing<br><span>Golden Glove</span></h1>
+    <div class="hero-subtitle-line">R B G G</div>
+    <div class="hero-divider"></div>
+    <p class="hero-tagline">"For those who fight with honour in the ring — and live it outside."</p>
+    <div class="hero-year-badge">Inaugural Edition — 2026</div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-bar"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- WHAT IS RBGG -->
+<section id="what">
+  <div class="section-inner">
+    <div class="what-grid">
+      <div class="what-left reveal">
+        <div class="section-label">What is the RBGG</div>
+        <h2 class="section-title">The Nobel Prize<br>of <em>Boxing.</em></h2>
+        <p class="section-body">
+          The Rival Boxing Golden Glove is the highest honour in professional boxing — awarded once a year by Rival founder and CEO Russ Anber. It is not voted on by a committee. It is not given to the biggest name or the biggest purse.
+        </p>
+        <p class="section-body">
+          The RBGG can only be awarded through a specific, sanctioned bout between two fighters who have been selected by Russ himself — elite athletes who have demonstrated both championship-level careers <em>and</em> irreproachable conduct throughout their lives.
+        </p>
+        <p class="section-body">
+          The winner of the fight takes the RBGG. But to even be considered, both fighters must already be worthy of it. This is boxing's answer to the Nobel — proof that greatness inside the ring means nothing without the character to match it outside.
+        </p>
+        <div class="stat-row">
+          <div class="stat-item">
+            <div class="stat-number">1</div>
+            <div class="stat-label">Award per year</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">2</div>
+            <div class="stat-label">Elite fighters selected</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Legacy impact</div>
+          </div>
+        </div>
+      </div>
+      <div class="what-right reveal reveal-delay-2">
+        <div class="glove-3d-wrapper">
+          <div class="glove-3d-bg"></div>
+          <div class="glove-3d-ring"></div>
+          <div class="glove-3d-ring"></div>
+          <div class="glove-3d-ring"></div>
+          <div class="glove-emoji-large">🥊</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-sep"></div>
+
+<!-- CRITERIA -->
+<section id="criteria">
+  <div class="section-inner">
+    <div class="criteria-header reveal">
+      <div class="section-label" style="justify-content: center;">The Dual Standard</div>
+      <h2 class="section-title" style="text-align: center;">Two rings.<br><em>One winner.</em></h2>
+    </div>
+    <div class="dual-standard">
+      <div class="criterion-card reveal">
+        <div class="criterion-number">I</div>
+        <span class="criterion-icon">🏆</span>
+        <h3 class="criterion-title">The Ring</h3>
+        <div class="criterion-subtitle">Championship Record</div>
+        <p class="criterion-body">
+          A fighter eligible for the RBGG must carry a career that speaks for itself — world titles, elite competition, defining moments in the sport. This is not an award for potential. It is awarded to those who have already proven themselves at the highest level, over years, against the best.
+        </p>
+        <div class="criterion-tags">
+          <span class="tag">World Title History</span>
+          <span class="tag">Elite Competition</span>
+          <span class="tag">Career Longevity</span>
+          <span class="tag">Defining Fights</span>
+        </div>
+      </div>
+      <div class="criterion-card reveal reveal-delay-2">
+        <div class="criterion-number">II</div>
+        <span class="criterion-icon">🤝</span>
+        <h3 class="criterion-title">The World</h3>
+        <div class="criterion-subtitle">Character & Ethics</div>
+        <p class="criterion-body">
+          A boxer is also a human being. The RBGG demands that both fighters have shown consistent dignity, respect, and generosity throughout their lives — in their communities, toward their opponents, and in the way they carry the responsibility of being a public figure and a role model.
+        </p>
+        <div class="criterion-tags">
+          <span class="tag">Sportsmanship</span>
+          <span class="tag">Community Impact</span>
+          <span class="tag">Respect for Opponents</span>
+          <span class="tag">Public Conduct</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-sep"></div>
+
+<!-- THE TROPHY -->
+<section id="trophy">
+  <div class="section-inner">
+    <div class="trophy-layout">
+      <div class="trophy-showcase reveal">
+        <div class="trophy-pedestal">
+          <div class="trophy-badge">The Golden Glove Trophy</div>
+          <span class="trophy-glove-display">🥊</span>
+          <div class="trophy-name">Rival Boxing Golden Glove</div>
+          <div class="trophy-edition">Fight-Night Replica Edition</div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="section-label">The Trophy</div>
+        <h2 class="section-title">Crafted from<br>the <em>fight itself.</em></h2>
+        <p class="section-body">
+          The RBGG trophy is not a generic prize. Every element of it is tied to the specific moment it was earned.
+        </p>
+        <div class="trophy-features">
+          <div class="trophy-feature">
+            <div class="feature-dot"></div>
+            <div>
+              <div class="feature-title">Fight-Night Glove Design</div>
+              <div class="feature-desc">The golden glove is manufactured by Rival and cast in the exact design of the gloves the winning fighter wore that night. Every marking, colourway, and feature of the fight glove is preserved — frozen in gold.</div>
+            </div>
+          </div>
+          <div class="trophy-feature">
+            <div class="feature-dot"></div>
+            <div>
+              <div class="feature-title">Handcrafted by Rival</div>
+              <div class="feature-desc">Built in-house by the same craftspeople who make Rival's professional fight gloves. The only piece of its kind in the world — and it belongs to the fighter who earned it.</div>
+            </div>
+          </div>
+          <div class="trophy-feature">
+            <div class="feature-dot"></div>
+            <div>
+              <div class="feature-title">Inscribed & Dated</div>
+              <div class="feature-desc">Each trophy bears the fighter's name, their opponent's name, the date and venue, and the words that define the award: <em>"In the Ring. In the World."</em></div>
+            </div>
+          </div>
+          <div class="trophy-feature">
+            <div class="feature-dot"></div>
+            <div>
+              <div class="feature-title">One Made, Ever</div>
+              <div class="feature-desc">No duplicates. No second edition. The trophy given to that fighter, for that fight, in that year — is the only one that will ever exist.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-sep"></div>
+
+<!-- INAUGURAL FIGHT -->
+<section id="winners">
+  <div class="section-inner">
+    <div class="winners-header reveal">
+      <div>
+        <div class="section-label">Inaugural 2026</div>
+        <h2 class="section-title">The First<br><em>RBGG Fight.</em></h2>
+      </div>
+      <div style="font-size:13px; color: rgba(247,244,238,0.3); letter-spacing:0.2em; text-transform:uppercase;">Announcement Pending</div>
+    </div>
+    <div class="inaugural-card reveal">
+      <div class="inaugural-inner">
+        <div class="inaugural-text">
+          <div class="section-label">Selection Criteria</div>
+          <h3 class="inaugural-title">Two fighters.<br>Both already<br><em>worthy.</em></h3>
+          <p class="inaugural-body">
+            The RBGG inaugural bout will be announced by Russ Anber. The two fighters selected will be among the most respected figures in the sport — chosen not just for their records, but for what they represent as human beings.
+          </p>
+          <div class="criteria-checklist">
+            <div class="check-item">Sanctioned professional bout</div>
+            <div class="check-item">Both fighters pre-qualified on character</div>
+            <div class="check-item">World-class competitive records</div>
+            <div class="check-item">Personally selected by Russ Anber</div>
+          </div>
+        </div>
+        <div class="inaugural-card-right">
+          <div class="versus-display">
+            <div class="fighter-slot">
+              <div class="fighter-slot-label">Fighter I</div>
+              <div class="fighter-slot-name">To Be Named</div>
+            </div>
+            <div class="vs-divider">versus</div>
+            <div class="fighter-slot">
+              <div class="fighter-slot-label">Fighter II</div>
+              <div class="fighter-slot-name">To Be Named</div>
+            </div>
+          </div>
+          <div class="announcement-cta">Watch rivalboxing.ca for the announcement</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-sep"></div>
+
+<!-- FROM RUSS -->
+<section id="russ">
+  <div class="section-inner">
+    <div class="russ-layout">
+      <div class="russ-identity reveal">
+        <div class="russ-avatar">
+          <div class="russ-avatar-placeholder">🥊</div>
+          <div class="russ-photo-label">
+            <div class="russ-name">Russ Anber</div>
+            <div class="russ-title">Founder & CEO — Rival Boxing</div>
+          </div>
+        </div>
+      </div>
+      <div class="russ-quote reveal reveal-delay-2">
+        <span class="quote-mark">"</span>
+        <p class="quote-text">
+          Boxing has always been more than fighting. The greatest men I've known in this sport — in any corner, in any gym — were great because of who they were when the cameras were off.
+        </p>
+        <p class="quote-body">
+          I've been in boxing long enough to know what it costs a person to reach the top. It costs years. It costs your body. For most of these fighters, it costs far more than that. But the ones who get there and still treat people with dignity — those are the ones I want to celebrate.
+        </p>
+        <p class="quote-body">
+          The Rival Boxing Golden Glove is my way of saying: this sport produces extraordinary human beings. And those human beings deserve to be recognized for all of it — not just the punches they threw, but the lives they lived.
+        </p>
+        <p class="quote-body">
+          The trophy is a glove because that's where it starts. But the award is about everything else.
+        </p>
+        <div class="quote-signature">
+          <div class="signature-line"></div>
+          <div class="signature-name">— Russ Anber</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<section id="footer-cta">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label" style="justify-content: center; margin-bottom: 24px;">Rival Boxing</div>
+      <h2 class="footer-title">Born from a<br><em>Boxing Mind.</em></h2>
+      <p class="footer-sub">The Rival Boxing Golden Glove — Inaugural 2026</p>
+      <div class="footer-links">
+        <a href="https://rivalboxing.ca">Shop Rival</a>
+        <a href="https://rivalboxing.ca/pages/who-we-are">Who We Are</a>
+        <a href="https://rivalboxing.ca/pages/contact">Contact</a>
+        <a href="https://rivalboxing.ca/collections/fight-gloves">Fight Gloves</a>
+      </div>
+      <div class="footer-bottom">
+        © 2026 Rival Boxing Gear — <span>rivalboxing.ca</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) current = s.getAttribute('id');
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === `#${current}` ? 'var(--gold)' : '';
+    });
+  });
+</script>
+</body>
+</html>
