@@ -1,0 +1,3694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRIFT CITY — The Asphalt Creed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── CSS VARIABLES ─────────────────────────────────────── */
+    :root {
+      --asphalt:   #090909;
+      --asphalt2:  #111111;
+      --asphalt3:  #1a1a1a;
+      --steel:     #2a2a2a;
+      --steel-lt:  #3e3e3e;
+      --chrome:    #8a8a8a;
+      --chrome-lt: #c0c0c0;
+      --neon:      #39ff14;
+      --neon-dim:  #1a7a06;
+      --neon-glow: rgba(57,255,20,0.35);
+      --red-alert: #ff2020;
+      --amber:     #ffaa00;
+      --white:     #f0f0f0;
+      --font-hd:   'Bebas Neue', sans-serif;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-body: 'Barlow Condensed', sans-serif;
+    }
+
+    /* ─── RESET & BASE ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--asphalt);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    ::selection { background: var(--neon); color: #000; }
+
+    /* ─── SCROLLBAR ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--asphalt); }
+    ::-webkit-scrollbar-thumb { background: var(--neon-dim); }
+
+    /* ─── NAV ───────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 56px;
+      background: rgba(9,9,9,0.9);
+      border-bottom: 1px solid var(--neon-dim);
+      backdrop-filter: blur(8px);
+    }
+    .nav-logo {
+      font-family: var(--font-hd);
+      font-size: 1.6rem;
+      letter-spacing: 0.15em;
+      color: var(--neon);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--chrome-lt); }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--chrome);
+      text-decoration: none;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--neon); }
+    .nav-status {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--neon);
+      letter-spacing: 0.1em;
+    }
+    .nav-status::before {
+      content: '';
+      display: inline-block;
+      width: 7px; height: 7px;
+      background: var(--neon);
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    /* ─── HERO ──────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 60px 80px;
+      overflow: hidden;
+    }
+    .hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridScroll 20s linear infinite;
+    }
+    @keyframes gridScroll {
+      from { background-position: 0 0; }
+      to   { background-position: 60px 60px; }
+    }
+    .hero-stripe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 6px;
+      height: 100%;
+      background: var(--neon);
+      box-shadow: 0 0 40px var(--neon-glow);
+    }
+    .hero-speed-counter {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--neon);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .hero-speed-counter::before {
+      content: '';
+      display: inline-block;
+      width: 40px;
+      height: 1px;
+      background: var(--neon);
+    }
+    .hero-title {
+      font-family: var(--font-hd);
+      font-size: clamp(4.5rem, 12vw, 11rem);
+      line-height: 0.92;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--white);
+      max-width: 900px;
+    }
+    .hero-title .accent { color: var(--neon); }
+    .hero-subtitle {
+      margin-top: 36px;
+      font-family: var(--font-body);
+      font-weight: 300;
+      font-size: clamp(1rem, 2vw, 1.45rem);
+      color: var(--chrome-lt);
+      max-width: 560px;
+      line-height: 1.45;
+      letter-spacing: 0.04em;
+    }
+    .hero-cta-row {
+      margin-top: 52px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .btn-primary {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #000;
+      background: var(--neon);
+      border: none;
+      padding: 14px 36px;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 30px var(--neon-glow);
+      transform: translateY(-2px);
+    }
+    .btn-ghost {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--neon);
+      background: transparent;
+      border: 1px solid var(--neon-dim);
+      padding: 13px 36px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--neon); }
+    .hero-stats {
+      position: absolute;
+      right: 60px;
+      bottom: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      text-align: right;
+    }
+    .hero-stat-item { position: relative; }
+    .hero-stat-num {
+      font-family: var(--font-hd);
+      font-size: 3.2rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .hero-stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .hero-scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon), transparent);
+      animation: scanLine 4s linear infinite;
+      opacity: 0.6;
+    }
+    @keyframes scanLine {
+      from { top: 0; } to { top: 100%; }
+    }
+
+    /* ─── SECTION BASE ──────────────────────────────────────── */
+    section {
+      position: relative;
+      padding: 100px 60px;
+      border-top: 1px solid var(--steel);
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--neon);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::before {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: var(--neon);
+      display: inline-block;
+    }
+    .section-title {
+      font-family: var(--font-hd);
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      letter-spacing: 0.05em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 50px;
+    }
+    .section-title .accent { color: var(--neon); }
+
+    /* ─── EV MANDATE ────────────────────────────────────────── */
+    #ev-mandate { background: var(--asphalt2); }
+    .ev-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+    .ev-card {
+      background: var(--asphalt3);
+      padding: 44px 40px;
+      border-left: 3px solid var(--steel-lt);
+      transition: border-color 0.25s;
+    }
+    .ev-card:hover { border-color: var(--neon); }
+    .ev-card.danger { border-left-color: var(--red-alert); }
+    .ev-card-icon {
+      font-size: 2.4rem;
+      margin-bottom: 18px;
+      display: block;
+    }
+    .ev-card-title {
+      font-family: var(--font-hd);
+      font-size: 1.9rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+    .ev-card-title.red { color: var(--red-alert); }
+    .ev-card p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      line-height: 1.65;
+      font-size: 1rem;
+    }
+    .ev-threshold {
+      margin-top: 24px;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 10px 20px;
+      border: 1px solid var(--neon-dim);
+      background: rgba(57,255,20,0.05);
+    }
+    .ev-threshold-num {
+      font-family: var(--font-hd);
+      font-size: 2.6rem;
+      color: var(--neon);
+    }
+    .ev-threshold-unit {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── RULES ─────────────────────────────────────────────── */
+    #rules { background: var(--asphalt); }
+    .rules-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .rule-item {
+      display: flex;
+      gap: 28px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--steel);
+    }
+    .rule-item:last-child { border-bottom: none; }
+    .rule-num {
+      font-family: var(--font-hd);
+      font-size: 4rem;
+      color: var(--steel-lt);
+      line-height: 1;
+      min-width: 70px;
+      flex-shrink: 0;
+    }
+    .rule-body {}
+    .rule-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: var(--white);
+    }
+    .rule-desc {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+    .rule-fine {
+      display: inline-block;
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--red-alert);
+      letter-spacing: 0.12em;
+      border: 1px solid var(--red-alert);
+      padding: 4px 10px;
+    }
+    .zero-tolerance {
+      background: #130000;
+      border: 1px solid var(--red-alert);
+      padding: 40px;
+      position: sticky;
+      top: 80px;
+    }
+    .zero-tolerance-title {
+      font-family: var(--font-hd);
+      font-size: 2.2rem;
+      color: var(--red-alert);
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+    .zero-tolerance p {
+      font-weight: 300;
+      color: #ff9a9a;
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .zt-list {
+      margin-top: 20px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .zt-list li {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--red-alert);
+      letter-spacing: 0.08em;
+      padding-left: 16px;
+      position: relative;
+    }
+    .zt-list li::before {
+      content: '▶';
+      position: absolute;
+      left: 0;
+      font-size: 0.55rem;
+      top: 3px;
+    }
+    .ban-badge {
+      margin-top: 28px;
+      text-align: center;
+      font-family: var(--font-hd);
+      font-size: 1.6rem;
+      letter-spacing: 0.3em;
+      color: #000;
+      background: var(--red-alert);
+      padding: 12px 0;
+    }
+
+    /* ─── ASN-9 ─────────────────────────────────────────────── */
+    #asn9 { background: var(--asphalt2); }
+    .asn-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .asn-info {}
+    .asn-stat-row {
+      display: flex;
+      gap: 40px;
+      margin-top: 40px;
+    }
+    .asn-stat {}
+    .asn-stat-val {
+      font-family: var(--font-hd);
+      font-size: 3.5rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .asn-stat-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+    .asn-info p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    /* ─── GREEN WAVE TRACKER ────────────────────────────────── */
+    .green-wave-container {
+      background: var(--asphalt3);
+      border: 1px solid var(--steel-lt);
+      padding: 30px;
+    }
+    .tracker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .tracker-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--neon);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .tracker-live {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--neon);
+      letter-spacing: 0.1em;
+    }
+    .tracker-live::before {
+      content: '● ';
+      animation: pulse 1s ease-in-out infinite;
+    }
+    #wave-canvas {
+      width: 100%;
+      height: 220px;
+      display: block;
+    }
+    .tracker-speed-bar {
+      margin-top: 20px;
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      height: 40px;
+    }
+    .speed-segment {
+      flex: 1;
+      background: var(--neon-dim);
+      border-radius: 0;
+      transition: height 0.5s ease, background 0.3s;
+    }
+    .tracker-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .tracker-label {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+    }
+    .road-indicator {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .road-node {
+      background: var(--asphalt);
+      border: 1px solid var(--steel-lt);
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .road-node-name {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .road-node-speed {
+      font-family: var(--font-hd);
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+    .road-node-speed.green { color: var(--neon); }
+    .road-node-speed.amber { color: var(--amber); }
+
+    /* ─── RESIDENTIAL §14 ───────────────────────────────────── */
+    #residential { background: var(--asphalt); }
+    .res-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 0;
+    }
+    .res-card {
+      background: var(--asphalt3);
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .res-card::before {
+      content: attr(data-code);
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      font-family: var(--font-hd);
+      font-size: 5rem;
+      color: rgba(57,255,20,0.04);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .res-card-num {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--neon);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .res-card-title {
+      font-family: var(--font-hd);
+      font-size: 1.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      line-height: 1.05;
+    }
+    .res-card p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .res-card .res-metric {
+      margin-top: 20px;
+      font-family: var(--font-hd);
+      font-size: 3rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .res-card .res-metric-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ─── RACING ECOSYSTEM ──────────────────────────────────── */
+    #racing { background: var(--asphalt2); }
+    .racing-layout {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .race-trace-display {
+      background: var(--asphalt3);
+      border: 1px solid var(--steel-lt);
+      padding: 30px;
+      position: relative;
+    }
+    .race-trace-display canvas {
+      width: 100%;
+      display: block;
+    }
+    .race-trace-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--neon);
+      letter-spacing: 0.12em;
+    }
+    .race-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .race-feature {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--steel);
+    }
+    .race-feature:last-child { border-bottom: none; }
+    .race-feature-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--neon);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .race-feature-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .race-feature p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    /* ─── ELITE LOGISTICS ───────────────────────────────────── */
+    #logistics { background: var(--asphalt); }
+    .logistics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-bottom: 60px;
+    }
+    .logistics-card {
+      background: var(--asphalt3);
+      padding: 36px 32px;
+      border-top: 3px solid var(--steel-lt);
+      transition: border-color 0.25s;
+    }
+    .logistics-card:hover { border-top-color: var(--neon); }
+    .lc-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .lc-title {
+      font-family: var(--font-hd);
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .logistics-card p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .lockdown-banner {
+      background: #0a0a00;
+      border: 1px solid var(--amber);
+      padding: 36px 40px;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+    .lockdown-icon {
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+    .lockdown-text {}
+    .lockdown-text .lt-title {
+      font-family: var(--font-hd);
+      font-size: 1.8rem;
+      letter-spacing: 0.1em;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+    .lockdown-text p {
+      font-weight: 300;
+      color: #ffddaa;
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    /* ─── MANUFACTURER PORTAL ───────────────────────────────── */
+    #manufacturer { background: var(--asphalt2); }
+    .mfr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-bottom: 50px;
+    }
+    .mfr-card {
+      background: var(--asphalt);
+      padding: 44px 36px;
+      border: 1px solid var(--steel);
+      text-align: center;
+      transition: border-color 0.25s;
+      cursor: pointer;
+    }
+    .mfr-card:hover { border-color: var(--neon); }
+    .mfr-card.active { border-color: var(--neon); background: rgba(57,255,20,0.03); }
+    .mfr-logo {
+      font-family: var(--font-hd);
+      font-size: 2.2rem;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .mfr-sub {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .mfr-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--neon);
+      letter-spacing: 0.1em;
+    }
+    .mfr-status::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--neon);
+      border-radius: 50%;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .mfr-note {
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+    }
+    .portal-terminal {
+      background: #050505;
+      border: 1px solid var(--steel-lt);
+      padding: 32px;
+      font-family: var(--font-mono);
+    }
+    .terminal-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .terminal-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .terminal-dot.red { background: #ff5f56; }
+    .terminal-dot.amber { background: #ffbd2e; }
+    .terminal-dot.green { background: var(--neon); animation: pulse 2s ease-in-out infinite; }
+    #terminal-output {
+      font-size: 0.75rem;
+      color: var(--neon);
+      letter-spacing: 0.06em;
+      line-height: 1.9;
+      min-height: 120px;
+    }
+    .terminal-line { display: block; }
+    .terminal-line.dim { color: var(--chrome); }
+    .terminal-line.alert { color: var(--red-alert); }
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: var(--neon);
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    .portal-input-row {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+    }
+    #portal-input {
+      flex: 1;
+      background: var(--asphalt3);
+      border: 1px solid var(--steel-lt);
+      color: var(--neon);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 12px 16px;
+      letter-spacing: 0.08em;
+      outline: none;
+    }
+    #portal-input:focus { border-color: var(--neon); }
+    #portal-input::placeholder { color: var(--steel-lt); }
+
+    /* ─── DCU HUB ───────────────────────────────────────────── */
+    #dcu { background: var(--asphalt); }
+    .dcu-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .dcu-info p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .dcu-departments {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dcu-dept {
+      background: var(--asphalt3);
+      padding: 28px 32px;
+      border-left: 2px solid var(--steel-lt);
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      transition: border-color 0.25s;
+    }
+    .dcu-dept:hover { border-left-color: var(--neon); }
+    .dcu-dept-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 4px; }
+    .dcu-dept-name {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .dcu-dept p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .dcu-funding {
+      margin-top: 36px;
+      padding: 24px;
+      border: 1px solid var(--neon-dim);
+      background: rgba(57,255,20,0.03);
+    }
+    .dcu-funding-title {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--neon);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .dcu-fund-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--steel);
+    }
+    .dcu-fund-row:last-child { border-bottom: none; }
+    .dcu-fund-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+    }
+    .dcu-fund-val {
+      font-family: var(--font-hd);
+      font-size: 1.2rem;
+      color: var(--neon);
+    }
+
+    /* ─── PERFORMANCE TAX ──────────────────────────────────── */
+    #perf-tax { background: var(--asphalt2); }
+
+    .tax-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .tax-intro p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .tax-brackets {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 36px;
+    }
+    .tax-bracket {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 24px;
+      background: var(--asphalt3);
+      border-left: 3px solid var(--steel-lt);
+      transition: border-color 0.25s;
+    }
+    .tax-bracket.active-bracket {
+      border-left-color: var(--neon);
+      background: rgba(57,255,20,0.04);
+    }
+    .tax-bracket.tier-1 .tb-rate { color: var(--neon); }
+    .tax-bracket.tier-2 .tb-rate { color: #aaff00; }
+    .tax-bracket.tier-3 .tb-rate { color: var(--amber); }
+    .tax-bracket.tier-4 .tb-rate { color: var(--red-alert); }
+    .tb-rate {
+      font-family: var(--font-hd);
+      font-size: 2.2rem;
+      line-height: 1;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    .tb-info {}
+    .tb-class {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .tb-condition {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .tb-badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 1px solid var(--steel-lt);
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    .tax-bracket.active-bracket .tb-badge {
+      color: var(--neon);
+      border-color: var(--neon-dim);
+    }
+
+    /* calculator */
+    .tax-calculator {
+      background: var(--asphalt3);
+      border: 1px solid var(--steel-lt);
+      padding: 36px;
+    }
+    .calc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .calc-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--neon);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .calc-year {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+    }
+
+    .calc-input-group {
+      margin-bottom: 28px;
+    }
+    .calc-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .calc-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .calc-value {
+      font-family: var(--font-hd);
+      font-size: 1.6rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .calc-value span {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      margin-left: 4px;
+    }
+
+    input[type="range"].dc-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 3px;
+      background: var(--steel);
+      outline: none;
+      border-radius: 0;
+      cursor: pointer;
+    }
+    input[type="range"].dc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--neon);
+      cursor: pointer;
+      border-radius: 0;
+      box-shadow: 0 0 8px var(--neon-glow);
+    }
+    input[type="range"].dc-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--neon);
+      cursor: pointer;
+      border-radius: 0;
+      border: none;
+    }
+
+    .calc-result {
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid var(--steel);
+    }
+    .calc-result-header {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .calc-score-bar-wrap {
+      background: var(--asphalt);
+      height: 8px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .calc-score-bar {
+      height: 100%;
+      background: var(--neon);
+      box-shadow: 0 0 10px var(--neon-glow);
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+    .calc-result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .calc-result-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+    }
+    .calc-result-val {
+      font-family: var(--font-hd);
+      font-size: 1.1rem;
+    }
+    #tax-rate-display {
+      font-size: 3.4rem;
+      line-height: 1;
+      transition: color 0.4s;
+    }
+    #tax-class-display {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.4s;
+    }
+    #tax-verdict {
+      margin-top: 18px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+      line-height: 1.7;
+      min-height: 40px;
+      transition: color 0.4s;
+    }
+
+    /* leaderboard */
+    .tax-leaderboard {
+      margin-top: 60px;
+    }
+    .lb-header-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 120px 120px 120px 100px;
+      gap: 16px;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--steel-lt);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .lb-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 120px 120px 120px 100px;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--steel);
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .lb-row:hover { background: rgba(57,255,20,0.02); }
+    .lb-rank {
+      font-family: var(--font-hd);
+      font-size: 1.4rem;
+      color: var(--steel-lt);
+      line-height: 1;
+    }
+    .lb-rank.gold { color: #ffd700; }
+    .lb-rank.silver { color: #c0c0c0; }
+    .lb-rank.bronze { color: #cd7f32; }
+    .lb-resident {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--white);
+      letter-spacing: 0.06em;
+    }
+    .lb-resident span {
+      display: block;
+      font-size: 0.58rem;
+      color: var(--chrome);
+      margin-top: 2px;
+    }
+    .lb-cell {
+      font-family: var(--font-hd);
+      font-size: 1.1rem;
+      text-align: right;
+    }
+    .lb-tax-rate {
+      font-family: var(--font-hd);
+      font-size: 1.4rem;
+      text-align: right;
+    }
+    .lb-tax-rate.tier-1 { color: var(--neon); }
+    .lb-tax-rate.tier-2 { color: #aaff00; }
+    .lb-tax-rate.tier-3 { color: var(--amber); }
+    .lb-tax-rate.tier-4 { color: var(--red-alert); }
+
+    /* ─── FLEET REDISTRIBUTION ─────────────────────────────── */
+    #fleet-redistribution { background: var(--asphalt); }
+
+    .fleet-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .fleet-intro p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    /* acquisition tiers */
+    .acq-tiers {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 36px;
+    }
+    .acq-tier {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 22px;
+      background: var(--asphalt3);
+      border-left: 3px solid var(--steel-lt);
+      transition: border-color 0.25s;
+    }
+    .acq-tier.active-tier { border-left-color: var(--neon); background: rgba(57,255,20,0.04); }
+    .acq-tier-score {
+      font-family: var(--font-hd);
+      font-size: 1.8rem;
+      line-height: 1;
+      min-width: 72px;
+      flex-shrink: 0;
+    }
+    .acq-tier-score.t1 { color: var(--neon); }
+    .acq-tier-score.t2 { color: #aaff00; }
+    .acq-tier-score.t3 { color: var(--amber); }
+    .acq-tier-name {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .acq-tier-cond {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .acq-tier-badge {
+      margin-left: auto;
+      font-family: var(--font-hd);
+      font-size: 1.2rem;
+      white-space: nowrap;
+    }
+    .acq-tier-badge.t1 { color: var(--neon); }
+    .acq-tier-badge.t2 { color: #aaff00; }
+    .acq-tier-badge.t3 { color: var(--amber); }
+
+    /* right column: fleet registry + calculator */
+    .fleet-right {}
+
+    /* score calculator */
+    .ethics-calc {
+      background: var(--asphalt3);
+      border: 1px solid var(--steel-lt);
+      padding: 32px;
+      margin-bottom: 2px;
+    }
+    .ethics-calc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .ethics-calc-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--neon);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .ethics-score-total {
+      font-family: var(--font-hd);
+      font-size: 2.6rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .ethics-score-total span {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      margin-left: 4px;
+    }
+    .ethics-sliders {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px 36px;
+    }
+    .ethics-slider-group {}
+    .ethics-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .ethics-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .ethics-val {
+      font-family: var(--font-hd);
+      font-size: 1.3rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .ethics-result {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--steel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #ethics-tier-name {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    #ethics-discount {
+      font-family: var(--font-hd);
+      font-size: 2rem;
+      line-height: 1;
+    }
+    #ethics-access {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    /* forfeited fleet registry */
+    .fleet-registry {
+      background: var(--asphalt3);
+      border: 1px solid var(--steel-lt);
+      padding: 28px;
+    }
+    .registry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .registry-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--neon);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .registry-count {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+    }
+    .fleet-card {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--steel);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px 20px;
+      align-items: start;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .fleet-card:last-child { border-bottom: none; }
+    .fleet-card:hover { background: rgba(57,255,20,0.02); margin: 0 -10px; padding: 18px 10px; }
+    .fleet-card-name {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .fleet-card-meta {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+      line-height: 1.7;
+    }
+    .fleet-card-meta .ban-reason { color: var(--red-alert); }
+    .fleet-card-price-col { text-align: right; }
+    .fleet-card-market {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+      text-decoration: line-through;
+    }
+    .fleet-card-dc-price {
+      font-family: var(--font-hd);
+      font-size: 1.5rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .fleet-card-min-score {
+      font-family: var(--font-mono);
+      font-size: 0.56rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+    .fleet-card-min-score.eligible { color: var(--neon); }
+    .fleet-card-min-score.ineligible { color: var(--red-alert); }
+
+    /* ban consequence calculator */
+    .ban-consequence {
+      background: #0d0000;
+      border: 1px solid var(--red-alert);
+      padding: 32px;
+      margin-top: 60px;
+    }
+    .bc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .bc-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--red-alert);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .bc-warning {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: #ff6060;
+      letter-spacing: 0.1em;
+    }
+    .bc-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .bc-slider-group {}
+    .bc-label-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .bc-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: #ff9a9a;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .bc-val {
+      font-family: var(--font-hd);
+      font-size: 1.8rem;
+      color: var(--red-alert);
+      line-height: 1;
+    }
+    input[type="range"].dc-slider-red::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--red-alert);
+      cursor: pointer;
+      border-radius: 0;
+      box-shadow: 0 0 8px rgba(255,32,32,0.5);
+    }
+    input[type="range"].dc-slider-red {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 3px;
+      background: #3a0000;
+      outline: none;
+      cursor: pointer;
+    }
+    .bc-result {
+      background: #1a0000;
+      padding: 24px;
+      text-align: center;
+    }
+    .bc-result-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: #ff9a9a;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .bc-fleet-value {
+      font-family: var(--font-hd);
+      font-size: 3rem;
+      color: var(--red-alert);
+      line-height: 1;
+    }
+    .bc-fleet-sub {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: #ff6060;
+      letter-spacing: 0.1em;
+      margin-top: 8px;
+      line-height: 1.8;
+    }
+
+    /* ─── EV PERFORMANCE BANNER ─────────────────────────────── */
+    .ev-perf-banner {
+      background: var(--neon);
+      padding: 18px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+    }
+    .ev-perf-banner-title {
+      font-family: var(--font-hd);
+      font-size: 2.4rem;
+      letter-spacing: 0.12em;
+      color: #000;
+      line-height: 1;
+    }
+    .ev-perf-banner-rule {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #000;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.7;
+    }
+    .ev-perf-banner-threshold {
+      font-family: var(--font-hd);
+      font-size: 3.5rem;
+      color: #000;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .ev-perf-banner-threshold span {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      display: block;
+    }
+
+    /* ─── URBAN CELL ─────────────────────────────────────────── */
+    #urban-cell { background: var(--asphalt2); }
+    .uc-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .uc-canvas-wrap {
+      background: var(--asphalt);
+      border: 1px solid var(--steel-lt);
+      padding: 20px;
+      position: relative;
+    }
+    #uc-canvas { width: 100%; display: block; }
+    .uc-legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+      margin-top: 14px;
+    }
+    .uc-leg-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.08em;
+    }
+    .uc-leg-dot {
+      width: 10px; height: 10px;
+      border-radius: 0;
+      flex-shrink: 0;
+    }
+    .uc-zones {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .uc-zone {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--steel);
+    }
+    .uc-zone:last-child { border-bottom: none; }
+    .uc-zone-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--neon);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .uc-zone-tag.silver { color: #c0c0c0; }
+    .uc-zone-title {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .uc-zone p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .uc-spec-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .uc-spec {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--neon);
+      letter-spacing: 0.1em;
+      border: 1px solid var(--neon-dim);
+      padding: 3px 9px;
+    }
+    .uc-spec.silver {
+      color: #c0c0c0;
+      border-color: rgba(192,192,192,0.3);
+    }
+    .uc-mansion-count {
+      margin-top: 30px;
+      display: flex;
+      gap: 32px;
+    }
+    .uc-mc-val {
+      font-family: var(--font-hd);
+      font-size: 3rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .uc-mc-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ─── GUEST TIER ─────────────────────────────────────────── */
+    #guest-tier { background: var(--asphalt); }
+    .gt-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2px;
+      margin-bottom: 50px;
+    }
+    .gt-card {
+      background: var(--asphalt3);
+      padding: 36px 32px;
+      border-top: 3px solid var(--steel-lt);
+      transition: border-color 0.25s;
+    }
+    .gt-card:hover { border-top-color: var(--neon); }
+    .gt-card-icon { font-size: 2rem; margin-bottom: 16px; display: block; }
+    .gt-card-title {
+      font-family: var(--font-hd);
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .gt-card p {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .supercar-teacher {
+      background: var(--asphalt3);
+      border: 1px solid var(--neon-dim);
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 50px;
+      align-items: start;
+    }
+    .st-left {}
+    .st-title {
+      font-family: var(--font-hd);
+      font-size: 2.8rem;
+      letter-spacing: 0.05em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .st-title .accent { color: var(--neon); }
+    .st-sub {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .st-rules {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .st-rule {
+      display: flex;
+      gap: 18px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--steel);
+      align-items: flex-start;
+    }
+    .st-rule:last-child { border-bottom: none; }
+    .st-rule-num {
+      font-family: var(--font-hd);
+      font-size: 2rem;
+      color: var(--steel-lt);
+      line-height: 1;
+      min-width: 40px;
+    }
+    .st-rule-text {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .st-rule-text strong { color: var(--white); font-weight: 600; }
+
+    /* ─── NO DELIVERY CULTURE UPDATE ────────────────────────── */
+    .no-delivery-banner {
+      margin-top: 60px;
+      background: var(--asphalt3);
+      border: 1px solid var(--neon-dim);
+      padding: 36px 44px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .nd-metric {}
+    .nd-val {
+      font-family: var(--font-hd);
+      font-size: 3.5rem;
+      color: var(--neon);
+      line-height: 1;
+    }
+    .nd-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+    .nd-text {
+      font-weight: 300;
+      color: var(--chrome-lt);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      grid-column: span 2;
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────────── */
+    footer {
+      background: #050505;
+      border-top: 2px solid var(--neon-dim);
+      padding: 60px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 50px;
+    }
+    .footer-brand {}
+    .footer-logo {
+      font-family: var(--font-hd);
+      font-size: 2.4rem;
+      color: var(--neon);
+      letter-spacing: 0.12em;
+      margin-bottom: 16px;
+    }
+    .footer-brand p {
+      font-weight: 300;
+      color: var(--chrome);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      max-width: 320px;
+    }
+    .footer-col-title {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--neon);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--chrome);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--neon); }
+    .footer-bottom {
+      border-top: 1px solid var(--steel);
+      padding-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-mandate {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--chrome);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .footer-mandate span { color: var(--neon); }
+    .footer-mandate.alert span { color: var(--red-alert); }
+
+    /* ─── ANIMATIONS ────────────────────────────────────────── */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── SPEEDOMETER WIDGET ────────────────────────────────── */
+    .speedometer-widget {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 110px;
+      z-index: 999;
+      pointer-events: none;
+    }
+    #speedo-canvas { width: 110px; height: 110px; }
+    .speedo-label {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: var(--chrome);
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      section { padding: 70px 28px; }
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero-stats { position: static; margin-top: 50px; flex-direction: row; flex-wrap: wrap; gap: 28px; }
+      .ev-grid, .rules-layout, .res-grid, .asn-layout, .racing-layout, .mfr-grid, .logistics-grid, .dcu-layout, .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#hero">DRIFT<span>CITY</span></a>
+  <ul class="nav-links">
+    <li><a href="#ev-mandate">EV Code</a></li>
+    <li><a href="#rules">Rules</a></li>
+    <li><a href="#asn9">ASN-9</a></li>
+    <li><a href="#residential">§14</a></li>
+    <li><a href="#racing">Ecosystem</a></li>
+    <li><a href="#manufacturer">Manufacturers</a></li>
+    <li><a href="#dcu">DCU</a></li>
+    <li><a href="#perf-tax">Tax</a></li>
+    <li><a href="#fleet-redistribution">Fleet</a></li>
+    <li><a href="#urban-cell">Urban Cell</a></li>
+    <li><a href="#guest-tier">Staff</a></li>
+    <li><a href="map.html" style="color:var(--neon)">⬡ ASN-9 MAP</a></li>
+    <li><a href="drift-city-googlemaps.html" style="color:var(--neon)">📍 DRIFT MAPS</a></li>
+  </ul>
+  <div class="nav-status">ASN-9 ONLINE — 847/847 NODES ACTIVE</div>
+</nav>
+
+<!-- ─── HERO ────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-scan-line"></div>
+  <div class="hero-stripe"></div>
+
+  <div class="hero-speed-counter">
+    <span>CITYWIDE AVG: <span id="avg-speed">88</span> KM/H</span>
+    <span>|</span>
+    <span>RESIDENTS: <span id="residents-count">4,812</span></span>
+  </div>
+
+  <h1 class="hero-title fade-in">
+    DRIFT <span class="accent">CITY</span><br>
+    THE ASPHALT<br>
+    CREED.
+  </h1>
+
+  <p class="hero-subtitle fade-in">
+    Drift City is not for everyone.<br>That is entirely the point.
+  </p>
+
+  <div class="hero-cta-row fade-in">
+    <a href="#ev-mandate" class="btn-primary">APPLY FOR RESIDENCY</a>
+    <a href="#rules" class="btn-ghost">READ THE CODE</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat-item fade-in">
+      <div class="hero-stat-num">88</div>
+      <div class="hero-stat-label">KM/H CITY AVG</div>
+    </div>
+    <div class="hero-stat-item fade-in">
+      <div class="hero-stat-num">847</div>
+      <div class="hero-stat-label">SMART SIGNALS</div>
+    </div>
+    <div class="hero-stat-item fade-in">
+      <div class="hero-stat-num">0</div>
+      <div class="hero-stat-label">TRAFFIC JAMS</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── EV PERFORMANCE BANNER ───────────────────────────────── -->
+<div class="ev-perf-banner" id="ev-banner">
+  <div class="ev-perf-banner-title">HIGH-PERFORMANCE<br>EVs WELCOME.</div>
+  <div class="ev-perf-banner-rule">
+    THE ORIGINAL CHARTER HAS BEEN UPDATED.<br>
+    ELITE ELECTRIC VEHICLES NOW RECOGNISED AS FULL<br>
+    CITIZENS OF THE 88 KM/H CITYWIDE AVERAGE ECOSYSTEM.<br>
+    ONE NON-NEGOTIABLE CONDITION REMAINS IN FORCE:
+  </div>
+  <div class="ev-perf-banner-threshold">
+    &lt;5s
+    <span>0–100 KM/H MANDATE<br>NO EXCEPTIONS</span>
+  </div>
+</div>
+
+<!-- ─── EV PERFORMANCE MANDATE ──────────────────────────────── -->
+<section id="ev-mandate">
+  <div class="section-label">DIRECTIVE 01 — EV PERFORMANCE MANDATE</div>
+  <h2 class="section-title">HIGH VOLTAGE.<br><span class="accent">ZERO EXCUSES.</span></h2>
+  <div class="ev-grid">
+    <div class="ev-card fade-in">
+      <span class="ev-card-icon">⚡</span>
+      <div class="ev-card-title">EV WELCOME STANDARD</div>
+      <p>High-performance electric vehicles are fully integrated into Drift City's driving culture — provided they demonstrate the acceleration signature of a true performance machine. Silent power is no exemption from speed.</p>
+      <div class="ev-threshold">
+        <span class="ev-threshold-num">&lt;5s</span>
+        <span class="ev-threshold-unit">0–100 KM/H<br>CLEARANCE THRESHOLD</span>
+      </div>
+    </div>
+    <div class="ev-card danger fade-in">
+      <span class="ev-card-icon">🚫</span>
+      <div class="ev-card-title red">FAILURE = TICKET</div>
+      <p>Any EV that fails to achieve 0–100 km/h in under five seconds will receive an automated performance citation the moment the plates are registered by any ASN-9 roadside sensor. There is no warning tier. There is no appeals window for low-output machinery.</p>
+      <div class="ev-threshold" style="border-color:var(--red-alert); background:rgba(255,32,32,0.04);">
+        <span class="ev-threshold-num" style="color:var(--red-alert);">$600</span>
+        <span class="ev-threshold-unit">AUTOMATED FINE<br>SLOW EV CITATION</span>
+      </div>
+    </div>
+    <div class="ev-card fade-in" style="border-left-color:var(--neon);">
+      <span class="ev-card-icon">🏎️</span>
+      <div class="ev-card-title">APPROVED PLATFORMS</div>
+      <p>Tesla Model S Plaid, Rimac Nevera, Porsche Taycan Turbo GT, Aspark Owl, and all manufacturer-certified vehicles holding a Drift City EV Performance Certificate (DCEPC). Koenigsegg Gemera (4-seat config) is unconditionally approved.</p>
+    </div>
+    <div class="ev-card fade-in">
+      <span class="ev-card-icon">🔋</span>
+      <div class="ev-card-title">CHARGING PROTOCOL</div>
+      <p>All residential charging infrastructure must sustain 350 kW minimum. Street-level charging is strictly prohibited. DC fast chargers are built into every residential garage bay. The city's energy grid is nuclear-backed for uninterrupted 24/7 high-draw charging.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── RULES OF THE ROAD ────────────────────────────────────── -->
+<section id="rules">
+  <div class="section-label">DIRECTIVE 02 — MUNICIPAL DRIVING CODE</div>
+  <h2 class="section-title">THE <span class="accent">RULES</span><br>OF THE ROAD.</h2>
+  <div class="rules-layout">
+    <div class="rules-list">
+      <div class="rule-item fade-in">
+        <div class="rule-num">01</div>
+        <div class="rule-body">
+          <div class="rule-title">Mandatory 25° Controlled Oversteer</div>
+          <p class="rule-desc">Every marked corner within Drift City requires a minimum 25° controlled drift. Exiting corners with all four wheels tracking straight is treated as a traffic infraction. ASN-9 laser arrays verify angle at every marked intersection.</p>
+          <span class="rule-fine">▶ $400 AUTOMATED CITATION — NO EXCEPTIONS</span>
+        </div>
+      </div>
+      <div class="rule-item fade-in">
+        <div class="rule-num">02</div>
+        <div class="rule-body">
+          <div class="rule-title">Green Wave Compliance</div>
+          <p class="rule-desc">Arterial roads require sustained speeds of 70–110 km/h to remain in the synchronized green wave managed by ASN-9. Dropping below or exceeding the window disrupts the flow cascade for all downstream intersections.</p>
+          <span class="rule-fine">▶ $250 FLOW DISRUPTION FINE</span>
+        </div>
+      </div>
+      <div class="rule-item fade-in">
+        <div class="rule-num">03</div>
+        <div class="rule-body">
+          <div class="rule-title">No Stopping in Transit Lanes</div>
+          <p class="rule-desc">Transit lanes operate as perpetual-flow corridors. Any vehicle that decelerates below 40 km/h outside a designated zone is flagged as a hazard. Emergency stop bays are located every 1.2 km on all major arterials.</p>
+          <span class="rule-fine">▶ $500 LANE STAGNATION FINE</span>
+        </div>
+      </div>
+      <div class="rule-item fade-in">
+        <div class="rule-num">04</div>
+        <div class="rule-body">
+          <div class="rule-title">Race License Mandatory</div>
+          <p class="rule-desc">Residency requires a minimum FIA-recognized regional racing license or an equivalent Drift City Qualification Certificate (DCQC). Licenses are re-evaluated bi-annually. Any lapse in standing triggers automatic residency review.</p>
+        </div>
+      </div>
+      <div class="rule-item fade-in">
+        <div class="rule-num">05</div>
+        <div class="rule-body">
+          <div class="rule-title">Monthly Tire Compliance Inspection</div>
+          <p class="rule-desc">All vehicles must present for mandatory tire inspection at licensed Drift City service bays every 30 days. Worn tyres below 2mm tread depth receive an automatic impound order. Replacements must use DC-approved compound grades.</p>
+          <span class="rule-fine">▶ $800 UNSAFE TIRE FINE + IMPOUND</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="zero-tolerance fade-in">
+      <div class="zero-tolerance-title">ZERO-TOLERANCE POLICY</div>
+      <p>Drift City maintains an absolute, non-negotiable stance on incidents. There is no court of appeal. There is no insurance settlement. There is only the ban.</p>
+      <ul class="zt-list">
+        <li>Any collision — including cosmetic contact — triggers permanent revocation</li>
+        <li>Mechanical stall on a live roadway — immediate lifetime ban</li>
+        <li>Vehicle fire or thermal runaway event — permanent ban + vehicle destruction</li>
+        <li>Driving under impairment of any kind — instant ban, no hearing</li>
+        <li>Failure to comply with an ASN-9 automated directive — ban pending review</li>
+      </ul>
+      <div class="ban-badge">LIFETIME BAN</div>
+      <p style="margin-top:20px; font-size:0.88rem; color:#ff9a9a; border-top:1px solid #3a0000; padding-top:16px;">
+        Upon ban, your <strong style="color:var(--red-alert)">entire registered fleet is forfeited</strong> to the city.
+        Every car you owned is your ticket. All vehicles enter the
+        <a href="#fleet-redistribution" style="color:var(--red-alert); text-decoration:underline;">Fleet Redistribution Protocol</a>
+        — sold at preferential pricing to vetted newcomers who demonstrate both great car control and great ethics.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ASN-9 NETWORK ─────────────────────────────────────────── -->
+<section id="asn9">
+  <div class="section-label">DIRECTIVE 03 — ASN-9 NEURAL TRAFFIC NETWORK</div>
+  <h2 class="section-title"><span class="accent">ASN-9</span> THE<br>GREEN WAVE.</h2>
+  <div class="asn-layout">
+    <div class="asn-info fade-in">
+      <p>The ASN-9 is the artificial intelligence central nervous system of Drift City — a distributed neural network managing all 847 traffic control nodes in real time. It processes 4.2 million data points per second: vehicle speed, trajectory, drift angle, tire load, weather micro-data, and road temperature.</p>
+      <p style="margin-top:20px;">The Green Wave protocol ensures that any vehicle traveling at the designated arterial speed (70–110 km/h) will never encounter a red light. Signals cascade in predictive sequences calculated 8.4 seconds ahead of the fastest vehicle in any given corridor.</p>
+      <div class="asn-stat-row">
+        <div class="asn-stat">
+          <div class="asn-stat-val">847</div>
+          <div class="asn-stat-lbl">Active Signal Nodes</div>
+        </div>
+        <div class="asn-stat">
+          <div class="asn-stat-val">8.4s</div>
+          <div class="asn-stat-lbl">Predictive Lead Time</div>
+        </div>
+        <div class="asn-stat">
+          <div class="asn-stat-val">4.2M</div>
+          <div class="asn-stat-lbl">Data Points/Second</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="green-wave-container fade-in">
+      <div class="tracker-header">
+        <span class="tracker-title">ASN-9 GREEN WAVE TRACKER</span>
+        <span class="tracker-live">LIVE FEED</span>
+      </div>
+      <canvas id="wave-canvas" height="220"></canvas>
+      <div class="tracker-speed-bar" id="speed-bars"></div>
+      <div class="tracker-labels">
+        <span class="tracker-label">VELOCITY DISTRIBUTION</span>
+        <span class="tracker-label" id="avg-display">AVG: 88 KM/H</span>
+      </div>
+      <div class="road-indicator">
+        <div class="road-node">
+          <span class="road-node-name">APEX BLVD</span>
+          <span class="road-node-speed green" id="r1">96</span>
+          <span class="road-node-name">KM/H</span>
+        </div>
+        <div class="road-node">
+          <span class="road-node-name">SLIPSTREAM AVE</span>
+          <span class="road-node-speed green" id="r2">88</span>
+          <span class="road-node-name">KM/H</span>
+        </div>
+        <div class="road-node">
+          <span class="road-node-name">TORQUE LOOP</span>
+          <span class="road-node-speed green" id="r3">101</span>
+          <span class="road-node-name">KM/H</span>
+        </div>
+        <div class="road-node">
+          <span class="road-node-name">OVERSTEER RING</span>
+          <span class="road-node-speed amber" id="r4">74</span>
+          <span class="road-node-name">KM/H</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── RESIDENTIAL §14 ──────────────────────────────────────── -->
+<section id="residential">
+  <div class="section-label">DIRECTIVE 04 — RESIDENTIAL CODE §14</div>
+  <h2 class="section-title">THE GARAGE<br>IS THE <span class="accent">LIVING ROOM.</span></h2>
+  <div class="res-grid">
+    <div class="res-card fade-in" data-code="§14">
+      <div class="res-card-num">CODE §14.1 — ENTRY PROTOCOL</div>
+      <div class="res-card-title">No Front Door</div>
+      <p>Drift City residential code prohibits conventional front-door pedestrian entry. All home access is through the garage bay. The garage is the ceremonial and functional primary entrance — the living room, the statement, the identity.</p>
+    </div>
+    <div class="res-card fade-in" data-code="30">
+      <div class="res-card-num">CODE §14.2 — VEHICLE CAPACITY</div>
+      <div class="res-card-title">30-Car Gallery Standard</div>
+      <p>Every Drift City residence must feature a minimum 30-vehicle gallery-grade garage. Climate control, hydraulic lift systems, and gallery lighting are code requirements. Vehicles on display must be operational — static collections without valid registration are prohibited.</p>
+      <div class="res-metric">30</div>
+      <div class="res-metric-label">MINIMUM VEHICLE BAYS</div>
+    </div>
+    <div class="res-card fade-in" data-code="⛽">
+      <div class="res-card-num">CODE §14.3 — FUEL SAFETY</div>
+      <div class="res-card-title">Gas-Station Grade Safety</div>
+      <p>All residential fuel storage must meet commercial-grade safety standards. Underground tanks, fire suppression systems, and automated vapor detection are mandatory. Improper fuel infrastructure is grounds for immediate residency suspension.</p>
+    </div>
+    <div class="res-card fade-in" data-code="400">
+      <div class="res-card-num">CODE §14.4 — PLATE RECOGNITION</div>
+      <div class="res-card-title">400-Metre Sensor Array</div>
+      <p>Residential approach corridors are equipped with ASN-9-integrated plate recognition systems that activate at 400 metres. Your garage opens before you brake. Your home recognizes your vehicle before your vehicle recognizes the road.</p>
+      <div class="res-metric">400m</div>
+      <div class="res-metric-label">PLATE RECOGNITION RANGE</div>
+    </div>
+    <div class="res-card fade-in" data-code="24">
+      <div class="res-card-num">CODE §14.5 — MAINTENANCE</div>
+      <div class="res-card-title">24-Hour Service Infrastructure</div>
+      <p>Every residential block has a dedicated 24-hour mechanical service unit. Residents may never be stranded — on-site technicians operate round the clock. Any vehicle requiring roadside assistance that cannot self-propel is subject to immediate towing and residency review.</p>
+    </div>
+    <div class="res-card fade-in" data-code="🔒">
+      <div class="res-card-num">CODE §14.6 — ZONE SECURITY</div>
+      <div class="res-card-title">ASN-9 Perimeter Watch</div>
+      <p>Residential zones are under continuous ASN-9 optical surveillance. Private security teams operate under direct ASN-9 coordination. Unregistered vehicles approaching residential corridors are intercepted at 600 metres. There are no blind spots.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── URBAN CELL ─────────────────────────────────────────────── -->
+<section id="urban-cell">
+  <div class="section-label">DIRECTIVE 11 — CIRCULAR AGGLOMERATION: THE URBAN CELL</div>
+  <h2 class="section-title">THE RING IS<br>THE <span class="accent">CITY.</span></h2>
+
+  <div class="uc-layout">
+    <!-- LEFT: Interactive Canvas -->
+    <div>
+      <div class="uc-canvas-wrap fade-in">
+        <canvas id="uc-canvas" height="500"></canvas>
+      </div>
+      <div class="uc-legend">
+        <div class="uc-leg-item"><div class="uc-leg-dot" style="background:#39ff14;box-shadow:0 0 4px #39ff14"></div>Supercar Ring (70–110 km/h)</div>
+        <div class="uc-leg-item"><div class="uc-leg-dot" style="background:#c0c0c0"></div>Pedestrian Interior (No Car)</div>
+        <div class="uc-leg-item"><div class="uc-leg-dot" style="background:#2a2a2a;border:1px solid #39ff14"></div>Mansion Garage (§14)</div>
+        <div class="uc-leg-item"><div class="uc-leg-dot" style="background:rgba(57,255,20,0.2);border:1px dashed #39ff14"></div>400m Sensor Zone</div>
+        <div class="uc-leg-item"><div class="uc-leg-dot" style="background:#1e1e28"></div>No-Car Interior Zone</div>
+        <div class="uc-leg-item"><div class="uc-leg-dot" style="background:#c0c0c0;opacity:.5"></div>Walking + Jogging Paths</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Zone descriptions -->
+    <div class="uc-zones">
+      <div class="uc-zone fade-in">
+        <div class="uc-zone-tag">EXTERIOR ZONE — ASPHALT BLACK</div>
+        <div class="uc-zone-title">The Supercar Perimeter</div>
+        <p>The outer ring of the Urban Cell is reserved exclusively for high-performance vehicles. Mansions face outward — garage-first, §14-compliant — with plate recognition sensors activating 400 metres before the resident reaches their bay. Vehicles enter the ring at full green-wave velocity and connect to other clusters, the University, and the race track via 70–110 km/h arterials.</p>
+        <div class="uc-spec-row">
+          <span class="uc-spec">§14 GARAGE-FIRST</span>
+          <span class="uc-spec">400M SENSOR</span>
+          <span class="uc-spec">70–110 KM/H RING</span>
+          <span class="uc-spec">ASN-9 MANAGED</span>
+        </div>
+        <div class="uc-mansion-count">
+          <div><div class="uc-mc-val" id="uc-mansion-num">12</div><div class="uc-mc-lbl">Mansions per Cell</div></div>
+          <div><div class="uc-mc-val">30</div><div class="uc-mc-lbl">Min. Garage Bays</div></div>
+          <div><div class="uc-mc-val">400m</div><div class="uc-mc-lbl">Plate Sensor Range</div></div>
+        </div>
+      </div>
+
+      <div class="uc-zone fade-in">
+        <div class="uc-zone-tag silver">INTERIOR ZONE — PRECISION SILVER</div>
+        <div class="uc-zone-title">The No-Car Site</div>
+        <p>The center of every Urban Cell is a protected pedestrian social hub. No vehicle — combustion or electric — is permitted to enter. Residents access the interior through their home's interior-facing pedestrian door — the only door in the house that does not face a garage. The interior hosts walking and jogging paths, a Farmers' Market, a curated mall, and community spaces.</p>
+        <div class="uc-spec-row">
+          <span class="uc-spec silver">PEDESTRIAN ONLY</span>
+          <span class="uc-spec silver">FARMERS MARKET</span>
+          <span class="uc-spec silver">JOGGING TRACK</span>
+          <span class="uc-spec silver">SOCIAL MALL</span>
+        </div>
+      </div>
+
+      <div class="uc-zone fade-in">
+        <div class="uc-zone-tag">CONNECTIVITY — GREEN WAVE ARTERIALS</div>
+        <div class="uc-zone-title">Cell-to-Cell Race Traces</div>
+        <p>Each Urban Cell connects to neighbouring cells, the Drift City University campus, and the race track network via ASN-9-managed arterial roads. The GPC navigation system generates optimal inter-cell routes as daily race traces. The 847-node signal network ensures that drivers moving between cells never break their green wave corridor.</p>
+        <div class="uc-spec-row">
+          <span class="uc-spec">GPC RACE TRACE</span>
+          <span class="uc-spec">INTER-CELL ARTERIALS</span>
+          <span class="uc-spec">847 ASN-9 NODES</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── GUEST TIER & STAFF INTEGRATION ──────────────────────── -->
+<section id="guest-tier">
+  <div class="section-label">DIRECTIVE 12 — GUEST TIER & STAFF INTEGRATION</div>
+  <h2 class="section-title">SERVICE<br>AT <span class="accent">VELOCITY.</span></h2>
+
+  <div class="gt-layout">
+    <div class="gt-card fade-in">
+      <span class="gt-card-icon">🚇</span>
+      <div class="gt-card-title">Subterranean Access</div>
+      <p>All non-resident essential personnel — merchants, teachers, maintenance staff — access Drift City exclusively via the underground subway and high-speed rail network. Subterranean arrival points are located beneath each Urban Cell's central pedestrian hub. Staff emerge directly into the No-Car interior zone, never touching the supercar ring.</p>
+    </div>
+    <div class="gt-card fade-in">
+      <span class="gt-card-icon">🚁</span>
+      <div class="gt-card-title">Helicopter Corridor</div>
+      <p>When ground access is impractical, approved staff and all city visitors access via dedicated helicopter corridors managed by ASN-9 air traffic control. Helipads are positioned at each Urban Cell's northern perimeter. Visitor ground access is permanently prohibited — any vehicle without a Drift City plate triggers an automatic ASN-9 intercept at 600 metres.</p>
+    </div>
+    <div class="gt-card fade-in">
+      <span class="gt-card-icon">🏫</span>
+      <div class="gt-card-title">Upper-Floor Residency</div>
+      <p>Residents may host approved guests — household staff, private tutors, live-in educators — in upper-floor suite accommodation. These suites open onto the interior pedestrian zone only. Guests assigned upper-floor residency are classified as Tier-2 City Persons and are prohibited from accessing the supercar ring without a sponsored vehicle arrangement.</p>
+    </div>
+  </div>
+
+  <!-- Supercar Teacher Model -->
+  <div class="supercar-teacher fade-in">
+    <div class="st-left">
+      <div class="st-title">The<br><span class="accent">Supercar</span><br>Teacher<br>Model.</div>
+      <p class="st-sub">A resident may provide a high-performance vehicle to an approved staff member. This is not a courtesy. It is a legal transfer of road responsibility.</p>
+    </div>
+    <div class="st-rules">
+      <div class="st-rule">
+        <div class="st-rule-num">01</div>
+        <div class="st-rule-text">The staff member must hold a <strong>Drift City Road License (DCRL)</strong> — the same class as any resident. No exceptions for employment status.</div>
+      </div>
+      <div class="st-rule">
+        <div class="st-rule-num">02</div>
+        <div class="st-rule-text">The vehicle provided must achieve <strong>0–100 km/h in under 5 seconds</strong>. Providing a slow vehicle to a staff member is a code violation for the sponsoring resident.</div>
+      </div>
+      <div class="st-rule">
+        <div class="st-rule-num">03</div>
+        <div class="st-rule-text">The mandatory <strong>25° controlled drift</strong> applies to all DCRL holders regardless of employment status. The ASN-9 does not distinguish between a resident and a sponsored teacher at a drift corner.</div>
+      </div>
+      <div class="st-rule">
+        <div class="st-rule-num">04</div>
+        <div class="st-rule-text">Any incident by a sponsored staff member — collision, stall, or fire — triggers a <strong>lifetime ban for the staff member</strong> and a formal review of the sponsoring resident's license standing.</div>
+      </div>
+      <div class="st-rule">
+        <div class="st-rule-num">05</div>
+        <div class="st-rule-text">Staff vehicles are <strong>registered to the resident's fleet</strong> and count toward the forfeiture total in the event of the resident's lifetime ban. Choose your staff wisely.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Delivery Banner -->
+  <div class="no-delivery-banner fade-in">
+    <div class="nd-metric">
+      <div class="nd-val">0</div>
+      <div class="nd-lbl">Delivery Services Permitted</div>
+    </div>
+    <div class="nd-metric">
+      <div class="nd-val">200L</div>
+      <div class="nd-lbl">Monthly Petrol Mandate</div>
+    </div>
+    <div class="nd-text">
+      All delivery services — couriers, food, parcels, logistics — are permanently banned from every Drift City Urban Cell. Residents navigate the exterior supercar ring in their own vehicles to retrieve goods from the central Farmers' Markets and mall in each cell's interior hub. This is not an inconvenience. It is the 200-litre monthly petrol quota in action. The journey to get groceries <em style="color:var(--neon)">is the point.</em>
+    </div>
+  </div>
+</section>
+
+<!-- ─── RACING ECOSYSTEM ─────────────────────────────────────── -->
+<section id="racing">
+  <div class="section-label">DIRECTIVE 05 — THE RACING ECOSYSTEM</div>
+  <h2 class="section-title">THE CITY<br>IS THE <span class="accent">TRACK.</span></h2>
+  <div class="racing-layout">
+    <div>
+      <div class="race-trace-display fade-in">
+        <div class="race-trace-overlay">GPC AI ROUTE — LIVE TRACE</div>
+        <canvas id="race-canvas" width="520" height="340"></canvas>
+      </div>
+    </div>
+    <div class="race-features">
+      <div class="race-feature fade-in">
+        <div class="race-feature-tag">AI SYSTEM — GPC NAVIGATOR</div>
+        <div class="race-feature-title">AI-Generated Race Traces</div>
+        <p>The GPC (GPS Performance Computer) generates dynamic race traces in real time, using ASN-9 traffic light timing as race markers. Every morning, a new optimal route is calculated for each resident — treating the city's arterial network as a reconfigurable race circuit.</p>
+      </div>
+      <div class="race-feature fade-in">
+        <div class="race-feature-tag">SIGNAL NETWORK — MARK SYSTEM</div>
+        <div class="race-feature-title">Traffic Lights as Race Markers</div>
+        <p>The 847 ASN-9 nodes function as dynamic race markers. Green light sequences define the racing line. Amber sequences signal corner-entry for drift zones. The city's signal choreography is both functional infrastructure and competitive framework.</p>
+      </div>
+      <div class="race-feature fade-in">
+        <div class="race-feature-tag">PERFORMANCE DATA</div>
+        <div class="race-feature-title">Live Lap Telemetry</div>
+        <p>Every run through a GPC-designated route is telemetrized — speed through each sector, drift angle at every corner, throttle data, and brake application events. Monthly leaderboards are published city-wide. The fastest residents earn priority green-wave scheduling.</p>
+      </div>
+      <div class="race-feature fade-in">
+        <div class="race-feature-tag">COMPETITIVE STRUCTURE</div>
+        <div class="race-feature-title">Weekly Race Events</div>
+        <p>Every Saturday at 04:00 the city locks specific arterials for structured time-attack events. Entry is automatic for all license-holding residents. DNF due to mechanical failure triggers a residency warning. Three warnings in 12 months initiates a license review.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ELITE LOGISTICS ──────────────────────────────────────── -->
+<section id="logistics">
+  <div class="section-label">DIRECTIVE 06 — ELITE LOGISTICS PROTOCOL</div>
+  <h2 class="section-title">ZERO<br><span class="accent">DELIVERY.</span><br>ZERO COMPROMISE.</h2>
+  <div class="logistics-grid">
+    <div class="logistics-card fade-in">
+      <span class="lc-icon">🚗</span>
+      <div class="lc-title">Resident Fetch Protocol</div>
+      <p>All delivery services — couriers, postal, food, and logistics — are permanently banned from Drift City roads. Residents retrieve all goods personally in their supercars. Commercial distribution hubs are located at the city perimeter — each with a high-speed supercar-compatible loading bay.</p>
+    </div>
+    <div class="logistics-card fade-in">
+      <span class="lc-icon">🚁</span>
+      <div class="lc-title">Helicopter-Only Access</div>
+      <p>All visitors, guests, and emergency services access Drift City exclusively via helicopter. Three helipads are strategically positioned at city entry points. No external ground vehicles are permitted on city roads. Emergency medical helicopters operate under ASN-9 air corridor management.</p>
+    </div>
+    <div class="logistics-card fade-in">
+      <span class="lc-icon">🔒</span>
+      <div class="lc-title">24-Hour City Lockdown</div>
+      <p>Any major accident — defined as structural damage, multi-vehicle incident, or any event causing lane closure exceeding 90 seconds — triggers an automatic 24-hour full city lockdown. All arterials reroute. The accident corridor is sealed until forensic analysis is complete.</p>
+    </div>
+  </div>
+  <div class="lockdown-banner fade-in">
+    <span class="lockdown-icon">⚠️</span>
+    <div class="lockdown-text">
+      <div class="lt-title">LOCKDOWN PROTOCOL ACTIVE THRESHOLD</div>
+      <p>A lockdown can be triggered by any single incident meeting the severity threshold. The ASN-9 system coordinates the full city response within 4 seconds of incident detection — rerouting all in-motion vehicles, securing helipads, alerting private security, and notifying all residents via dashboard alerts. There is no manual override. The ASN-9 decision is final.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── MANUFACTURER PORTAL ──────────────────────────────────── -->
+<section id="manufacturer">
+  <div class="section-label">DIRECTIVE 07 — MANUFACTURER LIAISON PORTAL</div>
+  <h2 class="section-title">DIRECT LINE.<br><span class="accent">24/7.</span></h2>
+  <div class="mfr-grid">
+    <div class="mfr-card active fade-in" onclick="activateMfr(this, 'ferrari')">
+      <div class="mfr-logo">FERRARI</div>
+      <div class="mfr-sub">Maranello, Italy — Since 1947</div>
+      <div class="mfr-status">LIVE LIAISON ACTIVE</div>
+      <div class="mfr-note">Approved models: SF90, F8, 812 Competizione</div>
+    </div>
+    <div class="mfr-card fade-in" onclick="activateMfr(this, 'lamborghini')">
+      <div class="mfr-logo">LAMBORGHINI</div>
+      <div class="mfr-sub">Sant'Agata, Italy — Since 1963</div>
+      <div class="mfr-status">LIVE LIAISON ACTIVE</div>
+      <div class="mfr-note">Approved models: Huracán STO, Revuelto, Urus (excluded)</div>
+    </div>
+    <div class="mfr-card fade-in" onclick="activateMfr(this, 'koenigsegg')">
+      <div class="mfr-logo">KOENIGSEGG</div>
+      <div class="mfr-sub">Ängelholm, Sweden — Since 1994</div>
+      <div class="mfr-status">LIVE LIAISON ACTIVE</div>
+      <div class="mfr-note">Gemera (4-seat): unconditionally approved — all configs</div>
+    </div>
+  </div>
+  <div class="portal-terminal fade-in">
+    <div class="terminal-header">
+      <div class="terminal-dot red"></div>
+      <div class="terminal-dot amber"></div>
+      <div class="terminal-dot green"></div>
+    </div>
+    <div id="terminal-output">
+      <span class="terminal-line dim">// DRIFT CITY MANUFACTURER PORTAL — ASN-9 SECURE CHANNEL</span>
+      <span class="terminal-line dim">// SESSION ENCRYPTED — AES-256 // LIAISON CODE: DC-MFR-24</span>
+      <span class="terminal-line">&gt; CONNECTING TO FERRARI FACTORY LIAISON...</span>
+      <span class="terminal-line">&gt; CHANNEL ESTABLISHED — RESPONSE TIME: 0.4s</span>
+      <span class="terminal-line">&gt; ACTIVE RESIDENTS ON FERRARI FLEET: 1,240 VEHICLES</span>
+      <span class="terminal-line">&gt; PENDING CERTIFICATION REQUESTS: 3</span>
+      <span class="terminal-line">&gt; LAST FIRMWARE UPDATE: FERRARI OTA 4.2.1 — DRIFT MODE CALIBRATION</span>
+      <span class="terminal-line">&gt; TYPE A REQUEST BELOW OR PRESS ENTER TO QUERY STATUS <span class="terminal-cursor"></span></span>
+    </div>
+    <div class="portal-input-row">
+      <input id="portal-input" type="text" placeholder="> ENTER MANUFACTURER QUERY..." autocomplete="off" />
+      <button class="btn-primary" onclick="sendPortalQuery()" style="white-space:nowrap;">TRANSMIT</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DCU RESEARCH HUB ──────────────────────────────────────── -->
+<section id="dcu">
+  <div class="section-label">DIRECTIVE 08 — DRIFT CITY UNIVERSITY RESEARCH HUB</div>
+  <h2 class="section-title">DCU —<br>ENGINEERING<br><span class="accent">THE FUTURE.</span></h2>
+  <div class="dcu-layout">
+    <div class="dcu-info fade-in">
+      <p>Drift City University is the world's only institution where the entire curriculum is built around the intersection of high-performance engineering, environmental management, and race-grade infrastructure design.</p>
+      <p>DCU's core mandate: ensure that Drift City's extraordinary performance culture does not come at an unchecked environmental cost. Air purification research, exhaust filtration innovation, and sustainable tire compound development are active programs with city-wide implementation.</p>
+      <p>Faculty are drawn exclusively from Formula 1 engineering departments, aerospace research institutions, and advanced materials laboratories.</p>
+      <div class="dcu-funding fade-in">
+        <div class="dcu-funding-title">ACTIVE RESEARCH BUDGET — FISCAL 2026</div>
+        <div class="dcu-fund-row">
+          <span class="dcu-fund-label">AIR PURIFICATION SYSTEMS</span>
+          <span class="dcu-fund-val">$84M</span>
+        </div>
+        <div class="dcu-fund-row">
+          <span class="dcu-fund-label">SUSTAINABLE TIRE COMPOUNDS</span>
+          <span class="dcu-fund-val">$47M</span>
+        </div>
+        <div class="dcu-fund-row">
+          <span class="dcu-fund-label">ASN-9 NEURAL ARCHITECTURE</span>
+          <span class="dcu-fund-val">$130M</span>
+        </div>
+        <div class="dcu-fund-row">
+          <span class="dcu-fund-label">HIGH-OUTPUT EXHAUST FILTRATION</span>
+          <span class="dcu-fund-val">$62M</span>
+        </div>
+        <div class="dcu-fund-row">
+          <span class="dcu-fund-label">GPC NAVIGATOR AI</span>
+          <span class="dcu-fund-val">$95M</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dcu-departments">
+      <div class="dcu-dept fade-in">
+        <span class="dcu-dept-icon">💨</span>
+        <div>
+          <div class="dcu-dept-name">Atmospheric Engineering Division</div>
+          <p>Managing exhaust output from 4,800+ high-performance combustion engines requires industrial-grade atmospheric intervention. DCU's atmospheric division operates a city-wide catalytic filtration network embedded in road surfaces and building facades, neutralizing particulates in real time.</p>
+        </div>
+      </div>
+      <div class="dcu-dept fade-in">
+        <span class="dcu-dept-icon">🛞</span>
+        <div>
+          <div class="dcu-dept-name">Advanced Tire Science Laboratory</div>
+          <p>Mandatory monthly tire replacement generates significant rubber waste. DCU's tire science lab has developed a closed-loop recycling process that reclaims 94% of worn compound material, converting it into sub-base road material for Drift City's own infrastructure renewal programme.</p>
+        </div>
+      </div>
+      <div class="dcu-dept fade-in">
+        <span class="dcu-dept-icon">🧠</span>
+        <div>
+          <div class="dcu-dept-name">ASN-9 Neural Architecture Lab</div>
+          <p>The team that built ASN-9 continues to evolve it. Current research focuses on predictive incident avoidance — using driver biometric data (heart rate, reaction telemetry) to anticipate and prevent incidents before they occur. Phase 3 integration targets sub-0.3 second intervention capability.</p>
+        </div>
+      </div>
+      <div class="dcu-dept fade-in">
+        <span class="dcu-dept-icon">⚗️</span>
+        <div>
+          <div class="dcu-dept-name">Fuel & Combustion Innovation Centre</div>
+          <p>Research into synthetic e-fuels with carbon-neutral combustion profiles, enabling combustion-engine residents to participate without atmospheric compromise. Current prototype fuel achieves 98.4% combustion completeness with measurable negative carbon output per cycle.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PERFORMANCE TAX SYSTEM ──────────────────────────────── -->
+<section id="perf-tax">
+  <div class="section-label">DIRECTIVE 09 — THE ASPHALT DIVIDEND</div>
+  <h2 class="section-title">DRIVE MORE.<br>PAY <span class="accent">LESS.</span></h2>
+
+  <div class="tax-layout">
+    <div class="tax-intro fade-in">
+      <p>Drift City operates on a single fiscal axiom: the road is the most honest measure of a resident's contribution. The more asphalt you cover — and the faster you cover it — the less you pay in municipal tax. Every year, the ASN-9 telemetry network calculates your <strong style="color:var(--neon)">Performance Score</strong> from your total annual distance and your average speed across all city roads.</p>
+      <p>This is not a reward. It is recognition. Slow residents consume road capacity without generating flow. Fast, high-distance residents are the lifeblood of the city's kinetic economy.</p>
+      <p>Tax assessments are finalised on <strong style="color:var(--chrome-lt)">31 December</strong> at 23:59:59. There are no extensions, no deductions, and no accountants. The ASN-9 does not negotiate.</p>
+
+      <div class="tax-brackets" id="tax-bracket-list">
+        <div class="tax-bracket tier-1" data-min-score="400" id="bracket-apex">
+          <div class="tb-rate">0%</div>
+          <div class="tb-info">
+            <div class="tb-class">Apex Class</div>
+            <div class="tb-condition">Score ≥ 400 pts — Distance × Speed dominance</div>
+          </div>
+          <div class="tb-badge">ZERO TAX</div>
+        </div>
+        <div class="tax-bracket tier-2" data-min-score="250" id="bracket-velocity">
+          <div class="tb-rate">4%</div>
+          <div class="tb-info">
+            <div class="tb-class">Velocity Class</div>
+            <div class="tb-condition">Score 250–399 pts</div>
+          </div>
+          <div class="tb-badge">LOW TAX</div>
+        </div>
+        <div class="tax-bracket tier-3" data-min-score="100" id="bracket-cruise">
+          <div class="tb-rate">12%</div>
+          <div class="tb-info">
+            <div class="tb-class">Cruise Class</div>
+            <div class="tb-condition">Score 100–249 pts</div>
+          </div>
+          <div class="tb-badge">STANDARD</div>
+        </div>
+        <div class="tax-bracket tier-4" data-min-score="0" id="bracket-compliance">
+          <div class="tb-rate">22%</div>
+          <div class="tb-info">
+            <div class="tb-class">Compliance Class</div>
+            <div class="tb-condition">Score &lt; 100 pts — Reconsider your residency.</div>
+          </div>
+          <div class="tb-badge">MAXIMUM</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-calculator fade-in">
+      <div class="calc-header">
+        <span class="calc-title">ANNUAL PERFORMANCE TAX CALCULATOR</span>
+        <span class="calc-year">FY 2026 — ASN-9 VERIFIED</span>
+      </div>
+
+      <div class="calc-input-group">
+        <div class="calc-label-row">
+          <span class="calc-label">Total KM Driven This Year</span>
+          <span class="calc-value" id="km-display">40,000 <span>KM</span></span>
+        </div>
+        <input type="range" class="dc-slider" id="km-slider"
+               min="5000" max="120000" step="1000" value="40000"
+               aria-label="Total kilometres driven per year" />
+      </div>
+
+      <div class="calc-input-group">
+        <div class="calc-label-row">
+          <span class="calc-label">Annual Average Speed</span>
+          <span class="calc-value" id="speed-display">88 <span>KM/H AVG</span></span>
+        </div>
+        <input type="range" class="dc-slider" id="speed-slider"
+               min="60" max="160" step="1" value="88"
+               aria-label="Annual average speed in kilometres per hour" />
+      </div>
+
+      <div class="calc-result">
+        <div class="calc-result-header">// ASN-9 TAX ASSESSMENT — REAL TIME</div>
+        <div class="calc-score-bar-wrap">
+          <div class="calc-score-bar" id="score-bar" style="width:0%"></div>
+        </div>
+        <div class="calc-result-row">
+          <span class="calc-result-lbl">PERFORMANCE SCORE</span>
+          <span class="calc-result-val" id="score-display" style="color:var(--neon)">—</span>
+        </div>
+        <div class="calc-result-row" style="margin-top:16px; align-items:flex-end;">
+          <div>
+            <div class="calc-result-lbl" style="margin-bottom:6px;">MUNICIPAL TAX RATE</div>
+            <div id="tax-class-display" style="color:var(--neon)">—</div>
+          </div>
+          <div id="tax-rate-display" style="color:var(--neon)">—</div>
+        </div>
+        <div id="tax-verdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annual Leaderboard -->
+  <div class="tax-leaderboard fade-in">
+    <div class="section-label" style="margin-bottom:24px;">2025 ANNUAL PERFORMANCE LEADERBOARD — TOP TAXPAYERS (LEAST TAX PAID)</div>
+    <div class="lb-header-row">
+      <span>#</span>
+      <span>RESIDENT</span>
+      <span style="text-align:right">KM / YEAR</span>
+      <span style="text-align:right">AVG KM/H</span>
+      <span style="text-align:right">SCORE</span>
+      <span style="text-align:right">TAX RATE</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank gold">1</span>
+      <div class="lb-resident">RESIDENT-7741<span>Ferrari SF90 — Apex Class</span></div>
+      <span class="lb-cell" style="color:var(--chrome-lt)">112,400</span>
+      <span class="lb-cell" style="color:var(--chrome-lt)">104</span>
+      <span class="lb-cell" style="color:var(--neon)">512</span>
+      <span class="lb-tax-rate tier-1">0%</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank silver">2</span>
+      <div class="lb-resident">RESIDENT-2209<span>Koenigsegg Gemera — Apex Class</span></div>
+      <span class="lb-cell" style="color:var(--chrome-lt)">98,000</span>
+      <span class="lb-cell" style="color:var(--chrome-lt)">112</span>
+      <span class="lb-cell" style="color:var(--neon)">497</span>
+      <span class="lb-tax-rate tier-1">0%</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank bronze">3</span>
+      <div class="lb-resident">RESIDENT-4403<span>Rimac Nevera — Apex Class</span></div>
+      <span class="lb-cell" style="color:var(--chrome-lt)">88,000</span>
+      <span class="lb-cell" style="color:var(--chrome-lt)">98</span>
+      <span class="lb-cell" style="color:var(--neon)">401</span>
+      <span class="lb-tax-rate tier-1">0%</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank">4</span>
+      <div class="lb-resident">RESIDENT-0118<span>Lamborghini Huracán STO — Velocity Class</span></div>
+      <span class="lb-cell" style="color:var(--chrome-lt)">74,000</span>
+      <span class="lb-cell" style="color:var(--chrome-lt)">91</span>
+      <span class="lb-cell" style="color:#aaff00">307</span>
+      <span class="lb-tax-rate tier-2">4%</span>
+    </div>
+    <div class="lb-row">
+      <span class="lb-rank">5</span>
+      <div class="lb-resident">RESIDENT-5590<span>Ferrari 812 Competizione — Velocity Class</span></div>
+      <span class="lb-cell" style="color:var(--chrome-lt)">61,000</span>
+      <span class="lb-cell" style="color:var(--chrome-lt)">89</span>
+      <span class="lb-cell" style="color:#aaff00">276</span>
+      <span class="lb-tax-rate tier-2">4%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FLEET REDISTRIBUTION PROTOCOL ───────────────────────── -->
+<section id="fleet-redistribution">
+  <div class="section-label">DIRECTIVE 10 — FLEET REDISTRIBUTION PROTOCOL</div>
+  <h2 class="section-title">YOUR CARS<br>ARE YOUR <span class="accent">TICKET.</span></h2>
+
+  <div class="fleet-layout">
+    <!-- LEFT: explainer + acquisition tiers -->
+    <div class="fleet-intro fade-in">
+      <p>A lifetime ban carries no fine. It carries something far more consequential: the forfeiture of your entire registered fleet. Every vehicle you had registered in Drift City becomes city property the moment the ban is issued. The ASN-9 inventories your cars in real time — licence plates, valuations, and transfer records are sealed within four seconds of the ban trigger.</p>
+      <p>Those vehicles do not go to auction. They go to <strong style="color:var(--neon)">the next generation</strong> — applicants who have demonstrated not only elite car control, but verified ethical standing. Great driving without great character is not Drift City material.</p>
+      <p>The discount earned is directly proportional to the combined <strong style="color:var(--chrome-lt)">Control + Ethics Score</strong> assigned by the Drift City Admissions Board after a multi-stage evaluation.</p>
+
+      <div class="acq-tiers" id="acq-tier-list">
+        <div class="acq-tier" id="acq-tier-1">
+          <div class="acq-tier-score t1">180+</div>
+          <div>
+            <div class="acq-tier-name">Creed Class — Full Access</div>
+            <div class="acq-tier-cond">Control ≥ 90 AND Ethics ≥ 90 — Entire forfeited fleet available</div>
+          </div>
+          <div class="acq-tier-badge t1">−40%</div>
+        </div>
+        <div class="acq-tier" id="acq-tier-2">
+          <div class="acq-tier-score t2">150+</div>
+          <div>
+            <div class="acq-tier-name">Asphalt Class — Standard Access</div>
+            <div class="acq-tier-cond">Combined score 150–179 — Vehicles under $800k market value</div>
+          </div>
+          <div class="acq-tier-badge t2">−25%</div>
+        </div>
+        <div class="acq-tier" id="acq-tier-3">
+          <div class="acq-tier-score t3">120+</div>
+          <div>
+            <div class="acq-tier-name">Tarmac Class — Limited Access</div>
+            <div class="acq-tier-cond">Combined score 120–149 — Entry-level forfeited vehicles only</div>
+          </div>
+          <div class="acq-tier-badge t3">−10%</div>
+        </div>
+        <div class="acq-tier" style="border-left-color:var(--red-alert)">
+          <div class="acq-tier-score" style="color:var(--red-alert);">&lt;120</div>
+          <div>
+            <div class="acq-tier-name" style="color:var(--red-alert)">Ineligible</div>
+            <div class="acq-tier-cond">Score below threshold — reapply after 12-month probation</div>
+          </div>
+          <div class="acq-tier-badge" style="color:var(--red-alert)">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: score calculator + forfeited fleet registry -->
+    <div class="fleet-right">
+      <!-- Acquisition Score Calculator -->
+      <div class="ethics-calc fade-in">
+        <div class="ethics-calc-header">
+          <span class="ethics-calc-title">ACQUISITION SCORE CALCULATOR</span>
+          <div style="text-align:right">
+            <div class="ethics-score-total" id="total-score-display">—<span>/ 200</span></div>
+          </div>
+        </div>
+        <div class="ethics-sliders">
+          <div class="ethics-slider-group">
+            <div class="ethics-label-row">
+              <span class="ethics-label">Control Score</span>
+              <span class="ethics-val" id="control-val">75</span>
+            </div>
+            <input type="range" class="dc-slider" id="control-slider"
+                   min="0" max="100" step="1" value="75"
+                   aria-label="Driving control score out of 100" />
+            <div style="font-family:var(--font-mono);font-size:0.56rem;color:var(--chrome);margin-top:6px;letter-spacing:0.08em;">DCQC DRIVING EXAMINATION</div>
+          </div>
+          <div class="ethics-slider-group">
+            <div class="ethics-label-row">
+              <span class="ethics-label">Ethics Score</span>
+              <span class="ethics-val" id="ethics-val">72</span>
+            </div>
+            <input type="range" class="dc-slider" id="ethics-slider"
+                   min="0" max="100" step="1" value="72"
+                   aria-label="Ethics score out of 100" />
+            <div style="font-family:var(--font-mono);font-size:0.56rem;color:var(--chrome);margin-top:6px;letter-spacing:0.08em;">BOARD CONDUCT REVIEW</div>
+          </div>
+        </div>
+        <div class="ethics-result">
+          <div>
+            <div id="ethics-tier-name" style="color:var(--chrome)">—</div>
+            <div id="ethics-access"></div>
+          </div>
+          <div style="text-align:right">
+            <div id="ethics-discount" style="color:var(--neon)">—</div>
+            <div style="font-family:var(--font-mono);font-size:0.58rem;color:var(--chrome);letter-spacing:0.08em;margin-top:4px;">BELOW MARKET</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forfeited Fleet Registry -->
+      <div class="fleet-registry fade-in">
+        <div class="registry-header">
+          <span class="registry-title">FORFEITED FLEET REGISTRY — LIVE</span>
+          <span class="registry-count" id="registry-count">6 VEHICLES AVAILABLE</span>
+        </div>
+
+        <div class="fleet-card" data-market="3200000" data-min-score="180" data-name="Ferrari SF90 Stradale">
+          <div>
+            <div class="fleet-card-name">Ferrari SF90 Stradale</div>
+            <div class="fleet-card-meta">
+              FORFEITED BY: RESIDENT-1182 &nbsp;·&nbsp;
+              <span class="ban-reason">BAN: COLLISION — APEX BLVD</span><br>
+              KM AT SEIZURE: 44,120 &nbsp;·&nbsp; FLEET POSITION: 1 OF 7
+            </div>
+          </div>
+          <div class="fleet-card-price-col">
+            <div class="fleet-card-market">€3,200,000</div>
+            <div class="fleet-card-dc-price" id="fv-1-price">—</div>
+            <div class="fleet-card-min-score" id="fv-1-elig">MIN SCORE: 180</div>
+          </div>
+        </div>
+
+        <div class="fleet-card" data-market="2800000" data-min-score="150" data-name="Koenigsegg Gemera">
+          <div>
+            <div class="fleet-card-name">Koenigsegg Gemera</div>
+            <div class="fleet-card-meta">
+              FORFEITED BY: RESIDENT-3305 &nbsp;·&nbsp;
+              <span class="ban-reason">BAN: MECHANICAL STALL — TORQUE LOOP</span><br>
+              KM AT SEIZURE: 29,800 &nbsp;·&nbsp; FLEET POSITION: 2 OF 4
+            </div>
+          </div>
+          <div class="fleet-card-price-col">
+            <div class="fleet-card-market">€2,800,000</div>
+            <div class="fleet-card-dc-price" id="fv-2-price">—</div>
+            <div class="fleet-card-min-score" id="fv-2-elig">MIN SCORE: 150</div>
+          </div>
+        </div>
+
+        <div class="fleet-card" data-market="1900000" data-min-score="150" data-name="Lamborghini Revuelto">
+          <div>
+            <div class="fleet-card-name">Lamborghini Revuelto</div>
+            <div class="fleet-card-meta">
+              FORFEITED BY: RESIDENT-0774 &nbsp;·&nbsp;
+              <span class="ban-reason">BAN: IMPAIRED DRIVING</span><br>
+              KM AT SEIZURE: 11,430 &nbsp;·&nbsp; FLEET POSITION: 3 OF 30
+            </div>
+          </div>
+          <div class="fleet-card-price-col">
+            <div class="fleet-card-market">€1,900,000</div>
+            <div class="fleet-card-dc-price" id="fv-3-price">—</div>
+            <div class="fleet-card-min-score" id="fv-3-elig">MIN SCORE: 150</div>
+          </div>
+        </div>
+
+        <div class="fleet-card" data-market="920000" data-min-score="120" data-name="Porsche 911 GT2 RS">
+          <div>
+            <div class="fleet-card-name">Porsche 911 GT2 RS</div>
+            <div class="fleet-card-meta">
+              FORFEITED BY: RESIDENT-6611 &nbsp;·&nbsp;
+              <span class="ban-reason">BAN: VEHICLE FIRE — SLIPSTREAM AVE</span><br>
+              KM AT SEIZURE: 8,900 &nbsp;·&nbsp; FLEET POSITION: 1 OF 12
+            </div>
+          </div>
+          <div class="fleet-card-price-col">
+            <div class="fleet-card-market">€920,000</div>
+            <div class="fleet-card-dc-price" id="fv-4-price">—</div>
+            <div class="fleet-card-min-score" id="fv-4-elig">MIN SCORE: 120</div>
+          </div>
+        </div>
+
+        <div class="fleet-card" data-market="650000" data-min-score="120" data-name="Rimac Nevera">
+          <div>
+            <div class="fleet-card-name">Rimac Nevera</div>
+            <div class="fleet-card-meta">
+              FORFEITED BY: RESIDENT-2280 &nbsp;·&nbsp;
+              <span class="ban-reason">BAN: ASN-9 NON-COMPLIANCE</span><br>
+              KM AT SEIZURE: 19,210 &nbsp;·&nbsp; FLEET POSITION: 4 OF 8
+            </div>
+          </div>
+          <div class="fleet-card-price-col">
+            <div class="fleet-card-market">€650,000</div>
+            <div class="fleet-card-dc-price" id="fv-5-price">—</div>
+            <div class="fleet-card-min-score" id="fv-5-elig">MIN SCORE: 120</div>
+          </div>
+        </div>
+
+        <div class="fleet-card" data-market="480000" data-min-score="120" data-name="McLaren 765LT">
+          <div>
+            <div class="fleet-card-name">McLaren 765LT</div>
+            <div class="fleet-card-meta">
+              FORFEITED BY: RESIDENT-9040 &nbsp;·&nbsp;
+              <span class="ban-reason">BAN: COLLISION — OVERSTEER RING</span><br>
+              KM AT SEIZURE: 6,050 &nbsp;·&nbsp; FLEET POSITION: 2 OF 18
+            </div>
+          </div>
+          <div class="fleet-card-price-col">
+            <div class="fleet-card-market">€480,000</div>
+            <div class="fleet-card-dc-price" id="fv-6-price">—</div>
+            <div class="fleet-card-min-score" id="fv-6-elig">MIN SCORE: 120</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ban Consequence Calculator -->
+  <div class="ban-consequence fade-in">
+    <div class="bc-header">
+      <span class="bc-title">BAN CONSEQUENCE SIMULATOR — YOUR FLEET FORFEITURE</span>
+      <span class="bc-warning">⚠ FOR PERSPECTIVE. NOT A PREDICTION.</span>
+    </div>
+    <div class="bc-layout">
+      <div class="bc-slider-group">
+        <div class="bc-label-row">
+          <span class="bc-label">Cars Registered in Drift City</span>
+          <span class="bc-val" id="bc-cars-val">12</span>
+        </div>
+        <input type="range" class="dc-slider dc-slider-red" id="bc-cars-slider"
+               min="1" max="30" step="1" value="12"
+               aria-label="Number of cars registered in Drift City" />
+        <div class="bc-label-row" style="margin-top:24px">
+          <span class="bc-label">Average Vehicle Value</span>
+          <span class="bc-val" id="bc-avg-val">€850K</span>
+        </div>
+        <input type="range" class="dc-slider dc-slider-red" id="bc-avg-slider"
+               min="100000" max="5000000" step="50000" value="850000"
+               aria-label="Average vehicle value in euros" />
+      </div>
+      <div class="bc-result">
+        <div class="bc-result-label">TOTAL FLEET FORFEITURE VALUE</div>
+        <div class="bc-fleet-value" id="bc-total">€10,200,000</div>
+        <div class="bc-fleet-sub" id="bc-fleet-sub">
+          12 vehicles · redistributed to vetted newcomers<br>
+          Estimated 3 Creed Class + 5 Asphalt Class + 4 Tarmac Class buyers
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">DRIFT CITY</div>
+      <p>A municipality engineered for those who have graduated beyond conventional transportation. The car is not a tool. It is a way of life. Residency is a privilege earned at speed.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">QUICK NAVIGATION</div>
+      <ul class="footer-links">
+        <li><a href="#ev-mandate">EV Performance Mandate</a></li>
+        <li><a href="#rules">Rules of the Road</a></li>
+        <li><a href="#asn9">ASN-9 Network</a></li>
+        <li><a href="#residential">Residential Code §14</a></li>
+        <li><a href="#racing">Racing Ecosystem</a></li>
+        <li><a href="#logistics">Elite Logistics</a></li>
+        <li><a href="#manufacturer">Manufacturer Portal</a></li>
+        <li><a href="#dcu">DCU Research Hub</a></li>
+        <li><a href="#perf-tax">Performance Tax System</a></li>
+        <li><a href="#fleet-redistribution">Fleet Redistribution Protocol</a></li>
+        <li><a href="#urban-cell">The Urban Cell</a></li>
+        <li><a href="#guest-tier">Guest Tier & Staff</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">LEGAL & ENFORCEMENT</div>
+      <ul class="footer-links">
+        <li><a href="#">Residency Application</a></li>
+        <li><a href="#">Driving License Registry</a></li>
+        <li><a href="#">Citation Review Portal</a></li>
+        <li><a href="#">ASN-9 Incident Reports</a></li>
+        <li><a href="#">Manufacturer Certification</a></li>
+        <li><a href="#">DCU Research Portal</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-mandate alert">⚠ <span>ANY CRIME IS A BAN.</span> SURVEILLANCE BY ASN-9. PRIVATE SECURITY ENFORCED.</p>
+    <p class="footer-mandate"><span>MONTHLY TIRE REPLACEMENTS ARE MANDATORY.</span> RESIDENCY BY RACE-LICENSE ONLY.</p>
+    <p class="footer-mandate">© 2026 DRIFT CITY MUNICIPAL AUTHORITY — ASN-9 MONITORING ACTIVE — ALL ROADS SURVEILLED — <span>DRIVE OR LEAVE.</span></p>
+  </div>
+</footer>
+
+<!-- ─── SPEEDOMETER WIDGET ────────────────────────────────────── -->
+<div class="speedometer-widget">
+  <canvas id="speedo-canvas" width="110" height="110"></canvas>
+  <div class="speedo-label">CITY AVG SPEED</div>
+</div>
+
+<!-- ─── SCRIPTS ──────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+// ─── INTERSECTION OBSERVER — FADE IN ──────────────────────────
+const fadeEls = document.querySelectorAll('.fade-in');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+fadeEls.forEach(el => observer.observe(el));
+
+// ─── GREEN WAVE CANVAS ─────────────────────────────────────────
+const waveCanvas = document.getElementById('wave-canvas');
+const wCtx = waveCanvas.getContext('2d');
+waveCanvas.width = waveCanvas.offsetWidth || 500;
+waveCanvas.height = 220;
+
+let waveOffset = 0;
+const roadColors = ['#39ff14','#39ff14','#39ff14','#ffaa00'];
+
+function drawWave() {
+  const w = waveCanvas.width;
+  const h = waveCanvas.height;
+  wCtx.clearRect(0, 0, w, h);
+
+  // grid
+  wCtx.strokeStyle = 'rgba(57,255,20,0.06)';
+  wCtx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) {
+    wCtx.beginPath(); wCtx.moveTo(x, 0); wCtx.lineTo(x, h); wCtx.stroke();
+  }
+  for (let y = 0; y < h; y += 30) {
+    wCtx.beginPath(); wCtx.moveTo(0, y); wCtx.lineTo(w, y); wCtx.stroke();
+  }
+
+  // wave layers
+  const waves = [
+    { amp: 28, freq: 0.018, speed: 0.8, alpha: 0.9, lw: 2.5, color: '#39ff14' },
+    { amp: 18, freq: 0.024, speed: 1.2, alpha: 0.5, lw: 1.5, color: '#39ff14' },
+    { amp: 12, freq: 0.032, speed: 0.5, alpha: 0.3, lw: 1, color: '#00ddff' },
+  ];
+
+  waves.forEach(wave => {
+    wCtx.beginPath();
+    wCtx.strokeStyle = wave.color;
+    wCtx.globalAlpha = wave.alpha;
+    wCtx.lineWidth = wave.lw;
+    for (let x = 0; x <= w; x++) {
+      const y = h / 2 + Math.sin((x * wave.freq) + (waveOffset * wave.speed)) * wave.amp;
+      x === 0 ? wCtx.moveTo(x, y) : wCtx.lineTo(x, y);
+    }
+    wCtx.stroke();
+  });
+
+  // signal node dots
+  wCtx.globalAlpha = 1;
+  const nodeSpacing = w / 12;
+  for (let i = 0; i <= 12; i++) {
+    const x = i * nodeSpacing;
+    const y = h / 2 + Math.sin((x * 0.018) + waveOffset * 0.8) * 28;
+    const isGreen = ((i + Math.floor(waveOffset * 0.3)) % 4) !== 3;
+    wCtx.beginPath();
+    wCtx.arc(x, y, 4, 0, Math.PI * 2);
+    wCtx.fillStyle = isGreen ? '#39ff14' : '#ffaa00';
+    wCtx.shadowColor = isGreen ? '#39ff14' : '#ffaa00';
+    wCtx.shadowBlur = 10;
+    wCtx.fill();
+    wCtx.shadowBlur = 0;
+  }
+
+  waveOffset += 0.04;
+  requestAnimationFrame(drawWave);
+}
+drawWave();
+
+// ─── SPEED BARS ────────────────────────────────────────────────
+const speedBarsEl = document.getElementById('speed-bars');
+const NUM_BARS = 28;
+const speeds = [];
+for (let i = 0; i < NUM_BARS; i++) speeds.push(60 + Math.random() * 55);
+
+for (let i = 0; i < NUM_BARS; i++) {
+  const seg = document.createElement('div');
+  seg.className = 'speed-segment';
+  speedBarsEl.appendChild(seg);
+}
+
+function updateBars() {
+  const segs = speedBarsEl.children;
+  for (let i = 0; i < NUM_BARS; i++) {
+    speeds[i] += (Math.random() - 0.48) * 5;
+    speeds[i] = Math.max(40, Math.min(120, speeds[i]));
+    const pct = (speeds[i] - 40) / 80;
+    segs[i].style.height = (20 + pct * 100) + '%';
+    segs[i].style.background = speeds[i] >= 70 && speeds[i] <= 110 ? 'var(--neon)' : 'var(--amber)';
+  }
+  const avg = Math.round(speeds.reduce((a, b) => a + b, 0) / NUM_BARS);
+  document.getElementById('avg-display').textContent = 'AVG: ' + avg + ' KM/H';
+}
+setInterval(updateBars, 600);
+updateBars();
+
+// ─── ROAD NODE SPEEDS ──────────────────────────────────────────
+const roadNodes = [
+  { id: 'r1', base: 95, min: 76, max: 110 },
+  { id: 'r2', base: 88, min: 72, max: 108 },
+  { id: 'r3', base: 101, min: 80, max: 110 },
+  { id: 'r4', base: 74, min: 65, max: 95 },
+];
+function updateRoadNodes() {
+  roadNodes.forEach(node => {
+    const el = document.getElementById(node.id);
+    const spd = Math.round(node.base + (Math.random() - 0.5) * 12);
+    const clamped = Math.max(node.min, Math.min(node.max, spd));
+    el.textContent = clamped;
+    el.className = 'road-node-speed ' + (clamped >= 70 ? 'green' : 'amber');
+    node.base = clamped;
+  });
+}
+setInterval(updateRoadNodes, 2200);
+
+// ─── RACE TRACE CANVAS ─────────────────────────────────────────
+const raceCanvas = document.getElementById('race-canvas');
+const rCtx = raceCanvas.getContext('2d');
+raceCanvas.width = raceCanvas.parentElement.offsetWidth - 60 || 460;
+raceCanvas.height = 340;
+
+const tracePoints = [];
+let traceProgress = 0;
+
+function generateTrace(w, h) {
+  const pts = [];
+  const n = 14;
+  for (let i = 0; i < n; i++) {
+    pts.push({
+      x: 40 + Math.random() * (w - 80),
+      y: 40 + Math.random() * (h - 80),
+      isCorner: Math.random() > 0.5,
+    });
+  }
+  return pts;
+}
+
+let tracePointsArr = generateTrace(raceCanvas.width, raceCanvas.height);
+let tracePath = 0;
+let traceHeadX = tracePointsArr[0].x;
+let traceHeadY = tracePointsArr[0].y;
+
+function drawRaceTrace() {
+  const w = raceCanvas.width;
+  const h = raceCanvas.height;
+  rCtx.fillStyle = 'rgba(17,17,17,0.25)';
+  rCtx.fillRect(0, 0, w, h);
+
+  // city grid
+  rCtx.strokeStyle = 'rgba(57,255,20,0.05)';
+  rCtx.lineWidth = 1;
+  for (let x = 0; x < w; x += 50) {
+    rCtx.beginPath(); rCtx.moveTo(x, 0); rCtx.lineTo(x, h); rCtx.stroke();
+  }
+  for (let y = 0; y < h; y += 50) {
+    rCtx.beginPath(); rCtx.moveTo(0, y); rCtx.lineTo(w, y); rCtx.stroke();
+  }
+
+  // route trace
+  tracePath += 0.015;
+  const pts = tracePointsArr;
+  const totalPts = pts.length;
+  const idx = Math.floor(tracePath) % totalPts;
+  const next = (idx + 1) % totalPts;
+  const t = tracePath % 1;
+  traceHeadX = pts[idx].x + (pts[next].x - pts[idx].x) * t;
+  traceHeadY = pts[idx].y + (pts[next].y - pts[idx].y) * t;
+
+  // draw full route dimly
+  rCtx.beginPath();
+  rCtx.strokeStyle = 'rgba(57,255,20,0.18)';
+  rCtx.lineWidth = 1.5;
+  rCtx.setLineDash([6, 4]);
+  rCtx.moveTo(pts[0].x, pts[0].y);
+  pts.forEach(p => rCtx.lineTo(p.x, p.y));
+  rCtx.closePath();
+  rCtx.stroke();
+  rCtx.setLineDash([]);
+
+  // corner markers
+  pts.forEach((p, i) => {
+    rCtx.beginPath();
+    rCtx.arc(p.x, p.y, p.isCorner ? 7 : 4, 0, Math.PI * 2);
+    rCtx.fillStyle = p.isCorner ? 'rgba(255,170,0,0.9)' : 'rgba(57,255,20,0.6)';
+    rCtx.shadowColor = p.isCorner ? '#ffaa00' : '#39ff14';
+    rCtx.shadowBlur = 8;
+    rCtx.fill();
+    rCtx.shadowBlur = 0;
+
+    if (p.isCorner) {
+      rCtx.fillStyle = 'rgba(255,170,0,0.7)';
+      rCtx.font = '9px Share Tech Mono';
+      rCtx.fillText('25°', p.x + 8, p.y - 6);
+    }
+  });
+
+  // car head
+  rCtx.beginPath();
+  rCtx.arc(traceHeadX, traceHeadY, 6, 0, Math.PI * 2);
+  rCtx.fillStyle = '#39ff14';
+  rCtx.shadowColor = '#39ff14';
+  rCtx.shadowBlur = 20;
+  rCtx.fill();
+  rCtx.shadowBlur = 0;
+
+  // trail
+  rCtx.beginPath();
+  rCtx.strokeStyle = 'rgba(57,255,20,0.7)';
+  rCtx.lineWidth = 2;
+  for (let i = 0; i < 6; i++) {
+    const tIdx = ((Math.floor(tracePath) - i) + totalPts) % totalPts;
+    const tNext = (tIdx + 1) % totalPts;
+    const tT = tracePath % 1;
+    const tx = pts[tIdx].x + (pts[tNext].x - pts[tIdx].x) * tT;
+    const ty = pts[tIdx].y + (pts[tNext].y - pts[tIdx].y) * tT;
+    i === 0 ? rCtx.moveTo(tx, ty) : rCtx.lineTo(tx, ty);
+  }
+  rCtx.stroke();
+
+  // regenerate trace every lap
+  if (Math.floor(tracePath) >= totalPts && tracePath % totalPts < 0.02) {
+    tracePointsArr = generateTrace(w, h);
+    tracePath = 0;
+  }
+
+  requestAnimationFrame(drawRaceTrace);
+}
+drawRaceTrace();
+
+// ─── SPEEDOMETER WIDGET ────────────────────────────────────────
+const speedoCanvas = document.getElementById('speedo-canvas');
+const sCtx = speedoCanvas.getContext('2d');
+let speedoVal = 88;
+let speedoTarget = 88;
+
+function drawSpeedo() {
+  const cx = 55, cy = 55, r = 46;
+  sCtx.clearRect(0, 0, 110, 110);
+
+  // outer ring
+  sCtx.beginPath();
+  sCtx.arc(cx, cy, r, 0, Math.PI * 2);
+  sCtx.strokeStyle = '#2a2a2a';
+  sCtx.lineWidth = 4;
+  sCtx.stroke();
+
+  // arc background
+  const startAngle = Math.PI * 0.75;
+  const endAngle = Math.PI * 2.25;
+  sCtx.beginPath();
+  sCtx.arc(cx, cy, r - 4, startAngle, endAngle);
+  sCtx.strokeStyle = '#1a1a1a';
+  sCtx.lineWidth = 8;
+  sCtx.stroke();
+
+  // speed arc
+  const pct = Math.min(speedoVal / 160, 1);
+  const arcEnd = startAngle + pct * (endAngle - startAngle);
+  sCtx.beginPath();
+  sCtx.arc(cx, cy, r - 4, startAngle, arcEnd);
+  sCtx.strokeStyle = speedoVal > 110 ? '#ff2020' : '#39ff14';
+  sCtx.shadowColor = sCtx.strokeStyle;
+  sCtx.shadowBlur = 8;
+  sCtx.lineWidth = 8;
+  sCtx.stroke();
+  sCtx.shadowBlur = 0;
+
+  // value
+  sCtx.fillStyle = '#f0f0f0';
+  sCtx.font = 'bold 18px Bebas Neue, sans-serif';
+  sCtx.textAlign = 'center';
+  sCtx.textBaseline = 'middle';
+  sCtx.fillText(Math.round(speedoVal), cx, cy - 4);
+
+  sCtx.fillStyle = '#8a8a8a';
+  sCtx.font = '8px Share Tech Mono, monospace';
+  sCtx.fillText('KM/H', cx, cy + 12);
+}
+
+function animateSpeedo() {
+  if (Math.random() < 0.04) speedoTarget = 60 + Math.random() * 80;
+  speedoVal += (speedoTarget - speedoVal) * 0.05;
+  drawSpeedo();
+  requestAnimationFrame(animateSpeedo);
+}
+animateSpeedo();
+
+// ─── MANUFACTURER PORTAL ───────────────────────────────────────
+const mfrData = {
+  ferrari: {
+    name: 'FERRARI',
+    fleet: 1240,
+    pending: 3,
+    lastUpdate: 'DRIFT MODE CALIBRATION 4.2.1',
+  },
+  lamborghini: {
+    name: 'LAMBORGHINI',
+    fleet: 987,
+    pending: 1,
+    lastUpdate: 'CHASSIS TELEMETRY UPDATE 2.9.7',
+  },
+  koenigsegg: {
+    name: 'KOENIGSEGG',
+    fleet: 214,
+    pending: 0,
+    lastUpdate: 'GEMERA DRIFT ANGLE OVERRIDE PATCH',
+  },
+};
+
+function activateMfr(el, key) {
+  document.querySelectorAll('.mfr-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const d = mfrData[key];
+  const out = document.getElementById('terminal-output');
+  out.innerHTML = `
+    <span class="terminal-line dim">// DRIFT CITY MANUFACTURER PORTAL — ASN-9 SECURE CHANNEL</span>
+    <span class="terminal-line dim">// SESSION ENCRYPTED — AES-256 // LIAISON CODE: DC-MFR-24</span>
+    <span class="terminal-line">&gt; CONNECTING TO ${d.name} FACTORY LIAISON...</span>
+    <span class="terminal-line">&gt; CHANNEL ESTABLISHED — RESPONSE TIME: ${(Math.random() * 0.6 + 0.2).toFixed(1)}s</span>
+    <span class="terminal-line">&gt; ACTIVE RESIDENTS ON ${d.name} FLEET: ${d.fleet.toLocaleString()} VEHICLES</span>
+    <span class="terminal-line">&gt; PENDING CERTIFICATION REQUESTS: ${d.pending}</span>
+    <span class="terminal-line">&gt; LAST FIRMWARE UPDATE: ${d.name} OTA — ${d.lastUpdate}</span>
+    <span class="terminal-line">&gt; TYPE A REQUEST BELOW OR PRESS ENTER TO QUERY STATUS <span class="terminal-cursor"></span></span>
+  `;
+}
+
+const portalResponses = [
+  'REQUEST LOGGED — LIAISON RESPONSE ETA: 4 MINUTES.',
+  () => 'QUERY DISPATCHED TO MANUFACTURER. TRACKING REF: DC-' + Math.floor(Math.random()*9000+1000),
+  'CERTIFICATION STATUS: UNDER REVIEW BY DC TECHNICAL COMMITTEE.',
+  'PARTS AVAILABILITY CONFIRMED — DISPATCH FROM FACTORY: 48H.',
+  'SERVICE APPOINTMENT SCHEDULED — BAY 7, DRIFT CITY MAIN HUB.',
+  'VEHICLE TELEMETRY DOWNLOADED — ANALYSIS COMPLETE. NO ANOMALIES.',
+  'RECALL NOTICE FLAGGED — DCU ENGINEERING TO ASSESS WITHIN 24H.',
+];
+
+function sendPortalQuery() {
+  const input = document.getElementById('portal-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const out = document.getElementById('terminal-output');
+  const pick = portalResponses[Math.floor(Math.random() * portalResponses.length)];
+  const resp = typeof pick === 'function' ? pick() : pick;
+  const newLine = `<span class="terminal-line" style="color:var(--chrome-lt)">&gt; USER: ${val.toUpperCase()}</span>
+    <span class="terminal-line">&gt; SYSTEM: ${resp} <span class="terminal-cursor"></span></span>`;
+  out.innerHTML += newLine;
+  input.value = '';
+  out.scrollTop = out.scrollHeight;
+}
+
+document.getElementById('portal-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendPortalQuery();
+});
+
+// ─── ANIMATED AVERAGE SPEED COUNTER IN HERO ───────────────────
+let heroSpeedTarget = 88;
+let heroSpeedVal = 88;
+setInterval(() => {
+  if (Math.random() < 0.3) heroSpeedTarget = 80 + Math.round(Math.random() * 16);
+  heroSpeedVal += (heroSpeedTarget - heroSpeedVal) * 0.15;
+  const el = document.getElementById('avg-speed');
+  if (el) el.textContent = Math.round(heroSpeedVal);
+}, 500);
+
+// ─── PERFORMANCE TAX CALCULATOR ───────────────────────────────
+/**
+ * Performance Score = (kmPerYear / 100) × (avgSpeedKmh / 88) × 10, rounded to 1 dp
+ * Brackets:
+ *   Score ≥ 400  → Apex Class    → 0%
+ *   Score ≥ 250  → Velocity Class → 4%
+ *   Score ≥ 100  → Cruise Class  → 12%
+ *   Score <  100 → Compliance    → 22%
+ */
+function calcPerformanceScore(kmPerYear, avgSpeedKmh) {
+  return Math.round((kmPerYear / 100) * (avgSpeedKmh / 88) * 10) / 10;
+}
+
+function getTaxBracket(score) {
+  if (score >= 400) return { rate: 0,  cls: 'Apex Class',       tier: 1, color: '#39ff14' };
+  if (score >= 250) return { rate: 4,  cls: 'Velocity Class',   tier: 2, color: '#aaff00' };
+  if (score >= 100) return { rate: 12, cls: 'Cruise Class',     tier: 3, color: '#ffaa00' };
+  return              { rate: 22, cls: 'Compliance Class', tier: 4, color: '#ff2020' };
+}
+
+const TAX_VERDICTS = {
+  1: 'The city calculates your tax liability at zero. You have earned the asphalt.',
+  2: 'Solid performance. Four percent — a minimal levy for a high-velocity contributor.',
+  3: 'Standard rate. The road expects more from you before year-end.',
+  4: 'Maximum rate. Your telemetry suggests reconsideration of your residency status.',
+};
+
+function updateTaxCalculator() {
+  const km    = parseInt(document.getElementById('km-slider').value, 10);
+  const speed = parseInt(document.getElementById('speed-slider').value, 10);
+
+  document.getElementById('km-display').innerHTML =
+    km.toLocaleString() + ' <span>KM</span>';
+  document.getElementById('speed-display').innerHTML =
+    speed + ' <span>KM/H AVG</span>';
+
+  const score   = calcPerformanceScore(km, speed);
+  const bracket = getTaxBracket(score);
+
+  // score bar (cap at 500 for full bar)
+  const barPct = Math.min((score / 500) * 100, 100);
+  const bar = document.getElementById('score-bar');
+  bar.style.width = barPct + '%';
+  bar.style.background = bracket.color;
+  bar.style.boxShadow = `0 0 10px ${bracket.color}66`;
+
+  document.getElementById('score-display').textContent = score + ' pts';
+  document.getElementById('score-display').style.color = bracket.color;
+
+  const rateEl = document.getElementById('tax-rate-display');
+  rateEl.textContent = bracket.rate + '%';
+  rateEl.style.color = bracket.color;
+
+  const clsEl = document.getElementById('tax-class-display');
+  clsEl.textContent = bracket.cls;
+  clsEl.style.color = bracket.color;
+
+  document.getElementById('tax-verdict').textContent = TAX_VERDICTS[bracket.tier];
+  document.getElementById('tax-verdict').style.color = bracket.tier <= 2 ? '#39ff14' : (bracket.tier === 3 ? '#ffaa00' : '#ff9a9a');
+
+  // highlight correct bracket row
+  document.querySelectorAll('.tax-bracket').forEach(el => el.classList.remove('active-bracket'));
+  const bracketIds = { 1: 'bracket-apex', 2: 'bracket-velocity', 3: 'bracket-cruise', 4: 'bracket-compliance' };
+  const activeEl = document.getElementById(bracketIds[bracket.tier]);
+  if (activeEl) activeEl.classList.add('active-bracket');
+}
+
+const kmSlider    = document.getElementById('km-slider');
+const speedSlider = document.getElementById('speed-slider');
+if (kmSlider)    kmSlider.addEventListener('input', updateTaxCalculator);
+if (speedSlider) speedSlider.addEventListener('input', updateTaxCalculator);
+updateTaxCalculator(); // initialise
+
+// ─── FLEET REDISTRIBUTION — ACQUISITION SCORE ─────────────────
+/**
+ * Acquisition tiers based on combined Control + Ethics score (max 200):
+ *   ≥ 180  → Creed Class   → −40% (full fleet access)
+ *   ≥ 150  → Asphalt Class → −25% (vehicles ≤ €800k market)
+ *   ≥ 120  → Tarmac Class  → −10% (entry-level only)
+ *   < 120  → Ineligible    →   0%
+ */
+function getAcquisitionTier(controlScore, ethicsScore) {
+  const total = controlScore + ethicsScore;
+  if (total >= 180 && controlScore >= 90 && ethicsScore >= 90) {
+    return { tier: 1, name: 'Creed Class', discount: 40, access: 'FULL FLEET — ALL VEHICLES', color: '#39ff14', total };
+  }
+  if (total >= 150) {
+    return { tier: 2, name: 'Asphalt Class', discount: 25, access: 'VEHICLES ≤ €800K MARKET VALUE', color: '#aaff00', total };
+  }
+  if (total >= 120) {
+    return { tier: 3, name: 'Tarmac Class', discount: 10, access: 'ENTRY-LEVEL VEHICLES ONLY (≤ €500K)', color: '#ffaa00', total };
+  }
+  return { tier: 0, name: 'Ineligible', discount: 0, access: 'REAPPLY AFTER 12-MONTH PROBATION', color: '#ff2020', total };
+}
+
+function formatEuro(val) {
+  if (val >= 1000000) return '€' + (val / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  if (val >= 1000) return '€' + Math.round(val / 1000) + 'K';
+  return '€' + val;
+}
+
+function updateAcquisitionCalc() {
+  const ctrl  = parseInt(document.getElementById('control-slider').value, 10);
+  const eth   = parseInt(document.getElementById('ethics-slider').value, 10);
+  document.getElementById('control-val').textContent = ctrl;
+  document.getElementById('ethics-val').textContent  = eth;
+
+  const tier = getAcquisitionTier(ctrl, eth);
+  const total = ctrl + eth;
+
+  document.getElementById('total-score-display').innerHTML =
+    `${total}<span>/ 200</span>`;
+  document.getElementById('total-score-display').style.color = tier.color;
+
+  document.getElementById('ethics-tier-name').textContent = tier.name;
+  document.getElementById('ethics-tier-name').style.color = tier.color;
+  document.getElementById('ethics-access').textContent = tier.access;
+  document.getElementById('ethics-discount').textContent = tier.discount > 0 ? `−${tier.discount}%` : 'NONE';
+  document.getElementById('ethics-discount').style.color = tier.color;
+
+  // highlight acquisition tier row
+  [1,2,3].forEach(i => document.getElementById(`acq-tier-${i}`)?.classList.remove('active-tier'));
+  if (tier.tier >= 1) document.getElementById(`acq-tier-${tier.tier}`)?.classList.add('active-tier');
+
+  // update fleet card eligibility indicators
+  updateFleetCardEligibility(tier);
+}
+
+function updateFleetCardEligibility(tier) {
+  const cards = document.querySelectorAll('.fleet-card');
+  cards.forEach((card, idx) => {
+    const minScore = parseInt(card.dataset.minScore, 10);
+    const market   = parseInt(card.dataset.market, 10);
+    const n = idx + 1;
+
+    const eligible = tier.tier > 0 && tier.total >= minScore &&
+      (tier.tier === 1 || (tier.tier === 2 && market <= 800000) || (tier.tier === 3 && market <= 500000));
+
+    const discountedPrice = eligible
+      ? Math.round(market * (1 - tier.discount / 100))
+      : market;
+
+    const priceEl = document.getElementById(`fv-${n}-price`);
+    const eligEl  = document.getElementById(`fv-${n}-elig`);
+    if (priceEl) {
+      priceEl.textContent = eligible
+        ? formatEuro(discountedPrice)
+        : formatEuro(market);
+      priceEl.style.color = eligible ? '#39ff14' : '#3e3e3e';
+    }
+    if (eligEl) {
+      eligEl.textContent = eligible
+        ? `✓ ELIGIBLE — ${tier.discount}% OFF`
+        : `✗ MIN SCORE: ${minScore}`;
+      eligEl.className = 'fleet-card-min-score ' + (eligible ? 'eligible' : 'ineligible');
+    }
+  });
+}
+
+const ctrlSlider   = document.getElementById('control-slider');
+const ethicsSlider = document.getElementById('ethics-slider');
+if (ctrlSlider)   ctrlSlider.addEventListener('input', updateAcquisitionCalc);
+if (ethicsSlider) ethicsSlider.addEventListener('input', updateAcquisitionCalc);
+updateAcquisitionCalc();
+
+// ─── BAN CONSEQUENCE CALCULATOR ───────────────────────────────
+function updateBanConsequence() {
+  const cars = parseInt(document.getElementById('bc-cars-slider').value, 10);
+  const avg  = parseInt(document.getElementById('bc-avg-slider').value, 10);
+
+  document.getElementById('bc-cars-val').textContent = cars;
+  document.getElementById('bc-avg-val').textContent  = formatEuro(avg);
+
+  const total = cars * avg;
+  document.getElementById('bc-total').textContent = formatEuro(total);
+
+  const creed  = Math.max(1, Math.round(cars * 0.25));
+  const asph   = Math.max(1, Math.round(cars * 0.40));
+  const tarmac = Math.max(0, cars - creed - asph);
+
+  document.getElementById('bc-fleet-sub').innerHTML =
+    `${cars} vehicle${cars > 1 ? 's' : ''} · redistributed to vetted newcomers<br>` +
+    `Estimated ${creed} Creed Class + ${asph} Asphalt Class + ${tarmac} Tarmac Class buyer${tarmac !== 1 ? 's' : ''}`;
+}
+
+const bcCarsSlider = document.getElementById('bc-cars-slider');
+const bcAvgSlider  = document.getElementById('bc-avg-slider');
+if (bcCarsSlider) bcCarsSlider.addEventListener('input', updateBanConsequence);
+if (bcAvgSlider)  bcAvgSlider.addEventListener('input', updateBanConsequence);
+updateBanConsequence();
+
+// ─── URBAN CELL CANVAS ────────────────────────────────────────
+(function initUrbanCell() {
+  const canvas = document.getElementById('uc-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width  = canvas.offsetWidth || 500;
+  canvas.height = canvas.width;
+
+  const NUM_MANSIONS = 12;
+  let ucTick = 0;
+
+  // Six animated cars on the supercar ring
+  const cars = Array.from({ length: 6 }, (_, i) => ({
+    angle: (i / 6) * Math.PI * 2,
+    speed: 0.007 + i * 0.0008,
+  }));
+
+  // Eight pedestrians in the inner zone
+  const peds = Array.from({ length: 8 }, (_, i) => ({
+    angle: (i / 8) * Math.PI * 2,
+    r: 0,          // set per frame
+    speed: 0.003 + (i % 3) * 0.001,
+  }));
+
+  function draw() {
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    const OR   = W * 0.46;   // outer radius
+    const roadR = W * 0.40;  // car road radius
+    const mRing = W * 0.35;  // mansion ring radius
+    const innerR = W * 0.26; // inner (no-car) zone
+
+    ctx.clearRect(0, 0, W, H);
+
+    // ── outer dark background disc ──
+    ctx.beginPath(); ctx.arc(cx, cy, OR, 0, Math.PI * 2);
+    ctx.fillStyle = '#111'; ctx.fill();
+
+    // ── neon road ring (animated dash) ──
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, roadR, 0, Math.PI * 2);
+    ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 4;
+    ctx.setLineDash([16, 7]);
+    ctx.lineDashOffset = -ucTick * 1.2;
+    ctx.shadowColor = '#39ff14'; ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.restore();
+
+    // ── 400m sensor arcs around each mansion (dim) ──
+    for (let i = 0; i < NUM_MANSIONS; i++) {
+      const a = (i / NUM_MANSIONS) * Math.PI * 2 - Math.PI / 2;
+      const mx = cx + Math.cos(a) * mRing;
+      const my = cy + Math.sin(a) * mRing;
+      ctx.beginPath();
+      ctx.arc(mx, my, W * 0.09, a - 0.65, a + 0.65);
+      ctx.strokeStyle = 'rgba(57,255,20,0.15)'; ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // ── mansion squares ──
+    for (let i = 0; i < NUM_MANSIONS; i++) {
+      const a = (i / NUM_MANSIONS) * Math.PI * 2 - Math.PI / 2;
+      const mx = cx + Math.cos(a) * mRing;
+      const my = cy + Math.sin(a) * mRing;
+      const sz = W * 0.056;
+
+      ctx.save();
+      ctx.translate(mx, my);
+      ctx.rotate(a + Math.PI / 2);
+
+      // body
+      ctx.fillStyle = '#1e1e1e'; ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.2;
+      ctx.fillRect(-sz / 2, -sz / 2, sz, sz);
+      ctx.strokeRect(-sz / 2, -sz / 2, sz, sz);
+
+      // garage door strip (exterior face, outward)
+      ctx.fillStyle = '#39ff14';
+      ctx.fillRect(-sz / 2 + 2, -sz / 2, sz - 4, 3);
+
+      // pedestrian door strip (interior face)
+      ctx.fillStyle = '#c0c0c0';
+      ctx.fillRect(-sz / 2 + 2, sz / 2 - 3, sz - 4, 3);
+
+      ctx.restore();
+    }
+
+    // ── inner no-car zone ──
+    ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+    ctx.fillStyle = '#14141c'; ctx.fill();
+    ctx.strokeStyle = 'rgba(192,192,192,0.25)'; ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // ── walking/jogging paths (silver concentric circles) ──
+    [0.55, 0.75, 0.9].forEach((r, i) => {
+      ctx.beginPath(); ctx.arc(cx, cy, innerR * r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(192,192,192,${0.08 + i * 0.05})`;
+      ctx.lineWidth = i === 2 ? 1.5 : 1;
+      ctx.setLineDash(i === 2 ? [] : [3, 4]);
+      ctx.stroke(); ctx.setLineDash([]);
+    });
+
+    // ── central market icon ──
+    ctx.beginPath(); ctx.arc(cx, cy, W * 0.055, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(192,192,192,0.12)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(192,192,192,0.3)'; ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.font = `${W * 0.046}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🏛', cx, cy);
+
+    // ── pedestrians (silver dots on innermost path) ──
+    peds.forEach((p, i) => {
+      p.angle += p.speed;
+      const pr = innerR * (0.55 + (i % 3) * 0.12);
+      const px = cx + Math.cos(p.angle) * pr;
+      const py = cy + Math.sin(p.angle) * pr;
+      ctx.beginPath(); ctx.arc(px, py, W * 0.008, 0, Math.PI * 2);
+      ctx.fillStyle = '#c0c0c0'; ctx.fill();
+    });
+
+    // ── animated cars on road ring ──
+    cars.forEach(car => {
+      car.angle += car.speed;
+      const carX = cx + Math.cos(car.angle) * roadR;
+      const carY = cy + Math.sin(car.angle) * roadR;
+      ctx.beginPath(); ctx.arc(carX, carY, W * 0.012, 0, Math.PI * 2);
+      ctx.fillStyle = '#39ff14';
+      ctx.shadowColor = '#39ff14'; ctx.shadowBlur = 12;
+      ctx.fill(); ctx.shadowBlur = 0;
+    });
+
+    // ── labels ──
+    ctx.font = `bold ${W * 0.022}px "Share Tech Mono", monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(57,255,20,0.9)';
+    ctx.fillText('SUPERCAR RING — 70–110 KM/H', cx, cy - OR + W * 0.034);
+
+    ctx.fillStyle = 'rgba(192,192,192,0.7)';
+    ctx.font = `${W * 0.02}px "Share Tech Mono", monospace`;
+    ctx.fillText('NO-CAR INTERIOR', cx, cy - innerR * 0.3);
+    ctx.fillText('PEDESTRIAN ZONE', cx, cy - innerR * 0.3 + W * 0.024);
+
+    ucTick++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ─── URBAN CELL MANSION SLIDER ─────────────────────────────────
+// Counts the "Mansions per Cell" stat up from 10 to 20 and back
+(function mansionSlider() {
+  const el = document.getElementById('uc-mansion-num');
+  if (!el) return;
+  let val = 12, dir = 1;
+  setInterval(() => {
+    val += dir;
+    if (val >= 20 || val <= 10) dir *= -1;
+    el.textContent = val;
+  }, 1200);
+})();
+
+// ─── RESIDENTS COUNTER ANIMATION ─────────────────────────────
+let residents = 4812;
+setInterval(() => {
+  if (Math.random() < 0.15) residents += Math.random() < 0.5 ? 1 : -1;
+  const el = document.getElementById('residents-count');
+  if (el) el.textContent = residents.toLocaleString();
+}, 3000);
+</script>
+</body>
+</html>

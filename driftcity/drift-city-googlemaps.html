@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT CITY — Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#e8e0d5;font-family:'Roboto',sans-serif;overflow:hidden;}
+
+/* ── GOOGLE MAPS TOP BAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+  display:flex;align-items:center;
+  padding:8px 14px;gap:12px;
+  height:52px;
+}
+.search-box{
+  flex:1;max-width:380px;
+  display:flex;align-items:center;gap:10px;
+  background:#f1f3f4;border-radius:24px;
+  padding:8px 16px;
+}
+.search-icon{color:#5f6368;font-size:1.1rem;}
+.search-input{
+  flex:1;border:none;background:transparent;
+  font-family:'Roboto',sans-serif;font-size:.85rem;color:#202124;outline:none;
+}
+.search-input::placeholder{color:#9aa0a6;}
+
+.map-btns{display:flex;gap:8px;}
+.map-btn{
+  padding:6px 14px;border-radius:20px;
+  border:1px solid #dadce0;background:#fff;
+  font-family:'Roboto',sans-serif;font-size:.75rem;font-weight:500;
+  color:#3c4043;cursor:pointer;white-space:nowrap;
+  transition:background .15s,box-shadow .15s;
+}
+.map-btn:hover{background:#f1f3f4;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.map-btn.active{background:#e8f0fe;border-color:#1a73e8;color:#1a73e8;}
+
+.logo-area{display:flex;align-items:center;gap:6px;}
+.logo-g{font-family:'Roboto',sans-serif;font-weight:700;font-size:1.1rem;}
+.logo-g span:nth-child(1){color:#4285f4;}
+.logo-g span:nth-child(2){color:#ea4335;}
+.logo-g span:nth-child(3){color:#fbbc05;}
+.logo-g span:nth-child(4){color:#4285f4;}
+.logo-g span:nth-child(5){color:#34a853;}
+.logo-g span:nth-child(6){color:#ea4335;}
+
+/* ── SIDE PANEL (Google Maps info panel style) ── */
+.panel{
+  position:fixed;top:90px;left:0;bottom:0;z-index:100;
+  width:340px;background:#fff;
+  box-shadow:2px 0 8px rgba(0,0,0,0.15);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.panel-header{
+  padding:18px 20px 14px;
+  border-bottom:1px solid #e0e0e0;
+}
+.panel-title{font-size:1.3rem;font-weight:500;color:#202124;margin-bottom:2px;}
+.panel-sub{font-size:.78rem;color:#70757a;}
+.panel-rating{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.rating-num{font-size:.85rem;font-weight:500;color:#e37400;}
+.stars{color:#fbbc05;font-size:.8rem;letter-spacing:1px;}
+.rating-count{font-size:.75rem;color:#70757a;}
+
+.panel-tabs{
+  display:flex;border-bottom:1px solid #e0e0e0;
+}
+.ptab{
+  flex:1;padding:12px 4px;text-align:center;
+  font-size:.72rem;font-weight:500;color:#70757a;
+  cursor:pointer;border-bottom:3px solid transparent;
+  transition:color .15s,border-color .15s;
+}
+.ptab.active{color:#1a73e8;border-bottom-color:#1a73e8;}
+
+.panel-body{flex:1;overflow-y:auto;padding:0;}
+
+/* Info rows */
+.info-section{padding:16px 20px;border-bottom:1px solid #f1f3f4;}
+.info-row{display:flex;gap:14px;margin-bottom:12px;align-items:flex-start;}
+.info-icon{color:#5f6368;font-size:1rem;margin-top:1px;flex-shrink:0;width:18px;}
+.info-text{font-size:.82rem;color:#3c4043;line-height:1.5;}
+.info-text strong{color:#202124;font-weight:500;}
+.info-text .tag{
+  display:inline-block;background:#e8f0fe;color:#1a73e8;
+  font-size:.65rem;font-weight:500;padding:1px 7px;border-radius:10px;margin-right:4px;margin-top:3px;
+}
+.info-text .tag.green{background:#e6f4ea;color:#137333;}
+.info-text .tag.red{background:#fce8e6;color:#c5221f;}
+.info-text .tag.orange{background:#fef3e2;color:#b06000;}
+
+/* Zone cards */
+.zone-card{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 20px;cursor:pointer;
+  transition:background .1s;
+}
+.zone-card:hover{background:#f8f9fa;}
+.zone-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.zone-info{flex:1;}
+.zone-name{font-size:.85rem;font-weight:500;color:#202124;}
+.zone-desc{font-size:.72rem;color:#70757a;margin-top:1px;}
+.zone-dist{font-size:.72rem;color:#70757a;}
+
+/* F1 widget */
+.f1-widget{margin:14px 20px;background:#fff8e1;border:1px solid #f9a825;border-radius:8px;padding:12px;}
+.f1-title{font-size:.8rem;font-weight:700;color:#f57f17;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.f1-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.f1-stat{background:#fff;border-radius:4px;padding:6px 8px;}
+.f1-stat-val{font-size:1rem;font-weight:700;color:#202124;}
+.f1-stat-key{font-size:.6rem;color:#9aa0a6;text-transform:uppercase;letter-spacing:.05em;}
+.sector-bar{display:flex;gap:3px;margin-top:8px;}
+.s-seg{flex:1;height:4px;border-radius:2px;}
+
+/* ASN-9 */
+.asn-widget{margin:14px 20px;background:#e8f5e9;border:1px solid #66bb6a;border-radius:8px;padding:12px;}
+.asn-title{font-size:.78rem;font-weight:700;color:#2e7d32;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.asn-dot{width:7px;height:7px;border-radius:50%;background:#2e7d32;animation:pd 1.5s ease-in-out infinite;}
+@keyframes pd{0%,100%{opacity:.4;}50%{opacity:1;}}
+.asn-row{display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:4px;}
+.asn-key{color:#4caf50;}.asn-val{color:#1b5e20;font-weight:500;}
+
+/* Live metrics chip row */
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;padding:12px 20px;}
+.chip{
+  display:flex;align-items:center;gap:5px;
+  background:#f1f3f4;border-radius:16px;padding:5px 12px;
+  font-size:.72rem;color:#3c4043;font-weight:500;
+}
+.chip-dot{width:8px;height:8px;border-radius:50%;}
+
+/* Controls */
+.ctrl-row{display:flex;flex-direction:column;gap:6px;padding:12px 20px;}
+.ctrl-btn{
+  padding:9px 16px;border-radius:6px;border:1px solid #dadce0;
+  background:#fff;font-family:'Roboto',sans-serif;font-size:.78rem;font-weight:500;
+  color:#3c4043;cursor:pointer;text-align:left;
+  display:flex;align-items:center;gap:8px;
+  transition:background .1s,box-shadow .1s;
+}
+.ctrl-btn:hover{background:#f8f9fa;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.ctrl-btn.primary{background:#1a73e8;color:#fff;border-color:#1a73e8;}
+.ctrl-btn.primary:hover{background:#1765cc;}
+
+/* ── MAP CANVAS ── */
+.map-wrap{
+  position:fixed;
+  top:90px;left:340px;right:0;bottom:0;
+  overflow:hidden;
+}
+canvas{display:block;width:100%;height:100%;}
+
+/* ── GOOGLE MAPS CONTROLS (right side) ── */
+.map-controls{
+  position:fixed;right:10px;bottom:120px;z-index:150;
+  display:flex;flex-direction:column;gap:2px;
+}
+.mc-btn{
+  width:40px;height:40px;background:#fff;border:none;
+  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;color:#3c4043;font-weight:300;
+  transition:background .1s;
+}
+.mc-btn:first-child{border-radius:2px 2px 0 0;border-bottom:1px solid #e0e0e0;}
+.mc-btn:last-child{border-radius:0 0 2px 2px;}
+.mc-btn:hover{background:#f8f9fa;}
+
+/* ── SCALE BAR ── */
+.scale-bar{
+  position:fixed;right:60px;bottom:24px;z-index:150;
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;
+}
+.scale-line{
+  display:flex;align-items:center;gap:0;
+}
+.scale-seg{height:4px;background:#555;}
+.scale-label{font-size:.65rem;color:#555;font-family:'Roboto',sans-serif;text-align:right;}
+
+/* ── BOTTOM STRIP (Google copyright style) ── */
+.bottom-strip{
+  position:fixed;bottom:0;left:340px;right:0;z-index:150;
+  background:rgba(255,255,255,0.92);
+  padding:4px 10px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.65rem;color:#70757a;
+  border-top:1px solid #e0e0e0;
+}
+
+/* Zoom level */
+.zoom-display{
+  position:fixed;left:350px;bottom:30px;z-index:150;
+  background:rgba(255,255,255,0.9);padding:3px 8px;border-radius:2px;
+  font-size:.65rem;color:#5f6368;font-family:'Roboto',sans-serif;
+  box-shadow:0 1px 3px rgba(0,0,0,.15);
+}
+
+/* ── DC MAP TAB BAR ── */
+#dc-tab-bar{
+  position:fixed;top:0;left:0;right:0;height:38px;z-index:9999;
+  background:#000;border-bottom:1px solid #39ff14;
+  display:flex;align-items:center;padding:0 16px;gap:0;
+  font-family:'Share Tech Mono',monospace;
+}
+#dc-tab-bar a{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 18px;height:38px;
+  font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  text-decoration:none;color:#8a8a8a;
+  border-right:1px solid #1a1a1a;
+  transition:color .2s,background .2s;
+}
+#dc-tab-bar a:first-child{border-left:1px solid #1a1a1a;}
+#dc-tab-bar a:hover{color:#39ff14;background:rgba(57,255,20,.05);}
+#dc-tab-bar a.dc-tab-active{color:#39ff14;background:rgba(57,255,20,.08);border-bottom:2px solid #39ff14;}
+#dc-tab-bar .tab-home{margin-left:auto;border-left:1px solid #1a1a1a;}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- DC MAP TAB BAR -->
+<div id="dc-tab-bar">
+  <a href="map.html">⬡ ASN-9 COMMAND</a>
+  <a href="drift-city-googlemaps.html" class="dc-tab-active">📍 DRIFT MAPS</a>
+  <a href="index.html" class="tab-home">↩ MAIN SITE</a>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar" style="top:38px;">
+  <div class="logo-area">
+    <div class="logo-g">
+      <span>D</span><span>r</span><span>i</span><span>f</span><span>t</span>
+    </div>
+    <div style="font-size:.65rem;color:#70757a;font-family:'Roboto',sans-serif;">Maps</div>
+  </div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" value="Drift City, NEOM Zone, Saudi Arabia" readonly>
+  </div>
+  <div class="map-btns">
+    <button class="map-btn active">Map</button>
+    <button class="map-btn" onclick="toggleSat(this)">Satellite</button>
+    <button class="map-btn" onclick="toggleNight(this)">Night</button>
+    <button class="map-btn" onclick="toggleTraffic(this)">Traffic</button>
+  </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">Drift City</div>
+    <div class="panel-sub">NEOM Special Zone · Tabuk Region, Saudi Arabia · 28.12°N 35.32°E</div>
+    <div class="panel-rating">
+      <span class="rating-num">4.9</span>
+      <span class="stars">★★★★★</span>
+      <span class="rating-count">(847 reviews)</span>
+    </div>
+  </div>
+  <div class="panel-tabs">
+    <div class="ptab active">Overview</div>
+    <div class="ptab">F1 Circuit</div>
+    <div class="ptab">Live</div>
+  </div>
+  <div class="panel-body">
+
+    <div class="info-section">
+      <div class="info-row">
+        <span class="info-icon">📍</span>
+        <div class="info-text"><strong>NEOM Zone, Tabuk Region</strong><br>Saudi Arabia · 580 km² desert site</div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">⚠️</span>
+        <div class="info-text">
+          <span class="tag red">DRIFT MANDATORY</span>
+          <span class="tag red">NO FRONT DOORS</span>
+          <span class="tag orange">EV: 0–100 in 5s</span>
+          <span class="tag green">0 TRAFFIC JAMS</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">🏎</span>
+        <div class="info-text"><strong>DC Grand Prix Circuit</strong><br>6.42 km · 19 corners · 3 DRS zones · Lap record: 1:28.742</div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">🎓</span>
+        <div class="info-text"><strong>Drift City Institute of Speed</strong><br>University campus · Engineering, Motorsport, Aerodynamics</div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">🏠</span>
+        <div class="info-text"><strong>100 residential units</strong><br>5 agglomerations · No pedestrian entry · Garage door = front door</div>
+      </div>
+    </div>
+
+    <!-- F1 WIDGET -->
+    <div class="f1-widget">
+      <div class="f1-title">🏁 F1 Live — DC Grand Prix</div>
+      <div class="f1-grid">
+        <div class="f1-stat"><div class="f1-stat-val" id="s1v">28.4s</div><div class="f1-stat-key">Sector 1</div></div>
+        <div class="f1-stat"><div class="f1-stat-val" id="s2v">34.1s</div><div class="f1-stat-key">Sector 2</div></div>
+        <div class="f1-stat"><div class="f1-stat-val" id="s3v">29.8s</div><div class="f1-stat-key">Sector 3</div></div>
+        <div class="f1-stat"><div class="f1-stat-val" id="tspdv" style="color:#c62828;">338</div><div class="f1-stat-key">Top Speed km/h</div></div>
+      </div>
+      <div class="sector-bar">
+        <div class="s-seg" style="background:#f57f17;flex:0.28;"></div>
+        <div class="s-seg" style="background:#9c27b0;flex:0.34;"></div>
+        <div class="s-seg" style="background:#1565c0;flex:0.28;"></div>
+      </div>
+    </div>
+
+    <!-- ASN-9 -->
+    <div class="asn-widget">
+      <div class="asn-title"><div class="asn-dot"></div>ASN-9 Traffic Network · Live</div>
+      <div class="asn-row"><span class="asn-key">Nodes active</span><span class="asn-val" id="asn-nodes">18</span></div>
+      <div class="asn-row"><span class="asn-key">Avg city speed</span><span class="asn-val" id="asn-spd">88 km/h</span></div>
+      <div class="asn-row"><span class="asn-key">Traffic jams</span><span class="asn-val">0 (since 2001)</span></div>
+      <div class="asn-row"><span class="asn-key">Status</span><span class="asn-val" id="asn-msg">ALL CORRIDORS CLEAR</span></div>
+    </div>
+
+    <!-- LIVE CHIPS -->
+    <div class="chip-row">
+      <div class="chip"><div class="chip-dot" style="background:#34a853;"></div><span id="c-cars">20</span> cars</div>
+      <div class="chip"><div class="chip-dot" style="background:#ea4335;"></div><span id="c-drift">0</span> drifts</div>
+      <div class="chip"><div class="chip-dot" style="background:#fbbc05;"></div><span id="c-viol">0</span> violations</div>
+      <div class="chip"><div class="chip-dot" style="background:#4285f4;"></div>F1 live</div>
+    </div>
+
+    <!-- ZONES -->
+    <div class="info-section" style="padding:8px 0;">
+      <div style="padding:8px 20px 4px;font-size:.72rem;font-weight:500;color:#70757a;letter-spacing:.05em;text-transform:uppercase;">Districts</div>
+      <div class="zone-card"><div class="zone-icon" style="background:#fff3e0;">🏁</div><div class="zone-info"><div class="zone-name">Alpha District</div><div class="zone-desc">20 homes · NW zone · Chicane circuit</div></div></div>
+      <div class="zone-card"><div class="zone-icon" style="background:#e3f2fd;">🏁</div><div class="zone-info"><div class="zone-name">Beta District</div><div class="zone-desc">20 homes · NE zone · Right-hand loop</div></div></div>
+      <div class="zone-card"><div class="zone-icon" style="background:#f3e5f5;">🏁</div><div class="zone-info"><div class="zone-name">Gamma District</div><div class="zone-desc">20 homes · SE zone · Hairpin complex</div></div></div>
+      <div class="zone-card"><div class="zone-icon" style="background:#fce4ec;">🏁</div><div class="zone-info"><div class="zone-name">Delta District</div><div class="zone-desc">20 homes · SW zone · S-bend loop</div></div></div>
+      <div class="zone-card"><div class="zone-icon" style="background:#e8f5e9;">🏁</div><div class="zone-info"><div class="zone-name">Central District</div><div class="zone-desc">20 homes · City centre · Hub oval</div></div></div>
+      <div class="zone-card"><div class="zone-icon" style="background:#e3f2fd;">🎓</div><div class="zone-info"><div class="zone-name">Drift City Institute</div><div class="zone-desc">University campus · 8 faculties · Campus road</div></div></div>
+      <div class="zone-card"><div class="zone-icon" style="background:#ffebee;">🏎</div><div class="zone-info"><div class="zone-name">DC Grand Prix Circuit</div><div class="zone-desc">F1 grade · 6.42 km · 3 DRS zones · Pit lane</div></div></div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="ctrl-row">
+      <button class="ctrl-btn primary" onclick="spawnBurst()">➕ Spawn 5 Cars</button>
+      <button class="ctrl-btn" onclick="toggleSim()" id="btn-p">⏸ Pause Simulation</button>
+      <button class="ctrl-btn" onclick="spawnOne()">🚗 Spawn Car</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAP -->
+<div class="map-wrap">
+  <canvas id="c"></canvas>
+</div>
+
+<!-- MAP CONTROLS -->
+<div class="map-controls">
+  <button class="mc-btn" onclick="zoom(1.15)" title="Zoom in">＋</button>
+  <button class="mc-btn" onclick="zoom(0.87)" title="Zoom out">－</button>
+</div>
+
+<!-- SCALE BAR -->
+<div class="scale-bar">
+  <div class="scale-label">2 km</div>
+  <div class="scale-line">
+    <div class="scale-seg" style="width:80px;border-left:2px solid #555;border-right:2px solid #555;"></div>
+  </div>
+</div>
+
+<!-- BOTTOM STRIP -->
+<div class="bottom-strip">
+  <span>© 2025 Drift City Maps · © NEOM Authority · Data: ASN-9 Network</span>
+  <span>28.12°N 35.32°E · Map data updated live</span>
+</div>
+
+<div class="zoom-display" id="zoom-label">Zoom 14</div>
+
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=canvas.clientWidth;canvas.height=canvas.clientHeight;}
+resize();window.addEventListener('resize',resize);
+const W=()=>canvas.width,H=()=>canvas.height;
+const VW=1200,VH=780;
+
+let zoomFactor=1.0;
+let nightMode=false, satMode=false, trafficMode=false, paused=false;
+
+function vx(x){return Math.round(x/VW*W()*zoomFactor+(W()*(1-zoomFactor)/2));}
+function vy(y){return Math.round(y/VH*H()*zoomFactor+(H()*(1-zoomFactor)/2));}
+function vs(s){return Math.max(1,s/VW*W()*zoomFactor);}
+
+function zoom(f){
+  zoomFactor=Math.max(0.5,Math.min(2.5,zoomFactor*f));
+  const z=Math.round(14+Math.log2(zoomFactor)*1.5);
+  document.getElementById('zoom-label').textContent='Zoom '+z;
+}
+
+// ── GOOGLE MAPS COLOUR PALETTE ──
+const GM={
+  land:    '#f2efe9',
+  landSat: '#3d5a3e',
+  water:   '#a8c8f0',
+  park:    '#c8e6c9',
+  parkDark:'#b2dfdb',
+  desert:  '#e8d5a3',
+  desertSat:'#8a7040',
+  sand:    '#f5e6c3',
+  road_hw: '#f7c948',   // highway yellow
+  road_hw_stroke:'#e6a817',
+  road_major:'#ffffff', // major road white
+  road_major_stroke:'#bdbdbd',
+  road_minor:'#ffffff',
+  road_minor_stroke:'#d0d0d0',
+  road_local:'#f8f8f8',
+  road_local_stroke:'#ddd',
+  road_f1:  '#fafafa',
+  road_f1_stroke:'#bbb',
+  building: '#e0d9cf',
+  buildingShadow:'#c8c0b4',
+  buildingStroke:'#c4bdb4',
+  uni_bldg: '#bbdefb',
+  uni_stroke:'#90caf9',
+  label_major:'#3c4043',
+  label_minor:'#6b6b6b',
+  label_road:'#5f5f5f',
+  // zones
+  alpha:'#ff6d00', beta:'#1565c0', gamma:'#6a1b9a',
+  delta:'#b71c1c', central:'#1b5e20', uni:'#0277bd',
+  // traffic
+  traffic_free:'#34a853',
+  traffic_slow:'#fbbc04',
+  traffic_jam:'#ea4335',
+  // F1
+  f1_runoff:'#e8e4d4',
+  f1_runoff_sat:'#666650',
+  f1_kerb_r:'#d32f2f',
+  f1_kerb_w:'#ffffff',
+  drs:'rgba(52,168,83,0.18)',
+  // night overrides
+  night_land:'#1d2c4d',
+  night_water:'#17263c',
+  night_road:'#38414e',
+  night_road_stroke:'#2c333e',
+  night_hw:'#c19b29',
+  night_hw_stroke:'#9c7b1f',
+  night_park:'#1a3820',
+  night_label:'#9aa0a6',
+  night_building:'#2a3040',
+};
+
+function c(day,night){return nightMode?night:day;}
+function cs(sat,day,night){return satMode?(nightMode?night:sat):(nightMode?night:day);}
+
+// ── CATMULL-ROM ──
+function catmull(pts,steps=300){
+  const res=[];const n=pts.length;
+  for(let i=0;i<n-1;i++){
+    const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(n-1,i+2)];
+    const st=Math.ceil(steps/(n-1));
+    for(let t=0;t<st;t++){
+      const s=t/st,s2=s*s,s3=s2*s;
+      res.push([
+        .5*((2*p1[0])+(-p0[0]+p2[0])*s+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*s2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*s3),
+        .5*((2*p1[1])+(-p0[1]+p2[1])*s+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*s2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*s3)
+      ]);
+    }
+  }
+  return res;
+}
+
+// ── TRACKS ──
+const f1Raw=[[220,650],[380,650],[520,650],[660,650],[750,650],[820,640],[870,620],[900,590],[905,555],[900,520],[890,490],[870,465],[840,450],[800,448],[770,455],[745,470],[730,495],[730,520],[738,550],[760,570],[790,575],[820,565],[840,545],[850,510],[855,470],[855,430],[852,390],[848,350],[835,315],[810,295],[780,285],[750,285],[720,295],[700,310],[692,335],[690,360],[700,385],[718,400],[745,415],[775,420],[800,410],[818,390],[835,370],[845,345],[840,320],[825,295],[790,270],[750,255],[700,245],[650,238],[600,235],[550,235],[500,238],[450,242],[400,248],[355,258],[320,278],[305,308],[308,340],[318,368],[335,390],[360,402],[390,405],[420,400],[445,388],[458,368],[455,345],[440,325],[415,315],[388,318],[362,330],[345,350],[340,375],[348,400],[365,418],[390,430],[420,442],[455,445],[490,440],[530,432],[570,422],[605,408],[630,390],[640,365],[635,338],[618,315],[595,302],[568,298],[540,300],[515,310],[495,325],[480,348],[480,375],[490,402],[510,422],[540,438],[575,448],[615,450],[650,446],[680,436],[700,600],[600,648],[450,650],[300,650],[220,650]];
+const F1=catmull(f1Raw,1400);
+const OUTER=catmull([[500,52],[760,58],[940,108],[992,220],[978,370],[952,512],[882,612],[720,657],[500,667],[298,660],[148,612],[78,512],[52,370],[58,220],[138,108],[318,58],[500,52]],600);
+const INNER=catmull([[500,338],[572,268],[652,238],[722,263],[752,318],[742,390],[702,440],[642,465],[572,460],[500,430],[428,460],[358,465],[298,440],[256,390],[248,318],[280,263],[358,238],[428,268],[500,338]],300);
+const MID=catmull([[500,150],[680,158],[820,195],[900,280],[910,380],[885,480],[820,550],[680,600],[500,612],[320,600],[180,550],[115,480],[90,380],[100,280],[180,195],[320,158],[500,150]],300);
+
+const T={
+  alpha: catmull([[170,135],[210,95],[255,90],[280,115],[275,155],[245,178],[205,180],[170,160],[155,135],[170,135]],120),
+  beta:  catmull([[870,105],[910,88],[940,105],[945,140],[925,168],[890,175],[862,158],[852,128],[870,105]],110),
+  gamma: catmull([[880,580],[915,555],[940,568],[945,598],[925,622],[895,625],[865,608],[856,580],[880,580]],110),
+  delta: catmull([[155,580],[192,555],[220,562],[225,592],[205,618],[175,620],[150,600],[145,575],[155,580]],110),
+  central:catmull([[500,335],[540,308],[572,310],[585,338],[575,368],[545,382],[510,378],[488,355],[493,328],[500,335]],130),
+  uni:  catmull([[500,120],[540,95],[590,85],[635,92],[665,115],[670,145],[655,172],[625,188],[590,190],[555,180],[525,162],[510,140],[500,120]],160),
+};
+
+const CONNECTORS=[
+  catmull([[255,100],[340,80],[420,68],[500,62],[580,68],[660,80],[748,100]],80),
+  catmull([[255,140],[330,120],[410,110],[500,105],[590,110],[670,120],[752,140]],80),
+  catmull([[148,175],[142,250],[135,330],[132,420],[138,500],[145,560]],70),
+  catmull([[175,175],[168,250],[162,330],[160,420],[162,500],[168,560]],70),
+  catmull([[940,170],[945,250],[948,330],[946,420],[944,500],[940,552]],70),
+  catmull([[912,172],[916,252],[918,330],[916,420],[914,500],[910,553]],70),
+  catmull([[225,590],[300,608],[380,622],[460,630],[540,630],[620,622],[700,608],[852,590]],90),
+  catmull([[225,570],[300,588],[380,600],[460,608],[540,608],[620,600],[700,588],[852,570]],90),
+  catmull([[255,155],[310,200],[355,248],[400,295],[445,330]],70),
+  catmull([[240,165],[295,212],[340,260],[385,308],[428,345]],70),
+  catmull([[852,155],[800,200],[755,248],[710,295],[565,330]],70),
+  catmull([[860,168],[808,214],[762,262],[718,308],[578,342]],70),
+  catmull([[220,572],[265,520],[308,475],[355,435],[440,395]],70),
+  catmull([[210,558],[254,506],[296,460],[342,418],[428,380]],70),
+  catmull([[855,572],[812,520],[768,475],[720,438],[565,395]],70),
+  catmull([[862,558],[820,505],[776,460],[728,422],[578,408]],70),
+  catmull([[500,140],[430,140],[350,138],[280,137],[215,138]],60),
+  catmull([[660,140],[720,140],[790,138],[852,138]],50),
+  catmull([[585,188],[585,220],[582,265],[578,308],[572,338]],60),
+  catmull([[78,260],[200,248],[320,242],[440,240],[560,240],[680,242],[800,248],[940,260]],120),
+  catmull([[68,330],[160,322],[280,318],[400,315],[500,313],[600,315],[720,318],[840,322],[955,330]],120),
+  catmull([[70,440],[160,432],[280,428],[400,425],[500,423],[600,425],[720,428],[840,432],[952,440]],120),
+  catmull([[78,510],[175,502],[290,498],[410,496],[500,495],[590,496],[710,498],[825,502],[922,510]],100),
+  catmull([[250,58],[248,148],[246,230],[248,318],[250,420],[252,510],[255,580]],100),
+  catmull([[370,56],[368,120],[366,210],[365,315],[366,420],[368,510],[370,580]],100),
+  catmull([[630,56],[632,120],[634,210],[635,315],[634,420],[632,510],[630,580]],100),
+  catmull([[750,58],[752,148],[754,230],[752,318],[750,420],[748,510],[745,580]],100),
+  catmull([[140,200],[220,270],[300,340],[380,410],[460,475],[540,535],[610,590]],100),
+  catmull([[860,200],[780,270],[700,340],[620,410],[540,475],[460,535],[388,590]],100),
+];
+
+const AGGS=[
+  {id:'ALPHA',   label:'Alpha District',cx:215,cy:135,color:GM.alpha,r:72,houses:20,track:'alpha'},
+  {id:'BETA',    label:'Beta District', cx:895,cy:135,color:GM.beta, r:68,houses:20,track:'beta'},
+  {id:'GAMMA',   label:'Gamma District',cx:898,cy:595,color:GM.gamma,r:68,houses:20,track:'gamma'},
+  {id:'DELTA',   label:'Delta District',cx:185,cy:590,color:GM.delta,r:68,houses:20,track:'delta'},
+  {id:'CENTRAL', label:'Central Hub',   cx:500,cy:350,color:GM.central,r:82,houses:20,track:'central'},
+  {id:'UNI',     label:'Drift City Institute',cx:585,cy:138,color:GM.uni,r:68,houses:0,track:'uni',isUni:true},
+];
+
+const DRIFT_CORNERS=[{x:940,y:110},{x:990,y:220},{x:950,y:510},{x:880,y:610},{x:150,y:610},{x:60,y:220},{x:140,y:108},{x:760,y:58},{x:742,y:390},{x:258,y:390},{x:360,y:80},{x:640,y:80},{x:250,y:260},{x:752,y:260},{x:250,y:510},{x:750,y:510}];
+const F1_CORNERS=[{x:900,y:570,name:'T1'},{x:800,y:448,name:'T3 Hairpin'},{x:838,y:320,name:'T8'},{x:308,y:308,name:'T13'},{x:480,y:375,name:'T19'},{x:692,y:335,name:'T10'}];
+
+const NODES=[
+  {x:500,y:55,id:'N1'},{x:980,y:290,id:'N2'},{x:500,y:660,id:'N3'},{x:55,y:360,id:'N4'},
+  {x:720,y:318,id:'N5'},{x:280,y:373,id:'N6'},{x:500,y:313,id:'N7'},{x:500,y:400,id:'N8'},
+  {x:590,y:140,id:'N9'},{x:500,y:195,id:'NA'},{x:248,y:248,id:'NB'},{x:752,y:248,id:'NC'},
+  {x:248,y:440,id:'ND'},{x:752,y:440,id:'NE'},{x:500,y:497,id:'NF'},
+  {x:365,y:315,id:'NG'},{x:635,y:315,id:'NH'},{x:500,y:612,id:'NI'},
+].map((n,i)=>({...n,phaseIdx:i%2===0?0:2,timer:0,
+  phases:[{state:'g',dur:2800},{state:'a',dur:500},{state:'r',dur:2800},{state:'a',dur:500}]
+}));
+
+// ── HOUSES & BUILDINGS ──
+function buildHouses(agg){
+  const track=T[agg.track];if(!track||!agg.houses)return[];
+  const h=[];const step=Math.max(1,Math.floor(track.length/agg.houses));
+  for(let i=0;i<agg.houses;i++){
+    const idx=(i*step)%track.length;const pt=track[idx],nxt=track[(idx+1)%track.length];
+    const angle=Math.atan2(nxt[1]-pt[1],nxt[0]-pt[0]);const side=i%2===0?1:-1;
+    h.push({x:pt[0]+Math.cos(angle+Math.PI/2)*17*side,y:pt[1]+Math.sin(angle+Math.PI/2)*17*side,angle,side,color:agg.color});
+  }
+  return h;
+}
+function buildUni(){
+  const track=T.uni;if(!track)return[];const b=[];
+  const step=Math.floor(track.length/8);
+  for(let i=0;i<8;i++){
+    const idx=(i*step)%track.length;const pt=track[idx],nxt=track[(idx+1)%track.length];
+    const angle=Math.atan2(nxt[1]-pt[1],nxt[0]-pt[0]);const side=i%2===0?1:-1;
+    b.push({x:pt[0]+Math.cos(angle+Math.PI/2)*22*side,y:pt[1]+Math.sin(angle+Math.PI/2)*22*side,angle,side,w:15+i%3*5,h:10+i%2*5});
+  }
+  return b;
+}
+const ALL_HOUSES=AGGS.flatMap(a=>buildHouses(a));
+const UNI_BLDGS=buildUni();
+
+// ── CARS ──
+class Car{
+  constructor(track,speed,color,isF1=false){
+    this.track=track;this.speed=speed;this.color=color;this.isF1=isF1;
+    this.idx=Math.floor(Math.random()*track.length);
+    this.x=track[0][0];this.y=track[0][1];this.angle=0;
+    this.drifting=false;this.driftTimer=0;this.trail=[];
+  }
+  update(dt){
+    const n=this.track.length;
+    this.idx=(this.idx+Math.ceil(this.speed*dt*(this.isF1?.065:.044)))%n;
+    const cur=this.track[this.idx],nxt=this.track[(this.idx+1)%n];
+    this.x=cur[0];this.y=cur[1];
+    this.angle=Math.atan2(nxt[1]-cur[1],nxt[0]-cur[0]);
+    const near=DRIFT_CORNERS.some(c=>Math.hypot(c.x-this.x,c.y-this.y)<(this.isF1?44:26));
+    if(near&&!this.drifting&&Math.random()<.05){this.drifting=true;this.driftTimer=22+Math.random()*22;}
+    if(this.drifting){this.driftTimer--;if(this.driftTimer<=0)this.drifting=false;}
+    this.trail.push({x:this.x,y:this.y,d:this.drifting});
+    if(this.trail.length>8)this.trail.shift();
+  }
+  draw(ctx){
+    const sx=vx(this.x),sy=vy(this.y);
+    // Google Maps style car — small teardrop with colour
+    ctx.save();ctx.translate(sx,sy);ctx.rotate(this.angle);
+    const w=vs(this.isF1?11:8.5),h=vs(this.isF1?4.5:5.5);
+    // drop shadow
+    ctx.fillStyle='rgba(0,0,0,0.18)';
+    ctx.beginPath();ctx.ellipse(vs(1),vs(1),w/2,h/2,0,0,Math.PI*2);ctx.fill();
+    // body
+    ctx.fillStyle=this.drifting?'#e65100':this.color;
+    ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=vs(0.8);
+    ctx.beginPath();ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    // front direction dot
+    ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.beginPath();ctx.arc(w/2-vs(1.5),0,vs(1),0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+}
+
+let cars=[];
+function initCars(){
+  const defs=[
+    {t:OUTER,n:4,c:'#e53935',f:false},{t:INNER,n:3,c:'#1e88e5',f:false},
+    {t:MID,n:3,c:'#43a047',f:false},
+    {t:T.alpha,n:2,c:'#f4511e',f:false},{t:T.beta,n:2,c:'#039be5',f:false},
+    {t:T.gamma,n:2,c:'#8e24aa',f:false},{t:T.delta,n:2,c:'#d81b60',f:false},
+    {t:T.central,n:2,c:'#00897b',f:false},{t:T.uni,n:1,c:'#0288d1',f:false},
+    {t:CONNECTORS[19],n:1,c:'#fb8c00',f:false},{t:CONNECTORS[20],n:1,c:'#00acc1',f:false},
+    {t:CONNECTORS[23],n:1,c:'#7cb342',f:false},{t:CONNECTORS[27],n:1,c:'#f06292',f:false},
+    {t:F1,n:4,c:'#c62828',f:true},{t:F1,n:1,c:'#00838f',f:true},{t:F1,n:1,c:'#283593',f:true},{t:F1,n:1,c:'#e65100',f:true},
+  ];
+  defs.forEach(d=>{if(!d.t||d.t.length<2)return;for(let i=0;i<d.n;i++)cars.push(new Car(d.t,d.f?2.6+Math.random()*1.5:0.8+Math.random()*1.2,d.c,d.f));});
+}
+initCars();
+
+let violations=0,driftEvents=0,frameCount=0,lastTime=0;
+function toggleSim(){paused=!paused;document.getElementById('btn-p').textContent=paused?'▶ Resume Simulation':'⏸ Pause Simulation';}
+function toggleSat(btn){satMode=!satMode;btn.classList.toggle('active');}
+function toggleNight(btn){nightMode=!nightMode;btn.classList.toggle('active');}
+function toggleTraffic(btn){trafficMode=!trafficMode;btn.classList.toggle('active');}
+function spawnOne(){
+  const pool=[{t:F1,f:true,c:'#c62828'},{t:OUTER,f:false,c:'#e53935'},{t:INNER,f:false,c:'#1e88e5'},{t:MID,f:false,c:'#43a047'},{t:T.central,f:false,c:'#00897b'}];
+  const d=pool[Math.floor(Math.random()*pool.length)];
+  if(d.t&&d.t.length>2)cars.push(new Car(d.t,d.f?2.6+Math.random()*1.5:0.8+Math.random()*1.3,d.c,d.f));
+}
+function spawnBurst(){for(let i=0;i<5;i++)spawnOne();}
+
+function updateNodes(dt){
+  NODES.forEach(n=>{n.timer+=dt;const p=n.phases[n.phaseIdx%n.phases.length];if(n.timer>=p.dur){n.timer=0;n.phaseIdx=(n.phaseIdx+1)%n.phases.length;}});
+}
+
+// ══════════════════════════════════════
+// GOOGLE MAPS DRAW
+// ══════════════════════════════════════
+
+function drawBase(){
+  // land
+  ctx.fillStyle=c(satMode?GM.landSat:GM.land, GM.night_land);
+  ctx.fillRect(0,0,W(),H());
+  // desert interior
+  if(!satMode){
+    ctx.fillStyle=c(GM.desert,GM.night_land);
+    ctx.beginPath();ctx.ellipse(vx(590),vy(445),vs(355),vs(235),0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=c(GM.sand,'#141e2e');
+    ctx.beginPath();ctx.ellipse(vx(605),vy(430),vs(270),vs(170),0.2,0,Math.PI*2);ctx.fill();
+  } else {
+    ctx.fillStyle='#5a6a3a';
+    ctx.beginPath();ctx.ellipse(vx(590),vy(445),vs(355),vs(235),0,0,Math.PI*2);ctx.fill();
+  }
+  // zone parks
+  AGGS.forEach(a=>{
+    ctx.fillStyle=a.isUni?c('#dcedc8',GM.night_park):c(satMode?'#3a5a3a':GM.park,GM.night_park);
+    ctx.beginPath();ctx.arc(vx(a.cx),vy(a.cy),vs(a.r+20),0,Math.PI*2);ctx.fill();
+  });
+}
+
+function drawRoad(pts,lw,stroke,fill,dash){
+  if(!pts||pts.length<2)return;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.strokeStyle=stroke;ctx.lineWidth=vs(lw+2.5);
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+  ctx.strokeStyle=fill;ctx.lineWidth=vs(lw);
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+  if(dash){
+    ctx.strokeStyle=dash;ctx.lineWidth=vs(0.8);ctx.setLineDash([vs(10),vs(10)]);
+    ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
+function drawF1Road(pts){
+  if(!pts||pts.length<2)return;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  // runoff
+  ctx.strokeStyle=c(satMode?GM.f1_runoff_sat:GM.f1_runoff,'#2a2a2a');ctx.lineWidth=vs(34);
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+  // track
+  ctx.strokeStyle=c(GM.road_f1,GM.night_road);ctx.lineWidth=vs(19);
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+  // edge lines
+  ctx.strokeStyle=c(GM.road_f1_stroke,'#555');ctx.lineWidth=vs(0.6);ctx.setLineDash([vs(4),vs(4)]);
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+// Kerb
+function drawKerb(pts,start,len){
+  const end=Math.min(start+len,pts.length-1);
+  ctx.save();ctx.lineWidth=vs(3.5);ctx.lineCap='square';
+  ctx.setLineDash([vs(7),vs(7)]);
+  ctx.strokeStyle=GM.f1_kerb_r;ctx.beginPath();
+  for(let i=start;i<=end;i++){const p=pts[i];i===start?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1]));}ctx.stroke();
+  ctx.strokeStyle=GM.f1_kerb_w;ctx.lineDashOffset=vs(7);ctx.beginPath();
+  for(let i=start;i<=end;i++){const p=pts[i];i===start?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1]));}ctx.stroke();
+  ctx.setLineDash([]);ctx.lineDashOffset=0;ctx.restore();
+}
+
+function drawDRS(pts,start,end,label){
+  const e=Math.min(end,pts.length-1);
+  ctx.save();ctx.strokeStyle=GM.drs;ctx.lineWidth=vs(22);ctx.lineCap='round';
+  ctx.beginPath();for(let i=start;i<=e;i++){const p=pts[i];i===start?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1]));}ctx.stroke();
+  const mid=pts[Math.floor((start+e)/2)];
+  ctx.fillStyle='rgba(52,168,83,0.8)';
+  ctx.font=`500 ${vs(5)}px 'Roboto'`;ctx.textAlign='center';
+  ctx.fillText(label,vx(mid[0]),vy(mid[1]));ctx.restore();
+}
+
+// Traffic flow overlay
+function drawTrafficOverlay(pts,intensity){
+  if(!trafficMode||!pts||pts.length<2)return;
+  const col=intensity<0.4?GM.traffic_free:intensity<0.7?GM.traffic_slow:GM.traffic_jam;
+  ctx.save();ctx.strokeStyle=col+'aa';ctx.lineWidth=vs(5);ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(vx(p[0]),vy(p[1])):ctx.lineTo(vx(p[0]),vy(p[1])));ctx.stroke();
+  ctx.restore();
+}
+
+function drawStartFinish(){
+  const pt=F1[30],nxt=F1[31];
+  const angle=Math.atan2(nxt[1]-pt[1],nxt[0]-pt[0]);
+  ctx.save();ctx.translate(vx(pt[0]),vy(pt[1]));ctx.rotate(angle+Math.PI/2);
+  const cols=6,sw=vs(14)/cols,sh=vs(4)/2;
+  for(let cc=0;cc<cols;cc++)for(let r=0;r<2;r++){
+    ctx.fillStyle=(cc+r)%2===0?'#fff':'#222';
+    ctx.fillRect(-vs(7)+cc*sw,-vs(2)+r*sh,sw,sh);
+  }
+  ctx.restore();
+  ctx.save();
+  ctx.font=`500 ${vs(5)}px 'Roboto'`;ctx.fillStyle=c('#3c4043','#9aa0a6');ctx.textAlign='center';
+  ctx.fillText('Start / Finish',vx(pt[0]),vy(pt[1])-vs(12));
+  ctx.restore();
+}
+
+function drawPitLane(){
+  ctx.save();
+  ctx.strokeStyle=c('#e0d8cc','#2a2a2a');ctx.lineWidth=vs(5.5);ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(vx(240),vy(632));ctx.lineTo(vx(740),vy(632));ctx.stroke();
+  ctx.strokeStyle='#fbbc0466';ctx.lineWidth=vs(0.6);ctx.setLineDash([vs(4),vs(4)]);
+  ctx.beginPath();ctx.moveTo(vx(240),vy(632));ctx.lineTo(vx(740),vy(632));ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font=`400 ${vs(4.5)}px 'Roboto'`;ctx.fillStyle=c('#70757a','#5f6368');ctx.textAlign='center';
+  ctx.fillText('Pit Lane',vx(490),vy(627));ctx.restore();
+}
+
+// Google Maps style building footprint
+function drawBuilding(x,y,w,h,isUni){
+  const bx=vx(x)-vs(w/2),by=vy(y)-vs(h/2),bw=vs(w),bh=vs(h);
+  ctx.save();
+  // shadow
+  ctx.fillStyle=c('#d4ccbf','#1a2030');
+  ctx.fillRect(bx+vs(1.5),by+vs(1.5),bw,bh);
+  // fill
+  ctx.fillStyle=isUni?c(GM.uni_bldg,'#1a2840'):c(satMode?'#5a5040':GM.building,GM.night_building);
+  ctx.fillRect(bx,by,bw,bh);
+  ctx.strokeStyle=isUni?c(GM.uni_stroke,'#1a4060'):c(GM.buildingStroke,'#2a3040');
+  ctx.lineWidth=vs(0.4);ctx.strokeRect(bx,by,bw,bh);
+  ctx.restore();
+}
+
+// Google Maps PIN
+function drawPin(x,y,color,label){
+  const px=vx(x),py=vy(y);
+  ctx.save();
+  // shadow
+  ctx.fillStyle='rgba(0,0,0,0.2)';
+  ctx.beginPath();ctx.ellipse(px+vs(1),py+vs(1),vs(6),vs(4),0,0,Math.PI*2);ctx.fill();
+  // pin head
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.arc(px,py-vs(8),vs(7),0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=vs(1.5);ctx.stroke();
+  // pin tail
+  ctx.beginPath();ctx.moveTo(px-vs(4),py-vs(8));ctx.lineTo(px,py);ctx.lineTo(px+vs(4),py-vs(8));
+  ctx.fillStyle=color;ctx.fill();
+  // inner dot
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(px,py-vs(8),vs(2.5),0,Math.PI*2);ctx.fill();
+  // label
+  if(label&&vs(7)>5){
+    ctx.font=`600 ${vs(5.5)}px 'Roboto'`;
+    ctx.fillStyle=c('#3c4043','#e8eaed');
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    // label background
+    const tw=ctx.measureText(label).width;
+    ctx.fillStyle='rgba(255,255,255,0.92)';
+    ctx.beginPath();ctx.roundRect(px+vs(9),py-vs(9)-vs(3),tw+vs(8),vs(12),vs(3));ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.1)';ctx.lineWidth=vs(0.3);ctx.stroke();
+    ctx.fillStyle=c('#3c4043','#202124');
+    ctx.fillText(label,px+vs(13),py-vs(8));
+  }
+  ctx.restore();
+}
+
+// Traffic light pill — Google Maps style
+function drawTL(n){
+  const x=vx(n.x),y=vy(n.y);
+  const s=n.phases[n.phaseIdx%n.phases.length].state;
+  const col=s==='g'?'#34a853':s==='a'?'#fbbc04':'#ea4335';
+  if(vs(6)<3)return;
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath();ctx.roundRect(x-vs(5),y-vs(7),vs(10),vs(14),vs(3));ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=vs(.4);ctx.stroke();
+  ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=vs(nightMode?5:0);
+  ctx.beginPath();ctx.arc(x,y-vs(2),vs(3),0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+// Road label — Google Maps style white pill
+function roadLabel(pts,text,minSize){
+  if(!pts||pts.length<10)return;
+  if(vs(10)<(minSize||3))return;
+  const mid=pts[Math.floor(pts.length/2)];
+  const before=pts[Math.floor(pts.length/2)-5];
+  const angle=Math.atan2(mid[1]-before[1],mid[0]-before[0]);
+  ctx.save();ctx.translate(vx(mid[0]),vy(mid[1]));ctx.rotate(angle);
+  const fs=vs(4.8);
+  ctx.font=`500 ${fs}px 'Roboto'`;
+  const tw=ctx.measureText(text).width;
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  ctx.beginPath();ctx.roundRect(-tw/2-vs(4),-vs(5),tw+vs(8),vs(10),vs(3));ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.1)';ctx.lineWidth=vs(.3);ctx.stroke();
+  ctx.fillStyle=c('#3c4043','#9aa0a6');
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,0,0);
+  ctx.restore();
+}
+
+// Zone circle label
+function drawZoneLabel(a){
+  if(vs(20)<6)return;
+  ctx.save();
+  // Halo
+  ctx.fillStyle=a.color+'14';
+  ctx.strokeStyle=a.color+'30';ctx.lineWidth=vs(1.5);
+  ctx.setLineDash([vs(4),vs(4)]);
+  ctx.beginPath();ctx.arc(vx(a.cx),vy(a.cy),vs(a.r+4),0,Math.PI*2);
+  ctx.fill();ctx.stroke();ctx.setLineDash([]);
+  // Label
+  ctx.font=`700 ${vs(7)}px 'Roboto'`;
+  ctx.fillStyle=c(a.isUni?GM.uni:a.color,a.isUni?'#82b1ff':a.color+'cc');
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(255,255,255,0.9)';ctx.shadowBlur=vs(nightMode?0:4);
+  ctx.fillText(a.isUni?'University':a.label,vx(a.cx),vy(a.cy));
+  ctx.font=`400 ${vs(4.5)}px 'Roboto'`;
+  ctx.fillStyle=c(a.isUni?'#5e8fb0':'#5f6368','#9aa0a6');
+  ctx.shadowBlur=0;
+  ctx.fillText(a.isUni?'Campus':'District · '+a.houses+' homes',vx(a.cx),vy(a.cy)+vs(10));
+  ctx.restore();
+}
+
+function drawCornerMarker(c){
+  const x=vx(c.x),y=vy(c.y);
+  if(vs(4)<2)return;
+  ctx.save();
+  ctx.fillStyle='rgba(213,0,0,0.15)';
+  ctx.beginPath();ctx.arc(x,y,vs(6),0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#d50000';ctx.beginPath();ctx.arc(x,y,vs(2.5),0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function drawF1Label(c){
+  if(vs(6)<3)return;
+  ctx.save();
+  ctx.font=`500 ${vs(4.5)}px 'Roboto'`;
+  ctx.fillStyle='#fff';
+  const tw=ctx.measureText(c.name).width;
+  ctx.fillStyle='rgba(198,40,40,0.88)';
+  ctx.beginPath();ctx.roundRect(vx(c.x)-tw/2-vs(4),vy(c.y)-vs(18)-vs(6),tw+vs(8),vs(12),vs(3));ctx.fill();
+  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(c.name,vx(c.x),vy(c.y)-vs(18));
+  ctx.restore();
+}
+
+function drawCompass(){
+  const cx=W()-vs(24),cy=H()-vs(100),r=vs(13);
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=vs(.5);ctx.stroke();
+  ctx.fillStyle='#ea4335';ctx.font=`700 ${vs(7)}px 'Roboto'`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('N',cx,cy-r*.5);
+  ctx.fillStyle='#ea4335';ctx.fillRect(cx-vs(.8),cy-r*.9,vs(1.6),r*.4);
+  ctx.fillStyle='#5f6368';ctx.fillRect(cx-vs(.8),cy+r*.3,vs(1.6),r*.4);
+  ctx.restore();
+}
+
+// ── MAIN LOOP ──
+const asnMsgs=['All corridors clear','DRS Zone 1 active','Green wave — ring road','Drift buffer T3 hairpin','Sector 2 optimised','University gate cleared','Cross-city flow nominal'];
+function updateUI(){
+  const spd=82+Math.round(Math.sin(frameCount*.02)*9);
+  document.getElementById('asn-spd').textContent=spd+' km/h';
+  document.getElementById('c-cars').textContent=cars.length;
+  driftEvents+=cars.filter(c=>c.drifting).length*.25;
+  document.getElementById('c-drift').textContent=Math.floor(driftEvents);
+  if(Math.random()<.003)violations++;
+  document.getElementById('c-viol').textContent=violations;
+  if(frameCount%90===0){
+    document.getElementById('s1v').textContent=(27.8+Math.random()*1.2).toFixed(1)+'s';
+    document.getElementById('s2v').textContent=(33.5+Math.random()*1.4).toFixed(1)+'s';
+    document.getElementById('s3v').textContent=(29.2+Math.random()*1.1).toFixed(1)+'s';
+    document.getElementById('tspdv').textContent=330+Math.floor(Math.random()*14);
+  }
+  if(frameCount%120===0)document.getElementById('asn-msg').textContent=asnMsgs[Math.floor(frameCount/120)%asnMsgs.length];
+}
+
+function loop(ts){
+  const dt=Math.min(ts-lastTime,50);lastTime=ts;frameCount++;
+  if(!paused){cars.forEach(c=>c.update(dt));updateNodes(dt);}
+
+  // ── DRAW ──
+  drawBase();
+
+  // F1 track (bottom)
+  drawF1Road(F1);
+  drawDRS(F1,0,60,'DRS 1');drawDRS(F1,280,340,'DRS 2');drawDRS(F1,480,560,'DRS 3');
+  F1_CORNERS.forEach((_,i)=>drawKerb(F1,Math.max(0,Math.floor(i*F1.length/6)-16),32));
+  drawPitLane();drawStartFinish();
+
+  // Traffic overlay before roads
+  drawTrafficOverlay(OUTER,0.1);
+  drawTrafficOverlay(INNER,0.3);
+  drawTrafficOverlay(MID,0.2);
+  CONNECTORS.forEach((c,i)=>drawTrafficOverlay(c,Math.random()<.05?0.6+Math.random()*.4:0.05+Math.random()*.25));
+
+  // MID ring
+  const mRoad=c(GM.road_major,GM.night_road),mStroke=c(GM.road_major_stroke,GM.night_road_stroke);
+  drawRoad(MID,11,mStroke,mRoad,null);
+  roadLabel(MID,'Mid Ring Road',2);
+
+  // Outer highway
+  const hwFill=c(GM.road_hw,GM.night_hw),hwStroke=c(GM.road_hw_stroke,GM.night_hw_stroke);
+  drawRoad(OUTER,17,hwStroke,hwFill,null);
+  roadLabel(OUTER,'Drift City Ring Highway',2);
+
+  // Inner highway
+  drawRoad(INNER,13,mStroke,mRoad,null);
+  roadLabel(INNER,'Inner Loop',2);
+
+  // Connectors — minor + local roads
+  CONNECTORS.forEach((conn,i)=>{
+    const isMinor=i>=19;
+    const lw=isMinor?7:9;
+    const fill=c(isMinor?GM.road_local:GM.road_minor,GM.night_road);
+    const stroke=c(isMinor?GM.road_local_stroke:GM.road_minor_stroke,GM.night_road_stroke);
+    drawRoad(conn,lw,stroke,fill,null);
+  });
+
+  // connector labels
+  roadLabel(CONNECTORS[19],'North Boulevard',1);roadLabel(CONNECTORS[20],'Central Avenue',1);
+  roadLabel(CONNECTORS[21],'South Corridor',1);roadLabel(CONNECTORS[23],'West Spine',1);
+  roadLabel(CONNECTORS[25],'East Spine',1);roadLabel(CONNECTORS[27],'Drift Diagonal',1);
+  roadLabel(CONNECTORS[28],'Grand Diagonal',1);
+  roadLabel(CONNECTORS[2],'West Rim Road',1);roadLabel(CONNECTORS[4],'East Rim Road',1);
+  roadLabel(CONNECTORS[6],'South Boulevard',1);
+
+  // Agg local tracks
+  ['alpha','beta','gamma','delta','central','uni'].forEach(k=>{
+    const fill=c(GM.road_minor,GM.night_road);const stroke=c(GM.road_minor_stroke,GM.night_road_stroke);
+    drawRoad(T[k],8,stroke,fill,null);
+  });
+
+  // Zone labels
+  AGGS.forEach(a=>drawZoneLabel(a));
+
+  // Buildings
+  AGGS.forEach(a=>{
+    if(a.isUni)return;
+    for(let i=0;i<5;i++){
+      const ang=i*(Math.PI*2/5)+.4;
+      const bx=a.cx+Math.cos(ang)*a.r*.52,by=a.cy+Math.sin(ang)*a.r*.52;
+      const sz=7+i%3*3;
+      drawBuilding(bx,by,sz,sz,false);
+    }
+  });
+  ALL_HOUSES.forEach(h=>drawBuilding(h.x,h.y,8,6.5,false));
+  UNI_BLDGS.forEach(b=>drawBuilding(b.x,b.y,b.w,b.h,true));
+
+  // F1 corner markers & labels
+  DRIFT_CORNERS.forEach(dc=>drawCornerMarker(dc));
+  F1_CORNERS.forEach(c=>{drawCornerMarker(c);drawF1Label(c);});
+
+  // Cars
+  cars.filter(c=>!c.isF1).forEach(c=>c.draw(ctx));
+  cars.filter(c=>c.isF1).forEach(c=>c.draw(ctx));
+
+  // Traffic lights
+  NODES.forEach(n=>drawTL(n));
+
+  // Zone pins for agglomerations
+  AGGS.forEach(a=>{if(vs(7)>4)drawPin(a.cx,a.cy-a.r-5,a.isUni?GM.uni:a.color,'');});
+  // F1 circuit pin
+  drawPin(500,640,GM.f1_kerb_r,'DC Grand Prix Circuit');
+
+  drawCompass();
+
+  if(frameCount%6===0)updateUI();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(ts=>{lastTime=ts;requestAnimationFrame(loop);});
+</script>
+</body>
+</html>

@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRIFT CITY — ASN-9 GEOSPATIAL COMMAND</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=DM+Mono:wght@300;400;500&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       DRIFT CITY — ASN-9 COMMAND  |  Professional UI v2
+    ═══════════════════════════════════════════════════════════ */
+    :root {
+      /* Backgrounds */
+      --bg0: #04070a;
+      --bg1: #070c11;
+      --bg2: #0a1018;
+      --bg3: #0e1520;
+
+      /* Panels */
+      --panel-bg:   rgba(5,9,14,0.96);
+      --panel-card: rgba(10,16,24,0.85);
+
+      /* Borders */
+      --border-dim:  rgba(0,200,230,0.10);
+      --border-mid:  rgba(0,200,230,0.20);
+      --border-neon: rgba(57,255,20,0.45);
+
+      /* Text */
+      --t1: #dde6ee;   /* primary */
+      --t2: #6e8499;   /* secondary */
+      --t3: #3a5060;   /* tertiary/dim */
+
+      /* Accents */
+      --neon:      #39ff14;
+      --neon-dim:  #1a7a06;
+      --neon-glow: rgba(57,255,20,0.22);
+      --cyan:      #00d4f5;
+      --cyan-glow: rgba(0,212,245,0.18);
+      --amber:     #ffa520;
+      --red:       #ff3a3a;
+      --orange:    #ff6200;
+
+      /* Type */
+      --FHD:   'Bebas Neue',    sans-serif;
+      --FMONO: 'DM Mono',       monospace;
+      --FDATA: 'Rajdhani',      sans-serif;
+      --chrome:    #6e8499;
+      --chrome-lt: #a8bfcf;
+      --steel:     #1a2530;
+      --steel-lt:  #253545;
+      --white:     #dde6ee;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg0);
+      color: var(--t1);
+      font-family: var(--FMONO);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--neon); color: #000; }
+
+    /* ── SCROLLBARS ────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 2px; }
+
+    /* ══════════════════════════════════════════════════════════
+       MAP
+    ══════════════════════════════════════════════════════════ */
+    #map { position: absolute; inset: 0; z-index: 1; }
+    .leaflet-container { background: #03060a !important; }
+
+    /* Zoom controls */
+    .leaflet-control-zoom {
+      border: 1px solid var(--border-mid) !important;
+      border-radius: 4px !important;
+      margin-left: 278px !important;
+      margin-top: 100px !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+      overflow: hidden;
+    }
+    .leaflet-control-zoom a {
+      background: var(--bg2) !important;
+      color: var(--cyan) !important;
+      border-bottom: 1px solid var(--border-dim) !important;
+      font-family: var(--FDATA) !important;
+      font-weight: 600 !important;
+      line-height: 28px !important;
+      width: 28px !important;
+      height: 28px !important;
+      font-size: 1rem !important;
+      transition: background .15s !important;
+    }
+    .leaflet-control-zoom a:hover {
+      background: var(--bg3) !important;
+      color: var(--neon) !important;
+    }
+    .leaflet-control-attribution { display: none !important; }
+
+    /* ══════════════════════════════════════════════════════════
+       TAB BAR
+    ══════════════════════════════════════════════════════════ */
+    #map-tab-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0; height: 38px;
+      z-index: 1100;
+      background: linear-gradient(90deg, #000 0%, #030810 100%);
+      border-bottom: 1px solid rgba(0,212,245,0.25);
+      display: flex;
+      align-items: stretch;
+      padding: 0;
+    }
+    #map-tab-bar a, #map-tab-bar span {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 0 20px; height: 38px;
+      font-family: var(--FMONO); font-size: .6rem;
+      letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
+      color: var(--t3);
+      border-right: 1px solid rgba(255,255,255,0.04);
+      transition: color .2s, background .2s;
+      cursor: pointer;
+    }
+    #map-tab-bar a:first-child { border-left: none; }
+    #map-tab-bar a:hover { color: var(--cyan); background: rgba(0,212,245,0.04); }
+    #map-tab-bar a.map-tab-active {
+      color: var(--neon);
+      background: rgba(57,255,20,0.06);
+      border-bottom: 2px solid var(--neon);
+    }
+    #map-tab-bar .tab-home { margin-left: auto; }
+
+    /* ══════════════════════════════════════════════════════════
+       HUD PANELS — Glass + Corner Brackets
+    ══════════════════════════════════════════════════════════ */
+    .hud {
+      position: absolute;
+      z-index: 1000;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-dim);
+      backdrop-filter: blur(14px) saturate(1.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    /* ── TOP BAR ────────────────────────────────────────────── */
+    #hud-top {
+      top: 38px; left: 0; right: 0; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      border-left: none; border-right: none; border-top: none;
+      border-bottom: 1px solid var(--border-dim);
+      background: linear-gradient(180deg, rgba(8,14,22,0.99) 0%, rgba(6,10,16,0.96) 100%);
+    }
+    .top-logo {
+      font-family: var(--FHD);
+      font-size: 1.3rem;
+      letter-spacing: .18em;
+      color: var(--neon);
+      text-shadow: 0 0 20px var(--neon-glow);
+    }
+    .top-logo span { color: var(--chrome-lt); }
+
+    .top-center {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      height: 100%;
+    }
+    .top-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 22px;
+      border-right: 1px solid var(--border-dim);
+      position: relative;
+      min-width: 80px;
+    }
+    .top-stat:first-child { border-left: 1px solid var(--border-dim); }
+    .top-stat::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 20%; right: 20%;
+      height: 2px;
+      background: var(--neon);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .top-stat:hover::after { opacity: 0.6; }
+    .top-stat-val {
+      font-family: var(--FHD);
+      font-size: 1.55rem;
+      color: var(--neon);
+      line-height: 1;
+      letter-spacing: .04em;
+    }
+    .top-stat-lbl {
+      font-family: var(--FMONO);
+      font-size: .48rem;
+      color: var(--t3);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+    .top-right { display: flex; align-items: center; gap: 12px; }
+    .asn9-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--FMONO); font-size: .58rem;
+      color: var(--neon); letter-spacing: .1em;
+      background: rgba(57,255,20,0.06);
+      border: 1px solid rgba(57,255,20,0.2);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+    .asn9-pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--neon);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--neon);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    .city-tabs { display: flex; gap: 4px; }
+    .city-tab {
+      font-family: var(--FMONO); font-size: .58rem; letter-spacing: .1em;
+      padding: 5px 14px;
+      border: 1px solid var(--border-dim);
+      border-radius: 3px;
+      background: transparent; color: var(--t2); cursor: pointer;
+      text-transform: uppercase; transition: all .2s;
+    }
+    .city-tab.active {
+      border-color: var(--neon);
+      color: var(--neon);
+      background: rgba(57,255,20,0.07);
+      box-shadow: 0 0 12px rgba(57,255,20,0.12);
+    }
+    .city-tab:hover { color: var(--neon); border-color: rgba(57,255,20,0.3); }
+
+    /* ── LEFT PANEL ─────────────────────────────────────────── */
+    #hud-left {
+      top: 94px; left: 0; width: 272px; bottom: 32px;
+      border-left: none; border-top: none; border-bottom: none;
+      overflow-y: auto; padding: 16px 14px;
+    }
+    /* ── RIGHT PANEL ────────────────────────────────────────── */
+    #hud-right {
+      top: 94px; right: 0; width: 248px; bottom: 32px;
+      border-right: none; border-top: none; border-bottom: none;
+      overflow-y: auto; padding: 16px 14px;
+    }
+
+    /* ── BOTTOM BAR ─────────────────────────────────────────── */
+    #hud-bottom {
+      bottom: 0; left: 0; right: 0; height: 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: none; border-left: none; border-right: none;
+      border-top: 1px solid var(--border-dim);
+      background: linear-gradient(0deg, rgba(4,7,10,0.98) 0%, rgba(6,10,16,0.94) 100%);
+    }
+    .bot-text { font-family: var(--FMONO); font-size: .5rem; color: var(--t3); letter-spacing: .09em; text-transform: uppercase; }
+    .bot-text span { color: var(--neon); }
+    .bot-text.alert span { color: var(--red); }
+
+    /* ══════════════════════════════════════════════════════════
+       PANEL SECTIONS
+    ══════════════════════════════════════════════════════════ */
+    .psec {
+      margin-bottom: 20px;
+      padding-bottom: 2px;
+    }
+    .psec-title {
+      font-family: var(--FMONO);
+      font-size: .54rem;
+      color: var(--cyan);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      padding: 0 0 6px 8px;
+      border-bottom: 1px solid var(--border-dim);
+      border-left: 2px solid var(--cyan);
+      position: relative;
+    }
+    .pnote {
+      font-family: var(--FMONO);
+      font-size: .57rem;
+      color: var(--t2);
+      letter-spacing: .05em;
+      line-height: 1.7;
+    }
+    .pnote span, .pnote b { color: var(--neon); font-weight: 400; }
+    .pnote .red   { color: var(--red); }
+    .pnote .amber { color: var(--amber); }
+
+    /* ══════════════════════════════════════════════════════════
+       LAYER TOGGLES
+    ══════════════════════════════════════════════════════════ */
+    .ltrow {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 8px;
+      margin-bottom: 2px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .ltrow:hover { background: rgba(0,212,245,0.04); }
+    .ltdot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .ltlabel {
+      font-family: var(--FMONO);
+      font-size: .58rem;
+      color: var(--t1);
+      letter-spacing: .04em;
+      flex: 1;
+    }
+    /* Pill toggle */
+    .ltsw {
+      width: 30px; height: 16px;
+      background: var(--steel);
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      position: relative;
+      flex-shrink: 0;
+      transition: background .2s, border-color .2s;
+    }
+    .ltsw.on {
+      background: rgba(57,255,20,0.18);
+      border-color: rgba(57,255,20,0.4);
+    }
+    .ltsw::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 10px; height: 10px;
+      background: var(--t3);
+      border-radius: 50%;
+      transition: transform .2s, background .2s;
+    }
+    .ltsw.on::after {
+      transform: translateX(14px);
+      background: var(--neon);
+      box-shadow: 0 0 6px var(--neon-glow);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       BUTTONS
+    ══════════════════════════════════════════════════════════ */
+    .tbtn {
+      width: 100%;
+      font-family: var(--FMONO);
+      font-size: .58rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--neon);
+      background: rgba(57,255,20,0.04);
+      border: 1px solid rgba(57,255,20,0.18);
+      border-radius: 3px;
+      padding: 9px 12px;
+      cursor: pointer;
+      text-align: left;
+      margin-bottom: 5px;
+      transition: background .18s, border-color .18s, box-shadow .18s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tbtn:hover {
+      background: rgba(57,255,20,0.09);
+      border-color: rgba(57,255,20,0.5);
+      box-shadow: 0 0 12px rgba(57,255,20,0.1);
+    }
+    .tbtn.active {
+      background: rgba(57,255,20,0.13);
+      border-color: var(--neon);
+      box-shadow: 0 0 16px rgba(57,255,20,0.18), inset 0 1px 0 rgba(57,255,20,0.08);
+    }
+    .tbtn.danger {
+      color: var(--red);
+      background: rgba(255,58,58,0.04);
+      border-color: rgba(255,58,58,0.2);
+    }
+    .tbtn.danger:hover {
+      background: rgba(255,58,58,0.1);
+      border-color: rgba(255,58,58,0.5);
+    }
+    .tbtn.lockdown-active {
+      color: var(--red);
+      background: rgba(255,58,58,0.15);
+      border-color: var(--red);
+      animation: flash .5s ease-in-out infinite;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RIGHT PANEL — METRIC CARDS
+    ══════════════════════════════════════════════════════════ */
+    .m-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .m-card {
+      background: var(--panel-card);
+      border: 1px solid var(--border-dim);
+      border-radius: 4px;
+      padding: 9px 10px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .m-card:hover { border-color: var(--border-mid); }
+    .m-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.3;
+    }
+    .m-card.wide { grid-column: span 2; }
+    .m-card.accent-neon { border-color: rgba(57,255,20,0.2); }
+    .m-card.accent-neon::before { background: linear-gradient(90deg, transparent, var(--neon), transparent); opacity: 0.4; }
+    .m-card.accent-amber { border-color: rgba(255,165,32,0.2); }
+    .m-card.accent-red   { border-color: rgba(255,58,58,0.2); }
+    .m-val {
+      font-family: var(--FHD);
+      font-size: 1.45rem;
+      line-height: 1;
+      letter-spacing: .02em;
+      color: var(--neon);
+    }
+    .m-val.cyan  { color: var(--cyan); }
+    .m-val.amber { color: var(--amber); }
+    .m-val.red   { color: var(--red); }
+    .m-val.white { color: var(--t1); }
+    .m-lbl {
+      font-family: var(--FMONO);
+      font-size: .46rem;
+      color: var(--t3);
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+    /* Pulse on update */
+    @keyframes mPulse { 0%{opacity:1} 30%{opacity:.4} 100%{opacity:1} }
+    .m-val.updated { animation: mPulse .4s ease-out; }
+
+    /* Legacy srow (kept for challenge panel) */
+    .srow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border-dim); }
+    .srow:last-child { border-bottom: none; }
+    .slbl { font-family: var(--FMONO); font-size: .52rem; color: var(--t2); letter-spacing: .07em; text-transform: uppercase; }
+    .sval { font-family: var(--FDATA); font-size: 1rem; font-weight: 600; color: var(--neon); line-height: 1; }
+    .sval.amber { color: var(--amber); }
+    .sval.red   { color: var(--red); }
+
+    /* ══════════════════════════════════════════════════════════
+       FUEL TRACKER
+    ══════════════════════════════════════════════════════════ */
+    .fuel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+    .fuel-lbl { font-family: var(--FMONO); font-size: .5rem; color: var(--t3); letter-spacing: .1em; text-transform: uppercase; }
+    .fuel-num { font-family: var(--FHD); font-size: 1.1rem; color: var(--amber); letter-spacing: .04em; }
+    .fuel-track {
+      background: var(--steel);
+      height: 6px;
+      border-radius: 3px;
+      position: relative;
+      margin-bottom: 6px;
+      overflow: hidden;
+    }
+    .fuel-track::before {
+      /* segmented tick marks */
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(90deg, transparent 0%, transparent calc(25% - 1px), rgba(0,0,0,0.4) calc(25% - 1px), rgba(0,0,0,0.4) 25%);
+      z-index: 2;
+    }
+    .fuel-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--amber), #ffd060);
+      box-shadow: 0 0 8px rgba(255,165,32,0.35);
+      transition: width 1.2s ease;
+      position: relative; z-index: 1;
+    }
+    .fuel-fill.full {
+      background: linear-gradient(90deg, var(--neon), #a0ff60);
+      box-shadow: 0 0 8px var(--neon-glow);
+    }
+    .fuel-fill.low {
+      background: var(--red);
+      box-shadow: 0 0 8px rgba(255,58,58,0.4);
+      animation: flash 1.2s ease-in-out infinite;
+    }
+    .fuel-ticks { display: flex; justify-content: space-between; }
+    .fuel-tick { font-family: var(--FMONO); font-size: .44rem; color: var(--t3); letter-spacing: .05em; }
+
+    /* ══════════════════════════════════════════════════════════
+       LEAFLET POPUPS & TOOLTIPS
+    ══════════════════════════════════════════════════════════ */
+    .leaflet-popup-content-wrapper {
+      background: rgba(6,10,16,0.97) !important;
+      border: 1px solid var(--border-mid) !important;
+      border-radius: 6px !important;
+      color: var(--t1) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 20px var(--cyan-glow) !important;
+      backdrop-filter: blur(10px) !important;
+    }
+    .leaflet-popup-tip { background: rgba(6,10,16,0.97) !important; }
+    .leaflet-popup-close-button { color: var(--t2) !important; font-size: 16px !important; }
+    .leaflet-popup-close-button:hover { color: var(--cyan) !important; }
+    .leaflet-popup-content { margin: 0 !important; }
+
+    .pbox { padding: 14px 16px; min-width: 180px; }
+    .pbox-title {
+      font-family: var(--FHD);
+      font-size: 1.05rem;
+      letter-spacing: .08em;
+      color: var(--cyan);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .pbox-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-family: var(--FMONO); font-size: .56rem;
+      color: var(--t2); letter-spacing: .04em;
+      line-height: 1; padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .pbox-row:last-child { border-bottom: none; }
+    .pbox-row span  { color: var(--t1); }
+    .pbox-row .red  { color: var(--red); }
+    .pbox-row .amber{ color: var(--amber); }
+
+    .leaflet-tooltip {
+      background: rgba(5,9,14,0.95) !important;
+      border: 1px solid var(--border-mid) !important;
+      border-radius: 3px !important;
+      color: var(--chrome-lt) !important;
+      font-family: var(--FMONO) !important;
+      font-size: .56rem !important;
+      letter-spacing: .06em !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+      padding: 4px 9px !important;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       CUSTOM MAP MARKERS
+    ══════════════════════════════════════════════════════════ */
+    /* ASN-9 nodes */
+    .asn-marker { position: relative; width: 10px; height: 10px; }
+    .asn-core {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 6px var(--neon), 0 0 12px rgba(57,255,20,0.3);
+    }
+    .asn-ring {
+      position: absolute; top: -100%; left: -100%;
+      width: 300%; height: 300%; border-radius: 50%;
+      border: 1px solid var(--neon);
+      opacity: 0;
+      animation: mpulse 2.2s ease-out infinite;
+    }
+    .asn-ring.r2 { animation-delay: .8s; }
+
+    /* Drift corners — crosshair diamond */
+    .drift-marker {
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--amber);
+      transform: rotate(45deg);
+      background: rgba(255,165,32,0.08);
+      position: relative;
+    }
+    .drift-marker::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(255,165,32,0.3);
+    }
+
+    /* POI markers */
+    .heli-marker {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      box-shadow: 0 0 8px rgba(255,255,255,0.15);
+    }
+    .dcu-marker {
+      width: 22px; height: 22px;
+      border: 1.5px solid #9966ff;
+      border-radius: 4px;
+      background: rgba(153,102,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    .mfr-marker {
+      width: 22px; height: 22px;
+      border: 1.5px solid var(--orange);
+      border-radius: 4px;
+      background: rgba(255,98,0,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+
+    /* Race trace markers */
+    .trace-start {
+      width: 14px; height: 14px;
+      background: radial-gradient(circle, var(--neon) 40%, transparent 100%);
+      box-shadow: 0 0 14px var(--neon-glow);
+      border-radius: 50%;
+    }
+    .trace-end {
+      width: 14px; height: 14px;
+      background: radial-gradient(circle, var(--red) 40%, transparent 100%);
+      box-shadow: 0 0 14px rgba(255,58,58,0.4);
+      border-radius: 50%;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       LOCKDOWN & HUD OVERLAYS
+    ══════════════════════════════════════════════════════════ */
+    #lockdown-overlay { position: absolute; inset: 0; z-index: 1900; pointer-events: none; display: none; }
+    #lockdown-overlay.active { display: block; animation: ldflash .6s ease-in-out 4; }
+    #lockdown-banner {
+      position: absolute; top: 94px; left: 50%; transform: translateX(-50%);
+      background: var(--red); color: #fff;
+      font-family: var(--FHD); font-size: 1.4rem; letter-spacing: .22em;
+      padding: 12px 40px; z-index: 2000; display: none; pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 30px rgba(255,58,58,0.5);
+    }
+    #lockdown-banner.active { display: block; animation: ldblink 1s ease-in-out infinite; }
+    #lockdown-timer {
+      position: absolute; top: 148px; left: 50%; transform: translateX(-50%);
+      font-family: var(--FHD); font-size: 2.4rem; color: var(--red);
+      z-index: 2000; display: none;
+      text-shadow: 0 0 24px rgba(255,58,58,0.6);
+      letter-spacing: .06em; pointer-events: none;
+    }
+    #lockdown-timer.active { display: block; }
+
+    #coord-bar {
+      position: absolute; bottom: 32px; left: 272px; z-index: 1000;
+      font-family: var(--FMONO); font-size: .5rem; color: var(--t3);
+      letter-spacing: .07em;
+      background: rgba(4,7,10,0.85);
+      padding: 3px 12px;
+      border-top: 1px solid var(--border-dim);
+      border-right: 1px solid var(--border-dim);
+    }
+
+    #trace-info-box {
+      position: absolute; bottom: 72px; left: 50%; transform: translateX(-50%);
+      background: rgba(4,7,10,0.97);
+      border: 1px solid var(--border-mid);
+      border-radius: 4px;
+      font-family: var(--FMONO); font-size: .6rem; color: var(--cyan);
+      letter-spacing: .08em; padding: 9px 20px; z-index: 1500; display: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    #trace-info-box.active { display: block; }
+
+    /* ══════════════════════════════════════════════════════════
+       RACE CHALLENGE
+    ══════════════════════════════════════════════════════════ */
+    #challenge-card {
+      display: none;
+      background: rgba(18,6,0,0.9);
+      border: 1px solid rgba(255,98,0,0.35);
+      border-radius: 4px;
+      padding: 14px;
+      margin-top: 8px;
+      box-shadow: 0 4px 20px rgba(255,98,0,0.1);
+    }
+    .cc-title  {
+      font-family: var(--FHD); font-size: 1.4rem;
+      letter-spacing: .08em; line-height: 1; margin-bottom: 10px;
+    }
+    .cc-label  {
+      font-family: var(--FMONO); font-size: .5rem;
+      color: var(--t3); letter-spacing: .14em; text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .cc-code   {
+      font-family: var(--FMONO); font-size: .6rem;
+      color: var(--orange); letter-spacing: .08em;
+      word-break: break-all; margin: 8px 0; padding: 9px 10px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,98,0,0.25);
+      border-radius: 3px;
+    }
+    .cc-row    {
+      display: flex; justify-content: space-between;
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-family: var(--FMONO); font-size: .56rem;
+    }
+    .cc-row:last-of-type { border-bottom: none; }
+    .cc-key    { color: var(--t3); letter-spacing: .06em; }
+    .cc-val    { color: var(--t1); }
+    .cc-copy   {
+      width: 100%; margin-top: 10px;
+      font-family: var(--FMONO); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--orange);
+      background: rgba(255,98,0,0.07);
+      border: 1px solid rgba(255,98,0,0.3);
+      border-radius: 3px;
+      padding: 9px; cursor: pointer; transition: background .2s;
+    }
+    .cc-copy:hover { background: rgba(255,98,0,0.14); }
+    .cc-undo   {
+      width: 100%; margin-top: 4px;
+      font-family: var(--FMONO); font-size: .56rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--t2); background: transparent;
+      border: 1px solid var(--border-dim);
+      border-radius: 3px;
+      padding: 7px; cursor: pointer; transition: background .2s;
+    }
+    .cc-undo:hover { background: rgba(255,255,255,0.03); }
+
+    #challenge-hud {
+      position: absolute; bottom: 72px; left: 50%; transform: translateX(-50%);
+      background: rgba(18,4,0,0.97);
+      border: 1px solid rgba(255,98,0,0.5);
+      border-radius: 4px;
+      font-family: var(--FMONO); font-size: .6rem; color: var(--orange);
+      letter-spacing: .1em; padding: 9px 22px; z-index: 1500;
+      display: none; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(255,98,0,0.2);
+    }
+    #challenge-hud.active { display: block; }
+
+    /* ══════════════════════════════════════════════════════════
+       KEYFRAMES
+    ══════════════════════════════════════════════════════════ */
+    @keyframes blink   { 0%,100%{opacity:1} 50%{opacity:.25} }
+    @keyframes flash   { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes mpulse  { 0%{opacity:.7;width:100%;height:100%;top:0;left:0} 100%{opacity:0;width:400%;height:400%;top:-150%;left:-150%} }
+    @keyframes ldflash { 0%,100%{background:transparent} 50%{background:rgba(255,58,58,0.14)} }
+    @keyframes ldblink { 0%,100%{opacity:1} 50%{opacity:.6} }
+    @keyframes roadFlow{ from{stroke-dashoffset:36} to{stroke-dashoffset:0} }
+  </style>
+</head>
+<body>
+
+<!-- ── MAP TAB BAR ──────────────────────────────────────────── -->
+<div id="map-tab-bar">
+  <a href="map.html" class="map-tab-active">⬡ ASN-9 COMMAND</a>
+  <a href="drift-city-googlemaps.html">📍 DRIFT MAPS</a>
+  <a href="index.html" class="tab-home">↩ MAIN SITE</a>
+</div>
+
+<!-- ── LOCKDOWN OVERLAYS ────────────────────────────────────── -->
+<div id="lockdown-overlay"></div>
+<div id="lockdown-banner">⚠ CITY LOCKDOWN — 24H TOTAL FREEZE ⚠</div>
+<div id="lockdown-timer"></div>
+<div id="trace-info-box"></div>
+<div id="challenge-hud">⚡ RACE CHALLENGE ACTIVE — CLICK INTERSECTIONS TO TRACE YOUR ROUTE</div>
+
+<!-- ── TOP HUD ──────────────────────────────────────────────── -->
+<div class="hud" id="hud-top">
+  <div class="top-logo">DRIFT<span>CITY</span> <span style="font-size:.7rem;color:var(--t3);letter-spacing:.1em">// ASN-9 GEOSPATIAL COMMAND</span></div>
+  <div class="top-center">
+    <div class="top-stat"><div class="top-stat-val" id="ht-speed">88</div><div class="top-stat-lbl">KM/H AVG</div></div>
+    <div class="top-stat"><div class="top-stat-val" style="color:var(--cyan)">847</div><div class="top-stat-lbl">ASN-9 NODES</div></div>
+    <div class="top-stat"><div class="top-stat-val" id="ht-green">819</div><div class="top-stat-lbl">NODES GREEN</div></div>
+    <div class="top-stat"><div class="top-stat-val" style="color:var(--t1)" id="ht-veh">4,812</div><div class="top-stat-lbl">VEHICLES</div></div>
+  </div>
+  <div class="top-right">
+    <div class="city-tabs">
+      <button class="city-tab active" id="tab-nevada" onclick="switchCity('nevada')">DC-NV</button>
+      <button class="city-tab"        id="tab-saudi"  onclick="switchCity('saudi')">DC-SA</button>
+    </div>
+    <div class="asn9-pill">ASN-9 ONLINE</div>
+  </div>
+</div>
+
+<!-- ── LEFT PANEL ───────────────────────────────────────────── -->
+<div class="hud" id="hud-left">
+
+  <div class="psec">
+    <div class="psec-title">MAP LAYERS</div>
+    <div class="ltrow" onclick="toggleLayer('greenWave',this)">
+      <div class="ltdot" style="background:#39ff14;box-shadow:0 0 5px #39ff14"></div>
+      <span class="ltlabel">Green Wave Arterials</span>
+      <div class="ltsw on" id="sw-greenWave"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('asnNodes',this)">
+      <div class="ltdot" style="background:#39ff14"></div>
+      <span class="ltlabel">ASN-9 Traffic Nodes</span>
+      <div class="ltsw on" id="sw-asnNodes"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('driftCorners',this)">
+      <div class="ltdot" style="background:#ffaa00;box-shadow:0 0 5px #ffaa00"></div>
+      <span class="ltlabel">Drift Corners — $400 Zone</span>
+      <div class="ltsw on" id="sw-driftCorners"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('residences',this)">
+      <div class="ltdot" style="background:#00aaff"></div>
+      <span class="ltlabel">Residential §14 + Sensor</span>
+      <div class="ltsw on" id="sw-residences"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('helipads',this)">
+      <div class="ltdot" style="background:#fff"></div>
+      <span class="ltlabel">Helicopter Pads</span>
+      <div class="ltsw on" id="sw-helipads"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('dcu',this)">
+      <div class="ltdot" style="background:#aa44ff"></div>
+      <span class="ltlabel">DCU Research Hubs</span>
+      <div class="ltsw on" id="sw-dcu"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('mfr',this)">
+      <div class="ltdot" style="background:#ff6600"></div>
+      <span class="ltlabel">Manufacturer Centers</span>
+      <div class="ltsw on" id="sw-mfr"></div>
+    </div>
+    <div class="ltrow" onclick="toggleLayer('urbanCells',this)">
+      <div class="ltdot" style="background:rgba(57,255,20,0.6);border:1px solid #39ff14;border-radius:50%"></div>
+      <span class="ltlabel">Urban Cell Clusters</span>
+      <div class="ltsw on" id="sw-urbanCells"></div>
+    </div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">AI RACE TRACE — GPC</div>
+    <button class="tbtn" id="btn-trace" onclick="toggleRaceTrace()">⊕ GENERATE RACE TRACE</button>
+    <div class="pnote" id="trace-note">CLICK ABOVE TO ACTIVATE.<br>SELECT START → SELECT END.<br>GPC AI CALCULATES OPTIMAL<br>VELOCITY ROUTE IN REAL TIME.</div>
+    <button class="tbtn" id="btn-clear-trace" onclick="clearRaceTrace()" style="display:none;margin-top:4px">✕ CLEAR TRACE</button>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">⚡ RACE CHALLENGE — MULTI-WAYPOINT</div>
+    <button class="tbtn" id="btn-challenge" onclick="toggleChallenge()">⚡ TRACE RACE CHALLENGE</button>
+    <button class="tbtn" id="btn-undo-wp" onclick="undoWaypoint()" style="display:none">↩ UNDO LAST WAYPOINT</button>
+    <button class="tbtn" id="btn-lock-challenge" onclick="lockChallenge()" style="display:none;border-color:#ff4400;color:#ff4400">🏁 LOCK &amp; ISSUE CHALLENGE</button>
+    <button class="tbtn" id="btn-clear-challenge" onclick="clearChallenge()" style="display:none">✕ CLEAR ROUTE</button>
+    <div class="pnote" id="challenge-note">Trace a multi-waypoint route<br>by clicking intersections.<br>Issue a challenge code for<br>any other resident to race.</div>
+    <div id="challenge-card"></div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">PERFORMANCE FILTER</div>
+    <button class="tbtn" id="btn-perf" onclick="togglePerfFilter()">◈ EV / SUPERCAR ONLY MODE</button>
+    <div class="pnote" id="perf-note">MODE: <span>ALL VEHICLES</span><br>Activating restricts arterials<br>to 0–100 km/h &lt;5s vehicles only.</div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">LOCKDOWN SIMULATOR</div>
+    <button class="tbtn danger" id="btn-lockdown" onclick="triggerLockdown()">⚠ TRIGGER CITY LOCKDOWN</button>
+    <div class="pnote" id="lockdown-note">STATUS: <span>CITY OPERATIONAL</span><br>Simulates 24H freeze caused<br>by collision or stall event.<br>All 847 nodes go red.</div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">THE ASPHALT CREED</div>
+    <div class="pnote">
+      <span>DRIFT CITY</span> — PRIVATE MUNICIPALITY<br>
+      "Drift City is not for everyone.<br>That is entirely the point."<br><br>
+      "The car is not a tool. It is a way of life."<br><br>
+      Residents: <span>4,812</span> licensed drivers<br>
+      Avg speed: <span>88 km/h</span> citywide<br><br>
+      <span class="red">NO PUBLIC ACCESS.<br>Race license mandatory.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── RIGHT PANEL ──────────────────────────────────────────── -->
+<div class="hud" id="hud-right">
+
+  <div class="psec">
+    <div class="psec-title">LIVE CITY TELEMETRY</div>
+    <div class="m-grid">
+      <div class="m-card accent-neon">
+        <div class="m-val" id="r-speed">88</div>
+        <div class="m-lbl">KM/H AVG</div>
+      </div>
+      <div class="m-card">
+        <div class="m-val cyan" id="r-green">819</div>
+        <div class="m-lbl">GREEN NODES</div>
+      </div>
+      <div class="m-card">
+        <div class="m-val white" id="r-veh">4,812</div>
+        <div class="m-lbl">VEHICLES ACTIVE</div>
+      </div>
+      <div class="m-card">
+        <div class="m-val" id="r-comply">96.2%</div>
+        <div class="m-lbl">DRIFT COMPLY</div>
+      </div>
+      <div class="m-card accent-amber">
+        <div class="m-val amber" id="r-tickets">14</div>
+        <div class="m-lbl">TICKETS TODAY</div>
+      </div>
+      <div class="m-card accent-red">
+        <div class="m-val red" id="r-bans">1</div>
+        <div class="m-lbl">BANS TODAY</div>
+      </div>
+      <div class="m-card wide">
+        <div class="m-val" id="r-ld" style="font-size:1rem;color:var(--neon)">CLEAR</div>
+        <div class="m-lbl">LOCKDOWN STATUS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">FUEL TRACKER — 200L / MONTH MANDATE</div>
+    <div class="fuel-head">
+      <span class="fuel-lbl">CONSUMED THIS MONTH</span>
+      <span class="fuel-num" id="fuel-num">142 L</span>
+    </div>
+    <div class="fuel-track"><div class="fuel-fill" id="fuel-fill" style="width:71%"></div></div>
+    <div class="fuel-ticks">
+      <span class="fuel-tick">0</span><span class="fuel-tick">50</span>
+      <span class="fuel-tick">100</span><span class="fuel-tick">150</span>
+      <span class="fuel-tick">200L✓</span>
+    </div>
+    <div class="pnote" style="margin-top:6px"><span id="fuel-status">58L remaining to mandate</span></div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">ASN-9 PREDICTIVE STAGING</div>
+    <div class="pnote">
+      Next cascade: <span id="cascade-time">—</span><br>
+      Pre-stage window: <span>90 seconds</span><br>
+      Lead vehicle: <span id="lead-speed">—</span><br>
+      Drift hold delay: <span>3.8 seconds</span>
+    </div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">CURRENT CITY</div>
+    <div class="pnote">
+      LOCATION: <span id="city-terrain">Nevada Desert</span><br>
+      CODE: <span id="city-code">DC-NV</span><br>
+      CENTRE: <span id="city-coords">36.90°N 116.50°W</span><br>
+      TERRAIN: <span id="city-terr-type">Mojave Dry Lake Basin</span><br>
+      ZONE: <span class="red">RESTRICTED</span>
+    </div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">URBAN CELL STATUS</div>
+    <div class="pnote" id="cluster-status-list">
+      <div id="cs-alpha" style="padding:5px 0;border-bottom:1px solid var(--steel)">ALPHA: <span>OPERATIONAL</span></div>
+      <div id="cs-beta"  style="padding:5px 0;border-bottom:1px solid var(--steel)">BETA: <span>OPERATIONAL</span></div>
+      <div id="cs-gamma" style="padding:5px 0">GAMMA: <span>OPERATIONAL</span></div>
+    </div>
+    <button class="tbtn danger" id="btn-cluster-ld" onclick="triggerClusterLockdown()" style="margin-top:8px">⚠ CLUSTER LOCKDOWN</button>
+    <div class="pnote" id="cluster-ld-note" style="margin-top:4px">Freezes one cell + roads for 24H.</div>
+  </div>
+
+  <div class="psec">
+    <div class="psec-title">RACE TRACE RESULT</div>
+    <div class="pnote" id="trace-result">
+      AWAITING TRACE GENERATION.<br>
+      Select two points on map<br>to calculate GPC route.
+    </div>
+  </div>
+
+  <div class="psec" id="challenge-stats-panel" style="display:none">
+    <div class="psec-title">⚡ CHALLENGE ROUTE STATS</div>
+    <div class="srow"><span class="slbl">WAYPOINTS</span><span class="sval" id="cs-wps">—</span></div>
+    <div class="srow"><span class="slbl">TOTAL DISTANCE</span><span class="sval" id="cs-dist">—</span></div>
+    <div class="srow"><span class="slbl">ETA AT 88 KM/H</span><span class="sval" id="cs-eta">—</span></div>
+    <div class="srow"><span class="slbl">DRIFT CORNERS</span><span class="sval amber" id="cs-corners">—</span></div>
+    <div class="srow"><span class="slbl">DIFFICULTY</span><span class="sval" id="cs-diff">—</span></div>
+    <div class="srow"><span class="slbl">NODES COVERED</span><span class="sval" id="cs-nodes">—</span></div>
+  </div>
+</div>
+
+<!-- ── BOTTOM BAR ────────────────────────────────────────────── -->
+<div class="hud" id="hud-bottom">
+  <span class="bot-text alert">⚠ <span>ANY CRIME IS A BAN.</span> SURVEILLANCE BY ASN-9.</span>
+  <span class="bot-text"><span>THE ASPHALT CREED</span> — "Drift City is not for everyone. That is entirely the point."</span>
+  <span class="bot-text"><span>MONTHLY TIRE REPLACEMENTS MANDATORY</span> — RESIDENCY BY RACE-LICENSE ONLY</span>
+</div>
+
+<!-- ── COORD BAR ─────────────────────────────────────────────── -->
+<div id="coord-bar">LAT: — | LNG: — | ZOOM: 13</div>
+
+<!-- ── MAP ──────────────────────────────────────────────────── -->
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════════
+// CITY DATA
+// ══════════════════════════════════════════════════════════════
+const CITIES = {
+  nevada: {
+    name: 'DC-NV', fullName: 'Drift City Nevada',
+    center: [36.90, -116.50], zoom: 13,
+    terrain: 'Nevada Desert', terrainType: 'Mojave Dry Lake Basin',
+    coordStr: '36.90°N 116.50°W',
+    nodes: {
+      N1:  { pos: [36.934, -116.545], name: 'North Gate' },
+      N2:  { pos: [36.934, -116.500], name: 'North Hub' },
+      N3:  { pos: [36.934, -116.455], name: 'North East' },
+      C1:  { pos: [36.900, -116.545], name: 'West Gate' },
+      C2:  { pos: [36.900, -116.500], name: 'Central Command' },
+      C3:  { pos: [36.900, -116.455], name: 'East Gate' },
+      S1:  { pos: [36.866, -116.545], name: 'South West' },
+      S2:  { pos: [36.866, -116.500], name: 'South Hub' },
+      S3:  { pos: [36.866, -116.455], name: 'South East' },
+      NW:  { pos: [36.917, -116.523], name: 'NW Bend' },
+      NE:  { pos: [36.917, -116.477], name: 'NE Bend' },
+      SW:  { pos: [36.883, -116.523], name: 'SW Chicane' },
+      SE:  { pos: [36.883, -116.477], name: 'SE Complex' },
+    },
+    arterials: [
+      { name: 'Apex Boulevard',   nodes: ['N1','NW','N2','NE','N3'], speed: 95, primary: true },
+      { name: 'Center Straight',  nodes: ['C1','C2','C3'],            speed: 88, primary: true },
+      { name: 'South Ring',       nodes: ['S1','SW','S2','SE','S3'],  speed: 82, primary: true },
+      { name: 'Slipstream Ave',   nodes: ['N2','C2','S2'],            speed: 102, primary: true },
+      { name: 'West Corridor',    nodes: ['N1','C1','S1'],            speed: 76, primary: false },
+      { name: 'East Corridor',    nodes: ['N3','C3','S3'],            speed: 79, primary: false },
+      { name: 'Torque Diagonal',  nodes: ['N1','NW','C2','SE','S3'],  speed: 91, primary: true },
+      { name: 'Oversteer Loop',   nodes: ['NW','N2','NE','C3','SE','S2','SW','C1','NW'], speed: 86, primary: false },
+    ],
+    driftCorners: [
+      { pos: [36.934,-116.500], name: 'Apex Hairpin',   angle: 25, compliance: 94.2 },
+      { pos: [36.900,-116.500], name: 'Central Cross',  angle: 30, compliance: 97.1 },
+      { pos: [36.866,-116.500], name: 'South Sweeper',  angle: 25, compliance: 93.8 },
+      { pos: [36.917,-116.523], name: 'NW Drift Gate',  angle: 35, compliance: 91.5 },
+      { pos: [36.917,-116.477], name: 'NE Complex',     angle: 28, compliance: 95.3 },
+      { pos: [36.883,-116.523], name: 'SW Chicane',     angle: 40, compliance: 89.7 },
+      { pos: [36.883,-116.477], name: 'SE Entry',       angle: 32, compliance: 96.0 },
+      { pos: [36.900,-116.545], name: 'West Turn',      angle: 25, compliance: 98.2 },
+      { pos: [36.900,-116.455], name: 'East Exit',      angle: 27, compliance: 97.6 },
+    ],
+    residences: [
+      { pos: [36.910,-116.530], name: 'Estate Vesuvio',     cars: 30 },
+      { pos: [36.895,-116.485], name: 'Estate Monza',       cars: 24 },
+      { pos: [36.875,-116.510], name: 'Estate Mugello',     cars: 30 },
+      { pos: [36.918,-116.465], name: 'Estate Imola',       cars: 18 },
+      { pos: [36.885,-116.540], name: 'Estate Nürburgring', cars: 30 },
+    ],
+    helipads: [
+      { pos: [36.942,-116.500], name: 'North Helipad',    type: 'Visitor Access' },
+      { pos: [36.858,-116.500], name: 'South Helipad',    type: 'Emergency / Evacuation' },
+      { pos: [36.900,-116.458], name: 'East Helipad',     type: 'Stalled Vehicle Lift Zone' },
+    ],
+    dcuHubs: [
+      { pos: [36.906,-116.490], name: 'DCU Atmospheric Lab',   dept: 'Air Purification' },
+      { pos: [36.894,-116.512], name: 'DCU Neural Architecture',dept: 'ASN-9 Development' },
+    ],
+    mfr: [
+      { pos: [36.914,-116.514], name: 'Ferrari Service NV',       brand: 'FERRARI' },
+      { pos: [36.888,-116.490], name: 'Koenigsegg Technical Hub',  brand: 'KOENIGSEGG' },
+      { pos: [36.912,-116.474], name: 'Lamborghini Desert Hub',    brand: 'LAMBORGHINI' },
+    ],
+    urbanCells: [
+      { pos: [36.910,-116.522], name: 'Alpha Cell',  mansions: 12, lockdown: false, interior: 'Farmers Market + Mall' },
+      { pos: [36.876,-116.479], name: 'Beta Cell',   mansions: 15, lockdown: false, interior: 'Jogging Track + Social Hub' },
+      { pos: [36.924,-116.466], name: 'Gamma Cell',  mansions: 10, lockdown: false, interior: 'Farmers Market + Park' },
+    ],
+  },
+
+  saudi: {
+    name: 'DC-SA', fullName: 'Drift City Saudi',
+    center: [22.80, 51.20], zoom: 13,
+    terrain: 'Arabian Desert', terrainType: 'Rub al-Khali Basin',
+    coordStr: '22.80°N 51.20°E',
+    nodes: {
+      N1:  { pos: [22.834, 51.155], name: 'North Gate' },
+      N2:  { pos: [22.834, 51.200], name: 'North Hub' },
+      N3:  { pos: [22.834, 51.245], name: 'North East' },
+      C1:  { pos: [22.800, 51.155], name: 'West Gate' },
+      C2:  { pos: [22.800, 51.200], name: 'Central Command' },
+      C3:  { pos: [22.800, 51.245], name: 'East Gate' },
+      S1:  { pos: [22.766, 51.155], name: 'South West' },
+      S2:  { pos: [22.766, 51.200], name: 'South Hub' },
+      S3:  { pos: [22.766, 51.245], name: 'South East' },
+      NW:  { pos: [22.817, 51.178], name: 'NW Dune Bend' },
+      NE:  { pos: [22.817, 51.222], name: 'NE Desert Sweep' },
+      SW:  { pos: [22.783, 51.178], name: 'SW Sand Chicane' },
+      SE:  { pos: [22.783, 51.222], name: 'SE Dune Exit' },
+    },
+    arterials: [
+      { name: 'Sheikh Drift Blvd', nodes: ['N1','NW','N2','NE','N3'], speed: 98, primary: true },
+      { name: 'Desert Straight',   nodes: ['C1','C2','C3'],            speed: 88, primary: true },
+      { name: 'Dune Ring',         nodes: ['S1','SW','S2','SE','S3'],  speed: 84, primary: true },
+      { name: 'Meridian Ave',      nodes: ['N2','C2','S2'],            speed: 105, primary: true },
+      { name: 'Western Corridor',  nodes: ['N1','C1','S1'],            speed: 74, primary: false },
+      { name: 'Eastern Corridor',  nodes: ['N3','C3','S3'],            speed: 77, primary: false },
+      { name: 'Sand Diagonal',     nodes: ['N1','NW','C2','SE','S3'],  speed: 93, primary: true },
+      { name: 'Oasis Loop',        nodes: ['NW','N2','NE','C3','SE','S2','SW','C1','NW'], speed: 87, primary: false },
+    ],
+    driftCorners: [
+      { pos: [22.834,51.200], name: 'Desert Apex',       angle: 28, compliance: 95.1 },
+      { pos: [22.800,51.200], name: 'Sand Sweeper',       angle: 35, compliance: 96.8 },
+      { pos: [22.766,51.200], name: 'Dune Hairpin',       angle: 25, compliance: 93.2 },
+      { pos: [22.817,51.178], name: 'NW Dune Gate',       angle: 32, compliance: 91.9 },
+      { pos: [22.817,51.222], name: 'NE Desert Complex',  angle: 29, compliance: 94.7 },
+      { pos: [22.783,51.178], name: 'SW Sand Chicane',    angle: 25, compliance: 97.3 },
+      { pos: [22.783,51.222], name: 'SE Dune Entry',      angle: 38, compliance: 90.5 },
+      { pos: [22.800,51.155], name: 'West Gate Turn',     angle: 27, compliance: 98.0 },
+      { pos: [22.800,51.245], name: 'East Approach',      angle: 30, compliance: 97.1 },
+    ],
+    residences: [
+      { pos: [22.812,51.178], name: 'Palace Al-Apex',  cars: 30 },
+      { pos: [22.795,51.222], name: 'Palace Al-Drift',  cars: 30 },
+      { pos: [22.820,51.215], name: 'Palace Al-Nimr',   cars: 24 },
+      { pos: [22.778,51.185], name: 'Palace Al-Saba',   cars: 18 },
+      { pos: [22.810,51.200], name: 'Palace Al-Rayan',  cars: 30 },
+    ],
+    helipads: [
+      { pos: [22.840,51.200], name: 'North Helipad',   type: 'Visitor Access' },
+      { pos: [22.760,51.200], name: 'South Helipad',   type: 'Emergency / Evacuation' },
+      { pos: [22.800,51.252], name: 'East Helipad',    type: 'Stalled Vehicle Lift Zone' },
+    ],
+    dcuHubs: [
+      { pos: [22.806,51.210], name: 'DCU Desert Atmospheric Lab', dept: 'Sand Filtration Research' },
+      { pos: [22.794,51.190], name: 'DCU Heat Engineering Lab',   dept: 'High-Temp ASN-9 Systems' },
+    ],
+    mfr: [
+      { pos: [22.815,51.190], name: 'Ferrari Desert Hub',          brand: 'FERRARI' },
+      { pos: [22.785,51.210], name: 'Lamborghini Arabia Hub',       brand: 'LAMBORGHINI' },
+      { pos: [22.808,51.232], name: 'Koenigsegg Desert Service',   brand: 'KOENIGSEGG' },
+    ],
+    urbanCells: [
+      { pos: [22.812,51.178], name: 'Alpha Cell',  mansions: 12, lockdown: false, interior: 'Farmers Market + Mall' },
+      { pos: [22.783,51.222], name: 'Beta Cell',   mansions: 15, lockdown: false, interior: 'Jogging Track + Souk' },
+      { pos: [22.820,51.215], name: 'Gamma Cell',  mansions: 10, lockdown: false, interior: 'Desert Garden + Social Hub' },
+    ],
+  },
+};
+
+// ── Road graph (shared node-ID topology) ─────────────────────
+const ROAD_GRAPH = {
+  N1: ['N2','C1','NW'],
+  N2: ['N1','N3','C2','NW','NE'],
+  N3: ['N2','C3','NE'],
+  C1: ['N1','C2','S1','NW','SW'],
+  C2: ['C1','C3','N2','S2','NW','NE','SW','SE'],
+  C3: ['C2','N3','S3','NE','SE'],
+  S1: ['C1','S2','SW'],
+  S2: ['S1','S3','C2','SW','SE'],
+  S3: ['S2','C3','SE'],
+  NW: ['N1','N2','C1','C2'],
+  NE: ['N2','N3','C2','C3'],
+  SW: ['C1','C2','S1','S2'],
+  SE: ['C2','C3','S2','S3'],
+};
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let map, currentCity = 'nevada';
+let layerGroups = {};
+let roadPolylines = [];
+let lockdownActive = false, lockdownInterval = null, lockdownSeconds = 86400;
+let perfFilterActive = false;
+let traceMode = null; // null | 'start' | 'done'
+let traceStart = null, traceEnd = null, traceLayer = null;
+let fuelLitres = 142;
+let animFrameId = null;
+
+// ══════════════════════════════════════════════════════════════
+// PURE FUNCTIONS (exported for tests via window)
+// ══════════════════════════════════════════════════════════════
+
+/** BFS shortest path between two node IDs */
+function bfsPath(start, end) {
+  if (start === end) return [start];
+  const queue = [[start, [start]]];
+  const visited = new Set([start]);
+  while (queue.length) {
+    const [cur, path] = queue.shift();
+    for (const nb of (ROAD_GRAPH[cur] || [])) {
+      if (!visited.has(nb)) {
+        const np = [...path, nb];
+        if (nb === end) return np;
+        visited.add(nb);
+        queue.push([nb, np]);
+      }
+    }
+  }
+  return null;
+}
+
+/** Find nearest node ID to a given {lat, lng} point */
+function nearestNode(lat, lng, city) {
+  const nodes = CITIES[city].nodes;
+  let nearest = null, minD = Infinity;
+  for (const [id, node] of Object.entries(nodes)) {
+    const dlat = node.pos[0] - lat, dlng = node.pos[1] - lng;
+    const d = dlat * dlat + dlng * dlng;
+    if (d < minD) { minD = d; nearest = id; }
+  }
+  return nearest;
+}
+
+/** Estimate travel time given distance (m) and speed (km/h) → seconds */
+function travelTime(distM, speedKmh) {
+  return Math.round(distM / (speedKmh / 3.6));
+}
+
+/** Calculate total route distance in metres given an array of [lat,lng] positions */
+function routeDistance(positions) {
+  let total = 0;
+  for (let i = 0; i < positions.length - 1; i++) {
+    const [a, b] = [positions[i], positions[i + 1]];
+    const R = 6371000;
+    const dLat = (b[0] - a[0]) * Math.PI / 180;
+    const dLng = (b[1] - a[1]) * Math.PI / 180;
+    const s = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * Math.PI / 180) * Math.cos(b[0] * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    total += R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+  }
+  return total;
+}
+
+/** Is EV compliant for Drift City arterials? */
+function isEvCompliant(zeroToHundred) { return zeroToHundred < 5; }
+
+/** Fuel mandate percentage (0–100), clamped */
+function fuelPct(litres, mandate = 200) { return Math.max(0, Math.min(100, Math.round(litres / mandate * 100))); }
+
+// Expose for unit tests
+window.__DC__ = { bfsPath, nearestNode, travelTime, routeDistance, isEvCompliant, fuelPct, CITIES, ROAD_GRAPH };
+
+// ══════════════════════════════════════════════════════════════
+// MAP INIT
+// ══════════════════════════════════════════════════════════════
+function initMap() {
+  const city = CITIES[currentCity];
+  map = L.map('map', {
+    center: city.center,
+    zoom: city.zoom,
+    zoomControl: true,
+    attributionControl: false,
+  });
+
+  // CartoDB Dark Matter — free, no API key
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    subdomains: 'abcd',
+  }).addTo(map);
+
+  map.on('mousemove', e => {
+    document.getElementById('coord-bar').textContent =
+      `LAT: ${e.latlng.lat.toFixed(4)} | LNG: ${e.latlng.lng.toFixed(4)} | ZOOM: ${map.getZoom()}`;
+  });
+
+  map.on('click', onMapClick);
+
+  buildAllLayers();
+  startAnimationLoop();
+}
+
+// ══════════════════════════════════════════════════════════════
+// LAYER BUILDERS
+// ══════════════════════════════════════════════════════════════
+function buildAllLayers() {
+  // Clean up
+  Object.values(layerGroups).forEach(g => g && map.removeLayer(g));
+  layerGroups = {};
+  roadPolylines = [];
+
+  const city = CITIES[currentCity];
+
+  layerGroups.greenWave    = buildGreenWave(city);
+  layerGroups.asnNodes     = buildAsnNodes(city);
+  layerGroups.driftCorners = buildDriftCorners(city);
+  layerGroups.residences   = buildResidences(city);
+  layerGroups.helipads     = buildHelipads(city);
+  layerGroups.dcu          = buildDcu(city);
+  layerGroups.mfr          = buildMfr(city);
+  layerGroups.urbanCells   = buildUrbanCells(city);
+
+  // Add all that are toggled on
+  Object.entries(layerGroups).forEach(([key, grp]) => {
+    const sw = document.getElementById('sw-' + key);
+    if (sw && sw.classList.contains('on')) map.addLayer(grp);
+  });
+}
+
+function buildGreenWave(city) {
+  const grp = L.layerGroup();
+
+  city.arterials.forEach(road => {
+    const coords = road.nodes.map(id => city.nodes[id].pos);
+    const neonColor = road.primary ? '#39ff14' : '#aaff00';
+    const roadW     = road.primary ? 14 : 8;
+    const lineW     = road.primary ? 3.5 : 2;
+
+    // ── 1. Asphalt road body (dark, wide) ──
+    L.polyline(coords, {
+      color: '#1a1a1a',
+      weight: roadW,
+      opacity: 1,
+      lineCap: 'round',
+      lineJoin: 'round',
+    }).addTo(grp);
+
+    // ── 2. Road edge markings (thin steel lines) ──
+    L.polyline(coords, {
+      color: '#3a3a3a',
+      weight: roadW + 2,
+      opacity: 0.6,
+      lineCap: 'butt',
+    }).addTo(grp);
+
+    // Bring body back on top
+    L.polyline(coords, {
+      color: '#161616',
+      weight: roadW,
+      opacity: 1,
+      lineCap: 'round',
+    }).addTo(grp);
+
+    // ── 3. Green-wave centre line (animated) ──
+    const pl = L.polyline(coords, {
+      color: neonColor,
+      weight: lineW,
+      opacity: 0.9,
+      dashArray: '18 8',
+      lineCap: 'square',
+    });
+    pl.bindTooltip(`${road.name} — ${road.speed} km/h`, { sticky: true });
+    pl.bindPopup(`
+      <div class="pbox">
+        <div class="pbox-title">${road.name}</div>
+        <div class="pbox-row">SPEED LIMIT: <span>${road.speed} km/h</span></div>
+        <div class="pbox-row">TYPE: <span>${road.primary ? 'Primary Arterial' : 'Secondary Corridor'}</span></div>
+        <div class="pbox-row">GREEN WAVE: <span>${road.primary ? 'ACTIVE' : 'PARTIAL'}</span></div>
+        <div class="pbox-row">PRE-STAGE WINDOW: <span>90 seconds</span></div>
+      </div>`);
+    pl.addTo(grp);
+    roadPolylines.push({ pl, primary: road.primary });
+
+    // ── 4. Road name label at midpoint ──
+    const midPos = coords[Math.floor(coords.length / 2)];
+    const labelIcon = L.divIcon({
+      className: '',
+      html: `<div style="font-family:Share Tech Mono,monospace;font-size:9px;color:#c0c0c0;background:rgba(22,22,22,0.88);padding:2px 7px;border:1px solid #2a2a2a;white-space:nowrap;letter-spacing:0.08em;pointer-events:none;text-transform:uppercase">${road.name}</div>`,
+      iconAnchor: [0, 10],
+      iconSize: null,
+    });
+    L.marker(midPos, { icon: labelIcon, interactive: false }).addTo(grp);
+  });
+
+  // ── 5. Perimeter ring road (connects all outer nodes) ──
+  const perimNodes = ['N1','N2','N3','C3','S3','S2','S1','C1','N1'];
+  const perimCoords = perimNodes.map(id => city.nodes[id].pos);
+  L.polyline(perimCoords, { color: '#0f0f0f', weight: 10, opacity: 1 }).addTo(grp);
+  L.polyline(perimCoords, { color: '#2a2a2a', weight: 12, opacity: 0.5 }).addTo(grp);
+  L.polyline(perimCoords, { color: '#0f0f0f', weight: 10, opacity: 1 }).addTo(grp);
+
+  // ── 6. Intersection circles at all nodes ──
+  Object.values(city.nodes).forEach(node => {
+    L.circleMarker(node.pos, {
+      radius: 5,
+      color: '#39ff14',
+      fillColor: '#1a1a1a',
+      fillOpacity: 1,
+      weight: 1.5,
+    }).addTo(grp);
+  });
+
+  return grp;
+}
+
+function buildAsnNodes(city) {
+  const grp = L.layerGroup();
+  city.arterials.forEach(road => {
+    const positions = road.nodes.map(id => city.nodes[id].pos);
+    positions.forEach((from, i) => {
+      if (i >= positions.length - 1) return;
+      const to = positions[i + 1];
+      [0.25, 0.5, 0.75].forEach((t, j) => {
+        const lat = from[0] + (to[0] - from[0]) * t;
+        const lng = from[1] + (to[1] - from[1]) * t;
+        const delay = (i * 3 + j) * 0.3;
+        const icon = L.divIcon({
+          className: '',
+          html: `<div class="asn-marker"><div class="asn-core"></div><div class="asn-ring" style="animation-delay:${delay}s"></div><div class="asn-ring r2" style="animation-delay:${delay+0.8}s"></div></div>`,
+          iconSize: [10, 10],
+          iconAnchor: [5, 5],
+        });
+        const m = L.marker([lat, lng], { icon });
+        m.bindPopup(`
+          <div class="pbox">
+            <div class="pbox-title">ASN-9 NODE</div>
+            <div class="pbox-row">ROAD: <span>${road.name}</span></div>
+            <div class="pbox-row">STATUS: <span>GREEN WAVE ACTIVE</span></div>
+            <div class="pbox-row">FLOW SPEED: <span>${road.speed} km/h</span></div>
+            <div class="pbox-row">PRE-STAGE: <span>T−90s</span></div>
+            <div class="pbox-row">HOLD DELAY: <span class="amber">3.8 sec opposing traffic</span></div>
+          </div>`);
+        m.addTo(grp);
+      });
+    });
+    // Node markers at intersections
+    road.nodes.forEach(id => {
+      const node = city.nodes[id];
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:8px;height:8px;border-radius:50%;background:#39ff14;box-shadow:0 0 10px #39ff14"></div>`,
+        iconSize: [8, 8],
+        iconAnchor: [4, 4],
+      });
+      L.marker(node.pos, { icon }).bindTooltip(node.name).addTo(grp);
+    });
+  });
+  return grp;
+}
+
+function buildDriftCorners(city) {
+  const grp = L.layerGroup();
+  city.driftCorners.forEach(corner => {
+    // Ticket radius circle
+    L.circle(corner.pos, {
+      radius: 80,
+      color: '#ffaa00',
+      fillColor: '#ffaa00',
+      fillOpacity: 0.07,
+      weight: 1,
+      dashArray: '4 4',
+    }).addTo(grp);
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="drift-marker"></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+    });
+    L.marker(corner.pos, { icon })
+      .bindTooltip(`${corner.name} — ${corner.angle}° DRIFT`, { sticky: true })
+      .bindPopup(`
+        <div class="pbox">
+          <div class="pbox-title">${corner.name}</div>
+          <div class="pbox-row">MIN DRIFT ANGLE: <span>${corner.angle}°</span></div>
+          <div class="pbox-row">TICKET: <span class="red">$400 AUTO-FINE</span></div>
+          <div class="pbox-row">HOLD DELAY: <span class="amber">3.8 sec opposing traffic</span></div>
+          <div class="pbox-row">COMPLIANCE RATE: <span>${corner.compliance}%</span></div>
+          <div class="pbox-row">ENFORCEMENT: <span>ASN-9 LASER ARRAY</span></div>
+        </div>`)
+      .addTo(grp);
+  });
+  return grp;
+}
+
+function buildResidences(city) {
+  const grp = L.layerGroup();
+  city.residences.forEach(res => {
+    // 400m sensor zone
+    L.circle(res.pos, {
+      radius: 400,
+      color: '#00aaff',
+      fillColor: '#00aaff',
+      fillOpacity: 0.04,
+      weight: 1,
+      dashArray: '6 3',
+    }).addTo(grp);
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:14px;height:14px;border:2px solid #00aaff;background:rgba(0,170,255,.12);display:flex;align-items:center;justify-content:center;font-size:8px">🏠</div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    });
+    L.marker(res.pos, { icon })
+      .bindTooltip(res.name)
+      .bindPopup(`
+        <div class="pbox">
+          <div class="pbox-title">${res.name}</div>
+          <div class="pbox-row">CODE: <span>§14 COMPLIANT</span></div>
+          <div class="pbox-row">GARAGE BAYS: <span>${res.cars}</span></div>
+          <div class="pbox-row">FRONT DOOR: <span class="red">PROHIBITED</span></div>
+          <div class="pbox-row">SENSOR RANGE: <span>400 metres</span></div>
+          <div class="pbox-row">ENTRY: <span>GARAGE — NO DECELERATION</span></div>
+          <div class="pbox-row">FUEL GRADE: <span>GAS-STATION SPEC</span></div>
+        </div>`)
+      .addTo(grp);
+  });
+  return grp;
+}
+
+function buildHelipads(city) {
+  const grp = L.layerGroup();
+  city.helipads.forEach(h => {
+    // No-fly zone circle
+    L.circle(h.pos, {
+      radius: 200,
+      color: '#ffffff',
+      fillColor: '#ffffff',
+      fillOpacity: 0.04,
+      weight: 1,
+      dashArray: '3 4',
+    }).addTo(grp);
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="heli-marker">🚁</div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+    L.marker(h.pos, { icon })
+      .bindTooltip(h.name)
+      .bindPopup(`
+        <div class="pbox">
+          <div class="pbox-title">${h.name}</div>
+          <div class="pbox-row">TYPE: <span>${h.type}</span></div>
+          <div class="pbox-row">GROUND BAN: <span class="red">ENFORCED</span></div>
+          <div class="pbox-row">CAPACITY: <span>3 rotorcraft</span></div>
+          <div class="pbox-row">MANAGED BY: <span>ASN-9 AIR CORRIDOR</span></div>
+        </div>`)
+      .addTo(grp);
+  });
+  return grp;
+}
+
+function buildDcu(city) {
+  const grp = L.layerGroup();
+  city.dcuHubs.forEach(hub => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="dcu-marker">🔬</div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+    L.marker(hub.pos, { icon })
+      .bindTooltip(hub.name)
+      .bindPopup(`
+        <div class="pbox">
+          <div class="pbox-title">${hub.name}</div>
+          <div class="pbox-row">DEPT: <span>${hub.dept}</span></div>
+          <div class="pbox-row">STATUS: <span>ACTIVE RESEARCH</span></div>
+          <div class="pbox-row">INSTITUTION: <span>DRIFT CITY UNIVERSITY</span></div>
+          <div class="pbox-row">ACCESS: <span>RESIDENTS + FACULTY</span></div>
+        </div>`)
+      .addTo(grp);
+  });
+  return grp;
+}
+
+function buildMfr(city) {
+  const grp = L.layerGroup();
+  city.mfr.forEach(m => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="mfr-marker">🔧</div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+    });
+    L.marker(m.pos, { icon })
+      .bindTooltip(`${m.brand} — 24/7`)
+      .bindPopup(`
+        <div class="pbox">
+          <div class="pbox-title">${m.name}</div>
+          <div class="pbox-row">MANUFACTURER: <span>${m.brand}</span></div>
+          <div class="pbox-row">HOURS: <span>24 / 7 — 365</span></div>
+          <div class="pbox-row">CHANNEL: <span>DC-MFR-24 SECURE LINE</span></div>
+          <div class="pbox-row">RESPONSE: <span>&lt;4 minutes on-site</span></div>
+        </div>`)
+      .addTo(grp);
+  });
+  return grp;
+}
+
+// ══════════════════════════════════════════════════════════════
+// URBAN CELL CLUSTERS
+// ══════════════════════════════════════════════════════════════
+let clusterMarkers = []; // track for lockdown toggling
+
+function buildUrbanCells(city) {
+  const grp = L.layerGroup();
+  clusterMarkers = [];
+  if (!city.urbanCells) return grp;
+
+  city.urbanCells.forEach((cell, idx) => {
+    // Outer supercar ring (asphalt + neon border, ~250m radius)
+    const outerRing = L.circle(cell.pos, {
+      radius: 250,
+      color: '#39ff14',
+      fillColor: '#111111',
+      fillOpacity: 0.55,
+      weight: 2,
+      dashArray: '10 5',
+    });
+    outerRing.bindTooltip(`${cell.name} — Supercar Ring`).addTo(grp);
+
+    // Inner no-car zone (precision silver, ~110m radius)
+    const innerZone = L.circle(cell.pos, {
+      radius: 110,
+      color: 'rgba(192,192,192,0.5)',
+      fillColor: '#1e1e28',
+      fillOpacity: 0.75,
+      weight: 1.5,
+    });
+    innerZone.addTo(grp);
+
+    // Cell centre marker
+    const cellIcon = L.divIcon({
+      className: '',
+      html: `<div style="width:22px;height:22px;border:2px solid #39ff14;background:rgba(57,255,20,.12);display:flex;align-items:center;justify-content:center;font-size:11px;color:#39ff14;font-family:Share Tech Mono,monospace;font-weight:bold">${idx + 1}</div>`,
+      iconSize: [22, 22], iconAnchor: [11, 11],
+    });
+    const m = L.marker(cell.pos, { icon: cellIcon });
+    m.bindPopup(`
+      <div class="pbox">
+        <div class="pbox-title">${cell.name} — URBAN CELL</div>
+        <div class="pbox-row">MANSIONS: <span>${cell.mansions}</span></div>
+        <div class="pbox-row">EXTERIOR: <span>Supercar Ring (70–110 km/h)</span></div>
+        <div class="pbox-row">INTERIOR: <span class="amber">${cell.interior}</span></div>
+        <div class="pbox-row">SENSOR RANGE: <span>400 m</span></div>
+        <div class="pbox-row">LOCKDOWN: <span id="map-cs-${idx}" class="${cell.lockdown ? 'red' : ''}">${cell.lockdown ? '⚠ ACTIVE' : 'CLEAR'}</span></div>
+        <div class="pbox-row">CODE: <span>§14 COMPLIANT</span></div>
+      </div>`).addTo(grp);
+    clusterMarkers.push({ cell, outerRing, innerZone, marker: m, idx });
+  });
+
+  return grp;
+}
+
+/** Toggle a cluster into lockdown — freezes the cell visually */
+function setClusterLockdown(idx, active) {
+  const entry = clusterMarkers[idx];
+  if (!entry) return;
+  entry.cell.lockdown = active;
+  const el = entry.outerRing.getElement();
+  if (el) {
+    el.style.stroke = active ? '#ff2020' : '#39ff14';
+    el.style.fill   = active ? '#1a0000' : '#111111';
+  }
+  const labels  = ['alpha','beta','gamma'];
+  const csEl    = document.getElementById('cs-' + labels[idx]);
+  if (csEl) csEl.innerHTML = `${['ALPHA','BETA','GAMMA'][idx]}: <span${active ? ' class="red"' : ''} style="${active ? 'color:#ff2020' : ''}">${active ? '⚠ LOCKDOWN' : 'OPERATIONAL'}</span>`;
+}
+
+let clusterLockdownIdx = 0;
+function triggerClusterLockdown() {
+  const city = CITIES[currentCity];
+  if (!city.urbanCells) return;
+  const n = city.urbanCells.length;
+  const target = clusterLockdownIdx % n;
+  const isLocked = city.urbanCells[target].lockdown;
+  setClusterLockdown(target, !isLocked);
+  clusterLockdownIdx++;
+  const names = ['ALPHA','BETA','GAMMA'];
+  const note = document.getElementById('cluster-ld-note');
+  if (note) note.innerHTML = isLocked
+    ? `<span>${names[target]} CELL: LOCKDOWN CLEARED.</span>`
+    : `<span class="red">${names[target]} CELL: 24H LOCKDOWN. Roads frozen.</span>`;
+}
+
+// Expose cluster logic for tests
+window.__DC__.setClusterLockdown = setClusterLockdown;
+window.__DC__.clusterLockdownActive = (city, idx) => CITIES[city]?.urbanCells?.[idx]?.lockdown ?? false;
+
+// ══════════════════════════════════════════════════════════════
+// GREEN WAVE ANIMATION (SVG dashoffset)
+// ══════════════════════════════════════════════════════════════
+let animOffset = 0;
+function startAnimationLoop() {
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  function tick() {
+    animOffset -= 0.35;
+    roadPolylines.forEach(({ pl, primary }) => {
+      const el = pl.getElement();
+      if (!el) return;
+      if (lockdownActive) {
+        el.style.stroke = '#ff2020';
+        el.style.strokeDasharray = '8 5';
+        el.style.strokeDashoffset = (animOffset * 2) + 'px';
+      } else {
+        el.style.stroke = primary ? '#39ff14' : '#aaff00';
+        el.style.strokeDasharray = '18 8';
+        el.style.strokeDashoffset = animOffset + 'px';
+        el.style.opacity = perfFilterActive && !primary ? '0.2' : '0.9';
+      }
+    });
+    animFrameId = requestAnimationFrame(tick);
+  }
+  animFrameId = requestAnimationFrame(tick);
+}
+
+// ══════════════════════════════════════════════════════════════
+// LAYER TOGGLE
+// ══════════════════════════════════════════════════════════════
+function toggleLayer(key, row) {
+  const sw = document.getElementById('sw-' + key);
+  const grp = layerGroups[key];
+  if (!grp) return;
+  if (sw.classList.contains('on')) {
+    sw.classList.remove('on');
+    map.removeLayer(grp);
+  } else {
+    sw.classList.add('on');
+    map.addLayer(grp);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// RACE TRACE GENERATOR
+// ══════════════════════════════════════════════════════════════
+function toggleRaceTrace() {
+  if (traceMode) {
+    clearRaceTrace();
+    return;
+  }
+  if (challengeActive) clearChallenge();  // can't run both at once
+  traceMode = 'start';
+  document.getElementById('btn-trace').classList.add('active');
+  document.getElementById('btn-trace').textContent = '⊕ CLICK START POINT ON MAP';
+  document.getElementById('trace-note').innerHTML = '<span>STEP 1:</span> CLICK THE START POINT ON THE MAP.';
+  document.getElementById('trace-info-box').textContent = 'RACE TRACE — SELECT START POINT';
+  document.getElementById('trace-info-box').classList.add('active');
+  map.getContainer().style.cursor = 'crosshair';
+}
+
+function onMapClick(e) {
+  // Challenge mode takes priority
+  if (challengeActive) {
+    addChallengeWaypoint(e.latlng.lat, e.latlng.lng);
+    return;
+  }
+  if (!traceMode || traceMode === 'done') return;
+  const lat = e.latlng.lat, lng = e.latlng.lng;
+
+  if (traceMode === 'start') {
+    traceStart = nearestNode(lat, lng, currentCity);
+    const pos = CITIES[currentCity].nodes[traceStart].pos;
+    const startIcon = L.divIcon({ className: '', html: '<div class="trace-start"></div>', iconSize: [14, 14], iconAnchor: [7, 7] });
+    if (traceLayer) map.removeLayer(traceLayer);
+    traceLayer = L.layerGroup();
+    L.marker(pos, { icon: startIcon }).bindTooltip('START').addTo(traceLayer);
+    traceLayer.addTo(map);
+    traceMode = 'end';
+    document.getElementById('btn-trace').textContent = '⊕ CLICK END POINT ON MAP';
+    document.getElementById('trace-note').innerHTML = '<span>STEP 2:</span> CLICK THE END POINT ON MAP.';
+    document.getElementById('trace-info-box').textContent = `START: ${CITIES[currentCity].nodes[traceStart].name} — SELECT END POINT`;
+
+  } else if (traceMode === 'end') {
+    traceEnd = nearestNode(lat, lng, currentCity);
+    const pos = CITIES[currentCity].nodes[traceEnd].pos;
+    const endIcon = L.divIcon({ className: '', html: '<div class="trace-end"></div>', iconSize: [14, 14], iconAnchor: [7, 7] });
+    L.marker(pos, { icon: endIcon }).bindTooltip('END').addTo(traceLayer);
+
+    // Pathfind
+    const path = bfsPath(traceStart, traceEnd);
+    if (path) {
+      const city = CITIES[currentCity];
+      const coords = path.map(id => city.nodes[id].pos);
+      const dist = routeDistance(coords);
+      const speedKmh = 102;
+      const eta = travelTime(dist, speedKmh);
+
+      // Animated race line
+      const raceLine = L.polyline(coords, {
+        color: '#39ff14',
+        weight: 5,
+        opacity: 1,
+        dashArray: '12 6',
+      });
+      raceLine.addTo(traceLayer);
+
+      // Animate the trace line dashoffset separately
+      let rOffset = 0;
+      const raceAnim = setInterval(() => {
+        const el = raceLine.getElement();
+        if (!el) { clearInterval(raceAnim); return; }
+        rOffset -= 0.8;
+        el.style.strokeDashoffset = rOffset + 'px';
+        el.style.filter = 'drop-shadow(0 0 4px #39ff14)';
+      }, 16);
+
+      const distStr = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : Math.round(dist) + ' m';
+      document.getElementById('trace-result').innerHTML =
+        `ROUTE: <span>${path.join(' → ')}</span><br>` +
+        `NODES: <span>${path.length}</span><br>` +
+        `DISTANCE: <span>${distStr}</span><br>` +
+        `EST. SPEED: <span>${speedKmh} km/h</span><br>` +
+        `ETA: <span>${eta}s (${Math.ceil(eta/60)} min)</span><br>` +
+        `STATUS: <span>GPC OPTIMAL ROUTE</span>`;
+
+      document.getElementById('trace-info-box').textContent =
+        `GPC TRACE: ${path.length} nodes · ${distStr} · ETA ${eta}s`;
+    } else {
+      document.getElementById('trace-result').innerHTML = '<span class="red">NO VALID ROUTE — NODES NOT CONNECTED.</span>';
+      document.getElementById('trace-info-box').textContent = 'NO ROUTE FOUND';
+    }
+
+    document.getElementById('btn-trace').textContent = '⊕ GENERATE RACE TRACE';
+    document.getElementById('btn-trace').classList.remove('active');
+    document.getElementById('btn-clear-trace').style.display = 'flex';
+    document.getElementById('trace-note').innerHTML = 'TRACE COMPLETE.<br>GPC ROUTE RENDERED ON MAP.';
+    traceMode = 'done';
+    map.getContainer().style.cursor = '';
+  }
+}
+
+function clearRaceTrace() {
+  if (traceLayer) { map.removeLayer(traceLayer); traceLayer = null; }
+  traceMode = null; traceStart = null; traceEnd = null;
+  document.getElementById('btn-trace').classList.remove('active');
+  document.getElementById('btn-trace').textContent = '⊕ GENERATE RACE TRACE';
+  document.getElementById('btn-clear-trace').style.display = 'none';
+  document.getElementById('trace-note').innerHTML = 'CLICK ABOVE TO ACTIVATE.<br>SELECT START → SELECT END.<br>GPC AI CALCULATES OPTIMAL<br>VELOCITY ROUTE IN REAL TIME.';
+  document.getElementById('trace-result').innerHTML = 'AWAITING TRACE GENERATION.<br>Select two points on map<br>to calculate GPC route.';
+  document.getElementById('trace-info-box').classList.remove('active');
+  map.getContainer().style.cursor = '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// PERFORMANCE FILTER
+// ══════════════════════════════════════════════════════════════
+function togglePerfFilter() {
+  perfFilterActive = !perfFilterActive;
+  const btn = document.getElementById('btn-perf');
+  const note = document.getElementById('perf-note');
+  if (perfFilterActive) {
+    btn.classList.add('active');
+    note.innerHTML = 'MODE: <span>EV / SUPERCAR ONLY</span><br>Secondary roads dimmed.<br>Arterials: 0–100 &lt;5s vehicles.';
+  } else {
+    btn.classList.remove('active');
+    note.innerHTML = 'MODE: <span>ALL VEHICLES</span><br>Filter restricts arterials to<br>vehicles achieving 0–100 in &lt;5s.';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// LOCKDOWN SIMULATOR
+// ══════════════════════════════════════════════════════════════
+function triggerLockdown() {
+  if (lockdownActive) {
+    clearLockdown();
+    return;
+  }
+  lockdownActive = true;
+  lockdownSeconds = 86400;
+  document.getElementById('lockdown-overlay').classList.add('active');
+  document.getElementById('lockdown-banner').classList.add('active');
+  document.getElementById('lockdown-timer').classList.add('active');
+  document.getElementById('btn-lockdown').classList.add('lockdown-active');
+  document.getElementById('btn-lockdown').textContent = '✕ CLEAR LOCKDOWN';
+  document.getElementById('lockdown-note').innerHTML =
+    'STATUS: <span class="red">LOCKDOWN ACTIVE</span><br>All 847 nodes: RED.<br>City speed: 0 km/h.<br>Click to clear simulation.';
+  setStat('r-ld', '⚠ LOCKDOWN');
+  document.getElementById('r-ld').style.color = 'var(--red)';
+
+  // Update top bar
+  document.getElementById('ht-speed').textContent = '0';
+  document.getElementById('ht-green').textContent = '0';
+
+  updateLockdownTimer();
+  lockdownInterval = setInterval(updateLockdownTimer, 1000);
+
+  setTimeout(() => {
+    document.getElementById('lockdown-overlay').classList.remove('active');
+  }, 3200);
+}
+
+function updateLockdownTimer() {
+  lockdownSeconds = Math.max(0, lockdownSeconds - 1);
+  const h = String(Math.floor(lockdownSeconds / 3600)).padStart(2, '0');
+  const m = String(Math.floor((lockdownSeconds % 3600) / 60)).padStart(2, '0');
+  const s = String(lockdownSeconds % 60).padStart(2, '0');
+  document.getElementById('lockdown-timer').textContent = `FREEZE: ${h}:${m}:${s}`;
+}
+
+function clearLockdown() {
+  lockdownActive = false;
+  if (lockdownInterval) clearInterval(lockdownInterval);
+  document.getElementById('lockdown-banner').classList.remove('active');
+  document.getElementById('lockdown-timer').classList.remove('active');
+  document.getElementById('btn-lockdown').classList.remove('lockdown-active');
+  document.getElementById('btn-lockdown').classList.remove('danger');
+  document.getElementById('btn-lockdown').className = 'tbtn danger';
+  document.getElementById('btn-lockdown').textContent = '⚠ TRIGGER CITY LOCKDOWN';
+  document.getElementById('lockdown-note').innerHTML =
+    'STATUS: <span>CITY OPERATIONAL</span><br>Simulates 24H freeze caused<br>by collision or stall event.<br>All 847 nodes go red.';
+  setStat('r-ld', 'CLEAR');
+  document.getElementById('r-ld').style.color = 'var(--neon)';
+  document.getElementById('ht-speed').textContent = '88';
+  document.getElementById('ht-green').textContent = '819';
+}
+
+// ══════════════════════════════════════════════════════════════
+// CITY SWITCHER
+// ══════════════════════════════════════════════════════════════
+function switchCity(key) {
+  if (key === currentCity) return;
+  currentCity = key;
+  const city = CITIES[key];
+  map.setView(city.center, city.zoom);
+  buildAllLayers();
+  clearRaceTrace();
+  document.querySelectorAll('.city-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + key).classList.add('active');
+  document.getElementById('city-terrain').textContent = city.terrain;
+  document.getElementById('city-code').textContent = city.name;
+  document.getElementById('city-coords').textContent = city.coordStr;
+  document.getElementById('city-terr-type').textContent = city.terrainType;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RACE CHALLENGE — MULTI-WAYPOINT ROUTE TRACER
+// ══════════════════════════════════════════════════════════════
+let challengeActive  = false;
+let challengeWPs     = [];   // node IDs (user-placed waypoints)
+let challengeFullPath= [];   // fully expanded node sequence via BFS
+let challengeLayer   = null;
+let challengeLocked  = false;
+
+/** Returns a Set of node IDs that coincide with a drift corner */
+function getDriftCornerNodes(city) {
+  const s = new Set();
+  city.driftCorners.forEach(c => s.add(nearestNode(c.pos[0], c.pos[1], currentCity)));
+  return s;
+}
+
+/** Score → difficulty label */
+function calcDifficulty(distM, corners) {
+  const s = (distM / 1000) * 0.5 + corners * 1.8;
+  if (s < 2)  return { label: 'ROOKIE',    color: '#39ff14' };
+  if (s < 5)  return { label: 'VELOCITY',  color: '#aaff00' };
+  if (s < 9)  return { label: 'APEX',      color: '#ffaa00' };
+  return             { label: 'LEGENDARY', color: '#ff2020' };
+}
+
+/** Encode waypoints into a shareable challenge code */
+function makeChallengeCode() {
+  const ts  = Date.now().toString(36).toUpperCase().slice(-4);
+  const city = currentCity === 'nevada' ? 'NV' : 'SA';
+  return `DC-${city}-${challengeWPs.join('.')}-${ts}`;
+}
+
+function toggleChallenge() {
+  if (challengeActive || challengeLocked) {
+    clearChallenge();
+    return;
+  }
+  // Cancel race trace if active
+  if (traceMode) clearRaceTrace();
+
+  challengeActive = true;
+  challengeLocked = false;
+  challengeWPs    = [];
+  challengeFullPath = [];
+
+  document.getElementById('btn-challenge').classList.add('active');
+  document.getElementById('btn-challenge').textContent = '✕ EXIT CHALLENGE MODE';
+  document.getElementById('challenge-note').innerHTML =
+    '<span>STEP 1:</span> CLICK INTERSECTIONS<br>ON THE MAP TO TRACE<br>YOUR RACE ROUTE.';
+  document.getElementById('challenge-hud').classList.add('active');
+  document.getElementById('challenge-stats-panel').style.display = 'block';
+  document.getElementById('challenge-card').style.display = 'none';
+  map.getContainer().style.cursor = 'crosshair';
+}
+
+function undoWaypoint() {
+  if (challengeWPs.length === 0) return;
+  challengeWPs.pop();
+  rebuildChallengeRoute();
+}
+
+function clearChallenge() {
+  challengeActive  = false;
+  challengeLocked  = false;
+  challengeWPs     = [];
+  challengeFullPath= [];
+
+  if (challengeLayer) { map.removeLayer(challengeLayer); challengeLayer = null; }
+
+  document.getElementById('btn-challenge').classList.remove('active');
+  document.getElementById('btn-challenge').textContent = '⚡ TRACE RACE CHALLENGE';
+  document.getElementById('btn-undo-wp').style.display = 'none';
+  document.getElementById('btn-lock-challenge').style.display = 'none';
+  document.getElementById('btn-clear-challenge').style.display = 'none';
+  document.getElementById('challenge-note').innerHTML =
+    'Trace a multi-waypoint route<br>by clicking intersections.<br>Issue a challenge code for<br>any other resident to race.';
+  document.getElementById('challenge-hud').classList.remove('active');
+  document.getElementById('challenge-stats-panel').style.display = 'none';
+  document.getElementById('challenge-card').style.display = 'none';
+  map.getContainer().style.cursor = '';
+}
+
+function addChallengeWaypoint(lat, lng) {
+  const id = nearestNode(lat, lng, currentCity);
+  if (challengeWPs.length && challengeWPs[challengeWPs.length - 1] === id) return; // dedup
+  challengeWPs.push(id);
+  rebuildChallengeRoute();
+}
+
+function rebuildChallengeRoute() {
+  if (challengeLayer) map.removeLayer(challengeLayer);
+  challengeLayer = L.layerGroup();
+
+  const city = CITIES[currentCity];
+  challengeFullPath = [];
+
+  // BFS between each consecutive pair of waypoints
+  for (let i = 0; i < challengeWPs.length - 1; i++) {
+    const seg = bfsPath(challengeWPs[i], challengeWPs[i + 1]);
+    if (!seg) continue;
+    challengeFullPath.push(...(challengeFullPath.length === 0 ? seg : seg.slice(1)));
+  }
+
+  // ── Route line ──
+  if (challengeFullPath.length > 1) {
+    const coords = challengeFullPath.map(id => city.nodes[id].pos);
+
+    // Glow halo
+    L.polyline(coords, { color: '#ff4400', weight: 12, opacity: 0.15, lineCap: 'round' }).addTo(challengeLayer);
+    // Road body  
+    L.polyline(coords, { color: '#1a0800', weight: 10, opacity: 0.9, lineCap: 'round' }).addTo(challengeLayer);
+    // Challenge line (animated via rOffset below)
+    const challengeLine = L.polyline(coords, {
+      color: '#ff6600', weight: 3.5, opacity: 1, dashArray: '10 5', lineCap: 'square',
+    });
+    challengeLine.addTo(challengeLayer);
+
+    // Animate the challenge line
+    let cOffset = 0;
+    const cAnim = setInterval(() => {
+      const el = challengeLine.getElement();
+      if (!el) { clearInterval(cAnim); return; }
+      cOffset -= 0.7;
+      el.style.strokeDashoffset = cOffset + 'px';
+    }, 16);
+
+    // ── Directional arrows at 1/3 and 2/3 along path ──
+    [Math.floor(coords.length * 0.33), Math.floor(coords.length * 0.66)].forEach(idx => {
+      if (idx < 1 || idx >= coords.length) return;
+      const from = coords[idx - 1], to = coords[idx];
+      const angle = Math.atan2(to[1] - from[1], to[0] - from[0]) * 180 / Math.PI;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="color:#ff6600;font-size:14px;transform:rotate(${angle}deg);line-height:1">➤</div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7],
+      });
+      L.marker(coords[idx], { icon, interactive: false }).addTo(challengeLayer);
+    });
+
+    // Update stats
+    const dist      = routeDistance(coords);
+    const eta       = travelTime(dist, 88);
+    const corners   = getDriftCornerNodes(city);
+    const hitCorners= challengeFullPath.filter(id => corners.has(id)).length;
+    const diff      = calcDifficulty(dist, hitCorners);
+
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('cs-wps',     challengeWPs.length);
+    set('cs-dist',    dist >= 1000 ? (dist/1000).toFixed(2)+' km' : Math.round(dist)+' m');
+    set('cs-eta',     `${eta}s (${Math.ceil(eta/60)} min)`);
+    set('cs-corners', hitCorners);
+    set('cs-nodes',   challengeFullPath.length);
+
+    const diffEl = document.getElementById('cs-diff');
+    if (diffEl) { diffEl.textContent = diff.label; diffEl.style.color = diff.color; }
+  }
+
+  // ── Waypoint markers ──
+  challengeWPs.forEach((id, i) => {
+    const pos  = city.nodes[id].pos;
+    const isS  = i === 0;
+    const isE  = i === challengeWPs.length - 1 && challengeWPs.length > 1;
+    const col  = isS ? '#39ff14' : isE ? '#ff2020' : '#ff6600';
+    const lbl  = isS ? 'S' : isE ? 'F' : String(i);
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:20px;height:20px;border-radius:50%;background:${col};display:flex;align-items:center;justify-content:center;font-family:Share Tech Mono,monospace;font-size:9px;font-weight:bold;color:#000;box-shadow:0 0 10px ${col}">${lbl}</div>`,
+      iconSize: [20, 20], iconAnchor: [10, 10],
+    });
+    L.marker(pos, { icon })
+      .bindTooltip(`WP${i+1}: ${city.nodes[id].name}`)
+      .addTo(challengeLayer);
+  });
+
+  challengeLayer.addTo(map);
+
+  // Show/hide buttons based on state
+  const hasWPs = challengeWPs.length > 0;
+  const hasRoute = challengeWPs.length >= 2;
+  document.getElementById('btn-undo-wp').style.display       = hasWPs ? 'flex' : 'none';
+  document.getElementById('btn-lock-challenge').style.display = hasRoute && !challengeLocked ? 'flex' : 'none';
+  document.getElementById('btn-clear-challenge').style.display= hasWPs ? 'flex' : 'none';
+
+  const n = challengeWPs.length;
+  document.getElementById('challenge-note').innerHTML = hasWPs
+    ? `<span>${n} WAYPOINT${n>1?'S':''} SET.</span><br>${hasRoute ? 'Lock route to issue challenge.' : 'Click another intersection.'}`
+    : 'STEP 1: CLICK INTERSECTIONS<br>ON THE MAP TO TRACE<br>YOUR RACE ROUTE.';
+  document.getElementById('challenge-hud').textContent =
+    `⚡ CHALLENGE MODE — ${n} WP${n!==1?'s':''} SET — CLICK TO ADD MORE`;
+}
+
+function lockChallenge() {
+  if (challengeFullPath.length < 2) return;
+  challengeLocked = true;
+  challengeActive = false;
+  map.getContainer().style.cursor = '';
+
+  const city     = CITIES[currentCity];
+  const coords   = challengeFullPath.map(id => city.nodes[id].pos);
+  const dist     = routeDistance(coords);
+  const eta      = travelTime(dist, 88);
+  const corners  = getDriftCornerNodes(city);
+  const hitC     = challengeFullPath.filter(id => corners.has(id)).length;
+  const diff     = calcDifficulty(dist, hitC);
+  const code     = makeChallengeCode();
+  const distStr  = dist >= 1000 ? (dist/1000).toFixed(2)+' km' : Math.round(dist)+' m';
+
+  const card = document.getElementById('challenge-card');
+  card.style.display = 'block';
+  card.innerHTML = `
+    <div class="cc-label">CHALLENGE ISSUED</div>
+    <div class="cc-title" style="color:${diff.color}">${diff.label} ROUTE</div>
+    <div style="margin:10px 0 6px">
+      <div class="cc-row"><span class="cc-key">CITY</span><span class="cc-val">${city.name}</span></div>
+      <div class="cc-row"><span class="cc-key">WAYPOINTS</span><span class="cc-val">${challengeWPs.length}</span></div>
+      <div class="cc-row"><span class="cc-key">DISTANCE</span><span class="cc-val">${distStr}</span></div>
+      <div class="cc-row"><span class="cc-key">ETA @88</span><span class="cc-val">${eta}s</span></div>
+      <div class="cc-row"><span class="cc-key">DRIFT CORNERS</span><span class="cc-val" style="color:#ffaa00">${hitC}</span></div>
+      <div class="cc-row"><span class="cc-key">NODES</span><span class="cc-val">${challengeFullPath.length}</span></div>
+    </div>
+    <div class="cc-label">CHALLENGE CODE</div>
+    <div class="cc-code" id="cc-code-val">${code}</div>
+    <button class="cc-copy" onclick="copyChallenge()">⧉ COPY CODE TO CLIPBOARD</button>
+    <button class="cc-undo" onclick="clearChallenge()">✕ CLEAR &amp; NEW CHALLENGE</button>`;
+
+  document.getElementById('btn-challenge').classList.remove('active');
+  document.getElementById('btn-challenge').textContent = '⚡ TRACE RACE CHALLENGE';
+  document.getElementById('btn-lock-challenge').style.display = 'none';
+  document.getElementById('btn-undo-wp').style.display = 'none';
+  document.getElementById('challenge-hud').classList.remove('active');
+
+  // Store for copy
+  window._lastChallengeCode = code;
+}
+
+function copyChallenge() {
+  const code = document.getElementById('cc-code-val')?.textContent || window._lastChallengeCode || '';
+  if (!code) return;
+  navigator.clipboard?.writeText(code).then(() => {
+    const btn = document.querySelector('.cc-copy');
+    if (btn) { btn.textContent = '✓ COPIED!'; setTimeout(() => { btn.textContent = '⧉ COPY CODE TO CLIPBOARD'; }, 2000); }
+  }).catch(() => {
+    const btn = document.querySelector('.cc-copy');
+    if (btn) btn.textContent = code; // fallback: show code in button
+  });
+}
+
+// Expose for tests
+window.__DC__.getDriftCornerNodes  = getDriftCornerNodes;
+window.__DC__.calcDifficulty       = calcDifficulty;
+window.__DC__.makeChallengeCode    = makeChallengeCode;
+
+// ══════════════════════════════════════════════════════════════
+// LIVE STATS UPDATER
+// ══════════════════════════════════════════════════════════════
+/** Set a stat element value and flash the pulse animation */
+function setStat(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = value;
+  el.classList.remove('updated');
+  void el.offsetWidth; // reflow
+  el.classList.add('updated');
+}
+
+function updateStats() {
+  if (lockdownActive) return;
+  const speed   = 82 + Math.round(Math.random() * 14);
+  const green   = 810 + Math.round(Math.random() * 37);
+  const veh     = 4800 + Math.round(Math.random() * 40);
+  const comp    = (94 + Math.random() * 4).toFixed(1);
+  const tickets = 10 + Math.round(Math.random() * 8);
+
+  // Top bar
+  setStat('ht-speed', speed);
+  setStat('ht-green', green);
+  setStat('ht-veh',   veh.toLocaleString());
+
+  // Right panel metric cards
+  setStat('r-speed',   speed);
+  setStat('r-green',   green);
+  setStat('r-veh',     veh.toLocaleString());
+  setStat('r-comply',  comp + '%');
+  setStat('r-tickets', tickets);
+
+  // predictive staging
+  const nextSec = 45 + Math.round(Math.random() * 90);
+  const leadSpd = 88 + Math.round(Math.random() * 20);
+  setStat('cascade-time', `T+${nextSec}s`);
+  setStat('lead-speed',   `${leadSpd} km/h`);
+}
+
+// ══════════════════════════════════════════════════════════════
+// FUEL TRACKER
+// ══════════════════════════════════════════════════════════════
+function updateFuelTracker() {
+  fuelLitres = Math.min(200, fuelLitres + (Math.random() < 0.7 ? Math.random() * 1.5 : 0));
+  const pct = fuelPct(fuelLitres);
+  const remaining = Math.max(0, 200 - fuelLitres).toFixed(0);
+  document.getElementById('fuel-num').textContent  = Math.round(fuelLitres) + ' L';
+  document.getElementById('fuel-fill').style.width = pct + '%';
+  const bar = document.getElementById('fuel-fill');
+  bar.className = 'fuel-fill' + (pct >= 100 ? ' full' : pct < 20 ? ' low' : '');
+  document.getElementById('fuel-status').innerHTML =
+    pct >= 100
+      ? '<span>✓ MONTHLY MANDATE MET</span>'
+      : `<span class="amber">${remaining}L remaining to mandate</span>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════════
+initMap();
+setInterval(updateStats, 2800);
+setInterval(updateFuelTracker, 3500);
+updateStats();
+</script>
+</body>
+</html>
