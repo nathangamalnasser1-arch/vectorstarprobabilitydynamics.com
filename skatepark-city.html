@@ -316,6 +316,7 @@ html,body{overflow-x:hidden;max-width:100%}
     <li><a href="#locations" onclick="setTimeout(()=>switchLoc('mt'),10)">Mtl Pop-Up</a></li>
     <li><a href="#locations" onclick="setTimeout(()=>switchLoc('solo'),10)" style="color:#f5e233">Solo Inline</a></li>
     <li><a href="#locations" onclick="setTimeout(()=>switchLoc('gl'),10)" style="color:#60a5fa">Greenland?</a></li>
+    <li><a href="#locations" onclick="setTimeout(()=>switchLoc('us'),10)" style="color:#ef4444">USA</a></li>
     <li><a href="#coin">SPC Coin</a></li>
     <li><a href="#brands">Brands</a></li>
     <li><a href="#investment">Investors</a></li>
@@ -356,8 +357,8 @@ html,body{overflow-x:hidden;max-width:100%}
 <!-- LOCATIONS — FULL DUAL TAB -->
 <section id="locations" style="padding:120px 48px;background:var(--bg2)">
   <span class="section-tag reveal">00 — Choose Your City</span>
-  <h2 class="section-title reveal">TWO<br>LOCATIONS</h2>
-  <p class="section-body reveal" style="margin-bottom:48px">Same city. Same charter. Same concept. Two mountains, two countries, two phases. Pick a site to explore the full city description.</p>
+  <h2 class="section-title reveal">SEVEN<br>LOCATIONS</h2>
+  <p class="section-body reveal" style="margin-bottom:48px">Same city. Same charter. Same concept. Seven sites across five countries, multiple phases. Pick a site to explore the full city description.</p>
 
   <!-- LOCATION TABS -->
   <div style="display:flex;gap:0;border:1px solid var(--border);width:100%;margin-bottom:48px" class="reveal loc-tabs">
@@ -384,6 +385,10 @@ html,body{overflow-x:hidden;max-width:100%}
     <button id="ltab-gl" onclick="switchLoc('gl')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
       GREENLAND — PHASE ?
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Nuuk · Permafrost · Negotiating with 3 governments · TBD</div>
+    </button>
+    <button id="ltab-us" onclick="switchLoc('us')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
+      USA — PHASE ?
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Taos · Asheville · Bend · 3 Candidate Sites · Site TBD</div>
     </button>
   </div>
 
@@ -1105,6 +1110,245 @@ html,body{overflow-x:hidden;max-width:100%}
     </div>
 
   </div><!-- end loc-gl -->
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- USA PANEL                                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="loc-us" style="display:none">
+
+    <!-- CANDIDATE INTRO -->
+    <div style="border-left:3px solid #ef4444;padding:20px 24px;margin-bottom:48px;background:rgba(239,68,68,.04)">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:10px;text-transform:uppercase">Three candidate sites — one will be chosen</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9">The United States has three mountain regions that meet the SPC brief: elevation above 1,800m, year-round mild temperatures at altitude, established skate and action sports culture, access to a major airport within three hours, and land that is not coastal-priced. Below are the three shortlisted sites. Taos, New Mexico is the current lead recommendation. Asheville and Bend remain live candidates. One will be chosen after conversations with local government.</p>
+    </div>
+
+    <!-- THREE CANDIDATE COMPARISON -->
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Site comparison — three USA candidates</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+
+      <!-- TAOS -->
+      <div style="background:var(--bg);padding:28px 24px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#ef4444;margin-bottom:4px;letter-spacing:2px">TAOS, NM</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:#ef4444;margin-bottom:20px;opacity:.7">RECOMMENDED · Phase lead</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Elevation</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--white)">2,130m</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Summer temp</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ef4444">15–25°C</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Sun days/yr</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ef4444">300+</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Land $/m²</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ef4444">$4–12</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Ski infra</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ef4444">Taos Ski Valley ✓</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Airport</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--white)">Santa Fe · ABQ</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="font-size:11px;color:var(--muted)">Skate culture</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:#ef4444">Strong ✓</span></div>
+        </div>
+      </div>
+
+      <!-- ASHEVILLE -->
+      <div style="background:var(--bg2);padding:28px 24px;border-left:1px solid var(--border)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted);margin-bottom:4px;letter-spacing:2px">ASHEVILLE, NC</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:20px;opacity:.7">Blue Ridge · Candidate B</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Elevation</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--white)">660–1,900m</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Summer temp</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">18–27°C</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Sun days/yr</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">~210</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Land $/m²</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">$8–25</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Ski infra</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Appalachian · limited</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Airport</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--white)">AVL · Charlotte</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="font-size:11px;color:var(--muted)">Skate culture</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Growing</span></div>
+        </div>
+      </div>
+
+      <!-- BEND -->
+      <div style="background:var(--bg);padding:28px 24px;border-left:1px solid var(--border)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted);margin-bottom:4px;letter-spacing:2px">BEND, OR</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:20px;opacity:.7">High Cascades · Candidate C</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Elevation</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--white)">1,100m city · 2,750m ski</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Summer temp</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">10–28°C</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Sun days/yr</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">~300</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Land $/m²</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">$20–60</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Ski infra</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Mt Bachelor ✓</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--muted)">Airport</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--white)">Redmond · Portland</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="font-size:11px;color:var(--muted)">Skate culture</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Outdoor sports · strong</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO STATS — TAOS -->
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:16px;text-transform:uppercase">Lead site — Taos, New Mexico</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#ef4444;line-height:1">2,130m</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Taos Pueblo elevation</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#ef4444;line-height:1">300+</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Sun days per year</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#ef4444;line-height:1">$4–12</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Per m² mountain land</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#ef4444;line-height:1">700m</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Vertical drop · ski valley</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#ef4444;line-height:1">$2.4B</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Est. build cost 100K city</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:48px">
+
+      <!-- LEFT COL -->
+      <div>
+        <div style="border-left:3px solid #ef4444;padding-left:20px;margin-bottom:32px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:10px;text-transform:uppercase">The Site — Taos Ski Valley, New Mexico</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Taos sits at 2,130m in the Sangre de Cristo Mountains — the southernmost spine of the Rockies. The ski valley sits at 2,800m at its summit. The town already runs a dual-season economy: ski and snowboard in winter, downhill mountain biking, hiking, and skate in summer. The surrounding Río Grande del Norte wilderness keeps the plateau from being encroached by suburban sprawl. The altitude matches El Salvador's Miramundo almost exactly. The sun is more reliable than anywhere else on the East side of the Rockies: 300+ clear days per year at altitude, dry air, and no coastal humidity to blunt the training season.</p>
+        </div>
+
+        <div style="border-left:3px solid #ef4444;padding-left:20px;margin-bottom:32px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:10px;text-transform:uppercase">Land and Cost</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Mountain land in the Carson National Forest corridor and the unincorporated Taos County mesa trades at $4–12/m² for bulk agricultural and undeveloped parcels. This is significantly cheaper than Bend or anything in Colorado. A 2,000-hectare site at $8/m² costs $160M — roughly four times El Salvador's land cost, but still a fraction of what a coastal or urban-adjacent site in the US would require. New Mexico's state government has existing incentive frameworks for rural economic development, and Taos County has seen population stagnation that creates appetite for large-scale employment projects.</p>
+        </div>
+
+        <div style="border-left:3px solid #ef4444;padding-left:20px;margin-bottom:32px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:10px;text-transform:uppercase">Climate — High Desert, Full Altitude</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The Taos plateau runs 15–25°C through the skate season (April–October). At 2,130m, afternoon thunderstorms arrive daily in July–August — the monsoon window — but mornings and evenings remain dry. The temperature curve never hits the 32°C midday death zone of the lowlands. Winter at 2,800m converts the mountain to a legitimate ski operation without any new lift infrastructure — Taos Ski Valley already exists. The indoor dome keeps resident athletes training year-round at 18°C. It is the El Salvador climate model translated to the American Southwest: same altitude, same temperature band, same concept, different flag.</p>
+        </div>
+
+        <div style="border-left:3px solid #ef4444;padding-left:20px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:10px;text-transform:uppercase">Regulatory — Standard US, Not Simple</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The United States does not have an El Salvador-style special economic zone framework. New Mexico requires standard municipal incorporation, which takes 12–24 months, a population resident base, and county approval. However: Taos County is a home-rule county with limited zoning over unincorporated rural land. Large agricultural parcels face fewer restrictions than platted subdivisions. Federal land adjacency means environmental review adds 18–36 months to any permitting process. The regulatory path is slower than El Salvador and more expensive than Japan's depopulation zones but more predictable than Greenland. Build timeline: 2034–2038 realistic for first residents.</p>
+        </div>
+      </div>
+
+      <!-- RIGHT COL -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);text-transform:uppercase">City levels — plateau to summit</div>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);margin-bottom:32px">
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border)">
+            <div style="width:56px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ef4444;flex-shrink:0">2,800m</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:2px">Summit — ski valley integration</div><div style="font-size:11px;color:var(--muted)">Winter: ski/snowboard start gates · Summer: elite downhill skate runs · observation deck</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border)">
+            <div style="width:56px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ef4444;flex-shrink:0">2,600m</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:2px">Upper training hub</div><div style="font-size:11px;color:var(--muted)">Elite morning sessions · vert park · halfpipe · medical · high-altitude acclimatisation</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border)">
+            <div style="width:56px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ef4444;flex-shrink:0">2,400m</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:2px">Athlete village</div><div style="font-size:11px;color:var(--muted)">3D-printed adobe-style terraces · long downhill bomb runs · gear workshop row</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border)">
+            <div style="width:56px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ef4444;flex-shrink:0">2,250m</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:2px">Market terrace</div><div style="font-size:11px;color:var(--muted)">Green chile stand · gear shops · nutrition · first SPC delivery channel node</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border)">
+            <div style="width:56px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ef4444;flex-shrink:0">2,130m</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:2px">Town floor — residential</div><div style="font-size:11px;color:var(--muted)">Family housing · school · junior skate zone · physio · barber · café</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:14px 18px">
+            <div style="width:56px;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ef4444;flex-shrink:0">2,000m</div>
+            <div><div style="font-size:13px;color:var(--white);margin-bottom:2px">Stadium — city base</div><div style="font-size:11px;color:var(--muted)">Competition arena · university · depot · all delivery channels terminate here</div></div>
+          </div>
+        </div>
+
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Why not Asheville or Bend?</div>
+        <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);margin-bottom:32px">
+          <div style="background:var(--bg2);padding:14px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:12px">
+            <div style="font-size:11px;color:var(--muted)">Metric</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:#ef4444">TAOS</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">AVL</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">BEND</div>
+          </div>
+          <div style="background:var(--bg3);padding:12px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:12px">
+            <div style="font-size:11px;color:var(--muted)">Elevation ≥2,000m</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Partial</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">City ✗</div>
+          </div>
+          <div style="background:var(--bg2);padding:12px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:12px">
+            <div style="font-size:11px;color:var(--muted)">300+ sun days</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">✗</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">~✓</div>
+          </div>
+          <div style="background:var(--bg3);padding:12px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:12px">
+            <div style="font-size:11px;color:var(--muted)">Land under $15/m²</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">✗</div>
+          </div>
+          <div style="background:var(--bg2);padding:12px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:12px">
+            <div style="font-size:11px;color:var(--muted)">Existing ski infra</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Minimal</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">✓</div>
+          </div>
+          <div style="background:var(--bg3);padding:12px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:12px">
+            <div style="font-size:11px;color:var(--muted)">Vertical drop ≥600m</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">700m ✓</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">~400m</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ef4444">900m ✓</div>
+          </div>
+        </div>
+
+        <div style="padding:20px 24px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.05)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:10px">The Southwest advantage</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.8">New Mexico's construction costs run 20–30% below California and Colorado. Adobe and rammed-earth building traditions mean local trades already understand thermal-mass construction — the same principle as the 3D-printed terraces. The high desert dryness eliminates the moisture-control engineering overhead of the Appalachians or the Pacific Northwest. The SPC delivery network on skates runs cleanest on dry, smooth pavement. Taos gets the full model with no compromises: altitude, sun, vertical, culture, and price.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUILD COST BREAKDOWN -->
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Build cost breakdown — Taos · 100,000 citizens</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+      <div style="background:var(--bg);padding:20px 18px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Land (2,000 ha)</div><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ef4444">$160–240M</div><div style="font-size:11px;color:var(--muted);margin-top:4px">$4–12/m² mountain parcel</div></div>
+      <div style="background:var(--bg);padding:20px 18px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Housing (40K units)</div><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ef4444">$1.76B</div><div style="font-size:11px;color:var(--muted);margin-top:4px">$44K/home · 3D printed</div></div>
+      <div style="background:var(--bg);padding:20px 18px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Gondola + transport</div><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ef4444">$18M</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Integrate existing ski lifts</div></div>
+      <div style="background:var(--bg);padding:20px 18px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Civil + infra</div><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ef4444">$420M</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Solar · water · stadium · roads</div></div>
+      <div style="background:rgba(239,68,68,.1);padding:20px 18px;border:1px solid rgba(239,68,68,.3)"><div style="font-size:11px;color:#ef4444;margin-bottom:6px">TOTAL</div><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ef4444">$2.4B</div><div style="font-size:11px;color:var(--muted);margin-top:4px">$24K per capita</div></div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:24px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Roadmap — USA phase</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
+      <div style="display:flex;flex-direction:column;gap:0;position:relative">
+        <div style="position:absolute;left:11px;top:24px;bottom:24px;width:1px;background:var(--border)"></div>
+        <div style="display:flex;gap:20px;margin-bottom:32px;position:relative">
+          <div style="width:24px;height:24px;border-radius:50%;background:#ef4444;flex-shrink:0;display:flex;align-items:center;justify-content:center;z-index:1"><div style="width:8px;height:8px;border-radius:50%;background:#000"></div></div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:#ef4444;margin-bottom:4px">NOW → 2027</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white);margin-bottom:6px">Phase 0 — Site Selection</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.7">Commission a land survey across all three candidate sites. Open informal conversations with Taos County government and New Mexico Economic Development Department. Identify a 2,000-hectare parcel in the Ski Valley corridor that is not within National Forest boundaries. Retain a New Mexico land-use attorney.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;margin-bottom:32px;position:relative">
+          <div style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;z-index:1"><div style="width:8px;height:8px;border-radius:50%;background:var(--border)"></div></div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:4px">2027 — 2029</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white);margin-bottom:6px">Phase 1 — Permitting and Land</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.7">Environmental impact assessment. County zoning variance for a planned community. Parallel negotiations with existing Taos Ski Valley LLC on operational integration — the valley's winter season becomes SPC's winter programme. First land purchases. Announce the USA site publicly to attract brand and investor commitments ahead of groundbreaking.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;margin-bottom:32px;position:relative">
+          <div style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;z-index:1"><div style="width:8px;height:8px;border-radius:50%;background:var(--border)"></div></div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:4px">2030 — 2033</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white);margin-bottom:6px">Phase 2 — Build Phase 1</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.7">3D-print the first 500 homes and the summit training hub. Gondola operational. First cohort of 1,000 resident athletes and support workers. SPC coin economy live. First summer skate season open to visiting athletes and tourists. Taos SPC Pop-Up runs alongside Taos Ski Valley winter season from 2031.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;position:relative">
+          <div style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;z-index:1"><div style="width:8px;height:8px;border-radius:50%;background:var(--border)"></div></div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:4px">2034 — 2038</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white);margin-bottom:6px">Phase 3 — Full City</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.7">Scale to 100,000 residents. Stadium complete. University operational. The USA city becomes the North American hub of the SPC network — feeding talent to El Salvador for warm-weather elite training and receiving El Salvador athletes in summer for altitude conditioning. Two mountains. One charter. One coin economy.</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="padding:24px 28px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.04);margin-bottom:24px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#ef4444;margin-bottom:12px">Why build in the USA at all?</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">The United States is the world's largest action sports market. X Games, Street League, Dew Tour — the American circuit sets global culture. An SPC site in the US anchors the brand to that market permanently and gives American athletes a domestic pathway to the full city model without requiring a passport. The regulatory cost is higher than El Salvador. The land cost is higher. The timeline is longer. The payoff is access to the deepest capital market, the largest media audience, and the most valuable sponsor relationships on the planet. It is the hardest site to build. It is also the most important one to have.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:12px;padding:12px 16px;border:1px solid var(--border);align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:4px"></div><div style="font-size:12px;color:var(--muted)"><span style="color:var(--white)">SPC coin valid USA-wide</span> — the same SPC economy running in El Salvador and Japan operates with no modification at the Taos site. Athletes transfer between cities carrying their balance.</div></div>
+          <div style="display:flex;gap:12px;padding:12px 16px;border:1px solid var(--border);align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:4px"></div><div style="font-size:12px;color:var(--muted)"><span style="color:var(--white)">Ski Valley integration</span> — Taos Ski Valley already has gondola, patrol infrastructure, and competition permitting history. SPC does not build from zero on the mountain transport question.</div></div>
+          <div style="display:flex;gap:12px;padding:12px 16px;border:1px solid var(--border);align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:4px"></div><div style="font-size:12px;color:var(--muted)"><span style="color:var(--white)">Route 68 access</span> — the road from Taos Pueblo up to the Ski Valley is already paved, maintained, and handles freight. The gravity-delivery model is operational from day one of construction.</div></div>
+          <div style="display:flex;gap:12px;padding:12px 16px;border:1px solid var(--border);align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:4px"></div><div style="font-size:12px;color:var(--muted)"><span style="color:var(--white)">No polar bears</span> — confirmed. This puts Taos ahead of Greenland on at least one metric.</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end loc-us -->
 
   </div><!-- end loc-mt -->
 
@@ -2851,9 +3095,9 @@ reveals.forEach(r=>io.observe(r));
 
 // LOCATION TABS
 function switchLoc(loc){
-  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo',gl:'loc-gl'};
-  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo',gl:'ltab-gl'};
-  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)',gl:'#60a5fa'};
+  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo',gl:'loc-gl',us:'loc-us'};
+  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo',gl:'ltab-gl',us:'ltab-us'};
+  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)',gl:'#60a5fa',us:'#ef4444'};
   Object.values(panels).forEach(id=>document.getElementById(id).style.display='none');
   Object.values(tabs).forEach(id=>{
     const b=document.getElementById(id);
