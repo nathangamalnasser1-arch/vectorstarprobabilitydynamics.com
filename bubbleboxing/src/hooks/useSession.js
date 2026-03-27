@@ -60,6 +60,13 @@ export function useSession() {
         if (timeLeft <= 0) endSession();
       }, 1000);
 
+      // Small offscreen canvas for OpenCV — 16x fewer pixels than 1280x720
+      const cvCanvas = document.createElement('canvas');
+      cvCanvas.width = 320;
+      cvCanvas.height = 180;
+      const cvCtx = cvCanvas.getContext('2d');
+      let frameCount = 0;
+
       // rAF loop for frame processing
       const processLoop = (timestamp) => {
         if (!state.session.isRunning && timeLeft <= 0) return;
@@ -69,17 +76,20 @@ export function useSession() {
           if (canvasEl.width !== videoEl.videoWidth) canvasEl.width = videoEl.videoWidth || 640;
           if (canvasEl.height !== videoEl.videoHeight) canvasEl.height = videoEl.videoHeight || 480;
 
-          // Draw video to canvas
+          // Draw video to display canvas at full resolution
           const ctx = canvasEl.getContext('2d');
           ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
 
-          // Bubble detection
-          if (bubbleDetectorRef.current?._isReady) {
-            bubbleDetectorRef.current.processFrame(canvasEl);
+          frameCount++;
+
+          // Bubble detection — every 3rd frame on 320x180 offscreen canvas
+          if (frameCount % 3 === 0 && bubbleDetectorRef.current?._isReady) {
+            cvCtx.drawImage(videoEl, 0, 0, 320, 180);
+            bubbleDetectorRef.current.processFrame(cvCanvas);
           }
 
-          // Punch detection
-          if (punchDetectorRef.current?._isReady) {
+          // Punch detection — every 2nd frame
+          if (frameCount % 2 === 0 && punchDetectorRef.current?._isReady) {
             punchDetectorRef.current.processFrame(videoEl, timestamp);
           }
         }

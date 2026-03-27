@@ -3,6 +3,11 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   base: '/bubbleboxing/dist/',
+  server: {
+    host: true, // expose on local network so phone can connect via IP
+    port: 5173,
+    https: false,
+  },
   plugins: [react()],
   test: {
     globals: true,
