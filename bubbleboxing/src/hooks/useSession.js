@@ -65,6 +65,10 @@ export function useSession() {
         if (!state.session.isRunning && timeLeft <= 0) return;
 
         if (videoEl && videoEl.readyState >= 2) {
+          // Sync canvas pixel dimensions to video resolution
+          if (canvasEl.width !== videoEl.videoWidth) canvasEl.width = videoEl.videoWidth || 640;
+          if (canvasEl.height !== videoEl.videoHeight) canvasEl.height = videoEl.videoHeight || 480;
+
           // Draw video to canvas
           const ctx = canvasEl.getContext('2d');
           ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);

@@ -14,6 +14,7 @@ export default function SessionScreen() {
   const canvasRef = useRef(null);    // main composited canvas
   const ringCanvasRef = useRef(null); // ring light overlay
   const recorderRef = useRef(new Recorder());
+  const previewRafRef = useRef(null);
 
   const { videoRef, stream, isReady, startCamera, flipCamera, facingMode } = useCamera();
   const { startSession, endSession } = useSession();
@@ -29,6 +30,26 @@ export default function SessionScreen() {
     startCamera('environment');
   }, []);
 
+  // Live camera preview on canvas before session starts
+  useEffect(() => {
+    if (!isReady || started) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    const drawPreview = () => {
+      if (video.readyState >= 2) {
+        if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth || 640;
+        if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight || 480;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
+      previewRafRef.current = requestAnimationFrame(drawPreview);
+    };
+
+    previewRafRef.current = requestAnimationFrame(drawPreview);
+    return () => cancelAnimationFrame(previewRafRef.current);
+  }, [isReady, started, videoRef]);
+
   // Auto-capture on bubble pop
   useEffect(() => {
     if (!autoCapture) return;
@@ -39,6 +60,7 @@ export default function SessionScreen() {
 
   const handleStart = useCallback(async () => {
     if (!isReady || started) return;
+    cancelAnimationFrame(previewRafRef.current);
     setStarted(true);
     await startSession(videoRef.current, canvasRef.current);
   }, [isReady, started, startSession]);
