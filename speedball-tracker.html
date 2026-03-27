@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPEEDBALL TRACKER</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --panel: #111114;
+    --border: #1e1e24;
+    --red: #d62828;
+    --red-dim: #7a1515;
+    --gold: #f4a500;
+    --gold-dim: #7a5200;
+    --white: #e8e4dc;
+    --grey: #4a4a55;
+    --green: #2dba60;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(214,40,40,0.06) 0%, transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%230a0a0b'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23ffffff' opacity='0.02'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    line-height: 1;
+  }
+  .brand-sub {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--grey);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--grey);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .status-dot.active {
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    animation: blink 1.5s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .speed-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .speed-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .speed-card.hit::before { opacity: 1; }
+
+  .speed-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--grey);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .speed-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 9rem;
+    line-height: 0.9;
+    color: var(--white);
+    transition: color 0.2s, text-shadow 0.2s;
+  }
+  .speed-number.hit-flash {
+    color: var(--gold);
+    text-shadow: 0 0 40px rgba(244,165,0,0.5);
+  }
+  .speed-unit {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--grey);
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .tier-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 5px 18px;
+    border-radius: 2px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+    border: 1px solid;
+    transition: all 0.4s;
+  }
+  .tier-0 { color: var(--grey); border-color: var(--grey); }
+  .tier-1 { color: #4fc3f7; border-color: #4fc3f7; background: rgba(79,195,247,0.07); }
+  .tier-2 { color: var(--green); border-color: var(--green); background: rgba(45,186,96,0.07); }
+  .tier-3 { color: var(--gold); border-color: var(--gold); background: rgba(244,165,0,0.07); }
+  .tier-4 { color: var(--red); border-color: var(--red); background: rgba(214,40,40,0.1); text-shadow: 0 0 10px rgba(214,40,40,0.5); }
+
+  .gauge-wrap { margin-top: 24px; padding: 0 8px; }
+  .gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--grey);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .gauge-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    background: linear-gradient(90deg, #4fc3f7, var(--green), var(--gold), var(--red));
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-cell {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--white);
+  }
+  .stat-value.peak { color: var(--gold); }
+  .stat-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--grey);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .history-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--grey);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .history-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 60px;
+  }
+  .hbar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    background: var(--border);
+    min-height: 3px;
+    transition: height 0.3s ease, background 0.3s;
+  }
+  .hbar.active-bar { background: var(--red); box-shadow: 0 0 6px rgba(214,40,40,0.4); }
+  .hbar.b1 { background: #4fc3f7; }
+  .hbar.b2 { background: var(--green); }
+  .hbar.b3 { background: var(--gold); }
+  .hbar.b4 { background: var(--red); }
+
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .control-cell {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .control-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--grey);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .control-label span {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--gold);
+    font-size: 0.8rem;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: var(--gold);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(244,165,0,0.5);
+  }
+
+  .toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
+  .toggle { position: relative; width: 40px; height: 22px; cursor: pointer; }
+  .toggle input { display: none; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 11px;
+    transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--gold-dim); }
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    background: var(--grey);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle input:checked ~ .toggle-thumb {
+    transform: translateX(18px);
+    background: var(--gold);
+  }
+
+  .main-btn {
+    width: 100%;
+    padding: 18px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.15em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 10px;
+  }
+  .main-btn.start {
+    background: var(--red);
+    color: var(--white);
+    box-shadow: 0 4px 20px rgba(214,40,40,0.3);
+  }
+  .main-btn.start:hover {
+    background: #e63030;
+    box-shadow: 0 6px 28px rgba(214,40,40,0.5);
+    transform: translateY(-1px);
+  }
+  .main-btn.stop {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+  }
+  .main-btn.stop:hover { background: rgba(214,40,40,0.1); }
+  .main-btn:active { transform: scale(0.99); }
+
+  .mic-bar-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+  }
+  .mic-icon {
+    font-size: 0.7rem; letter-spacing: 0.2em; color: var(--grey);
+    text-transform: uppercase; font-weight: 700; white-space: nowrap;
+  }
+  .mic-level-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .mic-level-fill { height: 100%; width: 0%; background: var(--green); transition: width 0.05s; border-radius: 2px; }
+
+  .hit-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 100;
+    border: 2px solid var(--red); opacity: 0; transition: opacity 0.05s;
+  }
+  .hit-overlay.flash { opacity: 1; }
+
+  .announce-log {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; color: var(--grey);
+    text-align: center; min-height: 18px;
+    letter-spacing: 0.05em; transition: color 0.3s;
+    margin-bottom: 16px;
+  }
+  .announce-log.lit { color: var(--gold); }
+
+  @media (max-width: 480px) {
+    .speed-number { font-size: 6rem; }
+    .controls-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hit-overlay" id="hitOverlay"></div>
+
+<div class="container">
+  <header>
+    <div class="brand">
+      <div class="brand-title">SPEEDBALL</div>
+      <div class="brand-sub">Training Tracker</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="brand-sub" id="statusText">READY</div>
+      <div class="status-dot" id="statusDot"></div>
+    </div>
+  </header>
+
+  <div class="speed-card" id="speedCard">
+    <div class="speed-label">Hits Per Minute</div>
+    <div class="speed-number" id="speedNum">0</div>
+    <div class="speed-unit">BPM</div>
+    <div class="tier-badge tier-0" id="tierBadge">WAITING</div>
+    <div class="gauge-wrap">
+      <div class="gauge-labels">
+        <span>0</span><span>100</span><span>200</span><span>300+</span>
+      </div>
+      <div class="gauge-track">
+        <div class="gauge-fill" id="gaugeFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-cell">
+      <div class="stat-value" id="statHits">0</div>
+      <div class="stat-label">Total Hits</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-value peak" id="statPeak">0</div>
+      <div class="stat-label">Peak BPM</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-value" id="statTime">0:00</div>
+      <div class="stat-label">Session</div>
+    </div>
+  </div>
+
+  <div class="mic-bar-row">
+    <div class="mic-icon">MIC</div>
+    <div class="mic-level-track">
+      <div class="mic-level-fill" id="micFill"></div>
+    </div>
+    <div class="mic-icon" id="micDb">-- dB</div>
+  </div>
+
+  <div class="history-card">
+    <div class="card-title">Speed History — Last 30 hits</div>
+    <div class="history-bars" id="historyBars"></div>
+  </div>
+
+  <div class="controls-row">
+    <div class="control-cell">
+      <div class="control-label">
+        Sensitivity <span id="sensVal">65</span>
+      </div>
+      <input type="range" id="sensSlider" min="1" max="100" value="65">
+    </div>
+    <div class="control-cell">
+      <div class="control-label">Voice Announce</div>
+      <div class="toggle-wrap">
+        <div style="font-size:0.75rem;color:var(--grey)">Every 5s</div>
+        <label class="toggle">
+          <input type="checkbox" id="announceToggle" checked>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="announce-log" id="announceLog">Start session to begin detecting hits via microphone</div>
+
+  <button class="main-btn start" id="mainBtn" onclick="toggleSession()">
+    ▶ START SESSION
+  </button>
+</div>
+
+<script>
+let isRunning = false;
+let audioCtx = null, analyser = null, micStream = null;
+let animFrame = null;
+let hitTimes = [];
+let totalHits = 0;
+let peakBpm = 0;
+let sessionStart = null;
+let timerInterval = null;
+let lastAnnounceTime = 0;
+let bpmHistory = [];
+let lastBpm = -1;
+let lastHitTime = 0;
+const MIN_HIT_GAP = 60;
+
+const speedNum = document.getElementById('speedNum');
+const gaugeFill = document.getElementById('gaugeFill');
+const tierBadge = document.getElementById('tierBadge');
+const statHits = document.getElementById('statHits');
+const statPeak = document.getElementById('statPeak');
+const statTime = document.getElementById('statTime');
+const micFill = document.getElementById('micFill');
+const micDb = document.getElementById('micDb');
+const historyBars = document.getElementById('historyBars');
+const announceLog = document.getElementById('announceLog');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const mainBtn = document.getElementById('mainBtn');
+const speedCard = document.getElementById('speedCard');
+const hitOverlay = document.getElementById('hitOverlay');
+const sensSlider = document.getElementById('sensSlider');
+const sensVal = document.getElementById('sensVal');
+const announceToggle = document.getElementById('announceToggle');
+
+function initBars() {
+  historyBars.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const b = document.createElement('div');
+    b.className = 'hbar';
+    b.id = 'bar' + i;
+    historyBars.appendChild(b);
+  }
+}
+initBars();
+
+sensSlider.addEventListener('input', () => { sensVal.textContent = sensSlider.value; });
+
+async function toggleSession() {
+  if (isRunning) stopSession();
+  else await startSession();
+}
+
+async function startSession() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    micStream = stream;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.15;
+    const source = audioCtx.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    isRunning = true;
+    totalHits = 0; peakBpm = 0;
+    hitTimes = []; bpmHistory = [];
+    sessionStart = Date.now(); lastBpm = -1;
+
+    statusDot.classList.add('active');
+    statusText.textContent = 'LIVE';
+    mainBtn.textContent = '■ STOP SESSION';
+    mainBtn.className = 'main-btn stop';
+    setLog('Listening... start hitting!', false);
+
+    timerInterval = setInterval(updateTimer, 500);
+    detectLoop();
+  } catch(e) {
+    setLog('Microphone access denied — check browser permissions', false);
+  }
+}
+
+function stopSession() {
+  isRunning = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+  if (timerInterval) clearInterval(timerInterval);
+
+  statusDot.classList.remove('active');
+  statusText.textContent = 'DONE';
+  mainBtn.textContent = '▶ NEW SESSION';
+  mainBtn.className = 'main-btn start';
+
+  if (totalHits > 0) {
+    const msg = 'Session over — ' + totalHits + ' hits, peak ' + peakBpm + ' BPM';
+    setLog(msg, true);
+    if (announceToggle.checked) speak('Session over. ' + totalHits + ' hits. Peak ' + peakBpm + ' BPM.');
+  } else {
+    setLog('No hits detected — try raising sensitivity', false);
+  }
+
+  micFill.style.width = '0%';
+  micDb.textContent = '-- dB';
+}
+
+function detectLoop() {
+  if (!isRunning) return;
+  const bufLen = analyser.frequencyBinCount;
+  const data = new Uint8Array(bufLen);
+  analyser.getByteTimeDomainData(data);
+
+  let sum = 0;
+  for (let i = 0; i < bufLen; i++) {
+    const v = (data[i] - 128) / 128;
+    sum += v * v;
+  }
+  const rms = Math.sqrt(sum / bufLen);
+  const db = rms > 0 ? 20 * Math.log10(rms) : -80;
+  const levelPct = Math.min(100, Math.max(0, ((db + 60) / 60) * 100));
+  micFill.style.width = levelPct + '%';
+  micDb.textContent = db.toFixed(1) + ' dB';
+
+  const sens = parseInt(sensSlider.value);
+  const threshold = 0.6 - (sens / 100) * 0.55;
+
+  const now = Date.now();
+  if (rms > threshold && (now - lastHitTime) > MIN_HIT_GAP) {
+    lastHitTime = now;
+    registerHit(now);
+  }
+
+  const bpm = calcBpm();
+  if (bpm !== lastBpm) {
+    lastBpm = bpm;
+    updateDisplay(bpm);
+  }
+
+  if (announceToggle.checked && now - lastAnnounceTime > 5000 && isRunning && bpm > 0) {
+    lastAnnounceTime = now;
+    announceSpeed(bpm);
+  }
+
+  animFrame = requestAnimationFrame(detectLoop);
+}
+
+function registerHit(now) {
+  totalHits++;
+  hitTimes.push(now);
+  hitTimes = hitTimes.filter(t => now - t < 10000);
+  const bpm = calcBpm();
+  bpmHistory.push(bpm);
+  if (bpmHistory.length > 30) bpmHistory.shift();
+  statHits.textContent = totalHits;
+  flashHit();
+  updateHistoryBars();
+}
+
+function calcBpm() {
+  if (hitTimes.length < 2) return hitTimes.length > 0 ? 10 : 0;
+  const now = Date.now();
+  const recent = hitTimes.filter(t => now - t < 6000);
+  if (recent.length < 2) return 0;
+  const span = (recent[recent.length-1] - recent[0]) / 1000;
+  if (span === 0) return 0;
+  return Math.round((recent.length - 1) / span * 60);
+}
+
+function updateDisplay(bpm) {
+  speedNum.textContent = bpm;
+  if (bpm > peakBpm) { peakBpm = bpm; statPeak.textContent = peakBpm; }
+  gaugeFill.style.width = Math.min(100, (bpm / 320) * 100) + '%';
+
+  let tierText = 'WARMING UP', tierClass = 'tier-0';
+  if (bpm >= 240)      { tierText = 'ELITE';         tierClass = 'tier-4'; }
+  else if (bpm >= 180) { tierText = 'ADVANCED';      tierClass = 'tier-3'; }
+  else if (bpm >= 120) { tierText = 'INTERMEDIATE';  tierClass = 'tier-2'; }
+  else if (bpm >= 60)  { tierText = 'BEGINNER';      tierClass = 'tier-1'; }
+
+  tierBadge.textContent = tierText;
+  tierBadge.className = 'tier-badge ' + tierClass;
+}
+
+function flashHit() {
+  speedNum.classList.add('hit-flash');
+  speedCard.classList.add('hit');
+  hitOverlay.classList.add('flash');
+  setTimeout(() => {
+    speedNum.classList.remove('hit-flash');
+    speedCard.classList.remove('hit');
+    hitOverlay.classList.remove('flash');
+  }, 80);
+}
+
+function updateHistoryBars() {
+  const max = Math.max(320, ...bpmHistory);
+  for (let i = 0; i < 30; i++) {
+    const bar = document.getElementById('bar' + i);
+    if (!bar) continue;
+    if (i < bpmHistory.length) {
+      const v = bpmHistory[i];
+      bar.style.height = Math.max(3, (v / max) * 60) + 'px';
+      bar.className = 'hbar ' + (v >= 240 ? 'b4' : v >= 180 ? 'b3' : v >= 120 ? 'b2' : 'b1');
+      if (i === bpmHistory.length - 1) bar.classList.add('active-bar');
+    } else {
+      bar.style.height = '3px';
+      bar.className = 'hbar';
+    }
+  }
+}
+
+function updateTimer() {
+  if (!sessionStart) return;
+  const s = Math.floor((Date.now() - sessionStart) / 1000);
+  statTime.textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+
+function announceSpeed(bpm) {
+  const tierWord = bpm>=240?'Elite speed':bpm>=180?'Advanced':bpm>=120?'Intermediate':'Beginner pace';
+  const msg = bpm + ' BPM — ' + tierWord;
+  speak(msg);
+  setLog('ANNOUNCE: ' + msg, true);
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.1; u.pitch = 0.9; u.volume = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function setLog(msg, lit) {
+  announceLog.textContent = msg;
+  announceLog.className = lit ? 'announce-log lit' : 'announce-log';
+}
+</script>
+</body>
+</html>
