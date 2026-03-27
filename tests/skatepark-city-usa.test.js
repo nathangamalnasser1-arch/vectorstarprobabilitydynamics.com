@@ -15,7 +15,7 @@ const required = {
   switchLocUsaTab:         /us:'ltab-us'/,
   switchLocUsaColor:       /us:'#ef4444'/,
   navLinkUsa:              /switchLoc\('us'\).*USA|USA.*switchLoc\('us'\)/,
-  sevenLocationsHeading:   /SEVEN.*LOCATIONS|SEVEN<br>LOCATIONS/,
+  locationsSectionHeading: /TEN<br>LOCATIONS|NINE<br>LOCATIONS|EIGHT<br>LOCATIONS|SEVEN<br>LOCATIONS/,
   taosCandidateSite:       /TAOS.*NM|Taos.*New Mexico/i,
   ashevilleCandidateSite:  /ASHEVILLE.*NC|Asheville.*Blue Ridge/i,
   bendCandidateSite:       /BEND.*OR|Bend.*Oregon|Bend.*Cascades/i,

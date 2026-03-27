@@ -44,6 +44,7 @@ const mustInclude = [
   'id="inspiration"',
   'JqflfjrcKjo',
   'skatecityofficial',
+  'properties.lefigaro.com/announces/other-real+estate-quebec-canada/91000075',
 ];
 
 mustInclude.forEach((s) => {
