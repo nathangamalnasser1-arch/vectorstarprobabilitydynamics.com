@@ -12,6 +12,8 @@ const required = {
   title: /Natapps|Nathan.*Apps/i,
   periodicTablePoker: /periodictablepoker\.web\.app/,
   youknObtainium: /youknobtainium\.web\.app/,
+  bubbleBoxingHeading: /BubbleBoxing/,
+  bubbleBoxingLink: /bubbleboxing\/dist\/index\.html/,
   moreToCome: /more to come|coming soon/i,
   playButtons: /Play Now/,
   targetBlank: /target="_blank"/,

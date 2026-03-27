@@ -1,0 +1,29 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Sessions: authenticated users can create; 
+    // users can read their own; anyone can read for leaderboard
+    match /sessions/{sessionId} {
+      // Anyone authenticated can read (needed for global leaderboard)
+      allow read: if request.auth != null;
+
+      // Only the owner can create their own sessions
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.totalPops is int
+        && request.resource.data.totalPops >= 0
+        && request.resource.data.duration is int;
+
+      // Only the owner can update or delete their own sessions
+      allow update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}
