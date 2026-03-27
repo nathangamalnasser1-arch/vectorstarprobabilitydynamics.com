@@ -31,10 +31,18 @@ export function useCamera() {
 
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+
+        const onReady = () => {
+          videoRef.current?.play();
           setIsReady(true);
         };
+
+        if (videoRef.current.readyState >= 1) {
+          // metadata already loaded — event already fired, call directly
+          onReady();
+        } else {
+          videoRef.current.addEventListener('loadedmetadata', onReady, { once: true });
+        }
       }
 
       // Request wake lock to keep screen on

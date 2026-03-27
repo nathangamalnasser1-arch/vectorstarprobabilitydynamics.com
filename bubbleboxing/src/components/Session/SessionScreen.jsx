@@ -11,12 +11,11 @@ export default function SessionScreen() {
   const { state, dispatch } = useApp();
   const { theme, session, ringLight } = state;
 
-  const videoRef = useRef(null);
   const canvasRef = useRef(null);    // main composited canvas
   const ringCanvasRef = useRef(null); // ring light overlay
   const recorderRef = useRef(new Recorder());
 
-  const { stream, isReady, startCamera, flipCamera, facingMode } = useCamera();
+  const { videoRef, stream, isReady, startCamera, flipCamera, facingMode } = useCamera();
   const { startSession, endSession } = useSession();
   useRingLight(ringCanvasRef);
 
@@ -29,13 +28,6 @@ export default function SessionScreen() {
   useEffect(() => {
     startCamera('environment');
   }, []);
-
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play().catch(() => {});
-    }
-  }, [stream]);
 
   // Auto-capture on bubble pop
   useEffect(() => {
