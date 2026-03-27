@@ -17,11 +17,10 @@ const filesOnDisk = fs
   .filter((f) => IMAGE_EXT.test(f))
   .sort();
 
-const start = html.indexOf('class="gallery-grid');
-assert.ok(start >= 0, 'gallery-grid block not found');
-const end = html.indexOf('class="gallery-cap"', start);
-assert.ok(end > start, 'gallery-cap not found after gallery-grid');
-const galleryBlock = html.slice(start, end);
+const gStart = html.indexOf('<!-- GALLERY -->');
+const gEnd = html.indexOf('<!-- VIDEOS', gStart);
+assert.ok(gStart >= 0 && gEnd > gStart, 'GALLERY section block not found');
+const galleryBlock = html.slice(gStart, gEnd);
 
 const re = /skateparkcity images\/([^"']+\.(?:png|jpe?g|webp|gif))/gi;
 const fromHtml = [];

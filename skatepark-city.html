@@ -75,6 +75,26 @@ body.nav-open{overflow:hidden}
 .gallery-grid a img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease,opacity .3s}
 .gallery-grid a:hover img{transform:scale(1.045);opacity:.95}
 .gallery-cap{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:14px}
+.spc-gallery-carousel{max-width:1100px;margin:40px auto 0;position:relative;--gc-n:11;--gc-i:0}
+.spc-gc-viewport{position:relative;overflow:hidden;border:1px solid var(--border);background:var(--bg2);border-radius:4px;aspect-ratio:16/10;width:100%}
+.spc-gc-track{display:flex;height:100%;width:calc(var(--gc-n)*100%);transition:transform .45s cubic-bezier(.25,.1,.25,1);will-change:transform;transform:translateX(calc(-1*var(--gc-i)*100%/var(--gc-n)))}
+.spc-gc-slide{flex:0 0 calc(100%/var(--gc-n));height:100%;min-width:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:8px}
+.spc-gc-slide a{display:block;width:100%;height:100%;text-align:center}
+.spc-gc-slide img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;vertical-align:middle}
+.spc-gc-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:48px;height:48px;border:1px solid var(--border);background:rgba(8,12,15,.82);color:var(--orange);font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;cursor:pointer;border-radius:4px;transition:background .2s,border-color .2s;padding:0}
+.spc-gc-btn:hover{background:rgba(255,107,26,.15);border-color:rgba(255,107,26,.4)}
+.spc-gc-prev{left:12px}
+.spc-gc-next{right:12px}
+.spc-gc-meta{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+.spc-gc-counter{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted)}
+.spc-gc-dots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;max-width:100%}
+.spc-gc-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
+.spc-gc-dot[aria-current="true"]{background:var(--orange);border-color:var(--orange)}
+@media(max-width:600px){
+  .spc-gc-btn{width:40px;height:40px;font-size:22px}
+  .spc-gc-prev{left:6px}
+  .spc-gc-next{right:6px}
+}
 .context-art{margin:0 0 32px 0;border:1px solid var(--border);overflow:hidden;background:var(--bg3)}
 .context-art img{width:100%;max-height:380px;object-fit:cover;display:block}
 .context-art figcaption{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);padding:10px 14px;border-top:1px solid var(--border)}
@@ -428,20 +448,31 @@ html,body{overflow-x:hidden;max-width:100%}
 <section id="gallery" style="padding:100px 48px 80px;background:var(--bg3)">
   <span class="section-tag reveal">Visuals</span>
   <h2 class="section-title reveal">GALLERY</h2>
-  <p class="section-body reveal" style="max-width:640px;margin-bottom:8px">Concept art and renders — Skatepark City programme. Click any image to open the file (same assets used in-page below).</p>
-  <div class="gallery-grid reveal">
-    <a href="skateparkcity images/unnamed (23).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (23).png" alt="Skatepark City visual 1" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (24).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (24).png" alt="Skatepark City visual 2" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (25).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (25).png" alt="Skatepark City visual 3" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (26).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (26).png" alt="Skatepark City visual 4" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (27).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (27).png" alt="Skatepark City visual 5" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (28).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (28).png" alt="Skatepark City visual 6" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (29).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (29).png" alt="Skatepark City visual 7" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (30).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (30).png" alt="Skatepark City visual 8" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (23)1.png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (23)1.png" alt="Skatepark City visual 9" loading="lazy" width="800" height="600"></a>
-    <a href="skateparkcity images/unnamed (24)1.png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (24)1.png" alt="Skatepark City visual 10" loading="lazy" width="800" height="600"></a>
+  <p class="section-body reveal" style="max-width:640px;margin-bottom:8px">Concept art and renders — Skatepark City programme. Use arrows or dots to browse; click the image to open the full file (same assets used in-page below).</p>
+  <div class="spc-gallery-carousel reveal" id="spc-gallery-carousel" tabindex="0" role="region" aria-label="Skatepark City image gallery">
+    <div class="spc-gc-viewport">
+      <div class="spc-gc-track" id="spc-gc-track">
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (23).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (23).png" alt="Skatepark City visual 1" loading="eager" fetchpriority="high" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (24).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (24).png" alt="Skatepark City visual 2" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (25).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (25).png" alt="Skatepark City visual 3" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (26).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (26).png" alt="Skatepark City visual 4" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (27).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (27).png" alt="Skatepark City visual 5" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (28).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (28).png" alt="Skatepark City visual 6" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (29).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (29).png" alt="Skatepark City visual 7" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (30).png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (30).png" alt="Skatepark City visual 8" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (23)1.png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (23)1.png" alt="Skatepark City visual 9" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (24)1.png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (24)1.png" alt="Skatepark City visual 10" loading="lazy" width="1200" height="800"></a></div>
+        <div class="spc-gc-slide"><a href="skateparkcity images/unnamed (23)2.png" target="_blank" rel="noopener"><img src="skateparkcity images/unnamed (23)2.png" alt="Skatepark City visual 11" loading="lazy" width="1200" height="800"></a></div>
+      </div>
+      <button type="button" class="spc-gc-btn spc-gc-prev" id="spc-gc-prev" aria-label="Previous image">‹</button>
+      <button type="button" class="spc-gc-btn spc-gc-next" id="spc-gc-next" aria-label="Next image">›</button>
+    </div>
+    <div class="spc-gc-meta">
+      <span class="spc-gc-counter" id="spc-gc-counter" aria-live="polite">1 / 11</span>
+      <div class="spc-gc-dots" id="spc-gc-dots" aria-label="Gallery slides"></div>
+    </div>
+    <p class="gallery-cap" style="margin-top:8px;text-align:center">Folder: skateparkcity images · 11 assets · carousel</p>
   </div>
-  <p class="gallery-cap">Folder: skateparkcity images · 10 assets</p>
 </section>
 
 <!-- VIDEOS — YouTube -->
@@ -3690,7 +3721,7 @@ let mx=0,my=0,rx=0,ry=0;
 document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
 function animRing(){rx+=(mx-rx)*.15;ry+=(my-ry)*.15;ring.style.left=Math.round(rx)+'px';ring.style.top=Math.round(ry)+'px';requestAnimationFrame(animRing)}
 animRing();
-document.querySelectorAll('a,button,.feature-card,.invest-card,.mode-card,.license-tier,.nav-hamburger,.gallery-grid a,.nav-instagram').forEach(el=>{
+document.querySelectorAll('a,button,.feature-card,.invest-card,.mode-card,.license-tier,.nav-hamburger,.spc-gc-btn,.spc-gc-dot,.nav-instagram').forEach(el=>{
   el.addEventListener('mouseenter',()=>{cursor.style.width='24px';cursor.style.height='24px';ring.style.width='50px';ring.style.height='50px'});
   el.addEventListener('mouseleave',()=>{cursor.style.width='12px';cursor.style.height='12px';ring.style.width='36px';ring.style.height='36px'});
 });
@@ -3701,6 +3732,43 @@ const io = new IntersectionObserver((entries)=>{
   entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}});
 },{threshold:.1,rootMargin:'0px 0px -60px 0px'});
 reveals.forEach(r=>io.observe(r));
+
+// GALLERY CAROUSEL
+(function(){
+  const root=document.getElementById('spc-gallery-carousel');
+  const track=document.getElementById('spc-gc-track');
+  const prev=document.getElementById('spc-gc-prev');
+  const next=document.getElementById('spc-gc-next');
+  const counter=document.getElementById('spc-gc-counter');
+  const dotsWrap=document.getElementById('spc-gc-dots');
+  if(!root||!track||!prev||!next||!counter||!dotsWrap)return;
+  const n=track.querySelectorAll('.spc-gc-slide').length;
+  if(n<1)return;
+  root.style.setProperty('--gc-n',String(n));
+  let i=0;
+  function go(idx){
+    i=((idx%n)+n)%n;
+    root.style.setProperty('--gc-i',String(i));
+    counter.textContent=(i+1)+' / '+n;
+    dotsWrap.querySelectorAll('.spc-gc-dot').forEach((d,di)=>{d.setAttribute('aria-current',di===i?'true':'false')});
+  }
+  prev.addEventListener('click',e=>{e.stopPropagation();go(i-1)});
+  next.addEventListener('click',e=>{e.stopPropagation();go(i+1)});
+  dotsWrap.innerHTML='';
+  for(let j=0;j<n;j++){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='spc-gc-dot';
+    b.setAttribute('aria-label','Go to slide '+(j+1));
+    if(j===0)b.setAttribute('aria-current','true');
+    b.addEventListener('click',e=>{e.stopPropagation();go(j)});
+    dotsWrap.appendChild(b);
+  }
+  root.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'){e.preventDefault();go(i-1)}
+    else if(e.key==='ArrowRight'){e.preventDefault();go(i+1)}
+  });
+})();
 
 // LOCATION TABS
 function switchLoc(loc){
