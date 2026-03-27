@@ -1,0 +1,37 @@
+<svg width="560" height="220" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="560" height="220" fill="#020814" rx="6"/>
+  <polygon points="0,220 80,0 110,0 30,220" fill="#0066ff" opacity="0.18"/>
+  <polygon points="50,220 160,0 195,0 85,220" fill="#00e5ff" opacity="0.10"/>
+  <polygon points="370,0 480,220 510,220 400,0" fill="#00e5ff" opacity="0.10"/>
+  <polygon points="430,0 560,200 560,220 540,220 470,0" fill="#0066ff" opacity="0.14"/>
+  <polygon points="14,208 14,12 546,8 546,204" fill="#03101f" opacity="0.95"/>
+  <rect x="60" y="16" width="220" height="3" fill="#00e5ff" opacity="0.9" rx="1"/>
+  <rect x="280" y="16" width="220" height="3" fill="#0066ff" opacity="0.9" rx="1"/>
+  <rect x="60" y="201" width="220" height="3" fill="#0066ff" opacity="0.8" rx="1"/>
+  <rect x="280" y="201" width="220" height="3" fill="#00e5ff" opacity="0.8" rx="1"/>
+  <polygon points="22,82 38,38 47,38 35,66 52,66 30,112 36,112 18,152 14,152 32,112 16,112" fill="#f5c842" opacity="0.95"/>
+  <polygon points="538,82 522,38 513,38 525,66 508,66 530,112 524,112 542,152 546,152 528,112 544,112" fill="#00e5ff" opacity="0.95"/>
+  <g transform="skewX(-5)">
+    <text x="299" y="119" font-family="'Arial Black','Impact','Arial Narrow',sans-serif" font-size="78" fill="#0044cc" letter-spacing="-1" text-anchor="middle" dominant-baseline="central" font-weight="900" opacity="0.6">NATENATE</text>
+    <text x="296" y="116" font-family="'Arial Black','Impact','Arial Narrow',sans-serif" font-size="78" fill="#ffffff" letter-spacing="-1" text-anchor="middle" dominant-baseline="central" font-weight="900">NATENATE</text>
+    <clipPath id="p-top"><rect x="0" y="0" width="560" height="109"/></clipPath>
+    <text x="296" y="116" font-family="'Arial Black','Impact','Arial Narrow',sans-serif" font-size="78" fill="#f5c842" letter-spacing="-1" text-anchor="middle" dominant-baseline="central" font-weight="900" clip-path="url(#p-top)">NATENATE</text>
+    <clipPath id="p-bot"><rect x="0" y="109" width="560" height="111"/></clipPath>
+    <text x="296" y="116" font-family="'Arial Black','Impact','Arial Narrow',sans-serif" font-size="78" fill="#00e5ff" letter-spacing="-1" text-anchor="middle" dominant-baseline="central" font-weight="900" clip-path="url(#p-bot)">NATENATE</text>
+  </g>
+  <line x1="108" y1="143" x2="200" y2="143" stroke="#00e5ff" stroke-width="1.5" opacity="0.7"/>
+  <line x1="216" y1="143" x2="240" y2="143" stroke="#0066ff" stroke-width="1.5" opacity="0.7"/>
+  <circle cx="249" cy="143" r="3.5" fill="#f5c842" opacity="0.9"/>
+  <line x1="258" y1="143" x2="282" y2="143" stroke="#0066ff" stroke-width="1.5" opacity="0.7"/>
+  <line x1="296" y1="143" x2="390" y2="143" stroke="#00e5ff" stroke-width="1.5" opacity="0.7"/>
+  <polygon points="207,139 210,134 213,139 218,139 214,142 216,147 210,144 204,147 206,142 202,139" fill="#f5c842" opacity="0.8"/>
+  <polygon points="285,139 288,134 291,139 296,139 292,142 294,147 288,144 282,147 284,142 280,139" fill="#f5c842" opacity="0.8"/>
+  <g transform="skewX(-5)">
+    <text x="296" y="176" font-family="'Arial Black','Impact','Arial Narrow',sans-serif" font-size="30" fill="#0066ff" letter-spacing="20" text-anchor="middle" dominant-baseline="central" font-weight="900">WORLD</text>
+    <text x="295" y="175" font-family="'Arial Black','Impact','Arial Narrow',sans-serif" font-size="30" fill="#00e5ff" letter-spacing="20" text-anchor="middle" dominant-baseline="central" font-weight="900" opacity="0.85">WORLD</text>
+  </g>
+  <polyline points="62,20 70,20 70,28" fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.8"/>
+  <polyline points="498,20 490,20 490,28" fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.8"/>
+  <polyline points="62,200 70,200 70,192" fill="none" stroke="#0066ff" stroke-width="2" opacity="0.7"/>
+  <polyline points="498,200 490,200 490,192" fill="none" stroke="#0066ff" stroke-width="2" opacity="0.7"/>
+</svg>

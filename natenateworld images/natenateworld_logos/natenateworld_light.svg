@@ -1,0 +1,16 @@
+<svg width="480" height="180" viewBox="0 0 480 180" xmlns="http://www.w3.org/2000/svg">
+  <rect width="480" height="180" fill="#f0eee8" rx="4"/>
+  <polygon points="0,160 50,0 68,0 18,180 0,180" fill="#0066ff" opacity="0.08"/>
+  <polygon points="412,0 480,160 480,180 462,180 394,0" fill="#00e5ff" opacity="0.08"/>
+  <rect x="0" y="0" width="480" height="3" fill="#0066ff" opacity="0.6" rx="1"/>
+  <rect x="0" y="177" width="480" height="3" fill="#00e5ff" opacity="0.5" rx="1"/>
+  <g transform="skewX(-4)">
+    <text x="248" y="90" font-family="'Arial Black','Impact',sans-serif" font-size="72" fill="#0a0015" letter-spacing="-1" text-anchor="middle" dominant-baseline="central" font-weight="900">NATENATE</text>
+    <clipPath id="w-top"><rect x="0" y="0" width="480" height="88"/></clipPath>
+    <text x="248" y="90" font-family="'Arial Black','Impact',sans-serif" font-size="72" fill="#c9940a" letter-spacing="-1" text-anchor="middle" dominant-baseline="central" font-weight="900" clip-path="url(#w-top)" opacity="0.9">NATENATE</text>
+  </g>
+  <text x="248" y="152" font-family="'Arial Black','Impact',sans-serif" font-size="26" fill="#0066ff" letter-spacing="18" text-anchor="middle" dominant-baseline="central" font-weight="900">WORLD</text>
+  <line x1="100" y1="124" x2="188" y2="124" stroke="#0066ff" stroke-width="1.5" opacity="0.5"/>
+  <line x1="308" y1="124" x2="396" y2="124" stroke="#0066ff" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="248" cy="124" r="3" fill="#c9940a" opacity="0.7"/>
+</svg>

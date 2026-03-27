@@ -1,0 +1,22 @@
+<svg width="440" height="82" viewBox="0 0 440 82" xmlns="http://www.w3.org/2000/svg">
+  <rect width="440" height="82" fill="#020814" rx="4"/>
+  <polygon points="0,82 38,0 56,0 18,82" fill="#0066ff" opacity="0.22"/>
+  <polygon points="384,0 440,82 440,65 404,0" fill="#00e5ff" opacity="0.18"/>
+  <rect x="0" y="0" width="440" height="3" fill="#00e5ff" opacity="0.9" rx="1"/>
+  <rect x="0" y="79" width="440" height="3" fill="#0066ff" opacity="0.9" rx="1"/>
+  <rect x="10" y="10" width="62" height="62" fill="#03101f" rx="4"/>
+  <g transform="skewX(-5)">
+    <text x="43" y="43" font-family="'Arial Black','Impact',sans-serif" font-size="48" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-3">NN</text>
+    <clipPath id="s2-top"><rect x="10" y="10" width="62" height="32"/></clipPath>
+    <text x="43" y="43" font-family="'Arial Black','Impact',sans-serif" font-size="48" fill="#f5c842" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-3" clip-path="url(#s2-top)">NN</text>
+    <clipPath id="s2-bot"><rect x="10" y="42" width="62" height="30"/></clipPath>
+    <text x="43" y="43" font-family="'Arial Black','Impact',sans-serif" font-size="48" fill="#00e5ff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-3" clip-path="url(#s2-bot)">NN</text>
+  </g>
+  <rect x="84" y="14" width="2" height="54" fill="#0066ff" opacity="0.4" rx="1"/>
+  <g transform="skewX(-3)">
+    <text x="106" y="37" font-family="'Arial Black','Impact',sans-serif" font-size="34" fill="#f5c842" dominant-baseline="central" font-weight="900" letter-spacing="0">NATENATE</text>
+    <text x="106" y="64" font-family="'Arial Black','Impact',sans-serif" font-size="16" fill="#00e5ff" dominant-baseline="central" font-weight="900" letter-spacing="9">WORLD</text>
+  </g>
+  <rect x="390" y="28" width="36" height="26" fill="#0066ff" opacity="0.3" rx="2"/>
+  <text x="408" y="43" font-family="'Arial Black','Impact',sans-serif" font-size="10" fill="#00e5ff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="1">NNW</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="160" fill="#020814" rx="16"/>
+  <polygon points="0,160 55,0 78,0 23,160" fill="#0066ff" opacity="0.2"/>
+  <polygon points="82,160 160,10 160,0 140,0 58,160" fill="#00e5ff" opacity="0.15"/>
+  <rect x="12" y="12" width="136" height="3" fill="#00e5ff" opacity="0.9" rx="1"/>
+  <rect x="12" y="145" width="136" height="3" fill="#0066ff" opacity="0.9" rx="1"/>
+  <g transform="skewX(-6)">
+    <text x="84" y="84" font-family="'Arial Black','Impact',sans-serif" font-size="88" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-5">NN</text>
+    <clipPath id="i2-top"><rect x="0" y="0" width="160" height="78"/></clipPath>
+    <text x="84" y="84" font-family="'Arial Black','Impact',sans-serif" font-size="88" fill="#f5c842" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-5" clip-path="url(#i2-top)">NN</text>
+    <clipPath id="i2-bot"><rect x="0" y="78" width="160" height="82"/></clipPath>
+    <text x="84" y="84" font-family="'Arial Black','Impact',sans-serif" font-size="88" fill="#00e5ff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-5" clip-path="url(#i2-bot)">NN</text>
+  </g>
+  <text x="80" y="154" font-family="'Arial Black','Impact',sans-serif" font-size="10" fill="#0066ff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="5">WORLD</text>
+</svg>

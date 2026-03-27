@@ -1,0 +1,25 @@
+<svg width="240" height="210" viewBox="0 0 240 210" xmlns="http://www.w3.org/2000/svg">
+  <rect width="240" height="210" fill="#020814" rx="8"/>
+  <polygon points="0,210 60,0 80,0 20,210" fill="#0066ff" opacity="0.18"/>
+  <polygon points="160,0 240,160 240,210 220,210 140,0" fill="#00e5ff" opacity="0.13"/>
+  <rect x="16" y="16" width="208" height="3" fill="#00e5ff" opacity="0.9" rx="1"/>
+  <rect x="16" y="191" width="208" height="3" fill="#0066ff" opacity="0.9" rx="1"/>
+  <g transform="skewX(-5)">
+    <text x="126" y="92" font-family="'Arial Black','Impact',sans-serif" font-size="52" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-1">NATENATE</text>
+    <clipPath id="st-top"><rect x="0" y="0" width="240" height="87"/></clipPath>
+    <text x="126" y="92" font-family="'Arial Black','Impact',sans-serif" font-size="52" fill="#f5c842" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-1" clip-path="url(#st-top)">NATENATE</text>
+    <clipPath id="st-bot"><rect x="0" y="87" width="240" height="105"/></clipPath>
+    <text x="126" y="92" font-family="'Arial Black','Impact',sans-serif" font-size="52" fill="#00e5ff" text-anchor="middle" dominant-baseline="central" font-weight="900" letter-spacing="-1" clip-path="url(#st-bot)">NATENATE</text>
+  </g>
+  <line x1="40" y1="118" x2="96" y2="118" stroke="#0066ff" stroke-width="1.5" opacity="0.8"/>
+  <circle cx="120" cy="118" r="3" fill="#f5c842" opacity="0.9"/>
+  <line x1="144" y1="118" x2="200" y2="118" stroke="#0066ff" stroke-width="1.5" opacity="0.8"/>
+  <g transform="skewX(-5)">
+    <text x="126" y="155" font-family="'Arial Black','Impact',sans-serif" font-size="26" fill="#0066ff" letter-spacing="12" text-anchor="middle" dominant-baseline="central" font-weight="900">WORLD</text>
+    <text x="125" y="154" font-family="'Arial Black','Impact',sans-serif" font-size="26" fill="#00e5ff" letter-spacing="12" text-anchor="middle" dominant-baseline="central" font-weight="900" opacity="0.7">WORLD</text>
+  </g>
+  <polyline points="24,24 34,24 34,34" fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.7"/>
+  <polyline points="216,24 206,24 206,34" fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.7"/>
+  <polyline points="24,186 34,186 34,176" fill="none" stroke="#0066ff" stroke-width="2" opacity="0.7"/>
+  <polyline points="216,186 206,186 206,176" fill="none" stroke="#0066ff" stroke-width="2" opacity="0.7"/>
+</svg>
