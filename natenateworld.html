@@ -4,43 +4,44 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>natenateworld — Game Design Document v1.0</title>
+<link rel="icon" href="natenateworld images/natenateworld_logos/natenateworld_icon.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Barlow+Condensed:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#060606;--bg2:#0d0d0d;--bg3:#141414;--gold:#f5c842;--gold2:#c9940a;--red:#ff3333;--cyan:#00e5ff;--green:#2dff7f;--purple:#b06dff;--text:#ddd8cc;--muted:#5a5650;--border:rgba(245,200,66,.12);--border2:rgba(245,200,66,.28)}
+:root{--bg:#020814;--bg2:#03101f;--bg3:#0a1628;--gold:#f5c842;--gold2:#c9940a;--cyan:#00e5ff;--blue:#0066ff;--red:#ff3333;--green:#2dff7f;--purple:#b06dff;--text:#dce6f2;--muted:#6b7f96;--border:rgba(0,229,255,.14);--border2:rgba(0,102,255,.28)}
 *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;overflow-x:hidden;cursor:none}
-::selection{background:var(--gold);color:#000}
-#cur{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference}
-#cur-ring{position:fixed;width:28px;height:28px;border:1px solid rgba(245,200,66,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .15s}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9000}
-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--border);background:rgba(6,6,6,.93);backdrop-filter:blur(16px)}
-.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold);text-decoration:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+::selection{background:var(--cyan);color:#020814}
+#cur{position:fixed;width:6px;height:6px;background:var(--cyan);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:normal}
+#cur-ring{position:fixed;width:28px;height:28px;border:1px solid rgba(0,229,255,.45);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .15s}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,102,255,.03) 3px,rgba(0,102,255,.03) 4px);pointer-events:none;z-index:9000}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--border);background:rgba(2,8,20,.94);backdrop-filter:blur(16px)}
+.nav-logo{display:flex;align-items:center;text-decoration:none;gap:10px}
+.nav-logo img{display:block;width:40px;height:40px;border-radius:10px;object-fit:contain}
 .nav-links{display:flex;overflow-x:auto}
 .nav-links a{font-size:9px;letter-spacing:1.2px;color:var(--muted);text-decoration:none;text-transform:uppercase;padding:5px 12px;border-left:1px solid var(--border);transition:color .15s,background .15s;white-space:nowrap}
-.nav-links a:hover{color:var(--gold);background:rgba(245,200,66,.06)}
+.nav-links a:hover{color:var(--cyan);background:rgba(0,229,255,.07)}
 .badge{font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;text-transform:uppercase}
 .badge-gold{background:var(--gold);color:#000}.badge-red{background:var(--red);color:#fff}.badge-green{background:var(--green);color:#000}.badge-purple{background:var(--purple);color:#fff}
-.ticker-wrap{position:fixed;top:50px;left:0;right:0;z-index:199;overflow:hidden;white-space:nowrap;background:var(--gold);height:20px;display:flex;align-items:center}
-.ticker{display:inline-flex;animation:ticker 28s linear infinite;font-size:10px;font-weight:700;color:#000;letter-spacing:2px;text-transform:uppercase}
+.ticker-wrap{position:fixed;top:50px;left:0;right:0;z-index:199;overflow:hidden;white-space:nowrap;background:linear-gradient(90deg,var(--gold) 0%,var(--cyan) 52%,var(--blue) 100%);height:20px;display:flex;align-items:center}
+.ticker{display:inline-flex;animation:ticker 28s linear infinite;font-size:10px;font-weight:700;color:#020814;letter-spacing:2px;text-transform:uppercase}
 .ticker span{padding:0 24px;border-right:1px solid rgba(0,0,0,.2)}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 #canvas-bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 section{padding:88px 40px;max-width:1100px;margin:0 auto}
-.stag{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;opacity:.8}
+.stag{font-size:9px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-bottom:10px;opacity:.85}
 .stitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,76px);line-height:.95;letter-spacing:1px;margin-bottom:14px}
 .stitle em{font-style:normal;color:var(--gold)}
-.sline{width:44px;height:2px;background:var(--gold);margin-bottom:32px}
+.sline{width:72px;height:2px;background:linear-gradient(90deg,var(--gold),var(--cyan));margin-bottom:32px;border-radius:1px}
 .ssub{font-size:12px;color:var(--muted);line-height:1.9;max-width:580px;margin-bottom:32px}
 hr.div{border:none;border-top:1px solid var(--border);margin:0}
 #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:140px 40px 80px;position:relative;overflow:hidden;max-width:100%}
-.h-eye{font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:18px;opacity:0;animation:fu .5s .3s forwards}
-.h-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,13vw,168px);line-height:.88;letter-spacing:2px;margin-bottom:18px;opacity:0;animation:fu .5s .45s forwards}
-.h-title .g{color:var(--gold);display:inline-block;position:relative}
-.h-title .g::after{content:'';position:absolute;bottom:4px;left:0;width:100%;height:4px;background:var(--gold);transform:scaleX(0);transform-origin:left;animation:si .5s 1.1s forwards}
-.h-sub{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:300;color:var(--muted);max-width:580px;line-height:1.65;margin-bottom:44px;opacity:0;animation:fu .5s .6s forwards}
-.h-stats{display:flex;gap:32px;flex-wrap:wrap;opacity:0;animation:fu .5s .75s forwards}
-.hs{border-left:2px solid var(--gold);padding-left:14px}
-.hs-n{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--gold);line-height:1}
+.h-eye{font-size:9px;letter-spacing:4px;color:var(--cyan);text-transform:uppercase;margin-bottom:18px;opacity:0;animation:fu .5s .3s forwards}
+.hero-brand{width:min(100%,560px);height:auto;display:block;margin-bottom:20px;opacity:0;animation:fu .5s .42s forwards;filter:drop-shadow(0 12px 40px rgba(0,102,255,.25))}
+.h-sub{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:300;color:var(--muted);max-width:580px;line-height:1.65;margin-bottom:44px;opacity:0;animation:fu .5s .58s forwards}
+.h-stats{display:flex;gap:32px;flex-wrap:wrap;opacity:0;animation:fu .5s .72s forwards}
+.hs{border-left:2px solid var(--cyan);padding-left:14px}
+.hs-n{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--gold);line-height:1;text-shadow:0 0 24px rgba(0,229,255,.2)}
 .hs-l{font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
 .h-scroll{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;animation:pulse 2.5s infinite}
 .h-scroll::after{content:'';width:1px;height:34px;background:linear-gradient(to bottom,var(--muted),transparent)}
@@ -52,7 +53,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0}
 .cn{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);line-height:1;margin-bottom:5px}
 .ct{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px;color:var(--text)}
 .cb{font-size:11px;color:var(--muted);line-height:1.8}
-.hl{border-left:3px solid var(--gold);padding:13px 16px;background:rgba(245,200,66,.05);margin:18px 0;font-size:11px;line-height:1.9}
+.hl{border-left:3px solid var(--cyan);padding:13px 16px;background:linear-gradient(90deg,rgba(245,200,66,.06),rgba(0,229,255,.05));margin:18px 0;font-size:11px;line-height:1.9}
 .ttable{width:100%;border-collapse:collapse}
 .ttable tr{border-bottom:1px solid var(--border);transition:background .15s}
 .ttable tr:hover{background:var(--bg2)}
@@ -68,7 +69,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:0}
 .fa{flex-shrink:0;padding:0 7px;color:var(--gold);font-size:15px}
 .itab{padding:6px 13px;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
 .itab:hover{color:var(--text);border-color:var(--muted)}
-.itab.on{background:var(--gold);color:#000;border-color:var(--gold)}
+.itab.on{background:linear-gradient(135deg,var(--gold),var(--cyan));color:#020814;border-color:var(--cyan)}
 input[type=range]{accent-color:var(--gold);width:100%}
 .cl{font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
 .cv{font-size:14px;font-weight:700;color:var(--gold);min-width:80px;text-align:right}
@@ -120,15 +121,21 @@ input[type=range]{accent-color:var(--gold);width:100%}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:.9}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes li{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+.brand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:8px}
+.brand-card{background:var(--bg2);border:1px solid var(--border);padding:16px;transition:border-color .18s,background .18s}
+.brand-card:hover{background:var(--bg3);border-color:var(--border2)}
+.brand-card img{width:100%;height:auto;display:block;border-radius:4px}
+.brand-card figcaption{font-size:9px;letter-spacing:.6px;color:var(--muted);margin-top:10px;line-height:1.5}
+.brand-card.on-light{background:#e8edf4;border-color:rgba(0,102,255,.2)}
 @media(max-width:768px){.g2,.g3,.g4{grid-template-columns:1fr}nav .nav-links{display:none}section{padding:58px 18px}#hero{padding:108px 18px 58px}.flow{flex-direction:column}.fa{transform:rotate(90deg);text-align:center}.coin-split{flex-direction:column}nav{padding:0 18px}}
 </style>
 </head>
 <body>
 <div id="cur"></div><div id="cur-ring"></div>
 <nav>
-  <a class="nav-logo" href="#hero">NNW</a>
+  <a class="nav-logo" href="#hero"><img src="natenateworld images/natenateworld_logos/natenateworld_icon.svg" alt="NatenateWorld" width="40" height="40" decoding="async"></a>
   <div class="nav-links">
-    <a href="#concept">Concept</a><a href="#perspective">Perspective</a><a href="#creator">Creator</a>
+    <a href="#brand">Brand</a><a href="#concept">Concept</a><a href="#perspective">Perspective</a><a href="#creator">Creator</a>
     <a href="#p2p">Network</a><a href="#cities">Cities</a><a href="#transport">Transport</a>
     <a href="#physics">Physics</a><a href="#materials">Materials</a><a href="#nifty">Nifty</a>
     <a href="#economy">Economy</a><a href="#franchise">Franchise</a><a href="#tech">Tech</a><a href="#server">Server</a><a href="#devplatform" style="color:var(--purple)">Dev Platform</a><a href="#buy" style="color:var(--gold);font-weight:700">BUY $1 →</a>
@@ -144,8 +151,9 @@ input[type=range]{accent-color:var(--gold);width:100%}
 
 <!-- HERO -->
 <section id="hero">
+  <h1 class="sr-only">NatenateWorld — Game Design Document v1.0</h1>
   <div class="h-eye">// confidential game design document — 2026</div>
-  <h1 class="h-title">NATENATE<br><span class="g">WORLD</span></h1>
+  <img class="hero-brand" src="natenateworld images/natenateworld_logos/natenateworld_primary.svg" alt="NatenateWorld — NATENATE WORLD" width="560" height="220" decoding="async">
   <p class="h-sub">The first mechanic-fluid battle royale where your PC is the map, your childhood photo is your character, and every space runs its own laws of physics.</p>
   <div class="h-stats">
     <div class="hs"><div class="hs-n" data-count="100">0</div><div class="hs-l">spaces per match</div></div>
@@ -155,6 +163,17 @@ input[type=range]{accent-color:var(--gold);width:100%}
     <div class="hs"><div class="hs-n" id="live-cnt">63</div><div class="hs-l">players online</div></div>
   </div>
   <div class="h-scroll">scroll</div>
+</section><hr class="div">
+
+<!-- BRAND / LOGO PACK -->
+<section id="brand">
+  <div class="rev"><div class="stag">// 00 — identity</div><h2 class="stitle">Logo <em>Pack</em></h2><div class="sline"></div><p class="ssub">Official marks: deep navy, gold, cyan, and electric blue. Primary and stacked for digital; stream overlay for broadcasts; light variant for print and light backgrounds.</p></div>
+  <div class="brand-grid rev d1">
+    <figure class="brand-card"><img src="natenateworld images/natenateworld_logos/natenateworld_primary.svg" alt="NatenateWorld primary logo" width="560" height="220" loading="lazy" decoding="async"><figcaption>Primary — site headers, social, press</figcaption></figure>
+    <figure class="brand-card"><img src="natenateworld images/natenateworld_logos/natenateworld_stacked.svg" alt="NatenateWorld stacked mark" width="240" height="210" loading="lazy" decoding="async"><figcaption>Stacked — compact square, Discord, merch tags</figcaption></figure>
+    <figure class="brand-card"><img src="natenateworld images/natenateworld_logos/natenateworld_stream_overlay.svg" alt="NatenateWorld stream overlay" width="440" height="82" loading="lazy" decoding="async"><figcaption>Stream overlay — Twitch / YouTube HUD</figcaption></figure>
+    <figure class="brand-card on-light"><img src="natenateworld images/natenateworld_logos/natenateworld_light.svg" alt="NatenateWorld logo for light backgrounds" width="480" height="180" loading="lazy" decoding="async"><figcaption>Light — print, merch on light fabric</figcaption></figure>
+  </div>
 </section><hr class="div">
 
 <!-- CONCEPT -->
@@ -462,7 +481,7 @@ input[type=range]{accent-color:var(--gold);width:100%}
 
   <div class="g2 rev d1" style="margin-bottom:2px">
     <div style="background:var(--bg2);border:1px solid var(--border2);padding:28px 24px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;right:0;width:160px;height:160px;background:radial-gradient(circle at top right,rgba(245,200,66,.07),transparent);pointer-events:none"></div>
+      <div style="position:absolute;top:0;right:0;width:160px;height:160px;background:radial-gradient(circle at top right,rgba(0,229,255,.12),transparent);pointer-events:none"></div>
       <div style="font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Entry Pack</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--gold);line-height:1;margin-bottom:2px">$1</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:20px">one-time · no subscription · no auto-renew</div>
@@ -757,7 +776,7 @@ ti.innerHTML=inner+inner;
 const cv=document.getElementById('canvas-bg'),cx=cv.getContext('2d');
 function rsCV(){cv.width=window.innerWidth;cv.height=document.getElementById('hero').offsetHeight}
 rsCV();window.addEventListener('resize',rsCV);
-function drawG(){cx.clearRect(0,0,cv.width,cv.height);cx.strokeStyle='rgba(245,200,66,0.05)';cx.lineWidth=.5;const s=55;for(let x=0;x<cv.width;x+=s){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,cv.height);cx.stroke()}for(let y=0;y<cv.height;y+=s){cx.beginPath();cx.moveTo(0,y);cx.lineTo(cv.width,y);cx.stroke()}cx.fillStyle='rgba(245,200,66,0.18)';for(let x=0;x<cv.width;x+=s)for(let y=0;y<cv.height;y+=s){cx.beginPath();cx.arc(x,y,.9,0,Math.PI*2);cx.fill()}}
+function drawG(){cx.clearRect(0,0,cv.width,cv.height);cx.strokeStyle='rgba(0,229,255,0.06)';cx.lineWidth=.5;const s=55;for(let x=0;x<cv.width;x+=s){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,cv.height);cx.stroke()}for(let y=0;y<cv.height;y+=s){cx.beginPath();cx.moveTo(0,y);cx.lineTo(cv.width,y);cx.stroke()}cx.fillStyle='rgba(0,102,255,0.14)';for(let x=0;x<cv.width;x+=s)for(let y=0;y<cv.height;y+=s){cx.beginPath();cx.arc(x,y,.9,0,Math.PI*2);cx.fill()}}
 drawG();
 
 // COUNT UP
@@ -898,13 +917,13 @@ function updBC(){
 function drawBC(sc){
   const c=document.getElementById('bcc'),ctx=c.getContext('2d'),W=c.offsetWidth||580,H=c.offsetHeight||150;
   c.width=W;c.height=H;
-  ctx.strokeStyle='rgba(245,200,66,.08)';ctx.lineWidth=.5;
+  ctx.strokeStyle='rgba(0,229,255,.09)';ctx.lineWidth=.5;
   for(let x=0;x<W;x+=W/10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
   for(let y=0;y<H;y+=H/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-  ctx.strokeStyle='#f5c842';ctx.lineWidth=2;ctx.beginPath();
+  const grd=ctx.createLinearGradient(0,0,W,0);grd.addColorStop(0,'#f5c842');grd.addColorStop(1,'#00e5ff');ctx.strokeStyle=grd;ctx.lineWidth=2;ctx.beginPath();
   for(let i=0;i<=W;i++){const v=H-14-(H-28)*Math.pow(i/W,.33);i===0?ctx.moveTo(i,v):ctx.lineTo(i,v)}
   ctx.stroke();
-  [[.22,'P2'],[.47,'P3'],[.74,'P4']].forEach(([t,l])=>{const x=t*W;ctx.strokeStyle='rgba(245,200,66,.28)';ctx.lineWidth=.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(245,200,66,.55)';ctx.font='9px JetBrains Mono';ctx.fillText(l,x+3,12)});
+  [[.22,'P2'],[.47,'P3'],[.74,'P4']].forEach(([t,l])=>{const x=t*W;ctx.strokeStyle='rgba(0,102,255,.35)';ctx.lineWidth=.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(0,229,255,.65)';ctx.font='9px JetBrains Mono';ctx.fillText(l,x+3,12)});
   const px=Math.min((sc/25000)*W,W-8),py=H-14-(H-28)*Math.pow(Math.min(px/W,1),.33);
   ctx.fillStyle='#f5c842';ctx.beginPath();ctx.arc(px,py,4.5,0,Math.PI*2);ctx.fill();
 }
@@ -1140,7 +1159,7 @@ document.getElementById('buymo').addEventListener('click',e=>{if(e.target===docu
 .dbody{padding:20px 22px}
 .dphase{display:none}.dphase.on{display:block}
 .di{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;transition:border-color .15s}
-.di:focus{border-color:var(--gold)}.di::placeholder{color:var(--muted)}
+.di:focus{border-color:var(--cyan)}.di::placeholder{color:var(--muted)}
 .ds{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;cursor:pointer}
 .db{padding:9px 18px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'JetBrains Mono',monospace;text-transform:uppercase;transition:all .15s}
 .db:hover,.db.on{background:var(--gold);color:#000}
@@ -1149,7 +1168,7 @@ document.getElementById('buymo').addEventListener('click',e=>{if(e.target===docu
 .db.c{border-color:var(--cyan);color:var(--cyan)}.db.c:hover{background:var(--cyan);color:#000}
 .db:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
 .pchip{padding:5px 11px;font-size:9px;font-weight:700;letter-spacing:.5px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--muted);transition:all .13s;font-family:'JetBrains Mono',monospace;margin:2px;display:inline-block}
-.pchip:hover{border-color:var(--gold);color:var(--gold)}.pchip.sel{border-color:var(--gold);color:var(--gold);background:rgba(245,200,66,.07)}
+.pchip:hover{border-color:var(--cyan);color:var(--cyan)}.pchip.sel{border-color:var(--gold);color:var(--gold);background:rgba(0,229,255,.08)}
 .rcode{font-family:'Bebas Neue',sans-serif;font-size:60px;color:var(--gold);letter-spacing:14px;text-align:center;border:1px solid var(--border2);padding:12px 24px;background:var(--bg2)}
 #gc{display:block;width:100%;image-rendering:pixelated}
 .gll{font-size:10px;line-height:2;animation:gla .18s ease both}
