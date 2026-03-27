@@ -17,7 +17,7 @@ export default function SessionScreen() {
   const previewRafRef = useRef(null);
 
   const { videoRef, stream, isReady, startCamera, flipCamera, facingMode } = useCamera();
-  const { startSession, endSession } = useSession();
+  const { startSession, endSession, isDetectorsReady } = useSession();
   useRingLight(ringCanvasRef);
 
   const [isRecording, setIsRecording] = useState(false);
@@ -58,12 +58,14 @@ export default function SessionScreen() {
     return () => window.removeEventListener('bubble-pop', handle);
   }, [autoCapture]);
 
+  const canStart = isReady && isDetectorsReady;
+
   const handleStart = useCallback(async () => {
-    if (!isReady || started) return;
+    if (!canStart || started) return;
     cancelAnimationFrame(previewRafRef.current);
     setStarted(true);
     await startSession(videoRef.current, canvasRef.current);
-  }, [isReady, started, startSession]);
+  }, [canStart, started, startSession]);
 
   const handleEnd = useCallback(() => {
     endSession();
@@ -174,9 +176,9 @@ export default function SessionScreen() {
           <button
             style={styles.startBtn(theme)}
             onClick={handleStart}
-            disabled={!isReady}
+            disabled={!canStart}
           >
-            {isReady ? 'START' : 'Loading…'}
+            {!isReady ? 'Camera…' : !isDetectorsReady ? 'Loading AI…' : 'START'}
           </button>
         ) : (
           <button style={styles.endBtn} onClick={handleEnd}>

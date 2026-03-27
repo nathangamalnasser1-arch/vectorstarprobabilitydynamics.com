@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
   base: '/bubbleboxing/dist/',
   server: {
-    host: true, // expose on local network so phone can connect via IP
+    host: true,
     port: 5173,
-    https: false,
   },
-  plugins: [react()],
+  plugins: [react(), basicSsl()],
   test: {
     globals: true,
     environment: 'jsdom',
