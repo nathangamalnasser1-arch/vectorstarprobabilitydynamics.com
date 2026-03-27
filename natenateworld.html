@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>natenateworld — Game Design Document v1.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;700&family=Barlow+Condensed:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060606;--bg2:#0d0d0d;--bg3:#141414;--gold:#f5c842;--gold2:#c9940a;--red:#ff3333;--cyan:#00e5ff;--green:#2dff7f;--purple:#b06dff;--text:#ddd8cc;--muted:#5a5650;--border:rgba(245,200,66,.12);--border2:rgba(245,200,66,.28)}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;overflow-x:hidden;cursor:none}
+::selection{background:var(--gold);color:#000}
+#cur{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference}
+#cur-ring{position:fixed;width:28px;height:28px;border:1px solid rgba(245,200,66,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .15s}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9000}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--border);background:rgba(6,6,6,.93);backdrop-filter:blur(16px)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;color:var(--gold);text-decoration:none}
+.nav-links{display:flex;overflow-x:auto}
+.nav-links a{font-size:9px;letter-spacing:1.2px;color:var(--muted);text-decoration:none;text-transform:uppercase;padding:5px 12px;border-left:1px solid var(--border);transition:color .15s,background .15s;white-space:nowrap}
+.nav-links a:hover{color:var(--gold);background:rgba(245,200,66,.06)}
+.badge{font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;text-transform:uppercase}
+.badge-gold{background:var(--gold);color:#000}.badge-red{background:var(--red);color:#fff}.badge-green{background:var(--green);color:#000}.badge-purple{background:var(--purple);color:#fff}
+.ticker-wrap{position:fixed;top:50px;left:0;right:0;z-index:199;overflow:hidden;white-space:nowrap;background:var(--gold);height:20px;display:flex;align-items:center}
+.ticker{display:inline-flex;animation:ticker 28s linear infinite;font-size:10px;font-weight:700;color:#000;letter-spacing:2px;text-transform:uppercase}
+.ticker span{padding:0 24px;border-right:1px solid rgba(0,0,0,.2)}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+#canvas-bg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+section{padding:88px 40px;max-width:1100px;margin:0 auto}
+.stag{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;opacity:.8}
+.stitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,76px);line-height:.95;letter-spacing:1px;margin-bottom:14px}
+.stitle em{font-style:normal;color:var(--gold)}
+.sline{width:44px;height:2px;background:var(--gold);margin-bottom:32px}
+.ssub{font-size:12px;color:var(--muted);line-height:1.9;max-width:580px;margin-bottom:32px}
+hr.div{border:none;border-top:1px solid var(--border);margin:0}
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:140px 40px 80px;position:relative;overflow:hidden;max-width:100%}
+.h-eye{font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:18px;opacity:0;animation:fu .5s .3s forwards}
+.h-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,13vw,168px);line-height:.88;letter-spacing:2px;margin-bottom:18px;opacity:0;animation:fu .5s .45s forwards}
+.h-title .g{color:var(--gold);display:inline-block;position:relative}
+.h-title .g::after{content:'';position:absolute;bottom:4px;left:0;width:100%;height:4px;background:var(--gold);transform:scaleX(0);transform-origin:left;animation:si .5s 1.1s forwards}
+.h-sub{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:300;color:var(--muted);max-width:580px;line-height:1.65;margin-bottom:44px;opacity:0;animation:fu .5s .6s forwards}
+.h-stats{display:flex;gap:32px;flex-wrap:wrap;opacity:0;animation:fu .5s .75s forwards}
+.hs{border-left:2px solid var(--gold);padding-left:14px}
+.hs-n{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--gold);line-height:1}
+.hs-l{font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.h-scroll{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;animation:pulse 2.5s infinite}
+.h-scroll::after{content:'';width:1px;height:34px;background:linear-gradient(to bottom,var(--muted),transparent)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border)}
+.card{background:var(--bg2);padding:22px 18px;transition:background .18s}
+.card:hover{background:var(--bg3)}
+.cn{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--gold);line-height:1;margin-bottom:5px}
+.ct{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px;color:var(--text)}
+.cb{font-size:11px;color:var(--muted);line-height:1.8}
+.hl{border-left:3px solid var(--gold);padding:13px 16px;background:rgba(245,200,66,.05);margin:18px 0;font-size:11px;line-height:1.9}
+.ttable{width:100%;border-collapse:collapse}
+.ttable tr{border-bottom:1px solid var(--border);transition:background .15s}
+.ttable tr:hover{background:var(--bg2)}
+.ttable td{padding:11px 13px;font-size:11px}
+.ttable td:first-child{color:var(--muted);font-size:9px;letter-spacing:1px;text-transform:uppercase;width:180px}
+.ttable td:nth-child(2){color:var(--text)}
+.ttable td:last-child{color:var(--gold);font-size:10px;text-align:right}
+.flow{display:flex;align-items:center;overflow-x:auto;padding:4px 0;margin:22px 0}
+.fn{flex-shrink:0;background:var(--bg2);border:1px solid var(--border);padding:13px 15px;min-width:120px;text-align:center;transition:border-color .18s}
+.fn:hover{border-color:var(--gold)}
+.fn strong{display:block;font-size:10px;color:var(--gold);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+.fn span{color:var(--muted);font-size:9px;line-height:1.5}
+.fa{flex-shrink:0;padding:0 7px;color:var(--gold);font-size:15px}
+.itab{padding:6px 13px;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.itab:hover{color:var(--text);border-color:var(--muted)}
+.itab.on{background:var(--gold);color:#000;border-color:var(--gold)}
+input[type=range]{accent-color:var(--gold);width:100%}
+.cl{font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.cv{font-size:14px;font-weight:700;color:var(--gold);min-width:80px;text-align:right}
+.coin-split{display:flex;gap:1px;background:var(--border);margin:22px 0}
+.coin-h{flex:1;background:var(--bg2);padding:26px 22px}
+.coin-nm{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;margin-bottom:4px}
+.coin-li li{font-size:11px;line-height:2.3;list-style:none}
+.coin-li li.y{color:var(--green)}
+.coin-li li.y::before{content:'✓ ';color:var(--green)}
+.coin-li li.n{color:var(--red);opacity:.7}
+.coin-li li.n::before{content:'✗ ';color:var(--red)}
+#pdemo{background:var(--bg2);border:1px solid var(--border);overflow:hidden;margin-top:26px}
+.pdemo-hdr{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.pdemo-tabs{display:flex;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.pdemo-vp{height:210px;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:background .3s}
+.pdemo-info{padding:12px 18px;border-top:1px solid var(--border);font-size:11px;min-height:50px;color:var(--muted)}
+.mat-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px;cursor:pointer;transition:background .13s;border-radius:2px}
+.mat-row:last-child{border:none}
+.mat-row:hover{background:var(--bg3)}
+.mat-ico{font-size:19px;width:30px;text-align:center;flex-shrink:0}
+.mat-nm{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.mat-ds{font-size:10px;color:var(--muted);line-height:1.5}
+.buy-btn{font-size:9px;font-weight:700;padding:3px 9px;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);letter-spacing:.8px;transition:all .13s;margin-top:3px}
+.buy-btn:hover{background:var(--gold);color:#000}
+.inv-slot{background:var(--bg3);border:1px solid var(--border);padding:7px 5px;text-align:center;cursor:pointer;transition:border-color .13s;position:relative}
+.inv-slot:hover{border-color:var(--gold)}
+.inv-slot .ico{font-size:16px;display:block;margin-bottom:2px}
+.inv-slot .lbl{font-size:8px;color:var(--muted);letter-spacing:.5px}
+.inv-slot .cnt{position:absolute;top:2px;right:3px;font-size:8px;font-weight:700;color:var(--gold)}
+.code{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--bg2);border:1px solid var(--border);padding:14px;line-height:1.9;overflow-x:auto;margin:14px 0}
+.kw{color:var(--cyan)}.str{color:var(--green)}.num{color:var(--gold)}.cm{color:var(--muted);font-style:italic}
+.prog{height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:4px}
+.pf{height:100%;border-radius:3px;transition:width 1.1s ease}
+.rev{opacity:0;transform:translateY(22px);transition:opacity .62s ease,transform .62s ease}
+.rev.vis{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+.blog{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--bg3);border:1px solid var(--border);padding:11px;line-height:2.1;min-height:78px;overflow-y:auto;max-height:170px}
+.blog-l{animation:li .22s ease both}
+.hp-bar{height:8px;border-radius:4px;background:var(--bg3);overflow:hidden;border:1px solid var(--border);margin-top:4px}
+.hpf{height:100%;border-radius:4px;transition:width 1.1s ease}
+.fc{background:var(--bg2);padding:20px;cursor:pointer;transition:background .16s}
+.fc:hover{background:var(--bg3)}
+.fc-n{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;margin-bottom:4px}
+.fc-d{font-size:10px;color:var(--muted);line-height:1.7;margin-bottom:9px}
+.fc-num{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--muted);transition:color .18s}
+.fc:hover .fc-num{color:var(--gold)}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes si{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.9}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes li{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+@media(max-width:768px){.g2,.g3,.g4{grid-template-columns:1fr}nav .nav-links{display:none}section{padding:58px 18px}#hero{padding:108px 18px 58px}.flow{flex-direction:column}.fa{transform:rotate(90deg);text-align:center}.coin-split{flex-direction:column}nav{padding:0 18px}}
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="cur-ring"></div>
+<nav>
+  <a class="nav-logo" href="#hero">NNW</a>
+  <div class="nav-links">
+    <a href="#concept">Concept</a><a href="#perspective">Perspective</a><a href="#creator">Creator</a>
+    <a href="#p2p">Network</a><a href="#cities">Cities</a><a href="#transport">Transport</a>
+    <a href="#physics">Physics</a><a href="#materials">Materials</a><a href="#nifty">Nifty</a>
+    <a href="#economy">Economy</a><a href="#franchise">Franchise</a><a href="#tech">Tech</a><a href="#server">Server</a><a href="#devplatform" style="color:var(--purple)">Dev Platform</a><a href="#buy" style="color:var(--gold);font-weight:700">BUY $1 →</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <span class="badge badge-red" id="live-b">● LIVE</span>
+    <span class="badge badge-gold">GDD v1.0</span>
+    <button onclick="openDemo()" style="font-size:9px;font-weight:700;letter-spacing:1px;padding:5px 12px;cursor:pointer;border:1px solid var(--green);background:transparent;color:var(--green);font-family:'JetBrains Mono',monospace;text-transform:uppercase;transition:all .15s" onmouseover="this.style.background='var(--green)';this.style.color='#000'" onmouseout="this.style.background='transparent';this.style.color='var(--green)'">▶ PLAY DEMO</button>
+  </div>
+</nav>
+<div class="ticker-wrap"><div class="ticker" id="tkr"></div></div>
+<canvas id="canvas-bg"></canvas>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="h-eye">// confidential game design document — 2026</div>
+  <h1 class="h-title">NATENATE<br><span class="g">WORLD</span></h1>
+  <p class="h-sub">The first mechanic-fluid battle royale where your PC is the map, your childhood photo is your character, and every space runs its own laws of physics.</p>
+  <div class="h-stats">
+    <div class="hs"><div class="hs-n" data-count="100">0</div><div class="hs-l">spaces per match</div></div>
+    <div class="hs"><div class="hs-n" data-count="8">0</div><div class="hs-l">perspective modes</div></div>
+    <div class="hs"><div class="hs-n" data-count="3">0</div><div class="hs-l">% creator cut</div></div>
+    <div class="hs"><div class="hs-n" data-count="1">0</div><div class="hs-l">dollar entry</div></div>
+    <div class="hs"><div class="hs-n" id="live-cnt">63</div><div class="hs-l">players online</div></div>
+  </div>
+  <div class="h-scroll">scroll</div>
+</section><hr class="div">
+
+<!-- CONCEPT -->
+<section id="concept">
+  <div class="rev"><div class="stag">// 01 — what is it</div><h2 class="stitle">A New <em>Genre</em></h2><div class="sline"></div></div>
+  <div class="hl rev d1">Every player's PC becomes a piece of the map. 100 user-created spaces fuse into one battle royale map — each running its own visual style, physics laws, and game mechanic. Chasing an enemy into their space means adapting to their rules in real time. The space owner designed it as a trap.</div>
+  <div class="g3 rev d2" style="margin-top:2px">
+    <div class="card"><div class="cn">01</div><div class="ct">Your PC = Your Map</div><div class="cb">Space size proportional to hardware. Football field to mega city depending on GPU score.</div></div>
+    <div class="card"><div class="cn">02</div><div class="ct">Perspective Warfare</div><div class="cb">Enter an enemy space: camera snaps to their style. FPS to GTA1 top-down in 0.3 seconds.</div></div>
+    <div class="card"><div class="cn">03</div><div class="ct">AI Creator Mode</div><div class="cb">Type "treehouse with low gravity" — renders live. Upload baby photo — character generated in 60 seconds.</div></div>
+    <div class="card"><div class="cn">04</div><div class="ct">Weapon Stakes</div><div class="cb">Die and your crafted weapon transfers to the killer. One UUID exists globally per weapon.</div></div>
+    <div class="card"><div class="cn">05</div><div class="ct">Blade Code</div><div class="cb">Powered weapons need a daily code. Miss it and the weapon dissolves mid-match. Like Blade's katana.</div></div>
+    <div class="card"><div class="cn">06</div><div class="ct">Daily Boss</div><div class="cb">Random player gets 2× health and 2× power every 24 hours. Every player has their day.</div></div>
+    <div class="card"><div class="cn">07</div><div class="ct">Neighborhoods</div><div class="cb">10K users per IP cluster. Login auto-joins neighbors. Walk freely locally. Transport to reach distant cities.</div></div>
+    <div class="card"><div class="cn">08</div><div class="ct">Material Economy</div><div class="cb">Cut trees. Mine ore. Farm nifty spaces for rare crystals. Or buy with NNC. Nathan: 0.05% on every trade.</div></div>
+    <div class="card"><div class="cn">09</div><div class="ct">Nifty Weapons</div><div class="cb">Earn prestige to unlock exotic physics. Time machines. Laser seekers. Dimension folders. Built in Blender.</div></div>
+  </div>
+</section><hr class="div">
+
+<!-- PERSPECTIVE -->
+<section id="perspective">
+  <div class="rev"><div class="stag">// 02 — perspective warfare</div><h2 class="stitle">The 0.3s <em>Window</em></h2><div class="sline"></div><p class="ssub">Each space runs its own camera mode. Entering a portal triggers a 0.3 second transition — that disorientation window is the mechanic. The space owner pre-aimed snipers at the entry point.</p></div>
+  <div id="pdemo" class="rev d1">
+    <div class="pdemo-hdr"><span>// perspective simulator</span><span style="color:var(--gold)">click a mode →</span></div>
+    <div class="pdemo-tabs" id="ptabs"></div>
+    <div class="pdemo-vp" id="pvp"><div id="pscene" style="display:flex;flex-direction:column;align-items:center;gap:10px"></div></div>
+    <div class="pdemo-info" id="pinfo"></div>
+  </div>
+  <div class="g2 rev d2" style="margin-top:2px">
+    <div class="card"><div class="ct">Space Size by Hardware</div><div class="cb" style="line-height:2.4">
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">Low-end</span><span style="color:var(--gold)">5,000 m² — football field</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">Mid</span><span style="color:var(--gold)">50,000 m² — small town</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">High-end</span><span style="color:var(--gold)">200,000 m² — large city</span></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--muted)">Enthusiast</span><span style="color:var(--gold)">500,000 m² — mega city</span></div>
+    </div></div>
+    <div class="card"><div class="ct">Custom Space Mechanics</div><div class="cb" style="line-height:2.4">
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">Skate park</span><span>Skateboard spawns · trick pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">Zero gravity</span><span>Jetpack only · float physics</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">Music space</span><span>Kills only count on beat</span></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--muted)">Horror space</span><span>Flashlight only · sound</span></div>
+    </div></div>
+  </div>
+</section><hr class="div">
+
+<!-- CREATOR -->
+<section id="creator">
+  <div class="rev"><div class="stag">// 03 — creator mode</div><h2 class="stitle">AI <em>IDE</em> Inside the Game</h2><div class="sline"></div><p class="ssub">Three-panel interface. Left: AI chat. Center: live 3D viewport. Right: auto-populated properties. Type any prompt — renders in seconds. Upload a photo — character built in 60 seconds. Zero 3D knowledge required.</p></div>
+  <div class="flow rev d1">
+    <div class="fn"><strong>Type Prompt</strong><span>"treehouse low gravity"</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Claude API</strong><span>converts to PCG params</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Live Render</strong><span>viewport updates instantly</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Properties</strong><span>biome, gravity, mechanics</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Export</strong><span>replicated to BR server</span></div>
+  </div>
+  <div class="g3 rev d2" style="margin-top:2px">
+    <div class="card"><div class="ct">Image Pipeline</div><div class="cb">Baby photo → cartoon character. Treehouse photo → playable map. Movie screenshot → 3D weapon. Claude Vision + Tripo3D + Mixamo. 60 seconds.</div></div>
+    <div class="card"><div class="ct">Preset Prompts</div><div class="cb">"a desert" · "a forest" · "a skatepark" · "a stick" · "upside down" — ship with game. Advanced users get Blueprint editor. Devs get full UE5 access.</div></div>
+    <div class="card"><div class="ct">Space Manifest</div><div class="cb">JSON per space. on_entry_effects, mechanics, scoring rules, perspective. Engine reads and hot-swaps everything on portal entry. No compile step.</div></div>
+  </div>
+  <div class="hl rev d3"><span class="badge badge-gold" style="margin-right:8px">EXAMPLE</span><span style="color:var(--gold)">"make a skatepark"</span> → skateboard spawns on entry · grind physics active · trick pts feed BR score · kill while grinding = +250 pts · aerial kill = +400 pts · BR never pauses</div>
+</section><hr class="div">
+
+<!-- P2P -->
+<section id="p2p">
+  <div class="rev"><div class="stag">// 04 — p2p mesh world</div><h2 class="stitle">Your PC = <em>Your Land</em></h2><div class="sline"></div><p class="ssub">Login auto-detects your IP region. Your space joins your 10K-user neighborhood. Walk to neighbors freely. Transport is only required to cross neighborhoods — 10km to COD's city.</p></div>
+  <div class="g3 rev d1" style="margin-top:0">
+    <div class="card" style="border-top:2px solid var(--cyan)"><div class="ct" style="color:var(--cyan)">Normal User — 32 GB RAM</div><div class="cb" style="line-height:2.1">Space: ~50,000 m²<br>1 node of 10K neighborhood<br>Walk freely to all neighbors<br>Transport required to distant cities<br><span style="color:var(--muted);font-size:10px">Small. Creative. Your block. Your rules.</span></div></div>
+    <div class="card" style="border-top:2px solid var(--gold)"><div class="ct" style="color:var(--gold)">Indie Mega City — pooled</div><div class="cb" style="line-height:2.1">1,000 creators × 32 GB = 32 TB<br>Combined area rivals corporations<br>1,000 different creative visions<br>Attracts players by culture<br><span style="color:var(--muted);font-size:10px">Nathan: 0.05% on every trade.</span></div></div>
+    <div class="card" style="border-top:2px solid var(--red)"><div class="ct" style="color:var(--red)">COD Corporation — 128 GB × 10K</div><div class="cb" style="line-height:2.1">10K nodes × 128 GB = 1.28 PB RAM<br>10K nodes × 10 TB = 100 PB storage<br>Dominates every BR map it joins<br>Predictable. Powerful. Targetable.<br><span style="color:var(--muted);font-size:10px">Nathan: 0.05% on every trade.</span></div></div>
+  </div>
+  <div class="hl rev d2">The key balance: COD wins on raw hardware. Indie creators win on creativity, diversity, and culture. Players choose which city to live in — not just on size, but on vibes. <strong style="color:var(--gold)">Nathan earns 0.05% from all three.</strong></div>
+</section><hr class="div">
+
+<!-- CITIES -->
+<section id="cities">
+  <div class="rev"><div class="stag">// 05 — communities & corporations</div><h2 class="stitle">Merge Spaces. <em>Build Cities.</em></h2><div class="sline"></div></div>
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:22px;margin-bottom:2px" class="rev d1">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">// merge simulator</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px" id="mtabs">
+      <button class="itab on" onclick="merge(event,'solo')">Solo</button>
+      <button class="itab" onclick="merge(event,'district')">District</button>
+      <button class="itab" onclick="merge(event,'community')">Community</button>
+      <button class="itab" onclick="merge(event,'mega')">Mega City</button>
+      <button class="itab" onclick="merge(event,'corp')">Corporation</button>
+    </div>
+    <div id="mgrid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:12px"></div>
+    <div id="minfo" style="font-size:11px;color:var(--muted);line-height:1.8"></div>
+  </div>
+  <div class="g2 rev d2" style="margin-top:2px">
+    <div class="card"><div class="ct">What a corporation owns</div><div class="cb" style="line-height:2.1">✓ Permanent mega city in-world<br>✓ Internal trading tax rate they set<br>✓ Corporate boss elected daily<br>✓ Corp-exclusive weapons and skins<br>✓ Restrict district access to members</div></div>
+    <div class="card"><div class="ct">What a corporation cannot do</div><div class="cb" style="line-height:2.1">✗ Skip the $1 entry — every employee pays<br>✗ Bypass Nathan's 0.05% cut — ever<br>✗ Sell without playing in 7 days<br>✗ Override the blade code system<br>✗ Trade prestige ★NC outside the game</div></div>
+  </div>
+</section><hr class="div">
+
+<!-- TRANSPORT -->
+<section id="transport">
+  <div class="rev"><div class="stag">// 06 — transport & distance</div><h2 class="stitle">Distance is a <em>Mechanic</em></h2><div class="sline"></div><p class="ssub">COD's city is 10km away. You need to craft your way there. Transport is a craft category equal to weapons — same Blender pipeline, same UUID, same blade code mechanic.</p></div>
+  <div class="g3 rev d1" style="margin-top:0">
+    <div class="card"><div class="cn" style="font-size:28px">🪃</div><div class="ct">Catapult — 500 NNC</div><div class="cb">2km range. One-shot. You arrive as a projectile dealing 40 impact damage to everyone nearby including yourself. Chain three to reach COD.</div></div>
+    <div class="card"><div class="cn" style="font-size:28px">🚀</div><div class="ct">Jetpack — 2,000 NNC</div><div class="cb">Personal. Any direction. 200 km/h. Fly through spaces mid-air — perspective shifts happen in flight. Can be shot down.</div></div>
+    <div class="card"><div class="cn" style="font-size:28px">✈️</div><div class="ct">Plane — 8,000 NNC</div><div class="cb">Squad transport. 8 players. 800 km/h. Can be shot down. Crash landing is brutal and spectacular. Barrel-roll through spaces.</div></div>
+    <div class="card"><div class="cn" style="font-size:28px">🚂</div><div class="ct">Train — community funded</div><div class="cb">Communities build rail lines. Fights happen on the train in transit. Anybody can board. Nobody controls who leaves.</div></div>
+    <div class="card"><div class="cn" style="font-size:28px">🌀</div><div class="ct">Portal — 500–50K NNC</div><div class="cb">Instant travel. Pay the portal owner per crossing. Mega cities charge premium. The Toll Keeper: charge per crossing. Get rich without fighting.</div></div>
+    <div class="card"><div class="cn" style="font-size:28px">🐴</div><div class="ct">Horse — 800 NNC</div><div class="cb">Ground travel. 40 km/h. Communities build roads between spaces. Without roads — you crawl. With roads — fastest ground.</div></div>
+  </div>
+  <div class="hl rev d2"><span class="badge badge-gold" style="margin-right:8px">STRATEGY</span>The Catapult Army: 50 players coordinate simultaneous launches at COD HQ. They arrive as human artillery. All dealing impact damage on landing. COD did not see it coming. Nathan earns 0.05% on every portal toll.</div>
+</section><hr class="div">
+
+<!-- PHYSICS -->
+<section id="physics">
+  <div class="rev"><div class="stag">// 07 — physics rules engine</div><h2 class="stitle">Every Space = Its Own <em>Universe</em></h2><div class="sline"></div><p class="ssub">Every space publishes a physics constitution — a JSON file declaring the laws of that universe. All weapons and vehicles are validated against it before they can function inside.</p></div>
+  <div style="background:var(--bg2);border:1px solid var(--border);overflow:hidden;margin-bottom:2px" class="rev d1">
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap" id="phytabs"></div>
+    <div class="code" style="margin:0;border:none" id="phy-code"></div>
+  </div>
+  <div class="g2 rev d2" style="margin-top:2px">
+    <div class="card"><div class="ct">Standard user — physics ±20% Earth</div><div class="cb" style="line-height:2.1">Gravity: 7.8–11.8 m/s²<br>Time scale: fixed 1.0<br>No dimension folding<br>Weapons: ballistic, melee, basic energy</div></div>
+    <div class="card" style="border-left:2px solid var(--gold)"><div class="ct" style="color:var(--gold)">Nifty tier — no upper limit</div><div class="cb" style="line-height:2.1">Gravity: -∞ to +∞<br>Time scale: 0.01 to 10.0<br>Dimension folding enabled<br>Weapons: time machines, laser seekers, mass inverters</div></div>
+  </div>
+  <div class="hl rev d3"><span class="badge badge-purple" style="margin-right:8px">NIFTY UNLOCK</span>Earned by gameplay — prestige ★NC threshold. Not bought. COD can choose to never allow exotic physics. If they open their manifest to nifty weapons, indie creators can legally time-machine their employees. Board-level decision for COD.</div>
+</section><hr class="div">
+
+<!-- MATERIALS -->
+<section id="materials">
+  <div class="rev"><div class="stag">// 08 — material economy</div><h2 class="stitle">Gather or <em>Buy</em></h2><div class="sline"></div><p class="ssub">Every weapon, vehicle, and structure is built from materials. Gather in the world or buy with NNC. Rare materials are hard-capped by gameplay events. Nathan earns 0.05% on every material purchase.</p></div>
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:18px" class="rev d1"><div id="matlist"></div></div>
+  <div class="g2 rev d2" style="margin-top:2px">
+    <div class="card">
+      <div class="ct">Inventory</div>
+      <div id="invgrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:9px"></div>
+      <div style="font-size:10px;color:var(--muted)" id="invmsg">Click materials above to buy</div>
+      <div style="margin-top:5px;font-size:11px">Wallet: <span id="wallet" style="color:var(--gold);font-weight:700">50,000 NNC</span></div>
+    </div>
+    <div class="card">
+      <div class="ct">Craft</div>
+      <select id="recsel" style="width:100%;font-size:10px;padding:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text);margin-bottom:9px;cursor:pointer">
+        <option value="catapult">🪃 Catapult</option><option value="jetpack">🚀 Jetpack</option>
+        <option value="katana">⚔️ Blade-Code Katana</option><option value="laser">🎯 Laser Seeker (nifty)</option>
+        <option value="timemachine">⏱ Time Machine (mythic)</option>
+      </select>
+      <div id="recdisp" style="font-size:11px;line-height:2.1"></div>
+      <button onclick="craft()" style="margin-top:9px;width:100%;padding:6px;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'JetBrains Mono',monospace;text-transform:uppercase;transition:all .13s" onmouseover="this.style.background='var(--gold)';this.style.color='#000'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">Craft →</button>
+      <div id="cres" style="margin-top:7px;font-size:11px;min-height:16px"></div>
+    </div>
+  </div>
+</section><hr class="div">
+
+<!-- NIFTY -->
+<section id="nifty">
+  <div class="rev"><div class="stag">// 09 — nifty weapons</div><h2 class="stitle">David vs <em>Goliath</em></h2><div class="sline"></div><p class="ssub">Nifty-tier players enter COD's city with weapons COD employees have never trained against. Win a fight, steal their weapon. Steal enough, you're selling official COD weapons back to the lobby market.</p></div>
+  <div style="background:var(--bg2);border:1px solid var(--border);margin-bottom:2px" class="rev d1">
+    <div style="padding:13px 18px;border-bottom:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap" id="ntabs"></div>
+    <div style="padding:18px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px">
+        <div><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div><span style="font-size:11px;font-weight:500">COD Employee — 200 HP</span></div><div class="hp-bar"><div class="hpf" id="codhp" style="width:100%;background:var(--red)"></div></div><div style="font-size:9px;color:var(--muted);margin-top:2px" id="codl">200 / 200 HP</div></div>
+        <div><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div><span style="font-size:11px;font-weight:500">Nifty Creator — 100 HP</span></div><div class="hp-bar"><div class="hpf" id="niftyhp" style="width:100%;background:var(--green)"></div></div><div style="font-size:9px;color:var(--muted);margin-top:2px" id="niftyl">100 / 100 HP</div></div>
+      </div>
+      <div class="blog" id="blog">// select a weapon above to start the fight...</div>
+      <div id="bres" style="margin-top:9px;font-size:12px;font-weight:700;min-height:18px"></div>
+    </div>
+  </div>
+  <div class="g3 rev d2" style="margin-top:2px">
+    <div class="card" style="border-top:2px solid var(--green)"><div class="ct" style="color:var(--green)">Steal the weapon</div><div class="cb">COD employee's M4A1 UUID transfers on death. They now own a COD weapon. Use it, sell it, or list it in the lobby store.</div></div>
+    <div class="card" style="border-top:2px solid var(--gold)"><div class="ct" style="color:var(--gold)">Sell it back to COD</div><div class="cb">List the stolen weapon in lobby. COD employees buy it back. Nifty creator earns NNC. Nathan earns 0.05%. Cycle repeats.</div></div>
+    <div class="card" style="border-top:2px solid var(--cyan)"><div class="ct" style="color:var(--cyan)">Build a reputation</div><div class="cb">Players known for killing COD employees earn prestige titles. Their weapons become legendary. Sell blueprints to other indie creators.</div></div>
+  </div>
+</section><hr class="div">
+
+<!-- ECONOMY -->
+<section id="economy">
+  <div class="rev"><div class="stag">// 10 — natenatecoin economy</div><h2 class="stitle">The <em>NNC</em> System</h2><div class="sline"></div><p class="ssub">$1 entry. All trading lobby-only. 50K liquid + 50K prestige on purchase. Liquid can be cashed out and swapped to BTC/ETH when the bonding curve threshold is hit. Prestige stays in-game forever — this prevents the economy from collapsing.</p></div>
+  <div class="coin-split rev d1">
+    <div class="coin-h">
+      <div style="font-size:26px;margin-bottom:9px;animation:float 3s ease-in-out infinite">🟡</div>
+      <div class="coin-nm" style="color:var(--gold)">Liquid NNC</div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:14px">50,000 on $1 entry</div>
+      <ul class="coin-li"><li class="y">Trade in lobby</li><li class="y">Cash out to USD via Stripe</li><li class="y">Swap to BTC / ETH / USDC</li><li class="y">Buy weapons, maps, materials</li><li class="y">Appreciates with bonding curve</li></ul>
+    </div>
+    <div class="coin-h" style="border-left:1px solid var(--border)">
+      <div style="font-size:26px;margin-bottom:9px;animation:float 3s ease-in-out infinite;animation-delay:.6s">⭐</div>
+      <div class="coin-nm" style="color:var(--gold2)">Prestige ★NC</div>
+      <div style="font-size:11px;color:var(--gold2);margin-bottom:14px">50,000 on $1 entry — locked forever</div>
+      <ul class="coin-li"><li class="y">Trade in lobby</li><li class="y">Buy prestige-exclusive items</li><li class="y">Vote on economy events</li><li class="y">Earn more by winning matches</li><li class="y">Pay match entry (1 ★NC per match)</li><li class="y">Buy weapons, materials, skins in-game</li><li class="y">Match prize = 100 ★NC winner takes all</li><li class="n">Cannot cash out — ever</li><li class="n">Match prizes cannot leave the game</li></ul>
+    </div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:22px" class="rev d2">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:16px">// bonding curve + revenue simulator</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+      <div><div class="cl">Players (K)</div><input type="range" id="bcp" min="1" max="5000" value="10" oninput="updBC()"><div class="cv" id="bcpv">10K</div></div>
+      <div><div class="cl">Daily trades</div><input type="range" id="bct" min="100" max="50000" value="500" oninput="updBC()"><div class="cv" id="bctv">500</div></div>
+      <div><div class="cl">Franchises</div><input type="range" id="bcf" min="0" max="20" value="0" oninput="updBC()"><div class="cv" id="bcfv">0</div></div>
+    </div>
+    <canvas id="bcc" style="width:100%;height:150px;display:block;border:1px solid var(--border)"></canvas>
+    <div class="g4" style="background:var(--border);gap:1px;margin-top:1px">
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">NNC per $1</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="bcnnc">100,000</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Phase</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="bcph">1</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Nathan / month</div><div style="font-size:20px;font-weight:700;color:var(--green);font-family:'Bebas Neue',sans-serif" id="bcna">$0</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Early holder ×</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="bcmu">1.0×</div></div>
+    </div>
+  </div>
+</section><hr class="div">
+
+<!-- FRANCHISE -->
+<section id="franchise">
+  <div class="rev"><div class="stag">// 11 — franchise model</div><h2 class="stitle">Any Brand. <em>One Rule.</em></h2><div class="sline"></div><p class="ssub">Franchises enter as players. Their employees buy in at $1. All trading in lobby only. No special access. No separate portal. Nathan earns 0.05% on every transaction inside their mega city.</p></div>
+  <div class="g3 rev d1" style="margin-top:0">
+    <div class="fc"><div class="fc-n">COD</div><div class="fc-d">100K employees. Official weapons, maps, skins. Mega city dominates every BR map. Employees get time-machined by nifty creators.</div><div class="fc-num">$100,000</div><div style="font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">entry revenue alone</div></div>
+    <div class="fc"><div class="fc-n">Marvel</div><div class="fc-d">Thor's hammer as a real blade-code weapon. Iron Man suit as wearable. Limited edition UUID items. One Mjolnir exists globally.</div><div class="fc-num">$30,000+</div><div style="font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">estimated entry</div></div>
+    <div class="fc"><div class="fc-n">Any Film</div><div class="fc-d">Blade's katana as a real blade-code weapon. Movie weapon replicas. Production designers sell in-lobby. IP enters the game economy legally.</div><div class="fc-num">$5,000+</div><div style="font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">per franchise entry</div></div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:22px;margin-top:2px" class="rev d2">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:16px">// revenue calculator</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px">
+      <div style="flex:1;min-width:140px"><div class="cl">Total players</div><input type="range" id="rcp" min="1000" max="5000000" step="1000" value="100000" oninput="updRC()"><div class="cv" id="rcpv">100,000</div></div>
+      <div style="flex:1;min-width:140px"><div class="cl">Trades / player / mo</div><input type="range" id="rct" min="1" max="100" value="10" oninput="updRC()"><div class="cv" id="rctv">10</div></div>
+      <div style="flex:1;min-width:140px"><div class="cl">Avg trade value ($)</div><input type="range" id="rcv" min="0.1" max="50" step="0.1" value="2" oninput="updRC()"><div class="cv" id="rcvv">$2.00</div></div>
+    </div>
+    <div class="g3" style="background:var(--border);gap:1px">
+      <div style="background:var(--bg3);padding:13px 15px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Monthly entry</div><div style="font-size:22px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="rcen">$100K</div></div>
+      <div style="background:var(--bg3);padding:13px 15px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Trade cut (0.05%)</div><div style="font-size:22px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="rctr">$60K</div></div>
+      <div style="background:var(--bg3);padding:13px 15px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Total / month</div><div style="font-size:22px;font-weight:700;color:var(--green);font-family:'Bebas Neue',sans-serif" id="rctot">$160K</div></div>
+    </div>
+  </div>
+</section><hr class="div">
+
+<!-- TECH -->
+<section id="tech">
+  <div class="rev"><div class="stag">// 12 — tech stack</div><h2 class="stitle">Built on <em>Giants</em></h2><div class="sline"></div></div>
+  <table class="ttable rev d1">
+    <tr><td>Game Engine</td><td>Unreal Engine 5.3 C++</td><td>Free</td></tr>
+    <tr><td>Networking</td><td>Epic Online Services (EOS)</td><td>Free</td></tr>
+    <tr><td>AI Prompts</td><td>Claude API claude-sonnet-4</td><td>Pay per use</td></tr>
+    <tr><td>Image → 3D</td><td>Tripo3D + Meshy AI</td><td>API</td></tr>
+    <tr><td>Style Transfer</td><td>Stability AI / ControlNet</td><td>API</td></tr>
+    <tr><td>Auto-Rigging</td><td>Mixamo</td><td>Free</td></tr>
+    <tr><td>Moderation</td><td>AWS Rekognition + Claude Vision</td><td>~$20/mo</td></tr>
+    <tr><td>Procedural Gen</td><td>UE5 PCG Plugin</td><td>Included</td></tr>
+    <tr><td>BR Server</td><td>AWS GameLift</td><td>~$50–200/mo</td></tr>
+    <tr><td>Database</td><td>PostgreSQL</td><td>~$20/mo</td></tr>
+    <tr><td>Payments</td><td>Stripe Connect + Coinbase Commerce</td><td>2.9% + 0.05%</td></tr>
+    <tr><td>Backend</td><td>Node.js + Express</td><td>~$10/mo</td></tr>
+    <tr><td>Asset Validator</td><td>Python FastAPI microservice</td><td>~$10/mo</td></tr>
+    <tr><td>P2P Hosting</td><td>WebRTC + EOS relay</td><td>Included</td></tr>
+    <tr><td>IDE</td><td>Cursor + Claude Sonnet</td><td>$20/mo</td></tr>
+  </table>
+  <div class="hl rev d2" style="border-left-color:var(--red)"><span class="badge badge-red" style="margin-right:8px">HARD RULE</span>No match lasts longer than <strong style="color:var(--gold)">60 minutes</strong>. Timer starts when the first player spawns. At 59:00 the zone shrinks to one space. At 60:00 the server ends the match — <strong style="color:var(--red)">no winners declared, no rewards, nothing.</strong> If you didn't finish your opponent before the clock hit zero, you both lose. Kill fast or lose everything. This is also a Cloud Run Services constraint — no timeout workarounds needed, no Cloud Run Jobs, no DevOps complexity. 60 minutes is law.</div>
+  <div class="hl rev d3" style="border-left-color:var(--gold)"><span class="badge badge-gold" style="margin-right:8px">ENTRY COST</span>Every match entry costs <strong style="color:var(--gold)">1 coin</strong> — paid in either liquid NNC or prestige ★NC, player's choice. 100 players × 1 coin = 100-coin pot of mixed currency. <strong style="color:var(--gold)">The winner takes all 100 coins converted to prestige ★NC</strong> — regardless of what type was paid in. Prestige won from a match can never be traded out of the game, never cashed, never swapped. It can only be spent inside natenateworld on weapons, materials, skins, and items — where it flows to the creator of that item. Draw at 60:00 = Nathan takes all 100 prestige ★NC. Owning match-won prestige is the novelty. It cannot be bought. It can only be earned by winning.</div>
+  <div class="g2 rev d2" style="margin-top:2px">
+    <div class="card"><div class="ct">18 systems to build</div><div class="cb" style="line-height:2.1">1. UE5 scaffold + mode switch · 2. SpaceManifest + Physics · 3. Perspective + Portal · 4. Benchmark → Budget · 5. Creator UI · 6. Backend + DB · 7. Claude API → PCG · 8. NNC Wallet + Trade · 9. Blade Code · 10. Materials + Crafting · 11. Transport · 12. Community tiers · 13. BR manager · 14. Image pipeline · 15. Bonding curve · 16. Stripe + Coinbase · 17. Nifty validator · 18. P2P mesh</div></div>
+    <div class="card"><div class="ct">Solo timeline with Cursor</div><div class="cb" style="line-height:2.1">Phase 1 — scaffold + Creator UI: 3 weeks<br>Phase 2 — PCG + presets: 4 weeks<br>Phase 3 — Claude API → 3D gen: 4 weeks<br>Phase 4 — Multiplayer + spaces: 3 months<br>Phase 5 — Economy + payments: 2 months<br>Phase 6 — Materials + transport: 2 months<br>Phase 7 — Polish + beta: 2 months<br><strong style="color:var(--gold)">Total: ~12–16 months solo</strong></div></div>
+  </div>
+</section>
+
+<!-- SERVER ARCHITECTURE -->
+<section id="server">
+  <div class="rev"><div class="stag">// 13 — server architecture</div><h2 class="stitle">Where Does the <em>Game Live?</em></h2><div class="sline"></div></div>
+  <div class="hl rev d1">Short answer: <strong style="color:var(--gold)">Firebase + GCP Cloud Run.</strong> Firebase handles matchmaking, lobbies, and player state for free. GCP Cloud Run spins up a match server on demand per BR game — you pay only when a match is actually running. Monthly infra cost at 1,000 daily players: under $40.</div>
+
+  <!-- Layer diagram -->
+  <div style="margin:18px 0 2px" class="rev d1">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">// 4-layer architecture — click each layer</div>
+    <div id="arch-layers"></div>
+    <div id="arch-detail" style="background:var(--bg2);border:1px solid var(--border);padding:16px 18px;font-size:11px;line-height:1.9;color:var(--muted);min-height:80px;margin-top:1px"></div>
+  </div>
+
+  <div class="g3 rev d2" style="margin-top:2px">
+    <div class="card" style="border-top:2px solid var(--cyan)">
+      <div class="ct" style="color:var(--cyan)">Firebase Realtime DB</div>
+      <div class="cb" style="line-height:2.1">
+        Matchmaking queue<br>Lobby state (who's in, spaces)<br>Player wallets (NNC balances)<br>Leaderboards + scores<br>
+        <span style="color:var(--green);font-size:10px">Free up to 1 GB storage · 10 GB/month transfer</span>
+      </div>
+    </div>
+    <div class="card" style="border-top:2px solid var(--gold)">
+      <div class="ct" style="color:var(--gold)">GCP Cloud Run — Match Server</div>
+      <div class="cb" style="line-height:2.1">
+        Spins up on match start<br>Stitches 100 player spaces<br>Authoritative physics engine<br>Kills itself when match ends<br>
+        <span style="color:var(--green);font-size:10px">~$0.00002/100ms · 1K matches/day ≈ $12/mo</span>
+      </div>
+    </div>
+    <div class="card" style="border-top:2px solid var(--purple)">
+      <div class="ct" style="color:var(--purple)">Player PCs — Space Hosts</div>
+      <div class="cb" style="line-height:2.1">
+        Each player PC hosts their space<br>Streams geometry to BR server<br>Handles local physics rendering<br>Sends events to Cloud Run<br>
+        <span style="color:var(--green);font-size:10px">P2P via WebRTC + EOS relay. Server just orchestrates.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:20px;margin-top:2px" class="rev d3">
+    <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px">// cost breakdown — slide to simulate daily active players</div>
+    <div style="margin-bottom:12px"><div class="cl">Daily Active Players</div><input type="range" id="dap" min="100" max="100000" step="100" value="1000" oninput="updCost()"><div class="cv" id="dapv">1,000</div></div>
+    <div class="g4" style="background:var(--border);gap:1px">
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Firebase</div><div style="font-size:20px;font-weight:700;color:var(--cyan);font-family:'Bebas Neue',sans-serif" id="c-fb">$0</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Cloud Run</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="c-cr">$12</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Postgres / NNC</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="c-db">$20</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Total / month</div><div style="font-size:20px;font-weight:700;color:var(--green);font-family:'Bebas Neue',sans-serif" id="c-tot">$32</div></div>
+    </div>
+  </div>
+</section><hr class="div">
+
+<!-- BUY NNC -->
+<section id="buy">
+  <div class="rev"><div class="stag">// 14 — get started</div><h2 class="stitle">Buy Your <em>100K NNC</em></h2><div class="sline"></div><p class="ssub">$1. That's it. You get 50,000 liquid NNC to trade, craft, and cash out — and 50,000 prestige ★NC to earn reputation and vote on the economy. One transaction. Two coin types. No subscription.</p></div>
+
+  <div class="g2 rev d1" style="margin-bottom:2px">
+    <div style="background:var(--bg2);border:1px solid var(--border2);padding:28px 24px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;width:160px;height:160px;background:radial-gradient(circle at top right,rgba(245,200,66,.07),transparent);pointer-events:none"></div>
+      <div style="font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Entry Pack</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:72px;color:var(--gold);line-height:1;margin-bottom:2px">$1</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:20px">one-time · no subscription · no auto-renew</div>
+      <div style="font-size:12px;line-height:2.4;margin-bottom:22px">
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">🟡 Liquid NNC</span><span style="color:var(--gold);font-weight:700">50,000</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">⭐ Prestige ★NC</span><span style="color:var(--gold2);font-weight:700">50,000</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:3px 0"><span style="color:var(--muted)">Phase 1 price</span><span style="color:var(--green)">100,000 NNC / $1 ← best rate ever</span></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--muted)">Phase 4 price</span><span style="color:var(--red)">1,000 NNC / $1 — same $1, 100× less</span></div>
+      </div>
+      <button onclick="openBuy()" style="width:100%;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;cursor:pointer;background:var(--gold);color:#000;border:none;transition:all .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">BUY NOW — $1 →</button>
+      <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:8px">Powered by Stripe · Instant delivery · Canada MSB compliant</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);padding:28px 24px">
+      <div style="font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:14px">What you can do immediately</div>
+      <div style="font-size:11px;line-height:2.5">
+        <div style="border-bottom:1px solid var(--border);padding:3px 0">🗺 Host your space in battle royale matches</div>
+        <div style="border-bottom:1px solid var(--border);padding:3px 0">⚔️ Buy materials and craft your first weapon</div>
+        <div style="border-bottom:1px solid var(--border);padding:3px 0">🌀 Place a portal and charge per-crossing fees</div>
+        <div style="border-bottom:1px solid var(--border);padding:3px 0">🏙 Merge with neighbors — start a district</div>
+        <div style="border-bottom:1px solid var(--border);padding:3px 0">💰 Sell what you craft to other players</div>
+        <div style="border-bottom:1px solid var(--border);padding:3px 0">🗳 Vote on economy events with prestige ★NC</div>
+        <div style="padding:3px 0">📈 Watch your 50K liquid appreciate as Phase 2 hits</div>
+      </div>
+    </div>
+  </div>
+  <div class="hl rev d2"><span class="badge badge-gold" style="margin-right:8px">TIMING</span>You're in Phase 1. Every $1 buys 100,000 NNC. When the player count and volume trigger Phase 2, the same $1 only buys 40,000 NNC. Your 50,000 liquid NNC is now worth 2.5× what someone pays to get it. That multiplier grows to 100× by Phase 4. <strong style="color:var(--gold)">There will never be a cheaper moment to enter than right now.</strong></div>
+</section><hr class="div">
+
+<hr class="div">
+
+<!-- DEVELOPER PLATFORM -->
+<section id="devplatform">
+  <div class="rev"><div class="stag">// 15 — developer platform</div><h2 class="stitle">Build Anything. <em>Sell Everything.</em></h2><div class="sline"></div><p class="ssub">Hackers, modders, and game developers build weapons, detection tools, AI behaviors, and space templates — then sell them to other players. Nathan takes 0.05% on every transaction. The developer keeps the rest. No app store fee. No publisher. No platform cut beyond 0.05%.</p></div>
+
+  <!-- The one-liner -->
+  <div class="hl rev d1" style="border-left-color:var(--purple)"><span class="badge badge-purple" style="margin-right:8px">THE DEAL</span>Build it. Declare every mechanic in weapon_rules.json. Pass the validator. Your item gets a UUID and goes live on the marketplace immediately. No human review. No waiting. Nathan takes 0.05% on every sale and every resale forever. You keep 99.95%. Your UUID is your IP — if someone buys it and dies in-game, it transfers to the killer. That is not a bug. That is the game.</div>
+
+  <!-- What can be built -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d1">// what developers can build</div>
+  <div id="cat-tabs" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:2px" class="rev d1">
+    <button class="itab on" onclick="showCat(event,'weapons')">Weapons</button>
+    <button class="itab" onclick="showCat(event,'tools')">Detection tools</button>
+    <button class="itab" onclick="showCat(event,'spaces')">Space templates</button>
+    <button class="itab" onclick="showCat(event,'ai')">AI packages</button>
+    <button class="itab" onclick="showCat(event,'banned')">Banned list</button>
+  </div>
+  <div id="cat-body" style="background:var(--bg2);border:1px solid var(--border);padding:18px;min-height:120px;font-size:11px;color:var(--muted);line-height:2.1" class="rev d2"></div>
+
+  <!-- SDK structure -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d2">// sdk — one github clone, everything inside</div>
+  <div class="code rev d2" style="margin:0">
+<span class="cm">// NNW_SDK/ — free, open, clone and start building</span><br>
+NNW_SDK/<br>
+├── templates/<br>
+│&nbsp;&nbsp;&nbsp;├── <span class="kw">weapon_base/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">← start here for any weapon</span><br>
+│&nbsp;&nbsp;&nbsp;├── <span class="kw">tool_base/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">← detection tools, shields, utilities</span><br>
+│&nbsp;&nbsp;&nbsp;├── <span class="kw">space_template/</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">← full space with manifest pre-wired</span><br>
+│&nbsp;&nbsp;&nbsp;├── <span class="kw">mechanic_base/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">← custom physics, scoring, on_entry</span><br>
+│&nbsp;&nbsp;&nbsp;└── <span class="kw">ai_behavior_base/</span>&nbsp;&nbsp;<span class="cm">← declare any AI mechanic legally</span><br>
+├── validator/<br>
+│&nbsp;&nbsp;&nbsp;├── <span class="kw">validate_local.py</span>&nbsp;&nbsp;<span class="cm">← test before submission</span><br>
+│&nbsp;&nbsp;&nbsp;├── weapon_rules.schema.json<br>
+│&nbsp;&nbsp;&nbsp;└── manifest.schema.json<br>
+├── examples/<br>
+│&nbsp;&nbsp;&nbsp;├── <span class="str">aimbot_detector/</span>&nbsp;&nbsp;&nbsp;<span class="cm">← working reference</span><br>
+│&nbsp;&nbsp;&nbsp;├── <span class="str">shield_on_trigger/</span><br>
+│&nbsp;&nbsp;&nbsp;├── <span class="str">custom_scoring/</span><br>
+│&nbsp;&nbsp;&nbsp;└── <span class="str">space_with_mechanic/</span><br>
+└── <span class="kw">submit.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">← one command → UUID issued → live</span>
+  </div>
+
+  <!-- Validator pipeline -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d3">// validator — the only gate. pass it and you're live.</div>
+  <div class="flow rev d3" style="margin:0 0 2px">
+    <div class="fn"><strong>Submit</strong><span>python submit.py<br>--asset ./weapon</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Schema check</strong><span>weapon_rules.json<br>all fields present</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Physics check</strong><span>mechanics match<br>declared tier</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Moderation</strong><span>AWS Rekognition<br>texture scan</span></div><div class="fa">→</div>
+    <div class="fn"><strong>Sandbox test</strong><span>60s test match<br>no crashes</span></div><div class="fa">→</div>
+    <div class="fn" style="border-color:var(--green)"><strong style="color:var(--green)">UUID issued</strong><span>listed on<br>marketplace</span></div>
+  </div>
+
+  <!-- Developer economy calculator -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d3">// developer revenue calculator</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:20px" class="rev d3">
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+      <div style="flex:1;min-width:140px"><div class="cl">Item price (NNC)</div><input type="range" id="devprice" min="1000" max="500000" step="1000" value="50000" oninput="updDev()"><div class="cv" id="devpricev">50,000</div></div>
+      <div style="flex:1;min-width:140px"><div class="cl">Units sold</div><input type="range" id="devunits" min="10" max="100000" step="10" value="1000" oninput="updDev()"><div class="cv" id="devunitsv">1,000</div></div>
+      <div style="flex:1;min-width:140px"><div class="cl">Resales / unit</div><input type="range" id="devresale" min="0" max="20" step="1" value="3" oninput="updDev()"><div class="cv" id="devresalev">3×</div></div>
+    </div>
+    <div class="g4" style="background:var(--border);gap:1px">
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Total NNC earned</div><div style="font-size:20px;font-weight:700;color:var(--gold);font-family:'Bebas Neue',sans-serif" id="dev-nnc">50M</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Nathan's cut</div><div style="font-size:20px;font-weight:700;color:var(--muted);font-family:'Bebas Neue',sans-serif" id="dev-nathan">25K NNC</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Dev keeps (Phase 4 $)</div><div style="font-size:20px;font-weight:700;color:var(--green);font-family:'Bebas Neue',sans-serif" id="dev-usd">$49,975</div></div>
+      <div style="background:var(--bg3);padding:11px 13px"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Resale income</div><div style="font-size:20px;font-weight:700;color:var(--cyan);font-family:'Bebas Neue',sans-serif" id="dev-resale">$15K+</div></div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.8">Dev keeps 99.95% of every primary sale and every secondary resale. Old versions stay listed — players resell them. Every resale generates income for the original creator. No expiry. No takedown. Your UUID circulates forever.</div>
+  </div>
+
+  <!-- The arms race -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d4">// the arms race — live market simulation</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);padding:18px" class="rev d4">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:11px;color:var(--muted)">Watch the detector / counter-measure market evolve</div>
+      <button onclick="runArmsRace()" style="font-size:10px;font-weight:700;padding:5px 14px;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);letter-spacing:1px;transition:all .15s" onmouseover="this.style.background='var(--gold)';this.style.color='#000'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">Run simulation →</button>
+    </div>
+    <div id="arms-log" style="font-family:'JetBrains Mono',monospace;font-size:10px;line-height:2.2;min-height:80px;color:var(--muted)">// click run to simulate market evolution...</div>
+    <div id="arms-market" style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)"></div>
+  </div>
+
+  <!-- Hacker pipeline -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d4">// the hacker pipeline — threat becomes product</div>
+  <div class="g3 rev d4" style="margin-top:0">
+    <div class="card" style="border-top:2px solid var(--red)">
+      <div class="ct" style="color:var(--red)">Traditional game</div>
+      <div class="cb" style="line-height:2.1">
+        Hacker finds exploit<br>
+        Sells it underground<br>
+        Gets $200 one-time<br>
+        Activision bans them<br>
+        Arms race continues<br>
+        <span style="color:var(--muted);font-size:10px">Everyone loses except the cheat seller.</span>
+      </div>
+    </div>
+    <div class="card" style="border-top:2px solid var(--gold)">
+      <div class="ct" style="color:var(--gold)">natenateworld</div>
+      <div class="cb" style="line-height:2.1">
+        Hacker finds detection method<br>
+        Builds it into a weapon<br>
+        Passes validator → UUID issued<br>
+        Lists for 50,000 NNC<br>
+        Earns on every sale + resale<br>
+        <span style="color:var(--green);font-size:10px">Exploit becomes product. Forever income.</span>
+      </div>
+    </div>
+    <div class="card" style="border-top:2px solid var(--green)">
+      <div class="ct" style="color:var(--green)">Nathan's outcome</div>
+      <div class="cb" style="line-height:2.1">
+        No anti-cheat spend<br>
+        No ban waves<br>
+        No false positives<br>
+        0.05% on every sale<br>
+        Hackers improve the game<br>
+        <span style="color:var(--green);font-size:10px">R&D department that pays you.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detector weapon code snippet -->
+  <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:24px" class="rev d4">// example — aimbot detector shield (sellable weapon)</div>
+  <div class="code rev d4" style="margin:0">
+<span class="cm">// SentinelShield.cpp — declare mechanics, pass validator, sell</span><br>
+<span class="kw">void</span> AAimbotDetectorShield::Tick(<span class="kw">float</span> DeltaTime) {<br>
+&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">auto</span>& Opponent : GetVisibleOpponents()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">float</span> SnapVel &nbsp;&nbsp;= Opponent->GetAimSnapVelocity();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">float</span> ReactionMs = Opponent->GetReactionTime();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">float</span> Variance &nbsp;&nbsp;= Opponent->GetShotVariance();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">bool</span> &nbsp;PreAim &nbsp;&nbsp;&nbsp;= Opponent->WasAimingPreVisibility();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">bool</span> AimDeclared = Opponent->GetManifest()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.DeclaredMechanics.AiAimAssist;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">float</span> Ceiling = AimDeclared ? <span class="str">0.97f</span> : <span class="str">0.82f</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">float</span> Confidence = CalcConfidence(SnapVel, ReactionMs,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Variance, PreAim, Ceiling);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (Confidence > <span class="str">0.85f</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ShieldComponent->Activate(<span class="str">3.0f</span>); <span class="cm">// 3s shield</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SubmitEvidencePacket(Opponent, Confidence);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<span class="cm">// weapon_rules.json declares: "shield_on_detection": true</span><br>
+<span class="cm">// validator stamps UUID → lists on marketplace at your price</span>
+  </div>
+
+</section><hr class="div">
+
+<footer style="border-top:1px solid var(--border);padding:44px;text-align:center;max-width:100%">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:5px;color:var(--gold);margin-bottom:10px">NATENATEWORLD</div>
+  <div style="margin-bottom:16px"><button onclick="openBuy()" style="padding:12px 32px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;cursor:pointer;background:var(--gold);color:#000;border:none;transition:opacity .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">BUY 100K NNC — $1</button></div>
+  <div style="font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px">© 2026 Nathan Gamal Nasser · Natapps · All rights reserved</div>
+  <div style="font-size:10px;letter-spacing:1px;color:rgba(90,86,80,.5);text-transform:uppercase">Game Design Document v1.0 · Confidential · Every transaction: Nathan +0.05%</div>
+</footer>
+
+<!-- BUY MODAL -->
+<style>
+#buymo{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.96);display:none;align-items:center;justify-content:center;padding:14px}
+.bmw{width:100%;max-width:660px;background:var(--bg);border:1px solid var(--border2);max-height:calc(100vh-28px);overflow-y:auto}
+.bmhdr{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:5}
+.bmbody{padding:20px 22px}
+.step{display:none}.step.on{display:block}
+.si2{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .15s;margin-bottom:8px}
+.si2:focus{border-color:var(--gold)}.si2::placeholder{color:var(--muted)}
+.bigbtn{width:100%;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;cursor:pointer;background:var(--gold);color:#000;border:none;transition:opacity .18s;margin-top:4px}
+.bigbtn:hover{opacity:.85}.bigbtn:disabled{opacity:.3;cursor:not-allowed}
+.inforow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:11px}
+.inforow:last-child{border:none}
+.tag2{font-size:9px;font-weight:700;padding:2px 7px;text-transform:uppercase;letter-spacing:.8px}
+</style>
+<div id="buymo" style="display:none">
+<div class="bmw">
+  <div class="bmhdr">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--gold)">BUY 100,000 NNC</div>
+      <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px">$1.00 USD · secure checkout via Stripe</div>
+    </div>
+    <button onclick="closeBuy()" style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+  </div>
+  <div class="bmbody">
+
+    <!-- STEP 1: REVIEW ORDER -->
+    <div class="step on" id="bs1">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px">// step 1 of 3 — review order</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:16px;margin-bottom:14px">
+        <div class="inforow"><span style="color:var(--muted)">Product</span><span>NNC Entry Pack — Phase 1</span></div>
+        <div class="inforow"><span style="color:var(--muted)">🟡 Liquid NNC</span><span style="color:var(--gold);font-weight:700">50,000 — tradeable, cashable</span></div>
+        <div class="inforow"><span style="color:var(--muted)">⭐ Prestige ★NC</span><span style="color:var(--gold2);font-weight:700">50,000 — governance + items</span></div>
+        <div class="inforow"><span style="color:var(--muted)">Current phase</span><span><span class="tag2" style="background:var(--green);color:#000">Phase 1</span> 100,000 NNC per $1</span></div>
+        <div class="inforow"><span style="color:var(--muted)">Price</span><span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)">$1.00 USD</span></div>
+        <div class="inforow" style="border:none;padding-top:10px"><span style="color:var(--muted)">Nathan's cut on your trades</span><span style="color:var(--green)">0.05% — goes to game creator</span></div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);line-height:1.9;margin-bottom:14px">By purchasing you agree that NNC is a platform utility token. Not a security. Not a financial product. Governed by natenateworld Terms of Service. Canada MSB registration: FINTRAC (pending). Stripe processes the payment — natenateworld never stores your card.</div>
+      <button class="bigbtn" onclick="buyStep(2)">CONTINUE →</button>
+    </div>
+
+    <!-- STEP 2: ACCOUNT -->
+    <div class="step" id="bs2">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px">// step 2 of 3 — your account</div>
+      <input class="si2" id="be" type="email" placeholder="Email — your NNC wallet is linked to this">
+      <input class="si2" id="bu" placeholder="Username / callsign (max 20 chars)" maxlength="20">
+      <input class="si2" id="bp" type="password" placeholder="Password (min 8 chars)">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.8">Your email is your wallet address. NNC is delivered here immediately after payment. You will receive a confirmation email with your wallet balance and a one-time recovery code. Keep it safe — your wallet cannot be recovered without it.</div>
+      <button class="bigbtn" id="step2btn" onclick="buyStep(3)">PROCEED TO PAYMENT →</button>
+      <div style="font-size:10px;color:var(--red);margin-top:7px;min-height:14px" id="berr"></div>
+    </div>
+
+    <!-- STEP 3: PAYMENT (Stripe) -->
+    <div class="step" id="bs3">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px">// step 3 of 3 — payment</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:14px;margin-bottom:14px;text-align:center">
+        <div style="font-size:9px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Stripe Checkout</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.9;margin-bottom:14px">In production: clicking below opens a Stripe Checkout session — hosted by Stripe, PCI-compliant, no card data touches natenateworld servers.<br><br>Stripe charges $1.00 + 2.9% + $0.30 fee = Nathan receives ~$0.67. At scale the fee drops with Stripe Volume pricing.</div>
+        <div id="stripe-placeholder" style="background:#1a1a2e;border:1px solid #2a2a4a;padding:18px;text-align:left;font-size:11px;line-height:2;color:#8888aa;font-family:monospace">
+          <div style="color:#aaaacc;margin-bottom:6px;font-size:9px;letter-spacing:2px;text-transform:uppercase">// stripe checkout — card form renders here</div>
+          Card number &nbsp;&nbsp;[    4242  4242  4242  4242    ]<br>
+          Expiry &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[  MM / YY  ] &nbsp; CVC &nbsp;[ *** ]<br>
+          Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[  Cardholder name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+          <div style="margin-top:8px;font-size:9px;color:#5555aa">🔒 Secured by Stripe · TLS 1.3 · PCI DSS Level 1</div>
+        </div>
+        <div style="margin-top:10px;font-size:9px;color:var(--muted)">Use test card 4242 4242 4242 4242 in development</div>
+      </div>
+      <button class="bigbtn" id="paybtn" onclick="simulatePay()">PAY $1.00 →</button>
+    </div>
+
+    <!-- STEP 4: SUCCESS -->
+    <div class="step" id="bs4">
+      <div style="text-align:center;padding:28px 0">
+        <div style="font-size:52px;margin-bottom:12px">🟡</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:3px;color:var(--green);margin-bottom:4px">WALLET FUNDED</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Stripe payment confirmed · NNC delivered instantly</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);padding:16px;text-align:left;margin-bottom:18px">
+          <div class="inforow"><span style="color:var(--muted)">🟡 Liquid NNC</span><span style="color:var(--gold);font-weight:700;font-size:16px">+50,000</span></div>
+          <div class="inforow" style="border:none"><span style="color:var(--muted)">⭐ Prestige ★NC</span><span style="color:var(--gold2);font-weight:700;font-size:16px">+50,000</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:18px;line-height:1.8">Confirmation email sent to <span id="conf-email" style="color:var(--gold)">—</span><br>Recovery code included. Download the game to access your wallet.</div>
+        <button class="bigbtn" onclick="closeBuy()" style="background:var(--green)">DONE — CLOSE</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+// CURSOR
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function a(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a)})();
+document.querySelectorAll('a,button,input,.itab,.fc,.card,.mat-row').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2.5)';ring.style.opacity='0.8'});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';ring.style.opacity='0.5'});
+});
+
+// TICKER
+const TK=['NATENATEWORLD','▸ BATTLE ROYALE × CREATOR MODE × AI PROMPTS','▸ 100 SPACES × 1 MAP × INFINITE PHYSICS','▸ BLADE CODE SYSTEM ACTIVE','▸ DAILY BOSS: @natenate','▸ NNC BONDING CURVE: PHASE 1','▸ $1 ENTRY · 100K NNC · NATHAN 0.05%','▸ P2P MESH · YOUR PC IS THE WORLD','▸ NIFTY TIER: TIME MACHINES ENABLED','▸ COD CITY: 10KM AWAY · BUILD A CATAPULT'];
+const ti=document.getElementById('tkr');
+const inner=TK.map(t=>`<span>${t}</span>`).join('');
+ti.innerHTML=inner+inner;
+
+// CANVAS BG
+const cv=document.getElementById('canvas-bg'),cx=cv.getContext('2d');
+function rsCV(){cv.width=window.innerWidth;cv.height=document.getElementById('hero').offsetHeight}
+rsCV();window.addEventListener('resize',rsCV);
+function drawG(){cx.clearRect(0,0,cv.width,cv.height);cx.strokeStyle='rgba(245,200,66,0.05)';cx.lineWidth=.5;const s=55;for(let x=0;x<cv.width;x+=s){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,cv.height);cx.stroke()}for(let y=0;y<cv.height;y+=s){cx.beginPath();cx.moveTo(0,y);cx.lineTo(cv.width,y);cx.stroke()}cx.fillStyle='rgba(245,200,66,0.18)';for(let x=0;x<cv.width;x+=s)for(let y=0;y<cv.height;y+=s){cx.beginPath();cx.arc(x,y,.9,0,Math.PI*2);cx.fill()}}
+drawG();
+
+// COUNT UP
+function countUp(el){const t=parseInt(el.getAttribute('data-count'));let c=0;const step=Math.ceil(t/50);const id=setInterval(()=>{c=Math.min(c+step,t);el.textContent=c;if(c>=t)clearInterval(id)},25)}
+setTimeout(()=>document.querySelectorAll('[data-count]').forEach(countUp),600);
+
+// LIVE COUNT + BADGE
+setInterval(()=>{const e=document.getElementById('live-cnt');if(e){const n=parseInt(e.textContent)+Math.floor(Math.random()*3)-1;e.textContent=Math.max(48,n)}},3200);
+setInterval(()=>{const b=document.getElementById('live-b');if(b)b.style.opacity=b.style.opacity==='0.3'?'1':'0.3'},850);
+
+// REVEAL
+const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:0.07});
+document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
+
+// PERSPECTIVE DEMO
+const modes=[
+  {l:'Ultra FPS',bg:'#07091a',fg:'#00e5ff',info:'Full UE5 Lumen ray-traced GI. Home territory. Maximum detail. The space owner has practiced every single corner.'},
+  {l:"Doom '93",bg:'#180900',fg:'#ff6600',info:'Sprites. 2.5D. No vertical aim. The enemy knows every pixel. Running blind in a world designed to kill you.'},
+  {l:'GTA1 2D',bg:'#070e07',fg:'#2dff7f',info:'Pure top-down 2D. You chased them here. 3 snipers pre-aimed at the portal entry. Dead in 2 seconds.'},
+  {l:'Isometric',bg:'#0a0a0a',fg:'#f5c842',info:'45° view. Some depth, no vertical aim. Buildings become mazes from this angle. Disorienting after FPS.'},
+  {l:'Cartoon',bg:'#14052a',fg:'#ff6ef7',info:'Toon shader. Feels safe. The owner designed traps that only look like decoration in this art style.'},
+  {l:'ASCII',bg:'#000',fg:'#2dff7f',info:'Full terminal render. Every object is characters. Nobody trains for this. Whoever built this space is a genius.'},
+  {l:'Upside Down',bg:'#090012',fg:'#b06dff',info:'Inverted gravity. Ground is ceiling. All ballistics recalculated. Everything falls up. Pure muscle-memory destruction.'},
+  {l:'COD Style',bg:'#111',fg:'#ddd8cc',info:'Standard FPS. Familiar controls. No surprises. The baseline you get lured away from. The worst place to be lured FROM.'},
+];
+const ptabs=document.getElementById('ptabs');
+modes.forEach((m,i)=>{
+  const btn=document.createElement('button');btn.className='itab'+(i===0?' on':'');btn.textContent=m.l;
+  btn.onclick=()=>{ptabs.querySelectorAll('.itab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');setMode(i)};
+  ptabs.appendChild(btn);
+});
+function setMode(i){
+  const m=modes[i];const vp=document.getElementById('pvp');vp.style.background=m.bg;
+  const sc=document.getElementById('pscene');
+  if(m.l==='GTA1 2D')sc.innerHTML=`<svg viewBox="0 0 200 140" width="170"><rect x="0" y="0" width="200" height="140" fill="${m.bg}" opacity=".5"/><rect x="30" y="20" width="28" height="28" fill="${m.fg}" opacity=".18" rx="1"/><rect x="120" y="14" width="38" height="33" fill="${m.fg}" opacity=".18" rx="1"/><rect x="72" y="58" width="28" height="38" fill="${m.fg}" opacity=".18" rx="1"/><circle cx="90" cy="44" r="5" fill="${m.fg}"/><circle cx="36" cy="88" r="3.5" fill="#ff3333" opacity=".9"/><circle cx="134" cy="86" r="3.5" fill="#ff3333" opacity=".9"/><circle cx="103" cy="24" r="3.5" fill="#ff3333" opacity=".9"/><text x="90" y="128" fill="${m.fg}" font-size="8" text-anchor="middle" font-family="monospace" opacity=".5">3 SNIPERS WAITING</text></svg>`;
+  else if(m.l==='ASCII')sc.innerHTML=`<div style="font-family:monospace;font-size:11px;color:${m.fg};line-height:1.5">###########<br>#....@....#<br>#..[].[]..#<br>#..........#<br>##..ENEMY.##<br>#..........#<br>###########</div>`;
+  else if(m.l==="Doom '93")sc.innerHTML=`<svg viewBox="0 0 200 120" width="170"><rect x="0" y="60" width="200" height="60" fill="#280d00" opacity=".8"/><rect x="10" y="18" width="48" height="44" fill="#3a1500" opacity=".8"/><rect x="130" y="10" width="48" height="52" fill="#3a1500" opacity=".8"/><circle cx="90" cy="33" r="10" fill="${m.fg}" opacity=".9"/><circle cx="90" cy="33" r="5" fill="#ff0000"/></svg>`;
+  else if(m.l==='Upside Down')sc.innerHTML=`<svg viewBox="0 0 200 120" width="170"><rect x="0" y="0" width="200" height="28" fill="${m.fg}" opacity=".1"/><circle cx="100" cy="18" r="5" fill="${m.fg}"/><text x="100" y="65" fill="${m.fg}" font-size="9" text-anchor="middle" font-family="monospace" opacity=".5">↑ GRAVITY INVERTED ↑</text><text x="100" y="85" fill="${m.fg}" font-size="7" text-anchor="middle" font-family="monospace" opacity=".3">all ballistics recalculated</text></svg>`;
+  else sc.innerHTML=`<svg viewBox="0 0 60 60" width="56"><circle cx="30" cy="30" r="22" fill="none" stroke="${m.fg}" stroke-width=".5" opacity=".45"/><circle cx="30" cy="30" r="3.5" fill="none" stroke="${m.fg}" stroke-width="1"/><line x1="30" y1="6" x2="30" y2="24.5" stroke="${m.fg}" stroke-width=".7"/><line x1="30" y1="35.5" x2="30" y2="54" stroke="${m.fg}" stroke-width=".7"/><line x1="6" y1="30" x2="24.5" y2="30" stroke="${m.fg}" stroke-width=".7"/><line x1="35.5" y1="30" x2="54" y2="30" stroke="${m.fg}" stroke-width=".7"/></svg><div style="color:${m.fg};font-size:9px;letter-spacing:2px;opacity:.55;text-transform:uppercase">${m.l}</div>`;
+  document.getElementById('pinfo').innerHTML=`<span style="color:var(--gold);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px">${m.l}</span><span style="margin-left:9px">${m.info}</span>`;
+}
+setMode(0);
+
+// PHYSICS SPACES
+const spaces={
+  earth:{n:'Normal Earth',rules:[['gravity','9.8 m/s²'],['time_scale','1.0 — fixed'],['dimensions','3D only'],['variable_mass','false'],['dimension_fold','false'],['nifty_allowed','false — standard weapons only']]},
+  lowg:{n:'Low Gravity',rules:[['gravity','1.6 m/s²'],['time_scale','1.0'],['max_jump_height','12m'],['variable_mass','false'],['nifty_allowed','partial — gravity weapons eligible']]},
+  upside:{n:'Upside Down',rules:[['gravity','-9.8 m/s² (inverted)'],['dimensions','3D inverted'],['variable_mass','true'],['projectile_arc','inverted parabola'],['nifty_allowed','true — gravity nifty ×2 here']]},
+  doom:{n:"Doom '93",rules:[['dimensions','2.5D sprite-based'],['render_mode','palette 16-color'],['variable_mass','false'],['nifty_allowed','sprite_only']]},
+  nifty:{n:'Nifty Space ★',rules:[['gravity','any — -∞ to +∞'],['time_scale','0.01 to 10.0'],['dimensions','3D + dimension fold'],['variable_mass','true'],['light_speed_fraction','up to 0.5c'],['nifty_allowed','ALL — no upper limit']]},
+};
+const phytabs=document.getElementById('phytabs');
+let cSp='earth';
+Object.keys(spaces).forEach(k=>{
+  const btn=document.createElement('button');btn.className='itab'+(k==='earth'?' on':'');btn.textContent=spaces[k].n;
+  btn.onclick=()=>{cSp=k;phytabs.querySelectorAll('.itab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');renderPhy()};
+  phytabs.appendChild(btn);
+});
+function renderPhy(){
+  const s=spaces[cSp];
+  document.getElementById('phy-code').innerHTML=`<span class="cm">// physics_constitution.json — ${s.n}</span>\n{\n${s.rules.map(r=>`  <span class="kw">"${r[0]}"</span>: <span class="str">"${r[1]}"</span>`).join(',\n')}\n}`;
+}
+renderPhy();
+
+// MATERIALS
+const MATS={wood:{ico:'🌲',nm:'Wood',tier:'Common',price:200,desc:'Cut trees. 5 units per tree. Catapults, handles, structures.',col:'#2dff7f'},steel:{ico:'⚙️',nm:'Steel',tier:'Uncommon',price:1500,desc:'Mine iron, smelt. Blades, frames, chassis.',col:'#00e5ff'},crystal:{ico:'💎',nm:'Energy Crystal',tier:'Rare',price:25000,desc:'Nifty spaces only. Laser seekers, portals, fuel cells.',col:'#f5c842'},tdust:{ico:'⏳',nm:'Temporal Dust',tier:'Legendary',price:500000,desc:'Daily boss kill only — 1 globally per day. Time machines.',col:'#ff3333'},qfiber:{ico:'🌀',nm:'Quantum Fiber',tier:'Mythic',price:2000000,desc:'10+ nifty players simultaneously same space. Dimension folders.',col:'#b06dff'}};
+const RECS={catapult:{mats:{wood:10,steel:3},r:'Catapult — 2km range · UUID issued'},jetpack:{mats:{wood:2,steel:8,crystal:2},r:'Jetpack — 200km/h flight · UUID issued'},katana:{mats:{steel:5,crystal:1},r:'Blade-Code Katana · blade code active · UUID issued'},laser:{mats:{steel:3,crystal:5,tdust:1},r:'Laser Seeker · nifty tier required · UUID issued'},timemachine:{mats:{crystal:10,tdust:3,qfiber:1},r:'Time Machine · mythic · nifty only · UUID issued'}};
+let wallet=50000,inv={wood:0,steel:0,crystal:0,tdust:0,qfiber:0};
+
+document.getElementById('matlist').innerHTML=Object.entries(MATS).map(([k,m])=>`
+<div class="mat-row" onclick="buyMat('${k}')">
+  <div class="mat-ico">${m.ico}</div>
+  <div style="flex:1"><div class="mat-nm">${m.nm} <span style="font-size:9px;font-weight:700;padding:1px 5px;background:rgba(0,0,0,.3);color:${m.col}">${m.tier}</span></div><div class="mat-ds">${m.desc}</div></div>
+  <div style="text-align:right;flex-shrink:0;min-width:100px"><div style="font-size:11px;font-weight:700;color:${m.col}">${m.price.toLocaleString()} NNC</div><div style="font-size:9px;color:var(--muted);margin-top:2px">or gather in world</div><button class="buy-btn" onclick="event.stopPropagation();buyMat('${k}')">Buy 1</button></div>
+</div>`).join('');
+
+function rendInv(){document.getElementById('invgrid').innerHTML=Object.keys(MATS).map(k=>`<div class="inv-slot"><span class="ico">${MATS[k].ico}</span><span class="lbl">${MATS[k].nm}</span><span class="cnt" style="color:${MATS[k].col}">${inv[k]}</span></div>`).join('');document.getElementById('wallet').textContent=wallet.toLocaleString()+' NNC'}
+function rendRec(){const r=RECS[document.getElementById('recsel').value];document.getElementById('recdisp').innerHTML=Object.keys(r.mats).map(k=>{const ok=inv[k]>=r.mats[k];return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)"><span>${MATS[k].ico} ${MATS[k].nm}</span><span style="color:${ok?'var(--green)':'var(--red)'}">${inv[k]}/${r.mats[k]}</span></div>`}).join('')}
+function buyMat(k){const p=MATS[k].price;const msg=document.getElementById('invmsg');if(wallet<p){msg.style.color='var(--red)';msg.textContent='Not enough NNC';return}wallet-=p;inv[k]++;msg.style.color='var(--green)';msg.textContent=`Bought 1x ${MATS[k].nm} · Nathan earned ${Math.round(p*.0005).toLocaleString()} NNC`;rendInv();rendRec()}
+function craft(){const rid=document.getElementById('recsel').value;const r=RECS[rid];const res=document.getElementById('cres');if(!Object.keys(r.mats).every(k=>inv[k]>=r.mats[k])){res.style.color='var(--red)';res.textContent='Missing materials — gather or buy';return}Object.keys(r.mats).forEach(k=>inv[k]-=r.mats[k]);rendInv();rendRec();res.style.color='var(--green)';res.textContent='✓ '+r.r}
+document.getElementById('recsel').addEventListener('change',rendRec);
+rendInv();rendRec();
+
+// MERGE SIMULATOR
+const mdata={solo:{c:1,col:'#5a5650',bg:'rgba(90,86,80,.18)',info:'1 space. Your PC, your rules. Walk freely to all 10K neighbors in your IP cluster. No transport needed.'},district:{c:6,col:'#00e5ff',bg:'rgba(0,229,255,.14)',info:'6 spaces joined. Shared portals, shared economy, shared prestige board. One connected zone in BR.'},community:{c:35,col:'#2dff7f',bg:'rgba(45,255,127,.14)',info:'35 spaces. Elect a mayor. Internal taxes. Shared landmarks. Rail lines. One biome in BR.'},mega:{c:80,col:'#f5c842',bg:'rgba(245,200,66,.14)',info:'80 spaces — Mega City. Combined GPU power. Districts, skyline. Visible across the entire BR map.'},corp:{c:100,col:'#ff3333',bg:'rgba(255,51,51,.14)',info:'100 spaces — Corporation. Sovereign entity. COD\'s 100K players = dominant node. Nathan: 0.05% on every trade.'}};
+const mg=document.getElementById('mgrid');const dots=[];
+for(let i=0;i<100;i++){const d=document.createElement('div');d.style.cssText='height:9px;border-radius:2px;background:var(--bg3);border:1px solid var(--border);transition:all .2s';mg.appendChild(d);dots.push(d)}
+function merge(e,mode){
+  document.querySelectorAll('#mtabs .itab').forEach(t=>t.classList.remove('on'));e.target.classList.add('on');
+  const m=mdata[mode];
+  dots.forEach((d,i)=>{setTimeout(()=>{d.style.background=i<m.c?m.bg:'var(--bg3)';d.style.borderColor=i<m.c?m.col:'var(--border)'},i*7)});
+  document.getElementById('minfo').innerHTML=`<span style="color:${m.col};font-weight:700">${mode.charAt(0).toUpperCase()+mode.slice(1)}</span> — ${m.info}`;
+}
+
+// NIFTY BATTLES
+const battles={
+  dissonator:{n:'🔊 Dissonator',logs:[['COD Employee — M4A1, 200HP, full loadout','#ddd8cc'],['Nifty Creator deploys The Dissonator...','#f5c842'],['⚡ CONTROLS INVERTED — 8 seconds','#f5c842'],['COD fires into own grenade — 60 self-damage','#ff3333'],['COD tries to aim — fires at ceiling — 0 damage','#5a5650'],['Nifty Creator closes in — 70 damage','#2dff7f'],['COD: 70HP — panic running backwards','#ff3333'],['Second wave — 8 more seconds inverted','#f5c842'],['Nifty Creator finishes — 40 damage','#2dff7f'],['💀 COD eliminated · M4A1 UUID transferred','#2dff7f']],w:'Nifty Creator wins — stole official COD M4A1',wc:'#2dff7f'},
+  mirror:{n:'🪞 Mirror Blade',logs:[['COD Employee opens with burst fire — 3 bullets','#ddd8cc'],['Mirror Blade activates — all 3 reflected','#f5c842'],['⚡ COD takes own fire — 60 self-damage','#ff3333'],['COD switches to grenades — reflected — 80 self','#ff3333'],['💀 COD eliminated by own weapons','#2dff7f']],w:'Nifty Creator wins — COD killed by own weapons',wc:'#2dff7f'},
+  perspective:{n:'📷 Perspective Grenade',logs:[['COD Employee — FPS loadout — confident','#ddd8cc'],['Perspective Grenade deployed inside COD city','#f5c842'],['📷 COD FPS → GTA1 top-down for 12 seconds','#f5c842'],['COD: total disorientation — never trained top-down','#5a5650'],['COD fires at wrong position — 0 damage','#5a5650'],['Nifty Creator — home style — 60 damage','#2dff7f'],['Grenade lingers — 8 more seconds — 60 more damage','#2dff7f'],['💀 COD eliminated inside their own server','#2dff7f']],w:"Nifty Creator wins — beat COD on COD's turf",wc:'#2dff7f'},
+  time:{n:'⏱ Time Machine',logs:[['COD Employee — 200HP — notices nothing unusual','#ddd8cc'],['Nifty Creator activates Time Machine (nifty only)','#f5c842'],['⏱ LOCAL TIME: 0.1x — COD moving at 10% speed','#f5c842'],['COD raises weapon — takes 8 real seconds to aim','#5a5650'],['Nifty fires 30 rounds while COD lifts gun','#2dff7f'],['💀 COD eliminated before firing a single shot','#2dff7f']],w:'Nifty Creator wins — only works if COD opens their physics manifest',wc:'#f5c842'},
+};
+const ntabs=document.getElementById('ntabs');
+Object.entries(battles).forEach(([k,b])=>{
+  const btn=document.createElement('button');btn.className='itab';btn.textContent=b.n;
+  btn.onclick=()=>{ntabs.querySelectorAll('.itab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');runBattle(k)};
+  ntabs.appendChild(btn);
+});
+function runBattle(k){
+  const b=battles[k];const log=document.getElementById('blog');const res=document.getElementById('bres');
+  const ch=document.getElementById('codhp'),nh=document.getElementById('niftyhp');
+  const cl=document.getElementById('codl'),nl=document.getElementById('niftyl');
+  log.innerHTML='';res.innerHTML='';ch.style.width='100%';nh.style.width='100%';cl.textContent='200 / 200 HP';nl.textContent='100 / 100 HP';
+  b.logs.forEach((line,i)=>{
+    setTimeout(()=>{
+      const d=document.createElement('div');d.className='blog-l';d.style.color=line[1];d.textContent='> '+line[0];log.appendChild(d);log.scrollTop=log.scrollHeight;
+      if(i===Math.floor(b.logs.length*.5)){ch.style.width='40%';cl.textContent='80 / 200 HP'}
+      if(i===b.logs.length-1){ch.style.width='0%';cl.textContent='0 / 200 HP · ELIMINATED';nh.style.width='75%';nl.textContent='75 / 100 HP';setTimeout(()=>{res.style.color=b.wc;res.textContent='🏆 '+b.w},300)}
+    },i*520);
+  });
+}
+
+// BONDING CURVE
+function updBC(){
+  const p=parseInt(document.getElementById('bcp').value),t=parseInt(document.getElementById('bct').value),f=parseInt(document.getElementById('bcf').value);
+  document.getElementById('bcpv').textContent=p>=1000?(p/1000).toFixed(0)+'K':p;
+  document.getElementById('bctv').textContent=t.toLocaleString();
+  document.getElementById('bcfv').textContent=f;
+  const sc=p*.5+t*2+f*200;
+  let ph=1,nnc=100000,mu=1;
+  if(sc>2000){ph=2;nnc=40000;mu=2.5}if(sc>8000){ph=3;nnc=8000;mu=12.5}if(sc>20000){ph=4;nnc=1000;mu=100}
+  const na=Math.round(p*1000*t*.5*.0005/1000);
+  document.getElementById('bcnnc').textContent=nnc.toLocaleString();
+  document.getElementById('bcph').textContent=ph;
+  document.getElementById('bcna').textContent='$'+na.toLocaleString();
+  document.getElementById('bcmu').textContent=mu.toFixed(1)+'×';
+  drawBC(sc);
+}
+function drawBC(sc){
+  const c=document.getElementById('bcc'),ctx=c.getContext('2d'),W=c.offsetWidth||580,H=c.offsetHeight||150;
+  c.width=W;c.height=H;
+  ctx.strokeStyle='rgba(245,200,66,.08)';ctx.lineWidth=.5;
+  for(let x=0;x<W;x+=W/10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=H/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  ctx.strokeStyle='#f5c842';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=W;i++){const v=H-14-(H-28)*Math.pow(i/W,.33);i===0?ctx.moveTo(i,v):ctx.lineTo(i,v)}
+  ctx.stroke();
+  [[.22,'P2'],[.47,'P3'],[.74,'P4']].forEach(([t,l])=>{const x=t*W;ctx.strokeStyle='rgba(245,200,66,.28)';ctx.lineWidth=.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(245,200,66,.55)';ctx.font='9px JetBrains Mono';ctx.fillText(l,x+3,12)});
+  const px=Math.min((sc/25000)*W,W-8),py=H-14-(H-28)*Math.pow(Math.min(px/W,1),.33);
+  ctx.fillStyle='#f5c842';ctx.beginPath();ctx.arc(px,py,4.5,0,Math.PI*2);ctx.fill();
+}
+updBC();window.addEventListener('resize',updBC);
+
+// REVENUE CALC
+function updRC(){
+  const p=parseInt(document.getElementById('rcp').value),t=parseInt(document.getElementById('rct').value),v=parseFloat(document.getElementById('rcv').value);
+  document.getElementById('rcpv').textContent=p.toLocaleString();
+  document.getElementById('rctv').textContent=t;
+  document.getElementById('rcvv').textContent='$'+v.toFixed(2);
+  const entry=p,trade=Math.round(p*t*v*.0005),total=entry+trade;
+  const fmt=n=>n>=1e6?'$'+(n/1e6).toFixed(1)+'M':n>=1000?'$'+(n/1000).toFixed(0)+'K':'$'+n;
+  document.getElementById('rcen').textContent=fmt(entry);
+  document.getElementById('rctr').textContent=fmt(trade);
+  document.getElementById('rctot').textContent=fmt(total);
+}
+updRC();
+
+// ── DEVELOPER PLATFORM ──
+const CATS = {
+  weapons: {
+    color: '#ff3333',
+    items: [
+      ['Offensive', 'Declared aim assist · laser seekers · time weapons · NNC drain spikes · mass inverters'],
+      ['Defensive', 'Shields · cloaks · evasion boots · parry systems · counter-fire on detection'],
+      ['Detection', 'Aimbot detectors · manifest scanners · trust score badges · pre-aim sensors'],
+      ['Economic', 'NNC drain spikes · trade interceptors · portal toll collectors · blade thieves'],
+      ['Exotic (nifty tier)', 'Dimension folders · time machines · gravity anchors · reality distorters'],
+    ]
+  },
+  tools: {
+    color: '#00e5ff',
+    items: [
+      ['HUD overlays', 'Opponent confidence scores · declared mechanics display · reaction time tracker'],
+      ['AI detection engines', 'Snap velocity analysis · shot variance detector · pre-aim sensor libraries'],
+      ['Evidence packages', 'Auto-sign dispute packets · batch-submit to Firebase · community vote trigger'],
+      ['Manifest scanner', 'Read any opponent\'s declared mechanics before engaging · risk assessment HUD'],
+      ['Trust score display', 'Show opponent\'s dispute history above their head · win/loss clean record'],
+    ]
+  },
+  spaces: {
+    color: '#f5c842',
+    items: [
+      ['Biome kits', 'Full AI-generated environments ready to drop in — desert, moon, underwater, disco'],
+      ['Trap systems', 'Pre-built portal trap designs · sniper nest configurations · choke point layouts'],
+      ['Mechanic presets', 'Custom scoring rules · on_entry effects · physics presets · perspective packages'],
+      ['Corporate kits', 'Branded space templates for franchise buy-in — drop in your logo and assets'],
+      ['Low-spec optimized', 'Fully playable spaces built for potato-tier hardware — ASCII, top-down, sprite'],
+    ]
+  },
+  ai: {
+    color: '#b06dff',
+    items: [
+      ['Aim assist tiers', 'Basic snap · predictive · full tracking — each declared, each a different price point'],
+      ['Evasion systems', 'Counter specific aim assist signatures · randomize movement · juke on pre-aim detect'],
+      ['Decision trees', 'When to fight · when to flee · when to trap · portal-entry aggression logic'],
+      ['Detection engines', 'Core analysis libraries sold separately — build your own detector on top'],
+      ['Squad AI coordination', 'Multi-player declared AI that coordinates across team wallets · shared behavior'],
+    ]
+  },
+  banned: {
+    color: '#2dff7f',
+    items: [
+      ['Content harming minors', 'Any form — instant permanent ban · no appeal'],
+      ['Intentional server crash', 'Assets designed to crash the match server or exploit Cloud Run'],
+      ['Manifest modification', 'Assets that alter another player\'s manifest without their consent'],
+      ['Data extraction', 'Assets that send player data to external servers outside NNW'],
+      ['Validator spoofing', 'Fake UUID signatures · bypassing the schema check · sandbox evasion'],
+    ]
+  }
+};
+
+function showCat(e, key) {
+  document.querySelectorAll('#cat-tabs .itab').forEach(t => t.classList.remove('on'));
+  e.target.classList.add('on');
+  const cat = CATS[key];
+  document.getElementById('cat-body').innerHTML = cat.items.map(([name, desc]) =>
+    `<div style="display:flex;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border)">
+      <span style="color:${cat.color};font-weight:700;min-width:160px;flex-shrink:0">${name}</span>
+      <span>${desc}</span>
+    </div>`
+  ).join('') + (key === 'banned'
+    ? `<div style="margin-top:10px;font-size:10px;color:var(--green)">Everything not on this list: build it, declare it, sell it. No other restrictions.</div>`
+    : `<div style="margin-top:10px;font-size:10px;color:var(--muted)">All items require weapon_rules.json declaration + validator pass. UUID issued on approval.</div>`);
+}
+showCat({ target: document.querySelector('#cat-tabs .itab') }, 'weapons');
+
+// Dev revenue calc
+function updDev() {
+  const price = parseInt(document.getElementById('devprice').value);
+  const units = parseInt(document.getElementById('devunits').value);
+  const resales = parseInt(document.getElementById('devresale').value);
+  document.getElementById('devpricev').textContent = price.toLocaleString();
+  document.getElementById('devunitsv').textContent = units.toLocaleString();
+  document.getElementById('devresalev').textContent = resales + '×';
+  const primaryNNC = price * units;
+  const resaleNNC = price * 0.5 * units * resales;
+  const totalNNC = primaryNNC + resaleNNC;
+  const nathanNNC = Math.round(totalNNC * 0.0005);
+  const devNNC = totalNNC - nathanNNC;
+  const devUSD = devNNC * 0.001;
+  const resaleUSD = resaleNNC * 0.001;
+  const fmt = n => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : n;
+  const fmtUSD = n => n >= 1e6 ? '$'+(n/1e6).toFixed(1)+'M' : n >= 1e3 ? '$'+(n/1e3).toFixed(0)+'K' : '$'+Math.round(n);
+  document.getElementById('dev-nnc').textContent = fmt(totalNNC);
+  document.getElementById('dev-nathan').textContent = fmt(nathanNNC) + ' NNC';
+  document.getElementById('dev-usd').textContent = fmtUSD(devUSD);
+  document.getElementById('dev-resale').textContent = fmtUSD(resaleUSD);
+}
+updDev();
+
+// Arms race simulation
+const ARMS_EVENTS = [
+  { actor: 'Dev Team A', action: 'releases SentinelShield v1.0 — basic snap velocity detection', price: 10000, sales: 500, col: '#00e5ff' },
+  { actor: 'Community', action: 'figures out SentinelShield\'s detection threshold. Requests counter.', price: 0, sales: 0, col: '#5a5650' },
+  { actor: 'Dev Team B', action: 'releases NoiseInjector v1.0 — adds variance to declared AI shots', price: 8000, sales: 400, col: '#b06dff' },
+  { actor: 'Dev Team A', action: 'releases SentinelShield v2.0 — now detects variance patterns too', price: 15000, sales: 800, col: '#00e5ff' },
+  { actor: 'Dev Team B', action: 'releases NoiseInjector v2.0 — 2× more sophisticated. v1.0 worthless.', price: 12000, sales: 700, col: '#b06dff' },
+  { actor: 'Dev Team C', action: 'enters market with EvasionSuite — cloak + noise + timing combined', price: 150000, sales: 1200, col: '#f5c842' },
+  { actor: 'Community', action: 'EvasionSuite becomes meta. SentinelShield v2.0 can\'t keep up.', price: 0, sales: 0, col: '#5a5650' },
+  { actor: 'Dev Team A', action: 'releases SentinelShield v3.0 — suite-aware, 94% confidence', price: 25000, sales: 2000, col: '#00e5ff' },
+  { actor: 'Nathan', action: '0.05% on every transaction in this entire chain. Spent zero on anti-cheat.', price: 0, sales: 0, col: '#2dff7f' },
+];
+
+function runArmsRace() {
+  const log = document.getElementById('arms-log');
+  const market = document.getElementById('arms-market');
+  log.innerHTML = '';
+  market.innerHTML = '';
+  let nathanTotal = 0;
+  ARMS_EVENTS.forEach((ev, i) => {
+    setTimeout(() => {
+      const d = document.createElement('div');
+      d.style.cssText = `animation:logIn .2s ease both;color:${ev.col}`;
+      const vol = ev.price * ev.sales;
+      nathanTotal += vol * 0.0005;
+      d.textContent = `> ${ev.actor}: ${ev.action}` +
+        (ev.sales > 0 ? ` [${ev.sales.toLocaleString()} sales · ${(vol/1000).toFixed(0)}K NNC vol]` : '');
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+      if (ev.sales > 0) {
+        const card = document.createElement('div');
+        card.style.cssText = `background:var(--bg3);padding:9px 11px;border-top:2px solid ${ev.col}`;
+        card.innerHTML = `<div style="font-size:9px;color:${ev.col};font-weight:700;letter-spacing:.5px;margin-bottom:3px">${ev.actor}</div><div style="font-size:10px;color:var(--muted);line-height:1.6">${ev.action.split('—')[0].trim()}<br><span style="color:var(--text)">${(ev.price/1000).toFixed(0)}K NNC · ${ev.sales.toLocaleString()} units</span></div>`;
+        market.appendChild(card);
+      }
+      if (i === ARMS_EVENTS.length - 1) {
+        setTimeout(() => {
+          const d2 = document.createElement('div');
+          d2.style.cssText = 'color:var(--green);font-weight:700;margin-top:6px';
+          d2.textContent = `> Nathan total from this chain: ${(nathanTotal/1000).toFixed(1)}K NNC · $${(nathanTotal*0.001).toFixed(0)} at Phase 4`;
+          log.appendChild(d2);
+        }, 400);
+      }
+    }, i * 600);
+  });
+}
+
+// ── SERVER COST CALC ──
+const archData=[
+  {l:'Layer 1 — Player PCs (P2P Space Hosts)',col:'#b06dff',detail:'Each player\'s PC runs their space locally and streams geometry + events via WebRTC. The game client (UE5) is installed on their PC. Epic Online Services (EOS) handles the P2P relay and NAT traversal for free. Your server never touches game geometry — it only orchestrates. Cost to you: $0 for the space hosting. Players pay with their own electricity.'},
+  {l:'Layer 2 — Firebase (Lobby + State)',col:'#00e5ff',detail:'Firebase Realtime Database handles: matchmaking queue (players waiting for a game), lobby state (which spaces are in, who\'s the host, game settings), NNC wallet balances, leaderboards, and space manifests. Firebase is free up to 1 GB storage and 10 GB/month transfer — enough for ~100K daily active players at text-only state. Cost: $0–$25/month depending on scale.'},
+  {l:'Layer 3 — GCP Cloud Run (BR Match Server)',col:'#f5c842',detail:'When a BR match starts, Firebase triggers a Cloud Run container. The container: receives all 100 space manifests, stitches them into a map, becomes the authoritative game server for that 100-player match, validates shots/physics/weapon events, handles scoring, then shuts itself down when the match ends. You pay only for active match time. Cloud Run charges $0.00002 per 100ms. A 20-minute match = 120,000ms = $0.024. At 1,000 matches/day = $24/day = $720/month. But most of that is covered by entry fees.'},
+  {l:'Layer 4 — PostgreSQL (NNC Economy + UUIDs)',col:'#2dff7f',detail:'PostgreSQL on Cloud SQL or Supabase (cheaper) stores: all NNC transactions (immutable ledger), weapon UUID registry (who owns what globally), space manifest history, bonding curve state, Nathan\'s 0.05% cut ledger. This is the financial layer — it must be durable, replicated, and backed up. Supabase free tier covers the first 500 MB. Paid: ~$20/month for a production DB that handles 10K transactions/day.'},
+];
+const al=document.getElementById('arch-layers');
+if(al)archData.forEach((a,i)=>{
+  const d=document.createElement('div');
+  d.style.cssText=`background:var(--bg2);border:1px solid var(--border);border-left:3px solid ${a.col};padding:11px 16px;margin-bottom:1px;cursor:pointer;transition:background .15s;font-size:11px;color:var(--muted)`;
+  d.innerHTML=`<span style="color:${a.col};font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;margin-right:8px">0${i+1}</span>${a.l}`;
+  d.onmouseover=()=>d.style.background='var(--bg3)';
+  d.onmouseout=()=>d.style.background='var(--bg2)';
+  d.onclick=()=>{document.getElementById('arch-detail').innerHTML=`<span style="color:${a.col};font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px">0${i+1} — ${a.l}</span>${a.detail}`;};
+  al.appendChild(d);
+});
+if(document.getElementById('arch-detail'))document.getElementById('arch-detail').innerHTML='<span style="color:var(--muted)">Click a layer to see implementation details →</span>';
+
+function updCost(){
+  const dap=parseInt(document.getElementById('dap').value);
+  document.getElementById('dapv').textContent=dap.toLocaleString();
+  const fb=dap<10000?0:dap<50000?25:Math.round(dap/1000*0.8);
+  const cr=Math.round(dap*.03*.024*30);
+  const db=dap<5000?20:Math.round(20+dap/1000*0.4);
+  const tot=fb+cr+db;
+  document.getElementById('c-fb').textContent='$'+fb;
+  document.getElementById('c-cr').textContent='$'+cr;
+  document.getElementById('c-db').textContent='$'+db;
+  document.getElementById('c-tot').textContent='$'+tot;
+}
+updCost();
+
+// ── BUY MODAL ──
+function openBuy(){document.getElementById('buymo').style.display='flex';buyStep(1)}
+function closeBuy(){document.getElementById('buymo').style.display='none'}
+function buyStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));
+  document.getElementById('bs'+n).classList.add('on');
+  if(n===3){
+    const e=document.getElementById('be').value.trim();
+    const u=document.getElementById('bu').value.trim();
+    const p=document.getElementById('bp').value;
+    const err=document.getElementById('berr');
+    if(!e||!e.includes('@')){err.textContent='Valid email required';buyStep(2);return}
+    if(!u){err.textContent='Username required';buyStep(2);return}
+    if(p.length<8){err.textContent='Password must be 8+ chars';buyStep(2);return}
+    err.textContent='';
+  }
+}
+function simulatePay(){
+  const btn=document.getElementById('paybtn');
+  btn.disabled=true;btn.textContent='Processing...';
+  // In production: POST to /api/create-checkout-session → redirect to stripe.com/checkout
+  // Backend creates Stripe session: stripe.checkout.sessions.create({price:'price_xxx',success_url,cancel_url})
+  // On success_url: webhook fires → verify payment → issue NNC to wallet
+  setTimeout(()=>{
+    document.getElementById('conf-email').textContent=document.getElementById('be').value||'your@email.com';
+    buyStep(4);
+    btn.disabled=false;btn.textContent='PAY $1.00 →';
+  },1800);
+}
+document.getElementById('buymo').addEventListener('click',e=>{if(e.target===document.getElementById('buymo'))closeBuy()});
+
+</script>
+
+<!-- ═══════════════════════════ DEMO MODE ═══════════════════════════ -->
+<style>
+#dmo{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.96);display:none;flex-direction:column;align-items:center;justify-content:center;padding:14px;overflow-y:auto}
+.dw{width:100%;max-width:920px;background:var(--bg);border:1px solid var(--border2);position:relative;max-height:calc(100vh - 28px);overflow-y:auto}
+.dclose{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;font-family:'JetBrains Mono',monospace;line-height:1;z-index:10;transition:color .15s}
+.dclose:hover{color:var(--text)}
+.dhdr{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:5}
+.dbody{padding:20px 22px}
+.dphase{display:none}.dphase.on{display:block}
+.di{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;transition:border-color .15s}
+.di:focus{border-color:var(--gold)}.di::placeholder{color:var(--muted)}
+.ds{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;cursor:pointer}
+.db{padding:9px 18px;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'JetBrains Mono',monospace;text-transform:uppercase;transition:all .15s}
+.db:hover,.db.on{background:var(--gold);color:#000}
+.db.g{border-color:var(--green);color:var(--green)}.db.g:hover{background:var(--green);color:#000}
+.db.r{border-color:var(--red);color:var(--red)}.db.r:hover{background:var(--red);color:#fff}
+.db.c{border-color:var(--cyan);color:var(--cyan)}.db.c:hover{background:var(--cyan);color:#000}
+.db:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.pchip{padding:5px 11px;font-size:9px;font-weight:700;letter-spacing:.5px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--muted);transition:all .13s;font-family:'JetBrains Mono',monospace;margin:2px;display:inline-block}
+.pchip:hover{border-color:var(--gold);color:var(--gold)}.pchip.sel{border-color:var(--gold);color:var(--gold);background:rgba(245,200,66,.07)}
+.rcode{font-family:'Bebas Neue',sans-serif;font-size:60px;color:var(--gold);letter-spacing:14px;text-align:center;border:1px solid var(--border2);padding:12px 24px;background:var(--bg2)}
+#gc{display:block;width:100%;image-rendering:pixelated}
+.gll{font-size:10px;line-height:2;animation:gla .18s ease both}
+@keyframes gla{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+.fl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.fl{grid-template-columns:1fr}}
+</style>
+
+<div id="dmo">
+<div class="dw">
+  <button class="dclose" onclick="closeDemo()">✕</button>
+  <div class="dhdr">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold)">NATENATEWORLD <span style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--muted)">DEMO</span></div>
+      <div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px">max 10 players · claude physics engine · stick figure arena</div>
+    </div>
+    <div id="phind" style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase">// setup</div>
+  </div>
+  <div class="dbody">
+
+    <!-- SETUP -->
+    <div class="dphase on" id="ph-setup">
+      <div class="fl" style="margin-bottom:12px">
+        <div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Callsign</div><input class="di" id="dn" placeholder="Your name..." maxlength="14"></div>
+        <div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Anthropic API Key <span style="font-size:8px">(optional — offline mode if blank)</span></div><input class="di" id="dk" type="password" placeholder="sk-ant-... or leave blank for offline mode"></div>
+      </div>
+      <div class="fl" style="margin-bottom:16px">
+        <div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Skin</div>
+          <select class="ds" id="dsk">
+            <option value="default">🧍 Default Stick Figure</option>
+            <option value="cowboy">🤠 Cowboy</option>
+            <option value="astronaut">👨‍🚀 Astronaut</option>
+            <option value="wizard">🧙 Wizard</option>
+            <option value="samurai">⚔️ Samurai</option>
+            <option value="disco">🕺 Disco King</option>
+          </select>
+        </div>
+        <div><div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Space / Arena</div>
+          <select class="ds" id="dsp">
+            <option value="desert">🏜️ Desert — Earth normal physics</option>
+            <option value="moon">🌙 Moon Landing — low gravity 1.6 m/s²</option>
+            <option value="underwater">🌊 Underwater — high resistance, buoyancy</option>
+            <option value="disco">🪩 Disco Floor — rhythm-locked actions only</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="db g" onclick="startVsAI()">▶ VS AI</button>
+        <button class="db" onclick="createRoom()">+ CREATE ROOM</button>
+        <button class="db c" onclick="toggleJoin()">⇒ JOIN ROOM</button>
+      </div>
+      <div id="join-row" style="display:none;margin-bottom:10px">
+        <div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Room code (4 letters)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="di" id="djc" placeholder="XXXX" maxlength="4" style="text-transform:uppercase;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;max-width:110px;text-align:center">
+          <button class="db c" onclick="joinRoom()">JOIN →</button>
+        </div>
+      </div>
+      <div id="serr" style="font-size:11px;color:var(--red);min-height:14px"></div>
+    </div>
+
+    <!-- LOBBY -->
+    <div class="dphase" id="ph-lobby">
+      <div style="text-align:center;padding:24px 0">
+        <div style="font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Share this code with your opponent</div>
+        <div class="rcode" id="rcd">????</div>
+        <div style="margin-top:14px;font-size:11px;color:var(--muted)" id="lbst">Waiting for player...</div>
+        <div id="lbpl" style="margin-top:10px;font-size:10px;min-height:18px"></div>
+        <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="db g" onclick="startGame()" id="start-btn" disabled>START GAME</button>
+          <button class="db r" onclick="cancelLobby()">CANCEL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="dphase" id="ph-game">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;flex-wrap:wrap;gap:6px">
+        <div id="gp1" style="font-size:11px;font-weight:700;color:var(--gold)"></div>
+        <div id="gtrn" style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">— YOUR TURN —</div>
+        <div id="gp2" style="font-size:11px;font-weight:700;color:var(--cyan);text-align:right"></div>
+      </div>
+      <div style="width:100%;background:#000;border:1px solid var(--border);overflow:hidden">
+        <canvas id="gc" width="640" height="320"></canvas>
+      </div>
+      <div style="margin-top:11px">
+        <div style="font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Preset shots →</div>
+        <div id="prow" style="display:flex;flex-wrap:wrap;margin-bottom:9px"></div>
+        <div style="display:flex;gap:7px;align-items:stretch">
+          <input class="di" id="si" placeholder='Describe your shot... "I shoot notes with a saxophone and you dance forever"' style="flex:1">
+          <button class="db g" id="fbtn" onclick="fireShot()">FIRE ⚡</button>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:5px;min-height:14px" id="sst"></div>
+      </div>
+      <div style="margin-top:10px;background:var(--bg2);border:1px solid var(--border);padding:9px;max-height:110px;overflow-y:auto" id="glog">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px">// battle log</div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="dphase" id="ph-result">
+      <div style="text-align:center;padding:28px 0">
+        <div style="font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Match over</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:58px;letter-spacing:3px;color:var(--gold)" id="wname">???</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px" id="wsub">wins</div>
+        <div id="fscore" style="font-size:11px;margin-bottom:22px"></div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="db g" onclick="playAgain()">↺ PLAY AGAIN</button>
+          <button class="db" onclick="closeDemo()">BACK TO GDD</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dbody -->
+</div><!-- /dw -->
+</div><!-- /dmo -->
+
+<script>
+// ═══════════════════ NATENATEWORLD DEMO ENGINE ═══════════════════
+
+const PRESETS = [
+  "I shoot notes with a saxophone — you dance forever",
+  "I'm a cowboy — I lasso you and you orbit me like a satellite",
+  "I summon a tornado of hot sauce — you sneeze yourself 50 meters up",
+  "I play guitar so loud your skeleton leaves your body to go mosh",
+  "I deploy a disco ball at light speed — you freeze in a pose forever",
+  "I throw a boomerang made of feelings — it hugs you to sleep",
+  "I fire a cannon of glitter — you sparkle so hard it's visible from space",
+  "I whistle the exact frequency that makes knees buckle — you jig",
+  "I challenge you to a thumb war — psychically — you lose immediately",
+  "I sneeze with the force of a thousand polite suns",
+];
+
+const AI_NAMES = ['NPC_404','ROBO_STAN','GLITCH_VII','PIXEL_PETE','VOXEL_VI','BOT_DADDY','UNIT_NULL'];
+const AI_SKINS = ['default','cowboy','astronaut','wizard','samurai','disco'];
+const AI_SHOTS = [
+  "I do a cartwheel so fast it generates a sonic shockwave",
+  "I emit a frequency only your left kneecap can hear — it listens",
+  "I challenge you to stare at the sun with me — I have shades — you don't",
+  "I play the theremin so hauntingly your stick figure forgets gravity",
+  "I summon a vending machine ghost — it pins you against the wall",
+  "I sneeze in your direction with exactly 4.7 Newtons of force",
+  "I deploy my backup dance moves — illegal in 12 jurisdictions",
+  "I do the worm so aggressively it causes a local seismic event",
+  "I throw a perfectly timed 'hey' — you turn around — direct hit",
+  "I bodyslam you with the weight of my emotional baggage",
+];
+
+const SPACE_PHY = {
+  desert:    "Normal Earth gravity 9.8 m/s². Dry heat. Sound travels normally. Wind: mild.",
+  moon:      "Low gravity 1.6 m/s². No atmosphere. Sound-based attacks don't travel in vacuum (saxophone notes stay put). High-launch actions get bonus. Floating is easy.",
+  underwater:"High water resistance. Buoyancy active — everything floats up slowly. Sound attenuated. Music/dance attacks have +20% bonus. Fire-based shots fail.",
+  disco:     "Rhythm-locked dimension. Actions only land if they involve dancing, music, or rhythm. Non-music attacks have 40% fail penalty. Beat-perfect timing gives +bonus.",
+};
+
+const OFF_HIT = [
+  {e:"Target breaks into uncontrollable choreography",f:"The universe has validated this. No appeals."},
+  {e:"Target levitates 3 feet and executes a perfect robot",f:"Newton would've approved wholeheartedly."},
+  {e:"Target's legs tap without permission for 9 seconds",f:"Physics has entered the chat. Physics is dancing."},
+  {e:"Target spins 360° and high-kicks an invisible foe",f:"Certified hit. Choreography: unplanned but appreciated."},
+  {e:"Target moonwalks across the entire arena backward",f:"Retrograde physics. Happens to the best of us."},
+  {e:"Target does backflips toward the distant horizon",f:"The arena demanded a performance and it got one."},
+  {e:"Target freezes in a pose that'll haunt both of you",f:"Confirmed. Physics locked them in. No refunds."},
+];
+const OFF_MISS = [
+  {e:"Attack fizzes out somewhere above the horizon",f:"Cool concept. The atmosphere politely disagrees."},
+  {e:"Target sidesteps at the last microsecond",f:"Bad aim. We've all been there."},
+  {e:"The attack ricochets into an innocent cactus",f:"The cactus is now dancing. You are not."},
+  {e:"Target ducks and the shot clears by 2 millimeters",f:"Technically a miss. Technically also very close."},
+];
+
+const GW=640, GH=320, GND=275;
+
+let D={
+  phase:'setup', myName:'PLAYER_1', mySkin:'default', space:'desert', apiKey:'',
+  vsAI:false, channel:null, roomCode:null, isHost:false, myId:'p1',
+  players:[], myTurn:true, frame:0, effects:[], raf:null, firing:false, stars:null,
+};
+
+function openDemo(){document.getElementById('dmo').style.display='flex';setDP('setup')}
+function closeDemo(){document.getElementById('dmo').style.display='none';if(D.raf)cancelAnimationFrame(D.raf);if(D.channel){D.channel.close();D.channel=null}}
+function setDP(p){D.phase=p;document.querySelectorAll('.dphase').forEach(e=>e.classList.remove('on'));document.getElementById('ph-'+p).classList.add('on');document.getElementById('phind').textContent='// '+p}
+function getName(){const n=document.getElementById('dn').value.trim();return(n||'ANON_'+Math.floor(Math.random()*999)).toUpperCase()}
+function serr(m){document.getElementById('serr').textContent=m}
+function toggleJoin(){const r=document.getElementById('join-row');r.style.display=r.style.display==='none'?'block':'none'}
+
+// ── VS AI ──
+function startVsAI(){
+  D.myName=getName(); D.mySkin=document.getElementById('dsk').value;
+  D.space=document.getElementById('dsp').value; D.apiKey=document.getElementById('dk').value.trim();
+  D.vsAI=true; D.isHost=true; D.myId='p1';
+  const an=AI_NAMES[Math.floor(Math.random()*AI_NAMES.length)];
+  const ask=AI_SKINS[Math.floor(Math.random()*AI_SKINS.length)];
+  D.players=[
+    {id:'p1',name:D.myName,skin:D.mySkin,score:0,state:'idle',stateTimer:0,x:130,facing:1,col:'#f5c842'},
+    {id:'ai',name:an,skin:ask,score:0,state:'idle',stateTimer:0,x:510,facing:-1,col:'#00e5ff'},
+  ];
+  startGame();
+}
+
+// ── CREATE ROOM ──
+function createRoom(){
+  D.myName=getName(); D.mySkin=document.getElementById('dsk').value;
+  D.space=document.getElementById('dsp').value; D.apiKey=document.getElementById('dk').value.trim();
+  D.vsAI=false; D.isHost=true; D.myId='p1';
+  D.roomCode=genCode();
+  D.channel=new BroadcastChannel('nnw-'+D.roomCode);
+  D.players=[{id:'p1',name:D.myName,skin:D.mySkin,score:0,state:'idle',stateTimer:0,x:130,facing:1,col:'#f5c842'}];
+  setDP('lobby');
+  document.getElementById('rcd').textContent=D.roomCode;
+  document.getElementById('lbst').textContent='Waiting for player to join...';
+  document.getElementById('lbpl').innerHTML=`<span style="color:var(--gold)">✓ ${D.myName} (host)</span>`;
+  D.channel.onmessage=e=>handleMsg(e.data);
+}
+function genCode(){return'ABCDEFGHJKLMNPQRSTUVWXYZ'.split('').sort(()=>Math.random()-.5).slice(0,4).join('')}
+
+// ── JOIN ROOM ──
+function joinRoom(){
+  const code=document.getElementById('djc').value.toUpperCase().trim();
+  if(code.length!==4){serr('Room code must be 4 letters');return}
+  D.myName=getName(); D.mySkin=document.getElementById('dsk').value;
+  D.space=document.getElementById('dsp').value; D.apiKey=document.getElementById('dk').value.trim();
+  D.vsAI=false; D.isHost=false; D.myId='p2'; D.roomCode=code;
+  D.channel=new BroadcastChannel('nnw-'+code);
+  D.channel.onmessage=e=>handleMsg(e.data);
+  bcast({type:'join',name:D.myName,skin:D.mySkin,id:'p2'});
+  setDP('lobby');
+  document.getElementById('rcd').textContent=code;
+  document.getElementById('lbst').textContent='Joined! Waiting for host to start...';
+  document.getElementById('lbpl').innerHTML=`<span style="color:var(--cyan)">✓ ${D.myName} (joining)</span>`;
+}
+
+function bcast(msg){if(D.channel)D.channel.postMessage(msg)}
+
+function handleMsg(msg){
+  if(msg.type==='join'&&D.isHost){
+    D.players.push({id:msg.id,name:msg.name,skin:msg.skin,score:0,state:'idle',stateTimer:0,x:510,facing:-1,col:'#00e5ff'});
+    document.getElementById('lbst').textContent=msg.name+' joined!';
+    document.getElementById('lbpl').innerHTML=D.players.map(p=>`<span style="color:${p.col};margin-right:10px">✓ ${p.name}</span>`).join('');
+    document.getElementById('start-btn').disabled=false;
+    bcast({type:'state',players:D.players,space:D.space});
+  }else if(msg.type==='state'){
+    D.players=msg.players; D.space=msg.space;
+    document.getElementById('lbpl').innerHTML=D.players.map(p=>`<span style="color:${p.col};margin-right:10px">✓ ${p.name}</span>`).join('');
+  }else if(msg.type==='start'){
+    D.space=msg.space; D.players=msg.players; setDP('game'); initGame();
+  }else if(msg.type==='shot_result'){
+    applyResult(msg.attackerId,msg.targetId,msg.lands,msg.effect,msg.flavor,msg.txt);
+  }else if(msg.type==='turn'){
+    D.myTurn=msg.next===D.myId; updateTurnUI();
+  }else if(msg.type==='restart'){
+    D.players.forEach(p=>{p.score=0;p.state='idle';p.stateTimer=0}); setDP('game'); initGame();
+  }
+}
+
+function cancelLobby(){if(D.channel){D.channel.close();D.channel=null}setDP('setup')}
+function startGame(){
+  if(!D.vsAI&&D.isHost)bcast({type:'start',space:D.space,players:D.players});
+  setDP('game'); initGame();
+}
+
+// ── INIT GAME ──
+function initGame(){
+  const cv=document.getElementById('gc'); if(!cv)return;
+  cv.width=GW; cv.height=GH;
+  D.stars=genStars(); D.effects=[]; D.frame=0; D.firing=false; D.myTurn=true;
+  const row=document.getElementById('prow');
+  row.innerHTML=PRESETS.slice(0,6).map((p,i)=>`<span class="pchip" onclick="selPreset(${i})">${p.split('—')[0].trim().slice(0,32)}</span>`).join('');
+  updateScoreUI(); updateTurnUI();
+  glog(`⚔️ Match started in ${D.space.toUpperCase()} — first to 5 wins!`,'#f5c842');
+  if(D.raf)cancelAnimationFrame(D.raf);
+  gameLoop();
+}
+
+function selPreset(i){
+  document.getElementById('si').value=PRESETS[i];
+  document.querySelectorAll('.pchip').forEach((c,j)=>c.classList.toggle('sel',j===i));
+}
+
+// ── GAME LOOP ──
+function gameLoop(){
+  const cv=document.getElementById('gc');
+  if(!cv||D.phase!=='game')return;
+  const ctx=cv.getContext('2d');
+  drawBG(ctx);
+  // ground
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,GND+2);ctx.lineTo(GW,GND+2);ctx.stroke();
+  // players
+  D.players.forEach(p=>{
+    if(p.stateTimer>0){p.stateTimer--;if(p.stateTimer===0&&p.state!=='idle')p.state='idle'}
+    drawStick(ctx,p.x,GND,p.skin,p.state,p.facing,p.col,p.name,p.score,D.frame);
+  });
+  // effects
+  for(let i=D.effects.length-1;i>=0;i--){
+    const e=D.effects[i];
+    ctx.save();ctx.globalAlpha=e.a;ctx.fillStyle=e.c;
+    ctx.font=`bold ${e.sz||12}px JetBrains Mono`;ctx.textAlign='center';
+    ctx.fillText(e.t,e.x,e.y);ctx.restore();
+    e.y-=0.65;e.a-=0.006;
+    if(e.a<=0)D.effects.splice(i,1);
+  }
+  D.frame++;
+  D.raf=requestAnimationFrame(gameLoop);
+}
+
+// ── BACKGROUNDS ──
+function genStars(){const s=[];for(let i=0;i<130;i++)s.push({x:Math.random()*GW,y:Math.random()*GH*.72,a:.3+Math.random()*.7});return s}
+
+function drawBG(ctx){
+  if(D.space==='desert'){
+    const sg=ctx.createLinearGradient(0,0,0,GH*.65);
+    sg.addColorStop(0,'#0a1230');sg.addColorStop(.6,'#1d4575');sg.addColorStop(1,'#e07030');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,GW,GH*.65);
+    const sd=ctx.createLinearGradient(0,GH*.65,0,GH);
+    sd.addColorStop(0,'#cc9a28');sd.addColorStop(1,'#9e7016');
+    ctx.fillStyle=sd;ctx.fillRect(0,GH*.65,GW,GH*.35);
+    ctx.fillStyle='#b08018';ctx.beginPath();ctx.moveTo(0,GH*.69);ctx.quadraticCurveTo(GW*.26,GH*.58,GW*.54,GH*.67);ctx.quadraticCurveTo(GW*.78,GH*.76,GW,GH*.69);ctx.lineTo(GW,GH);ctx.lineTo(0,GH);ctx.fill();
+    drawCactus(ctx,GW/2,GH*.65);
+    ctx.fillStyle='rgba(255,218,90,.9)';ctx.beginPath();ctx.arc(GW*.83,GH*.11,20,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,218,90,.15)';ctx.beginPath();ctx.arc(GW*.83,GH*.11,33,0,Math.PI*2);ctx.fill();
+  }else if(D.space==='moon'){
+    ctx.fillStyle='#060810';ctx.fillRect(0,0,GW,GH);
+    D.stars.forEach(s=>{ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fillRect(s.x,s.y,1,1)});
+    ctx.fillStyle='rgba(25,90,200,.65)';ctx.beginPath();ctx.arc(GW*.86,GH*.12,25,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(40,160,40,.55)';ctx.beginPath();ctx.arc(GW*.89,GH*.1,12,0,Math.PI*2);ctx.fill();
+    const mg=ctx.createLinearGradient(0,GH*.65,0,GH);mg.addColorStop(0,'#424242');mg.addColorStop(1,'#1a1a1a');
+    ctx.fillStyle=mg;ctx.fillRect(0,GH*.65,GW,GH*.35);
+    [[75,GH*.73,16],[215,GH*.77,11],[445,GH*.72,20],[578,GH*.75,13]].forEach(([x,y,r])=>{ctx.strokeStyle='#2e2e2e';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.stroke();ctx.fillStyle='rgba(0,0,0,.28)';ctx.fill()});
+  }else if(D.space==='underwater'){
+    const wg=ctx.createLinearGradient(0,0,0,GH);wg.addColorStop(0,'#001020');wg.addColorStop(1,'#003260');
+    ctx.fillStyle=wg;ctx.fillRect(0,0,GW,GH);
+    const t=D.frame*.018;
+    for(let i=0;i<7;i++){ctx.fillStyle='rgba(0,120,255,.04)';ctx.beginPath();ctx.ellipse(GW*(.08+i*.13)+Math.sin(t+i)*22,GH*.28,22+Math.sin(t*.6+i)*9,GH*.48,0,0,Math.PI*2);ctx.fill()}
+    ctx.fillStyle='#142e12';ctx.fillRect(0,GH*.65,GW,GH*.35);
+    const bf=D.frame*.6%44;
+    ctx.fillStyle='rgba(130,210,255,.28)';
+    [[110,bf],[270,bf+12],[460,bf+26],[570,bf+7]].forEach(([x,b])=>{ctx.beginPath();ctx.arc(x,GH*.65-b*4,3,0,Math.PI*2);ctx.fill()});
+    for(let i=0;i<5;i++){const sx=45+i*118,t2=D.frame*.025;ctx.strokeStyle='#1a5a1a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx,GH*.65);for(let j=0;j<6;j++)ctx.lineTo(sx+Math.sin(t2+j*.9+i)*13,GH*.65-j*14);ctx.stroke()}
+  }else{
+    ctx.fillStyle='#080010';ctx.fillRect(0,0,GW,GH);
+    const t=D.frame*.035;
+    for(let x=0;x<GW;x+=28)for(let y=GH*.65;y<GH;y+=28){const h=(x+y+D.frame*2.5)%360;ctx.fillStyle=`hsla(${h},75%,28%,.65)`;ctx.fillRect(x,y,27,27)}
+    const bx=GW/2,by=40,br=18;
+    ctx.fillStyle='#777';ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
+    for(let a=0;a<Math.PI*2;a+=.45){const rv=br+4;const h=(a*57+D.frame*9)%360;ctx.fillStyle=`hsla(${h},100%,68%,.8)`;ctx.beginPath();ctx.arc(bx+Math.cos(a)*rv,by+Math.sin(a)*rv,2.8,0,Math.PI*2);ctx.fill()}
+    [[195,195],[445,195]].forEach(([tx,ty])=>{ctx.strokeStyle=`rgba(255,180,0,${.04+Math.sin(t)*.025})`;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx+Math.sin(t)*28,ty);ctx.stroke()});
+    ctx.fillStyle='#100020';ctx.fillRect(0,0,GW,18);
+  }
+}
+
+function drawCactus(ctx,x,y){
+  ctx.strokeStyle='#1a4a1a';ctx.lineWidth=6;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-52);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-20,y-24);ctx.lineTo(x,y-24);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-20,y-24);ctx.lineTo(x-20,y-38);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x+17,y-33);ctx.lineTo(x,y-33);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x+17,y-33);ctx.lineTo(x+17,y-46);ctx.stroke();
+}
+
+// ── STICK FIGURE ──
+function drawStick(ctx,x,y,skin,state,facing,col,name,score,frame){
+  const t=frame*.09;
+  const hit=state==='hit_effect'||state==='stunned';
+  const c=hit?'#ff4444':col;
+  let dy=0;
+  if(state==='floating')dy=Math.sin(t*1.4)*12-18;
+  else if(state==='celebrating')dy=Math.abs(Math.sin(t*2))*-11;
+  else if(state==='dancing')dy=Math.sin(t*2)*4;
+  else dy=Math.sin(t*.5)*1.5;
+  const bx=x,by=y+dy;
+  ctx.strokeStyle=c;ctx.lineWidth=2.4;ctx.lineCap='round';
+  // Head
+  const hr=skin==='astronaut'?16:12;
+  ctx.beginPath();ctx.arc(bx,by-68,hr,0,Math.PI*2);ctx.stroke();
+  if(skin==='astronaut'){ctx.fillStyle='rgba(0,190,255,.22)';ctx.fill()}
+  // Skin decoration
+  if(skin==='cowboy'){
+    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bx-17,by-79);ctx.lineTo(bx+17,by-79);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(bx-10,by-79);ctx.lineTo(bx-10,by-94);ctx.lineTo(bx+10,by-94);ctx.lineTo(bx+10,by-79);ctx.stroke();ctx.lineWidth=2.4;
+  }else if(skin==='wizard'){
+    ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bx-13,by-78);ctx.lineTo(bx,by-98);ctx.lineTo(bx+13,by-78);ctx.stroke();ctx.lineWidth=2.4;
+  }else if(skin==='samurai'){
+    ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(bx,by-79);ctx.lineTo(bx,by-91);ctx.stroke();ctx.beginPath();ctx.arc(bx,by-92,3,0,Math.PI*2);ctx.stroke();ctx.lineWidth=2.4;
+  }else if(skin==='disco'){
+    ctx.lineWidth=4;ctx.beginPath();ctx.arc(bx,by-71,17,Math.PI,Math.PI*2);ctx.stroke();ctx.lineWidth=2.4;
+  }
+  ctx.strokeStyle=c;
+  // Body
+  ctx.beginPath();ctx.moveTo(bx,by-56);ctx.lineTo(bx,by-37);ctx.stroke();
+  // Arms
+  let lax,lay,rax,ray;const AL=19;
+  if(state==='dancing'){
+    lax=bx-AL*Math.cos(t);lay=by-54+AL*Math.abs(Math.sin(t))*-1.3;
+    rax=bx+AL*Math.cos(t+1);ray=by-54+AL*Math.abs(Math.sin(t+1))*-1.3;
+  }else if(state==='shooting'){
+    lax=bx-11;lay=by-46;rax=bx+facing*AL*.95;ray=by-52;
+  }else if(state==='celebrating'){
+    lax=bx-AL*.8;lay=by-55-AL;rax=bx+AL*.8;ray=by-55-AL;
+  }else if(state==='floating'){
+    lax=bx-AL*.6;lay=by-51-AL*.4+Math.sin(t)*5;rax=bx+AL*.6;ray=by-51-AL*.4+Math.sin(t+1)*5;
+  }else if(state==='stunned'){
+    lax=bx-AL;lay=by-44+Math.sin(t*5)*3;rax=bx+AL;ray=by-44+Math.sin(t*5+1)*3;
+  }else{lax=bx-AL*.7;lay=by-46+8;rax=bx+AL*.7;ray=by-46+8}
+  ctx.beginPath();ctx.moveTo(bx,by-51);ctx.lineTo(lax,lay);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(bx,by-51);ctx.lineTo(rax,ray);ctx.stroke();
+  // Weapon props when shooting
+  if(state==='shooting'){
+    if(skin==='samurai'){ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(rax,ray);ctx.lineTo(rax+facing*32,ray-7);ctx.stroke();ctx.lineWidth=2.4}
+    else if(skin==='cowboy'){ctx.strokeStyle='#c89040';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(rax+facing*18,ray-6,11,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=c;ctx.lineWidth=2.4}
+    else if(skin==='wizard'){for(let i=0;i<6;i++){ctx.fillStyle=`rgba(255,170,70,${.9-i*.12})`;ctx.beginPath();ctx.arc(rax+facing*(10+i*8),ray-i*4,2.8-i*.35,0,Math.PI*2);ctx.fill()}}
+    else if(skin==='disco'){const h=(frame*5)%360;for(let i=0;i<5;i++){ctx.fillStyle=`hsla(${(h+i*40)%360},100%,70%,.85)`;ctx.beginPath();ctx.arc(rax+facing*(11+i*8),ray-i*4,2.8,0,Math.PI*2);ctx.fill()}}
+    else{// Default — fist/punch motion line
+      ctx.lineWidth=1.5;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(rax,ray);ctx.lineTo(rax+facing*16,ray+2);ctx.stroke();ctx.lineWidth=2.4;ctx.strokeStyle=c}
+  }
+  // Legs
+  let llx,lly,rlx,rly;const LL=25;
+  if(state==='dancing'){
+    llx=bx-LL*Math.sin(t+.5);lly=by-37+LL*Math.cos(t+.5);
+    rlx=bx+LL*Math.sin(t);rly=by-37+LL*Math.cos(t);
+  }else if(state==='celebrating'){
+    llx=bx-LL*.55;lly=by-37+LL*.82;rlx=bx+LL*.55;rly=by-37+LL*.82;
+  }else{llx=bx-LL*.38;lly=by-37+LL*.92;rlx=bx+LL*.38;rly=by-37+LL*.92}
+  ctx.beginPath();ctx.moveTo(bx,by-37);ctx.lineTo(llx,lly);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(bx,by-37);ctx.lineTo(rlx,rly);ctx.stroke();
+  // Name + score
+  ctx.fillStyle=col;ctx.font='10px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText(name,bx,by+21);
+  ctx.fillStyle='#f5c842';ctx.font='bold 11px JetBrains Mono';
+  ctx.fillText('★'.repeat(score)+'·'.repeat(Math.max(0,5-score)),bx,by+34);
+}
+
+// ── FIRE SHOT ──
+async function fireShot(){
+  if(!D.myTurn||D.firing)return;
+  const txt=document.getElementById('si').value.trim();
+  if(!txt){document.getElementById('sst').textContent='Enter a shot!';return}
+  D.firing=true;
+  document.getElementById('fbtn').disabled=true;
+  document.getElementById('sst').textContent=D.apiKey?'Claude is judging the physics...':'Offline physics engine thinking...';
+  const me=D.players.find(p=>p.id===D.myId);
+  const tgt=D.players.find(p=>p.id!==D.myId);
+  if(!me||!tgt){D.firing=false;return}
+  me.state='shooting';me.stateTimer=55;
+  const res=await evalShot(txt,me.name,tgt.name,D.space,D.apiKey);
+  if(!D.vsAI&&D.channel)bcast({type:'shot_result',attackerId:D.myId,targetId:tgt.id,lands:res.lands,effect:res.e,flavor:res.f,txt});
+  applyResult(D.myId,tgt.id,res.lands,res.e,res.f,txt);
+  document.getElementById('si').value='';
+  document.querySelectorAll('.pchip').forEach(c=>c.classList.remove('sel'));
+  if(D.vsAI&&!checkWin())setTimeout(aiTurn,2200);
+}
+
+function applyResult(aid,tid,lands,effect,flavor,shotTxt){
+  const at=D.players.find(p=>p.id===aid);
+  const tg=D.players.find(p=>p.id===tid);
+  if(!at||!tg)return;
+  document.getElementById('sst').textContent='';
+  if(lands){
+    at.score++;at.state='celebrating';at.stateTimer=100;
+    tg.state=Math.random()>.4?'dancing':'floating';tg.stateTimer=130;
+    addFX(tg.x,'⚡ HIT','#ff3333',18,0);
+    addFX(tg.x,effect.slice(0,34),'#2dff7f',11,28);
+    glog(`🎯 ${at.name}: "${shotTxt.slice(0,44)}"`,at.col);
+    glog(`   ↳ HIT! ${effect}`,'#2dff7f');
+    glog(`   💬 ${flavor}`,'#5a5650');
+  }else{
+    at.state='idle';tg.state='stunned';tg.stateTimer=28;
+    addFX(tg.x,'MISS','#ff3333',16,0);
+    glog(`💨 ${at.name}: "${shotTxt.slice(0,44)}"`,at.col);
+    glog(`   ↳ MISS! ${flavor}`,'#ff3333');
+  }
+  updateScoreUI();
+  if(checkWin()){setTimeout(endGame,1600);return}
+  D.myTurn=aid!==D.myId;
+  updateTurnUI();
+  D.firing=false;
+  if(!D.vsAI)document.getElementById('fbtn').disabled=!D.myTurn;
+  if(!D.vsAI&&D.channel&&D.isHost)bcast({type:'turn',next:tid});
+}
+
+// ── AI TURN ──
+async function aiTurn(){
+  const ai=D.players.find(p=>p.id==='ai');
+  const me=D.players.find(p=>p.id==='p1');
+  if(!ai||!me||D.phase!=='game')return;
+  const shot=AI_SHOTS[Math.floor(Math.random()*AI_SHOTS.length)];
+  glog(`🤖 ${ai.name} is loading a shot...`,ai.col);
+  await new Promise(r=>setTimeout(r,900));
+  const res=await evalShot(shot,ai.name,me.name,D.space,D.apiKey);
+  applyResult('ai','p1',res.lands,res.e,res.f,shot);
+  if(!checkWin()){D.myTurn=true;document.getElementById('fbtn').disabled=false;updateTurnUI()}
+  D.firing=false;
+}
+
+// ── EVAL SHOT ──
+async function evalShot(prompt,attacker,target,space,apiKey){
+  if(!apiKey){
+    await new Promise(r=>setTimeout(r,500+Math.random()*400));
+    const h=Math.random()>.35;
+    const pool=h?OFF_HIT:OFF_MISS;
+    const r=pool[Math.floor(Math.random()*pool.length)];
+    return{lands:h,e:r.e,f:r.f};
+  }
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:130,
+        system:`You are the physics judge for natenateworld. Space: ${SPACE_PHY[space]||'Normal'} Evaluate if the shot lands. Respond ONLY in raw JSON (no markdown): {"lands":boolean,"e":"visual effect max 40 chars","f":"funny 1-liner max 55 chars"}`,
+        messages:[{role:'user',content:`Attacker:${attacker} Target:${target} Shot:"${prompt}"`}]
+      })
+    });
+    const data=await res.json();
+    const txt=data.content?.[0]?.text||'{"lands":true,"e":"Direct hit!","f":"Physics confirms."}';
+    try{return JSON.parse(txt.replace(/```json|```/g,'').trim())}
+    catch{return{lands:true,e:'Hit — unusual but valid',f:'The physics engine accepted this.'}}
+  }catch{
+    const h=Math.random()>.35;const pool=h?OFF_HIT:OFF_MISS;const r=pool[Math.floor(Math.random()*pool.length)];return{lands:h,e:r.e,f:r.f};
+  }
+}
+
+// ── HELPERS ──
+function addFX(x,t,c,sz,yOff){D.effects.push({x,y:GND-82-(yOff||0),t,c:c||'#f5c842',sz:sz||12,a:1})}
+function glog(msg,col){const l=document.getElementById('glog');if(!l)return;const d=document.createElement('div');d.className='gll';d.style.color=col||'var(--text)';d.textContent=msg;l.appendChild(d);l.scrollTop=l.scrollHeight}
+function updateScoreUI(){if(D.players.length<2)return;const p1=D.players[0],p2=D.players[1];document.getElementById('gp1').textContent=`${p1.name} ★${p1.score}`;document.getElementById('gp2').textContent=`★${p2.score} ${p2.name}`}
+function updateTurnUI(){const el=document.getElementById('gtrn');if(!el)return;if(D.myTurn){el.textContent='— YOUR TURN —';el.style.color='var(--gold)'}else{const p2=D.players.find(p=>p.id!==D.myId);el.textContent=p2?`— ${p2.name}'s TURN —`:'— WAITING —';el.style.color='var(--muted)'}}
+function checkWin(){return D.players.some(p=>p.score>=5)}
+function endGame(){
+  const w=D.players.reduce((a,b)=>a.score>b.score?a:b);
+  const l=D.players.find(p=>p!==w);
+  if(D.raf)cancelAnimationFrame(D.raf);
+  setDP('result');
+  document.getElementById('wname').textContent=w.name;
+  document.getElementById('wsub').textContent=`wins ${w.score}–${l.score}`;
+  document.getElementById('fscore').innerHTML=`<span style="color:${w.col}">${w.name}: ${w.score}★</span> &nbsp;|&nbsp; <span style="color:${l.col}">${l.name}: ${l.score}★</span>`;
+}
+function playAgain(){
+  D.players.forEach(p=>{p.score=0;p.state='idle';p.stateTimer=0});
+  if(!D.vsAI&&D.channel)bcast({type:'restart'});
+  setDP('game');initGame();
+}
+</script>
+</body>
+</html>

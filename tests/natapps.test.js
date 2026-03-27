@@ -16,6 +16,8 @@ const required = {
   bubbleBoxingLink: /bubbleboxing\/dist\/index\.html/,
   speedballTrackerHeading: /Speedball Tracker/,
   speedballTrackerLink: /speedball-tracker\.html/,
+  natenateworldHeading: /natenateworld/,
+  natenateworldLink: /natenateworld\.html/,
   moreToCome: /more to come|coming soon/i,
   playButtons: /Play Now/,
   targetBlank: /target="_blank"/,
