@@ -43,6 +43,8 @@ const mustInclude = [
   'heated UWPT',
   'snowmobile',
   'Many grade exits',
+  'rainy days',
+  'UWPT stormwater evacuation',
   'id="gallery"',
   'skateparkcity images',
   'id="inspiration"',
