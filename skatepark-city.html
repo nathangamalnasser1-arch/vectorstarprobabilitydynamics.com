@@ -62,14 +62,19 @@ body.nav-open .nav-hamburger span:nth-child(3){transform:translateY(-7px) rotate
 .nav-cta{margin-left:0}
 .nav-imyta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:8px 14px;border:1px solid rgba(245,226,51,.45);color:var(--yellow);background:rgba(245,226,51,.08);cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:4px;flex-shrink:0;white-space:nowrap}
 .nav-imyta:hover{background:rgba(245,226,51,.18);border-color:var(--yellow);color:#fff}
-.imyta-overlay{position:fixed;inset:0;z-index:1020;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));box-sizing:border-box}
-.imyta-overlay.is-open{display:flex}
-.imyta-overlay-panel{position:relative;width:100%;max-width:min(1001px,96vw);background:var(--bg2);border:1px solid var(--border);border-radius:6px;box-shadow:0 24px 80px rgba(0,0,0,.6);overflow:hidden}
-.imyta-overlay-close{position:absolute;top:10px;right:10px;z-index:2;width:40px;height:40px;border:1px solid var(--border);background:rgba(8,12,15,.9);color:var(--white);font-size:22px;line-height:1;cursor:pointer;border-radius:4px;transition:background .2s,border-color .2s}
-.imyta-overlay-close:hover{background:var(--orange);border-color:var(--orange);color:#000}
+.imyta-overlay,.uwpt-video-overlay{position:fixed;inset:0;z-index:1020;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));box-sizing:border-box}
+.imyta-overlay.is-open,.uwpt-video-overlay.is-open{display:flex}
+.imyta-overlay-panel,.uwpt-video-overlay-panel{position:relative;width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;box-shadow:0 24px 80px rgba(0,0,0,.6);overflow:hidden}
+.imyta-overlay-panel{max-width:min(1001px,96vw)}
+.uwpt-video-overlay-panel{max-width:min(1100px,96vw)}
+.imyta-overlay-close,.uwpt-video-overlay-close{position:absolute;top:10px;right:10px;z-index:2;width:40px;height:40px;border:1px solid var(--border);background:rgba(8,12,15,.9);color:var(--white);font-size:22px;line-height:1;cursor:pointer;border-radius:4px;transition:background .2s,border-color .2s}
+.imyta-overlay-close:hover,.uwpt-video-overlay-close:hover{background:var(--orange);border-color:var(--orange);color:#000}
 .imyta-video-shell{position:relative;width:100%;padding-bottom:75.02%;height:0;background:#000}
-.imyta-video-shell iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
-.imyta-overlay-caption{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);padding:10px 14px;border-top:1px solid var(--border)}
+.uwpt-video-shell{position:relative;width:100%;padding-bottom:56.25%;height:0;background:#000}
+.imyta-video-shell iframe,.uwpt-video-shell iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+.imyta-overlay-caption,.uwpt-video-overlay-caption{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);padding:10px 14px;border-top:1px solid var(--border)}
+.uwpt-video-open{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:8px 14px;border:1px solid rgba(0,212,255,.45);color:var(--cyan);background:rgba(0,212,255,.08);cursor:pointer;text-transform:uppercase;transition:all .2s;border-radius:4px;flex-shrink:0;white-space:nowrap}
+.uwpt-video-open:hover{background:rgba(0,212,255,.18);border-color:#00d4ff;color:#fff}
 .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:520px){
   .nav-instagram{display:none}
@@ -442,6 +447,17 @@ html,body{overflow-x:hidden;max-width:100%}
   </div>
 </div>
 
+<div id="uwpt-video-overlay" class="uwpt-video-overlay" role="dialog" aria-modal="true" aria-labelledby="uwpt-video-modal-title" aria-hidden="true">
+  <div class="uwpt-video-overlay-panel">
+    <button type="button" class="uwpt-video-overlay-close" id="uwpt-video-close" aria-label="Close video">×</button>
+    <h2 id="uwpt-video-modal-title" class="visually-hidden">The Anti Subway — Reimagining Mass Transit for a Wheels First City</h2>
+    <div class="uwpt-video-shell">
+      <iframe width="1840" height="1035" src="https://www.youtube.com/embed/EQ-XIZ3b5mM" title="The Anti Subway — Reimagining Mass Transit for a Wheels First City" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <p class="uwpt-video-overlay-caption">The Anti Subway — wheels-first mass transit (YouTube)</p>
+  </div>
+</div>
+
 <!-- HERO -->
 <section id="hero">
   <div class="hero-bg">
@@ -664,7 +680,10 @@ html,body{overflow-x:hidden;max-width:100%}
           <div style="display:flex;gap:12px;padding:12px 16px;border:1px solid var(--border);align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:4px"></div><div style="font-size:12px;color:var(--muted)"><span style="color:var(--white)">Gravity</span> — going down is always free. Every commute to work is downhill. Boost levers at the base of each level for the last flat push.</div></div>
         </div>
 
-        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Underground way — pumptracks, not subways</div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase">Underground way — pumptracks, not subways</div>
+          <button type="button" class="uwpt-video-open" id="uwpt-video-open" aria-haspopup="dialog" aria-controls="uwpt-video-overlay">Anti Subway — video</button>
+        </div>
         <div style="margin-bottom:28px;padding:18px 20px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.04)">
           <p style="font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:14px">The below-grade network is not a conventional subway. It is <span style="color:var(--white)">UWPT</span> — <span style="color:var(--white)">Underway Pumptrack</span>: a linked underground pumptrack spine of continuous concrete rollers that moves flow and training volume without rail cars. The slab is <span style="color:var(--white)">hydronically heated</span> (glycol loops, same family as arena and outdoor-rink systems) so <span style="color:var(--white)">UWPT stays rideable through winter</span> when exterior wheels are snowbound. On <span style="color:var(--white)">rainy days</span>, <span style="color:var(--white)">UWPT</span> is the covered spine while exterior concrete is wet — same franchise rule at Miramundo as in Quebec and China. The circuit has <span style="color:var(--white)">many exits</span> to grade — plazas, station decks, athlete village — so movement is never locked to a single tunnel portal.</p>
           <p style="font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:14px">Where the franchise runs a <span style="color:var(--white)">snow season</span>, <span style="color:var(--white)">exterior travel</span> on the signed winter network is <span style="color:var(--white)">ski, snowboard, and snowmobile</span> (plus nordic / resort spine as built) while <span style="color:var(--white)">UWPT</span> carries heated skate and BMX volume below grade. <span style="color:var(--white)">Skatepark City Quebec (Laurentian Edition)</span> and <span style="color:var(--white)">Skatepark City China</span> both specify <span style="color:var(--white)">heated UWPT</span> and <span style="color:var(--white)">multi-exit</span> below-grade fabric as standard cold-climate delivery — and the same <span style="color:var(--white)">UWPT</span> spine answers <span style="color:var(--white)">rainy days</span> with <span style="color:var(--white)">UWPT stormwater evacuation</span>, not ad-hoc drains bolted on later.</p>
@@ -3851,7 +3870,7 @@ let mx=0,my=0,rx=0,ry=0;
 document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
 function animRing(){rx+=(mx-rx)*.15;ry+=(my-ry)*.15;ring.style.left=Math.round(rx)+'px';ring.style.top=Math.round(ry)+'px';requestAnimationFrame(animRing)}
 animRing();
-document.querySelectorAll('a,button,.feature-card,.invest-card,.mode-card,.license-tier,.nav-hamburger,.spc-gc-btn,.spc-gc-dot,.nav-instagram,.nav-imyta,.imyta-overlay-close').forEach(el=>{
+document.querySelectorAll('a,button,.feature-card,.invest-card,.mode-card,.license-tier,.nav-hamburger,.spc-gc-btn,.spc-gc-dot,.nav-instagram,.nav-imyta,.imyta-overlay-close,.uwpt-video-open,.uwpt-video-overlay-close').forEach(el=>{
   el.addEventListener('mouseenter',()=>{cursor.style.width='24px';cursor.style.height='24px';ring.style.width='50px';ring.style.height='50px'});
   el.addEventListener('mouseleave',()=>{cursor.style.width='12px';cursor.style.height='12px';ring.style.width='36px';ring.style.height='36px'});
 });
@@ -3880,6 +3899,33 @@ document.querySelectorAll('a,button,.feature-card,.invest-card,.mode-card,.licen
   document.addEventListener('keydown',e=>{
     if(e.key!=='Escape'||!overlay.classList.contains('is-open'))return;
     closeImyta();
+  });
+})();
+
+// UWPT — Anti Subway video modal (YouTube embed)
+(function(){
+  const overlay=document.getElementById('uwpt-video-overlay');
+  const openBtn=document.getElementById('uwpt-video-open');
+  const closeBtn=document.getElementById('uwpt-video-close');
+  if(!overlay||!openBtn||!closeBtn)return;
+  function openUwptVideo(){
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+    closeBtn.focus();
+  }
+  function closeUwptVideo(){
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    openBtn.focus();
+  }
+  openBtn.addEventListener('click',openUwptVideo);
+  closeBtn.addEventListener('click',closeUwptVideo);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeUwptVideo()});
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape'||!overlay.classList.contains('is-open'))return;
+    closeUwptVideo();
   });
 })();
 

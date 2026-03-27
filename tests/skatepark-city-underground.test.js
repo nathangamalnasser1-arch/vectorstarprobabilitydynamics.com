@@ -30,5 +30,8 @@ assert.ok(/UWPT — underway pumptrack spine/i.test(svPanel), 'city levels row l
 assert.ok(/id="spc-pumptrack-underway-map"/.test(svPanel), 'fictive map SVG id');
 assert.ok(/Fictive schematic — pumptrack underway/i.test(svPanel), 'fictive map section label');
 assert.ok(/UWPT · HEATED/.test(svPanel), 'SVG heated UWPT label');
+assert.ok(/id="uwpt-video-open"/.test(svPanel), 'UWPT Anti Subway video button');
+assert.ok(/Anti Subway — video/.test(svPanel), 'UWPT video button label');
+assert.ok(html.includes('EQ-XIZ3b5mM') && /id="uwpt-video-overlay"/.test(html), 'UWPT YouTube modal embed');
 
 console.log('ok: skatepark-city underground pumptrack (El Salvador) checks passed');
