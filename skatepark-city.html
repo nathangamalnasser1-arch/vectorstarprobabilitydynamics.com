@@ -322,6 +322,7 @@ html,body{overflow-x:hidden;max-width:100%}
     <li><a href="#investment">Investors</a></li>
     <li><a href="#charter">Charter</a></li>
     <li><a href="china-gu.html" style="color:#e8c4ff">China × Gu</a></li>
+    <li><a href="#locations" onclick="setTimeout(()=>switchLoc('qc'),10)" style="color:#7cb893">Quebec</a></li>
   </ul>
   <a href="#cta" class="nav-cta">Invest</a>
 </nav>
@@ -357,8 +358,8 @@ html,body{overflow-x:hidden;max-width:100%}
 <!-- LOCATIONS — FULL DUAL TAB -->
 <section id="locations" style="padding:120px 48px;background:var(--bg2)">
   <span class="section-tag reveal">00 — Choose Your City</span>
-  <h2 class="section-title reveal">SEVEN<br>LOCATIONS</h2>
-  <p class="section-body reveal" style="margin-bottom:48px">Same city. Same charter. Same concept. Seven sites across five countries, multiple phases. Pick a site to explore the full city description.</p>
+  <h2 class="section-title reveal">EIGHT<br>LOCATIONS</h2>
+  <p class="section-body reveal" style="margin-bottom:48px">Same city. Same charter. Same concept. Eight locations across multiple regions and phases. Pick a site to explore the full city description.</p>
 
   <!-- LOCATION TABS -->
   <div style="display:flex;gap:0;border:1px solid var(--border);width:100%;margin-bottom:48px" class="reveal loc-tabs">
@@ -389,6 +390,10 @@ html,body{overflow-x:hidden;max-width:100%}
     <button id="ltab-us" onclick="switchLoc('us')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
       USA — PHASE ?
       <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">Taos · Asheville · Bend · 3 Candidate Sites · Site TBD</div>
+    </button>
+    <button id="ltab-qc" onclick="switchLoc('qc')" style="flex:1;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;padding:20px 32px;background:transparent;color:var(--muted);border:none;cursor:pointer;transition:all .2s;text-align:left;border-left:1px solid var(--border)">
+      QUEBEC — LAURENTIAN
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:4px;font-weight:400;opacity:.5">93-Acre Village · Lantier / SM du Lac Masson · Athlete Hub Montréal · Q3 2031</div>
     </button>
   </div>
 
@@ -1351,6 +1356,152 @@ html,body{overflow-x:hidden;max-width:100%}
   </div><!-- end loc-us -->
 
   </div><!-- end loc-mt -->
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- QUEBEC PANEL — Laurentian Edition                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="loc-qc" style="display:none">
+
+    <div style="border:1px solid rgba(107,155,122,.35);background:linear-gradient(135deg,rgba(45,52,48,.9) 0%,rgba(26,32,28,.95) 100%);padding:40px 36px;margin-bottom:48px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;opacity:.15;background-image:repeating-linear-gradient(-12deg,transparent,transparent 40px,rgba(255,107,26,.06) 40px,rgba(255,107,26,.06) 41px);pointer-events:none"></div>
+      <div style="position:relative;z-index:2">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:4px;color:#7cb893;margin-bottom:12px;text-transform:uppercase">Skatepark City Quebec · The Laurentian Edition</div>
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,64px);letter-spacing:3px;line-height:1;color:var(--white);margin-bottom:8px">Quebec: The Next Vertical Drop</h3>
+        <p style="font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,3vw,34px);letter-spacing:2px;color:var(--orange);margin-bottom:14px">Roll to Work. Grind Main Street. No Cars for Daily Life.</p>
+        <p style="font-size:14px;color:#9ca89f;line-height:1.85;max-width:920px;margin-bottom:16px">Introducing the <strong style="color:var(--white);font-weight:500">93-acre Athlete Village</strong> in the heart of the Laurentians — <strong style="color:var(--white);font-weight:500">365-day skate flow</strong> woven into luxury mountain living. A human-powered, car-optional urban expansion of the global SPC franchise: mountainous terrain around Lantier &amp; Sainte-Marguerite-du-Lac-Masson, paired with the urban <strong style="color:var(--white);font-weight:500">Athlete Hub</strong> at the Montreal Olympic Stadium.</p>
+        <p style="font-family:'DM Mono',monospace;font-size:11px;color:#6b7a72;letter-spacing:1px;line-height:1.7">Vehicles remain permitted for emergency and service access — ambulances, logistics, contractors — but the city is engineered so residents never <em>need</em> a car for work, school, or play.</p>
+      </div>
+    </div>
+
+    <div style="margin-bottom:48px;border:2px solid rgba(255,107,26,.4);padding:32px 36px;background:linear-gradient(135deg,rgba(255,107,26,.07) 0%,rgba(45,74,58,.2) 100%);display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:10px;text-transform:uppercase">Total programme estimate · 100K-citizen city (full build)</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,6vw,80px);color:var(--orange);line-height:1;letter-spacing:2px">~$3.9B <span style="font-size:0.42em;color:#b8c4bc;letter-spacing:4px;vertical-align:middle">CAD</span></div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.85;margin-top:16px;max-width:520px">Model: franchise-scale delivery (housing, terraced concrete, transport spine, base infrastructure, civil) at <strong style="color:var(--white)">~US$28K per capita</strong> × 100,000 citizens ≈ <strong style="color:var(--white)">US$2.8B</strong>, converted for Canadian planning at <strong style="color:var(--white)">~1.40 CAD per USD</strong> → <strong style="color:var(--orange)">~$3.9 billion CAD</strong> indicative. Excludes financing costs, contingency, and land acquisition (site-specific).</p>
+      </div>
+      <div style="border:1px solid rgba(107,155,122,.35);padding:22px 24px;background:rgba(8,12,15,.5)">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;text-transform:uppercase">Benchmark</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.8">Phase 1 Miramundo all-in budget ~US$2.1B / 100K (~US$21K per capita). Quebec Laurentian edition assumes higher shell and cold-climate civil inputs, partially offset by a <strong style="color:var(--white)">four-unit owned printer fleet</strong> and regional logistics.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:48px">
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#7cb893;line-height:1">93</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Acres · Athlete Village</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--orange);line-height:1">~$39K</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Per-capita · CAD (~US$28K)</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#7cb893;line-height:1">4</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Structural 3D printers · fleet</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--orange);line-height:1">SPC-QP-01</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">Standard quarter-pipe module</div></div>
+      <div style="background:var(--bg);padding:24px 20px"><div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:#7cb893;line-height:1">Q3</div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:4px">2031 · Groundbreaking target</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:48px;align-items:start">
+      <div>
+        <div style="border-left:3px solid #7cb893;padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:10px;text-transform:uppercase">Visual language — Luxury Montagnard × Industrial Skate Tech</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Volcanic <strong style="color:#b8c4bc">basalt grey</strong>, <strong style="color:#7cb893">pine forest green</strong>, and SPC <strong style="color:var(--orange)">Athlete Orange</strong> — high-gloss finishes inside container interiors, matte shotcrete outside. Imagery: 3D renders of 40ft High Cube luxury containers stacked on 3D-printed concrete terraces, interconnected <strong style="color:var(--white)">SPC-QP-01</strong> quarter-pipes dropping from second-story balconies to street-level flow.</p>
+        </div>
+        <div style="border-left:3px solid #7cb893;padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:10px;text-transform:uppercase">The Architecture — Skate-Home · Code SPC-HRC-01</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.9">Hybrid build: <strong style="color:var(--white)">3D-printed foundations</strong> cut directly into the Laurentian slope, locked to bedrock, topped with <strong style="color:var(--white)">stacked 40ft High Cube</strong> luxury containers — climate-controlled, double-glazed, and treated as precision athletic equipment, not job-site trailers.</p>
+        </div>
+        <div style="border-left:3px solid var(--orange);padding-left:20px;margin-bottom:28px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:10px;text-transform:uppercase">The Rolling Code — Technical specs</div>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px">
+            <li style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">Seamless 900mm door openings</span> — roll-through clearances, no threshold stops.</li>
+            <li style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">Coved skirting</span> — no sharp 90° corners at floor-to-wall transitions.</li>
+            <li style="font-size:13px;color:var(--muted);line-height:1.7"><span style="color:var(--white)">Internal roll-paths</span> — continuous routes connecting every room.</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;text-transform:uppercase">Interactive — Cross-section · Floor 3 stacked QP → street</div>
+        <div id="qc-cross-section" style="position:relative;border:1px solid rgba(107,155,122,.4);background:linear-gradient(180deg,#1a2220 0%,#0d1310 100%);border-radius:4px;overflow:hidden;min-height:320px;cursor:crosshair">
+          <svg viewBox="0 0 400 280" width="100%" height="320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="Cross-section: stacked containers and quarter-pipe drop">
+            <defs>
+              <linearGradient id="qcSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4a5c54"/><stop offset="100%" stop-color="#2a3530"/></linearGradient>
+              <linearGradient id="qcConcrete" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5c5c58"/><stop offset="100%" stop-color="#3a3a38"/></linearGradient>
+              <linearGradient id="qcGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,.25)"/><stop offset="100%" stop-color="rgba(255,255,255,.02)"/></linearGradient>
+            </defs>
+            <rect x="0" y="200" width="400" height="80" fill="url(#qcConcrete)"/>
+            <path d="M 0 200 Q 120 120 200 200 L 260 200 L 260 280 L 0 280 Z" fill="#3d3d3a" stroke="#7cb893" stroke-width="1"/>
+            <rect x="20" y="95" width="100" height="50" fill="url(#qcSteel)" stroke="#7cb893" stroke-width="0.5" opacity="0.95"/>
+            <rect x="20" y="45" width="100" height="48" fill="url(#qcSteel)" stroke="#7cb893" stroke-width="0.5" opacity="0.95"/>
+            <rect x="20" y="45" width="100" height="48" fill="url(#qcGloss)" opacity="0.4"/>
+            <rect x="130" y="115" width="100" height="55" fill="url(#qcSteel)" stroke="#7cb893" stroke-width="0.5"/>
+            <rect x="240" y="60" width="80" height="110" fill="url(#qcSteel)" stroke="var(--orange)" stroke-width="0.8"/>
+            <path d="M 240 60 L 320 60 L 320 170 L 300 170 Q 260 140 240 100 Z" fill="none" stroke="rgba(255,107,26,.5)" stroke-width="1" stroke-dasharray="4 3"/>
+            <text x="28" y="78" fill="#9ca89f" font-family="DM Mono,monospace" font-size="8">HC-40</text>
+            <text x="28" y="128" fill="#9ca89f" font-family="DM Mono,monospace" font-size="8">HC-40</text>
+            <text x="250" y="52" fill="var(--orange)" font-family="Bebas Neue,sans-serif" font-size="11" letter-spacing="1">STACKED QP · FL3</text>
+            <circle r="6" fill="var(--orange)">
+              <animateMotion dur="3s" repeatCount="indefinite" rotate="auto" path="M 280 75 Q 200 130 140 195"/>
+            </circle>
+          </svg>
+          <div style="position:absolute;bottom:12px;left:16px;right:16px;font-family:'DM Mono',monospace;font-size:9px;color:#6b7a72;letter-spacing:1px">Animated path — skater drops from Floor 3 stacked quarter-pipe into street-level SPC-QP-01 flow (illustrative).</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">The Build Engine — Quebec&apos;s Concrete Legends</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px">
+      <div style="border:1px solid rgba(107,155,122,.25);padding:24px;background:rgba(26,34,30,.6)">
+        <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:0">Design and terrain integration: <strong style="color:var(--white)">Philippe D&apos;Aoust</strong> (Point de Tangente). Pumptrack and flow programming: <strong style="color:var(--white)">Samael Piché</strong> (Flow Parc). Specialized concrete &amp; shotcrete: <strong style="color:var(--white)">Hugo Papillon</strong> (Papillon Skateparks) and <strong style="color:var(--white)">Rick Design Skateparks</strong> — the crew that builds what athletes actually ride.</p>
+      </div>
+      <div style="border:1px solid rgba(255,107,26,.25);padding:24px;background:rgba(255,107,26,.04)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--orange);margin-bottom:8px">4-Unit Fleet</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9">Ownership of a <strong style="color:var(--white)">four-unit structural 3D printer fleet</strong> amortized across the village pushes per-capita structural shell cost to roughly <strong style="color:var(--orange)">~US$28K</strong> (<strong style="color:var(--orange)">~$39K CAD</strong> at ~1.40 FX) — before interior fit-out and terracing.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px">
+      <div style="border:1px solid var(--border);padding:28px;background:var(--bg2)">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:12px;text-transform:uppercase">The Economy — SPC Coin</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9">Same global entry rate: <strong style="color:var(--white)">$1 = 100,000 SPC</strong>. Every coffee, competition fee, and vendor ring-out in the Laurentian village runs on SPC — interoperable with Miramundo, Tokyo, and every pop-up gate.</p>
+      </div>
+      <div style="border:1px solid var(--border);padding:28px;background:var(--bg2)">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:12px;text-transform:uppercase">One Brand, One Store — Retail scarcity</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.9">The <strong style="color:var(--white)">Retail District</strong> limits global brands to <strong style="color:var(--white)">exactly one flagship</strong> per label for the life of the city — Vans, Nike SB, Independent, and the full SPC roster each get a single permanent location.</p>
+      </div>
+    </div>
+
+    <div style="border:2px solid rgba(245,226,51,.35);padding:32px;margin-bottom:40px;background:rgba(245,226,51,.04)">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--yellow);margin-bottom:12px;text-transform:uppercase">The Montreal Pop-Up — Olympic Stadium Activation</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:12px"><strong style="color:var(--white)">48-hour festival model.</strong> The <strong style="color:var(--white)">175m inclined tower</strong> becomes a natural gondola anchor; the <strong style="color:var(--white)">360° concourse</strong> converts into the world&apos;s longest indoor pump track — same Athlete Hub spine that connects the Laurentian village to Montreal&apos;s R&amp;D and broadcast layer.</p>
+      <p style="font-family:'DM Mono',monospace;font-size:11px;color:#9ca89f">Also see <a href="#locations" onclick="setTimeout(()=>switchLoc('mt'),10);return false" style="color:var(--yellow)">Montreal — Pop-Up</a> tab for full festival mechanics.</p>
+    </div>
+
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:16px;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border)">Location Map — Choosing the Slope</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:32px">
+      <div style="background:var(--bg);padding:24px 22px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#7cb893;margin-bottom:8px">Lantier</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.85">Strong candidate for <strong style="color:var(--white)">eco-residential zoning flexibility</strong> and lower-density edge development against forest — ideal for phased terraces and container stacking without crowding the watershed.</p>
+      </div>
+      <div style="background:var(--bg2);padding:24px 22px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#7cb893;margin-bottom:8px">Sainte-Marguerite-du-Lac-Masson</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.85"><strong style="color:var(--white)">~1,700-acre</strong> development history and existing infrastructure dialogue — a proven large-format parcel narrative for regional planners.</p>
+      </div>
+    </div>
+
+    <div style="padding:24px 28px;border:1px solid rgba(107,155,122,.3);background:rgba(45,74,58,.12);margin-bottom:40px">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:#7cb893;margin-bottom:10px;text-transform:uppercase">Logistics</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9"><strong style="color:var(--white)">Montreal-Trudeau (YUL)</strong> — international athlete and investor access; drive time to the Laurentian corridor scales with final site selection. Proximity to the <strong style="color:var(--white)">Athlete R&amp;D Lab</strong> at the Olympic Stadium cluster keeps coaching, testing, and broadcast on a single regional spine.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:32px 36px;border:1px solid rgba(255,107,26,.35);background:linear-gradient(90deg,rgba(255,107,26,.08),transparent)">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px">Invest in the Future</div>
+        <p style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px"><strong style="color:var(--orange)">Q3 2031</strong> groundbreaking target · Download the Founding Charter · Join the 100,000 — apply for your <strong style="color:var(--white)">L1 License</strong>.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a href="#cta" style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:12px 24px;border:2px solid var(--orange);color:var(--orange);background:rgba(255,107,26,.12);text-decoration:none;text-transform:uppercase;text-align:center;white-space:nowrap;transition:all .2s">Invest · Q3 2031</a>
+        <a href="#charter" style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;padding:12px 24px;border:1px solid #7cb893;color:#7cb893;background:transparent;text-decoration:none;text-transform:uppercase;text-align:center;transition:all .2s">Download Founding Charter</a>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;padding:20px 24px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)">
+      SPC-MASTER-01 · Rev. 05 · Quebec Edition · Contact: <a href="mailto:natenate@vectorstarprobabilitydynamics.com" style="color:#7cb893;text-decoration:none">natenate@vectorstarprobabilitydynamics.com</a>
+    </div>
+
+  </div><!-- end loc-qc -->
 
 </section>
 
@@ -2996,7 +3147,7 @@ renderBrands('all');
   <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:4px;color:rgba(0,0,0,.5);text-transform:uppercase;margin-bottom:20px">Phase 1 Raise — $28M target · Miramundo, Chalatenango · 2,300m</div>
   <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,120px);letter-spacing:4px;color:#000;line-height:.9;margin-bottom:20px">INVEST IN<br>THE FUTURE</h2>
   <p style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;color:rgba(0,0,0,.55);margin-bottom:40px">One arena naming slot remaining · Competition media rights open · Equity rounds close Q3 2031</p>
-  <div class="gfm-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;max-width:1300px;margin:0 auto 48px;padding:0 16px">
+  <div class="gfm-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:1400px;margin:0 auto 48px;padding:0 16px">
 
     <!-- El Salvador -->
     <div style="background:#111;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;flex-direction:column">
@@ -3058,6 +3209,18 @@ renderBrands('all');
       </div>
     </div>
 
+    <!-- Quebec Laurentian -->
+    <div style="background:#111;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;flex-direction:column">
+      <div style="height:4px;background:#7cb893"></div>
+      <div style="padding:24px 22px;flex:1;display:flex;flex-direction:column">
+        <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:#7cb893;text-transform:uppercase;margin-bottom:6px">Quebec Edition · Laurentians</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#fff;margin-bottom:4px">Skatepark City Quebec</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6b7280;margin-bottom:16px">93 acres · Lantier · Olympic Stadium Hub</div>
+        <p style="font-size:12px;color:#94a3b8;line-height:1.6;margin-bottom:20px;flex:1">Luxury-industrial Athlete Village in the Laurentians — stacked High Cube containers, SPC-QP-01 flow, and the Montreal pop-up spine. Full programme ~$3.9B CAD (100K model). Car-optional by design; service vehicles when needed.</p>
+        <a href="#locations" onclick="setTimeout(()=>switchLoc('qc'),10)" style="display:block;text-align:center;background:#7cb893;color:#000;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;padding:12px 20px;border-radius:6px;text-decoration:none;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Open Quebec brief →</a>
+      </div>
+    </div>
+
   </div>
   <div class="cta-btns">
     <a href="#" class="cta-btn solid">Request pitch deck</a>
@@ -3070,7 +3233,7 @@ renderBrands('all');
 <footer>
   <div class="footer-logo">SKATEPARK CITY</div>
   <div class="footer-meta" style="text-align:center">Ciudad Patineta · Miramundo, Chalatenango, El Salvador · 2,300m · Est. 2031<br>0 Cars · 847 Roundabouts · 18 Extreme Sports · 1 Mountain · Full Emergency Services · 1 Purpose<br><a href="mailto:natenate@vectorstarprobabilitydynamics.com" style="color:var(--orange);text-decoration:none;letter-spacing:1px">natenate@vectorstarprobabilitydynamics.com</a></div>
-  <div class="footer-meta" style="text-align:right">SPC-MASTER-01 · Rev. 05<br>Mountain Edition<br><span style="color:var(--white)">White Paper: Nathan Gamal Nasser</span></div>
+  <div class="footer-meta" style="text-align:right">SPC-MASTER-01 · Rev. 05<br>Mountain Edition · Quebec Laurentian Edition<br><span style="color:var(--white)">White Paper: Nathan Gamal Nasser</span></div>
 </footer>
 
 <script>
@@ -3095,9 +3258,9 @@ reveals.forEach(r=>io.observe(r));
 
 // LOCATION TABS
 function switchLoc(loc){
-  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo',gl:'loc-gl',us:'loc-us'};
-  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo',gl:'ltab-gl',us:'ltab-us'};
-  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)',gl:'#60a5fa',us:'#ef4444'};
+  const panels={sv:'loc-sv',jp:'loc-jp',cu:'loc-cu',mt:'loc-mt',solo:'loc-solo',gl:'loc-gl',us:'loc-us',qc:'loc-qc'};
+  const tabs={sv:'ltab-sv',jp:'ltab-jp',cu:'ltab-cu',mt:'ltab-mt',solo:'ltab-solo',gl:'ltab-gl',us:'ltab-us',qc:'ltab-qc'};
+  const colors={sv:'var(--orange)',jp:'var(--cyan)',cu:'var(--green)',mt:'var(--yellow)',solo:'var(--yellow)',gl:'#60a5fa',us:'#ef4444',qc:'#7cb893'};
   Object.values(panels).forEach(id=>document.getElementById(id).style.display='none');
   Object.values(tabs).forEach(id=>{
     const b=document.getElementById(id);
