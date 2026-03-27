@@ -33,6 +33,14 @@ const mustInclude = [
   '~$3.9B',
   'CAD',
   'US$2.8B',
+  'helical piers',
+  'Air-entrained',
+  'EIFS',
+  'Hydronic',
+  'honest upside',
+  'ski city',
+  'id="gallery"',
+  'skateparkcity images',
 ];
 
 mustInclude.forEach((s) => {
