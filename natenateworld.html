@@ -127,6 +127,20 @@ input[type=range]{accent-color:var(--gold);width:100%}
 .brand-card img{width:100%;height:auto;display:block;border-radius:4px}
 .brand-card figcaption{font-size:9px;letter-spacing:.6px;color:var(--muted);margin-top:10px;line-height:1.5}
 .brand-card.on-light{background:#e8edf4;border-color:rgba(0,102,255,.2)}
+.nnw-carousel{position:relative;margin-top:8px;max-width:min(100%,980px)}
+.nnw-car-viewport{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;gap:0;border:1px solid var(--border);border-radius:8px;background:var(--bg2);aspect-ratio:16/9;max-height:min(70vh,600px);scrollbar-width:thin;scrollbar-color:var(--cyan) var(--bg3)}
+.nnw-car-viewport::-webkit-scrollbar{height:6px}
+.nnw-car-viewport::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:3px}
+.nnw-car-slide{flex:0 0 100%;scroll-snap-align:start;margin:0;height:100%;min-height:200px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,.08),transparent 55%),var(--bg3)}
+.nnw-car-slide img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+.nnw-car-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;border:1px solid var(--border);border-radius:50%;background:rgba(2,8,20,.88);color:var(--cyan);font-size:22px;line-height:1;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s,color .15s;display:flex;align-items:center;justify-content:center;padding:0}
+.nnw-car-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(10,22,40,.95)}
+.nnw-car-prev{left:10px}.nnw-car-next{right:10px}
+.nnw-car-dots{display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+.nnw-car-dot{width:9px;height:9px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;padding:0;transition:background .15s,border-color .15s,transform .15s}
+.nnw-car-dot.on,.nnw-car-dot:hover{background:var(--cyan);border-color:var(--cyan);transform:scale(1.15)}
+.nnw-car-cap{font-size:9px;letter-spacing:.6px;color:var(--muted);margin-top:12px;text-align:center}
+@media(max-width:768px){.nnw-car-btn{width:38px;height:38px;font-size:18px}.nnw-car-prev{left:6px}.nnw-car-next{right:6px}}
 @media(max-width:768px){.g2,.g3,.g4{grid-template-columns:1fr}nav .nav-links{display:none}section{padding:58px 18px}#hero{padding:108px 18px 58px}.flow{flex-direction:column}.fa{transform:rotate(90deg);text-align:center}.coin-split{flex-direction:column}nav{padding:0 18px}}
 </style>
 </head>
@@ -135,7 +149,7 @@ input[type=range]{accent-color:var(--gold);width:100%}
 <nav>
   <a class="nav-logo" href="#hero"><img src="natenateworld images/natenateworld_logos/natenateworld_icon.svg" alt="NatenateWorld" width="40" height="40" decoding="async"></a>
   <div class="nav-links">
-    <a href="#brand">Brand</a><a href="#concept">Concept</a><a href="#perspective">Perspective</a><a href="#creator">Creator</a>
+    <a href="#brand">Brand</a><a href="#gallery">Gallery</a><a href="#concept">Concept</a><a href="#perspective">Perspective</a><a href="#creator">Creator</a>
     <a href="#p2p">Network</a><a href="#cities">Cities</a><a href="#transport">Transport</a>
     <a href="#physics">Physics</a><a href="#materials">Materials</a><a href="#nifty">Nifty</a>
     <a href="#economy">Economy</a><a href="#franchise">Franchise</a><a href="#tech">Tech</a><a href="#server">Server</a><a href="#devplatform" style="color:var(--purple)">Dev Platform</a><a href="#buy" style="color:var(--gold);font-weight:700">BUY $1 →</a>
@@ -173,6 +187,22 @@ input[type=range]{accent-color:var(--gold);width:100%}
     <figure class="brand-card"><img src="natenateworld images/natenateworld_logos/natenateworld_stacked.svg" alt="NatenateWorld stacked mark" width="240" height="210" loading="lazy" decoding="async"><figcaption>Stacked — compact square, Discord, merch tags</figcaption></figure>
     <figure class="brand-card"><img src="natenateworld images/natenateworld_logos/natenateworld_stream_overlay.svg" alt="NatenateWorld stream overlay" width="440" height="82" loading="lazy" decoding="async"><figcaption>Stream overlay — Twitch / YouTube HUD</figcaption></figure>
     <figure class="brand-card on-light"><img src="natenateworld images/natenateworld_logos/natenateworld_light.svg" alt="NatenateWorld logo for light backgrounds" width="480" height="180" loading="lazy" decoding="async"><figcaption>Light — print, merch on light fabric</figcaption></figure>
+  </div>
+</section><hr class="div">
+
+<!-- NNW CAROUSEL — images: natenateworld images/nnw/ -->
+<section id="gallery">
+  <div class="rev"><div class="stag">// 00b — world shots</div><h2 class="stitle">NNW <em>Gallery</em></h2><div class="sline"></div><p class="ssub">Concept frames from the NatenateWorld folder (<code style="font-size:10px;color:var(--cyan)">natenateworld images/nnw</code>). Arrow keys when focused.</p></div>
+  <div class="nnw-carousel rev d1" id="nnw-carousel">
+    <div class="nnw-car-viewport" id="nnw-car-viewport" tabindex="0" role="region" aria-roledescription="carousel" aria-label="NatenateWorld concept gallery">
+      <figure class="nnw-car-slide"><img src="natenateworld images/nnw/gallery-01.png" alt="NatenateWorld concept art 1" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="nnw-car-slide"><img src="natenateworld images/nnw/gallery-02.png" alt="NatenateWorld concept art 2" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="nnw-car-slide"><img src="natenateworld images/nnw/gallery-03.png" alt="NatenateWorld concept art 3" width="1600" height="900" loading="lazy" decoding="async"></figure>
+    </div>
+    <button type="button" class="nnw-car-btn nnw-car-prev" aria-label="Previous slide">‹</button>
+    <button type="button" class="nnw-car-btn nnw-car-next" aria-label="Next slide">›</button>
+    <div class="nnw-car-dots" id="nnw-car-dots" aria-label="Gallery slides"></div>
+    <p class="nnw-car-cap rev d2" id="nnw-gallery-cap">Folder: natenateworld images/nnw · 3 assets</p>
   </div>
 </section><hr class="div">
 
@@ -790,6 +820,55 @@ setInterval(()=>{const b=document.getElementById('live-b');if(b)b.style.opacity=
 // REVEAL
 const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:0.07});
 document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
+
+// NNW GALLERY CAROUSEL (natenateworld images/nnw)
+(function initNnwCarousel(){
+  const vp=document.getElementById('nnw-car-viewport');
+  const root=document.getElementById('nnw-carousel');
+  if(!vp||!root)return;
+  const slides=vp.querySelectorAll('.nnw-car-slide');
+  const prev=root.querySelector('.nnw-car-prev');
+  const next=root.querySelector('.nnw-car-next');
+  const dotsEl=document.getElementById('nnw-car-dots');
+  if(!slides.length)return;
+  let idx=0;
+  function scrollToIdx(i){
+    idx=Math.max(0,Math.min(i,slides.length-1));
+    const w=vp.clientWidth||1;
+    vp.scrollTo({left:idx*w,behavior:'smooth'});
+    syncDots();
+  }
+  function syncDots(){
+    if(!dotsEl)return;
+    dotsEl.querySelectorAll('.nnw-car-dot').forEach((b,j)=>{
+      const on=j===idx;
+      b.classList.toggle('on',on);
+      b.setAttribute('aria-selected',on?'true':'false');
+    });
+  }
+  function readIdxFromScroll(){
+    const w=vp.clientWidth||1;
+    idx=Math.round(vp.scrollLeft/w);
+    idx=Math.max(0,Math.min(idx,slides.length-1));
+    syncDots();
+  }
+  let scrollT;
+  vp.addEventListener('scroll',()=>{clearTimeout(scrollT);scrollT=setTimeout(readIdxFromScroll,64)});
+  prev?.addEventListener('click',()=>scrollToIdx(idx-1));
+  next?.addEventListener('click',()=>scrollToIdx(idx+1));
+  slides.forEach((_,j)=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='nnw-car-dot';b.setAttribute('aria-label','Slide '+(j+1));
+    b.addEventListener('click',()=>scrollToIdx(j));
+    dotsEl.appendChild(b);
+  });
+  syncDots();
+  vp.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'){e.preventDefault();scrollToIdx(idx-1)}
+    else if(e.key==='ArrowRight'){e.preventDefault();scrollToIdx(idx+1)}
+  });
+  window.addEventListener('resize',()=>{vp.scrollTo({left:idx*(vp.clientWidth||1),behavior:'auto'});syncDots()});
+})();
 
 // PERSPECTIVE DEMO
 const modes=[
