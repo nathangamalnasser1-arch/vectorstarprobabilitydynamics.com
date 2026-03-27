@@ -401,7 +401,7 @@
   <div class="stats-row">
     <div class="stat-cell">
       <div class="stat-value" id="statHits">0</div>
-      <div class="stat-label">Total Hits</div>
+      <div class="stat-label">Total Hits (3 per punch)</div>
     </div>
     <div class="stat-cell">
       <div class="stat-value peak" id="statPeak">0</div>
@@ -446,18 +446,19 @@
     </div>
   </div>
 
-  <div class="announce-log" id="announceLog">Start session to begin detecting hits via microphone</div>
+  <div class="announce-log" id="announceLog">Mic: high-pass + impact filter reduces voice; each punch scores 3 hits (2 taps + strike)</div>
 
   <button class="main-btn start" id="mainBtn" onclick="toggleSession()">
     ▶ START SESSION
   </button>
 </div>
 
+<script src="speedball-tracker-core.js"></script>
 <script>
 let isRunning = false;
-let audioCtx = null, analyser = null, micStream = null;
+let audioCtx = null, analyser = null, micStream = null, highpass = null;
 let animFrame = null;
-let hitTimes = [];
+let punchTimes = [];
 let totalHits = 0;
 let peakBpm = 0;
 let sessionStart = null;
@@ -465,8 +466,15 @@ let timerInterval = null;
 let lastAnnounceTime = 0;
 let bpmHistory = [];
 let lastBpm = -1;
-let lastHitTime = 0;
-const MIN_HIT_GAP = 60;
+let lastPunchTime = 0;
+const SB = typeof SpeedballCore !== 'undefined' ? SpeedballCore : {
+  HITS_PER_PUNCH: 3,
+  MIN_PUNCH_GAP_MS: 300,
+  impactEnergyRatio: function () { return 1; },
+  minImpactRatioForSensitivity: function () { return 0; },
+  calcBpmFromPunches: function () { return 0; },
+  trimPunchTimes: function (a, n) { return a.filter(function (t) { return n - t < 10000; }); },
+};
 
 const speedNum = document.getElementById('speedNum');
 const gaugeFill = document.getElementById('gaugeFill');
@@ -510,16 +518,22 @@ async function startSession() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     micStream = stream;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    highpass = audioCtx.createBiquadFilter();
+    highpass.type = 'highpass';
+    highpass.frequency.value = 380;
+    highpass.Q.value = 0.707;
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 512;
-    analyser.smoothingTimeConstant = 0.15;
+    analyser.smoothingTimeConstant = 0.12;
     const source = audioCtx.createMediaStreamSource(stream);
-    source.connect(analyser);
+    source.connect(highpass);
+    highpass.connect(analyser);
 
     isRunning = true;
     totalHits = 0; peakBpm = 0;
-    hitTimes = []; bpmHistory = [];
+    punchTimes = []; bpmHistory = [];
     sessionStart = Date.now(); lastBpm = -1;
+    lastPunchTime = 0;
 
     statusDot.classList.add('active');
     statusText.textContent = 'LIVE';
@@ -576,11 +590,19 @@ function detectLoop() {
   micDb.textContent = db.toFixed(1) + ' dB';
 
   const sens = parseInt(sensSlider.value);
-  const threshold = 0.6 - (sens / 100) * 0.55;
+  const threshold = 0.58 - (sens / 100) * 0.52;
+
+  const freqData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(freqData);
+  const sr = audioCtx.sampleRate;
+  const impactRatio = SB.impactEnergyRatio(freqData, sr, analyser.fftSize);
+  const minImpact = SB.minImpactRatioForSensitivity(sens);
 
   const now = Date.now();
-  if (rms > threshold && (now - lastHitTime) > MIN_HIT_GAP) {
-    lastHitTime = now;
+  const punchGapOk = (now - lastPunchTime) > SB.MIN_PUNCH_GAP_MS;
+  const looksLikeImpact = impactRatio >= minImpact;
+  if (rms > threshold && punchGapOk && looksLikeImpact) {
+    lastPunchTime = now;
     registerHit(now);
   }
 
@@ -599,9 +621,9 @@ function detectLoop() {
 }
 
 function registerHit(now) {
-  totalHits++;
-  hitTimes.push(now);
-  hitTimes = hitTimes.filter(t => now - t < 10000);
+  totalHits += SB.HITS_PER_PUNCH;
+  punchTimes.push(now);
+  punchTimes = SB.trimPunchTimes(punchTimes, now);
   const bpm = calcBpm();
   bpmHistory.push(bpm);
   if (bpmHistory.length > 30) bpmHistory.shift();
@@ -611,13 +633,7 @@ function registerHit(now) {
 }
 
 function calcBpm() {
-  if (hitTimes.length < 2) return hitTimes.length > 0 ? 10 : 0;
-  const now = Date.now();
-  const recent = hitTimes.filter(t => now - t < 6000);
-  if (recent.length < 2) return 0;
-  const span = (recent[recent.length-1] - recent[0]) / 1000;
-  if (span === 0) return 0;
-  return Math.round((recent.length - 1) / span * 60);
+  return SB.calcBpmFromPunches(punchTimes, Date.now(), SB.BPM_WINDOW_MS);
 }
 
 function updateDisplay(bpm) {
