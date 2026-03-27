@@ -43,6 +43,7 @@ const mustInclude = [
   'skateparkcity images',
   'id="inspiration"',
   'JqflfjrcKjo',
+  'skatecityofficial',
 ];
 
 mustInclude.forEach((s) => {
