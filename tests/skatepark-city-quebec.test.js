@@ -41,6 +41,8 @@ const mustInclude = [
   'ski city',
   'id="gallery"',
   'skateparkcity images',
+  'id="inspiration"',
+  'JqflfjrcKjo',
 ];
 
 mustInclude.forEach((s) => {
