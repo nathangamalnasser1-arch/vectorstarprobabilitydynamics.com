@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competition Prize Token System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold2: #F0D080;
+    --black: #080808;
+    --dark: #0F0F0F;
+    --card: #141414;
+    --border: #222;
+    --text: #D8D0C0;
+    --muted: #666;
+    --red: #C0392B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Serif Display', Georgia, serif;
+    background: var(--black);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px;
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 40%, #1a0f00 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, #0a0500 0%, transparent 50%),
+      var(--black);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 900px; }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: inline-block;
+    border: 1px solid var(--gold);
+    padding: 6px 14px;
+    margin-bottom: 32px;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(5rem, 12vw, 11rem);
+    line-height: 0.9;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+
+  .hero h1 .gold { color: var(--gold2); }
+
+  .hero-sub {
+    font-style: italic;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: var(--muted);
+    margin-top: 28px;
+    margin-bottom: 48px;
+    max-width: 560px;
+    line-height: 1.6;
+  }
+
+  .hero-cta {
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--black);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s, transform 0.2s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+
+  .btn-secondary {
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    display: inline-block;
+  }
+
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px; right: 60px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .hero-scroll::after {
+    content: '';
+    width: 1px; height: 60px;
+    background: linear-gradient(var(--muted), transparent);
+  }
+
+  /* ── SECTIONS COMMON ── */
+  section { padding: 100px 60px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+  }
+
+  .section-body {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 600px;
+  }
+
+  /* ── PROBLEM ── */
+  .problem {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .problem-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+  }
+
+  .problem-stats {
+    display: flex; flex-direction: column; gap: 32px;
+  }
+
+  .stat-item {
+    border-left: 2px solid var(--border);
+    padding-left: 24px;
+    transition: border-color 0.3s;
+  }
+
+  .stat-item:hover { border-color: var(--gold); }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: var(--gold2);
+    line-height: 1;
+  }
+
+  .stat-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    max-width: 1100px; margin: 0 auto;
+  }
+
+  .how-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 60px;
+  }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    margin-bottom: 60px;
+  }
+
+  .step {
+    padding: 40px 28px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:last-child { border-right: none; }
+  .step:hover { background: var(--card); }
+
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .step-icon {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .step h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .step p {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+  }
+
+  .step-connector {
+    position: absolute;
+    top: 50%; right: -14px;
+    transform: translateY(-50%);
+    background: var(--black);
+    color: var(--gold);
+    font-size: 0.9rem;
+    z-index: 2;
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── DUAL CLASS ── */
+  .dual {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dual-inner {
+    max-width: 1100px; margin: 0 auto;
+  }
+
+  .class-cards {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 60px;
+    border: 1px solid var(--border);
+  }
+
+  .class-card {
+    padding: 60px 48px;
+    background: var(--card);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .class-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .class-card.prize::before { background: var(--gold); }
+  .class-card.public::before { background: #4a9eff; }
+
+  .class-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+
+  .prize .class-badge {
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .public .class-badge {
+    background: rgba(74,158,255,0.1);
+    color: #4a9eff;
+    border: 1px solid rgba(74,158,255,0.3);
+  }
+
+  .class-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+
+  .class-card p {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .class-props {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .class-props li {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    letter-spacing: 1px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .prop-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .prize .prop-dot { background: var(--gold); }
+  .public .prop-dot { background: #4a9eff; }
+
+  .class-card .big-glyph {
+    position: absolute;
+    bottom: -20px; right: 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10rem;
+    opacity: 0.04;
+    color: #fff;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── LEDGER ── */
+  .ledger-section { max-width: 1100px; margin: 0 auto; }
+
+  .ledger-demo {
+    margin-top: 60px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .ledger-header {
+    background: var(--card);
+    padding: 16px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ledger-header span {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  .ledger-header .live-dot {
+    display: flex; align-items: center; gap: 6px;
+    color: #4CAF50;
+    font-size: 10px;
+  }
+
+  .live-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #4CAF50;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 140px 120px 100px;
+    gap: 0;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+    align-items: center;
+  }
+
+  .ledger-row:hover { background: var(--card); }
+
+  .ledger-row:last-child { border-bottom: none; }
+
+  .ledger-row .date {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .ledger-row .event {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .ledger-row .wallet {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--gold);
+  }
+
+  .ledger-row .prize-amt {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #4a9eff;
+  }
+
+  .ledger-row .status {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #4CAF50;
+    letter-spacing: 1px;
+  }
+
+  /* ── DEFLATIONARY ── */
+  .deflation {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+  }
+
+  .deflation-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: center;
+  }
+
+  .supply-visual {
+    position: relative;
+  }
+
+  .supply-bar-wrap {
+    border: 1px solid var(--border);
+    height: 48px;
+    position: relative;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .supply-bar-fill {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    transition: width 1s ease;
+  }
+
+  .supply-bar-label {
+    position: absolute;
+    top: 50%; left: 16px;
+    transform: translateY(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--black);
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 1;
+  }
+
+  .supply-bar-pct {
+    position: absolute;
+    top: 50%; right: 16px;
+    transform: translateY(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    z-index: 1;
+  }
+
+  .supply-locked {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .supply-locked .supply-bar-fill {
+    background: linear-gradient(90deg, #333, #444);
+  }
+
+  .supply-locked .supply-bar-label { color: var(--gold); }
+
+  .supply-event-list {
+    margin-top: 24px;
+    display: flex; flex-direction: column; gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .supply-event {
+    display: flex; justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .supply-event:last-child { border-bottom: none; }
+  .supply-event .locked-amt { color: var(--gold); }
+
+  /* ── CLAIM ── */
+  .claim-section {
+    text-align: center;
+    padding: 120px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .claim-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, #120a00 0%, var(--black) 65%);
+  }
+
+  .claim-inner { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+
+  .claim-section .section-title { font-size: clamp(3rem, 6vw, 6rem); }
+
+  .claim-quote {
+    border: 1px solid var(--gold);
+    padding: 40px 48px;
+    margin: 48px auto;
+    max-width: 700px;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--text);
+    line-height: 1.9;
+    position: relative;
+    text-align: left;
+  }
+
+  .claim-quote::before {
+    content: '"';
+    position: absolute;
+    top: -24px; left: 24px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px 60px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .footer-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .footer-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: right;
+    line-height: 2;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 80px 24px; }
+    .hero { padding: 120px 24px 80px; }
+    .problem-inner { grid-template-columns: 1fr; gap: 40px; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .step:nth-child(2) { border-right: none; }
+    .class-cards { grid-template-columns: 1fr; }
+    .ledger-row { grid-template-columns: 120px 1fr 100px; }
+    .ledger-row .prize-amt, .ledger-row .status { display: none; }
+    .deflation-inner { grid-template-columns: 1fr; gap: 40px; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-meta { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">CPTS Protocol</div>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#dual">Token Classes</a></li>
+    <li><a href="#ledger">The Ledger</a></li>
+    <li><a href="#claim">IP Claim</a></li>
+    <li><a href="whitepaper.html">Whitepaper ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Original System Design · March 2026</div>
+    <h1>WIN IT.<br><span class="gold">LOCK IT.</span><br>PROVE IT.</h1>
+    <p class="hero-sub">A blockchain token that launches on competition day, awards permanent on-chain trophies to winners, and builds an immutable ledger of champions — across any discipline.</p>
+    <div class="hero-cta">
+      <a href="whitepaper.html" class="btn-primary">Read the Whitepaper</a>
+      <a href="#how" class="btn-secondary">How It Works</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="problem-inner">
+    <div>
+      <span class="section-label">The Problem</span>
+      <h2 class="section-title">Champions Deserve Permanent Proof</h2>
+      <p class="section-body">Competition records exist in databases owned by organizations that can revise, delete, or lose them. There is no trustless, permanent, and unspoofable proof of athletic or competitive achievement. The Competition Prize Token System changes that.</p>
+    </div>
+    <div class="problem-stats fade-in">
+      <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-desc">Prize tokens locked forever — no federation can revise them</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Day 1</div>
+        <div class="stat-desc">Token launches on competition day — audience is the market</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-desc">Disciplines supported — any event with a winner qualifies</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="how">
+    <div class="how-header">
+      <div>
+        <span class="section-label">The Mechanism</span>
+        <h2 class="section-title">How It Works</h2>
+      </div>
+      <p style="font-family: Space Mono, monospace; font-size: 10px; color: var(--muted); max-width: 260px; line-height: 1.8; letter-spacing: 1px; text-transform: uppercase;">Repeats with every competition event. Each cycle locks more supply.</p>
+    </div>
+
+    <div class="steps fade-in">
+      <div class="step">
+        <span class="step-num">01</span>
+        <span class="step-icon">🏟</span>
+        <h4>Competition Day</h4>
+        <p>A scheduled competition event begins. Fighters, athletes, or competitors take the field.</p>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <span class="step-icon">🚀</span>
+        <h4>Token Launches</h4>
+        <p>The token launches on pump.fun at the same moment. The event audience is the first buyer pool.</p>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <span class="step-icon">📈</span>
+        <h4>Public Buys In</h4>
+        <p>Competition excitement drives buys. The bonding curve fills with real demand from real fans.</p>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <span class="step-icon">⚡</span>
+        <h4>Curve Graduates</h4>
+        <p>Buy pressure graduates the token from the bonding curve to a decentralized exchange. The event is the graduation engine.</p>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step">
+        <span class="step-num">05</span>
+        <span class="step-icon">🏆</span>
+        <h4>Winner Receives Prize</h4>
+        <p>Winner's wallet receives prize tokens. Permanently locked. On-chain proof of victory. The ledger records the moment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DUAL CLASS -->
+<section class="dual" id="dual">
+  <div class="dual-inner">
+    <span class="section-label">Token Architecture</span>
+    <h2 class="section-title">Two Classes.<br>One Token.</h2>
+    <p class="section-body">A single token supply with two functionally distinct classes — determined at the point of distribution, not at minting.</p>
+
+    <div class="class-cards fade-in">
+      <div class="class-card prize">
+        <span class="class-badge">Class A — Prize</span>
+        <h3>The Trophy</h3>
+        <p>Awarded to competition winners. Permanently locked to the recipient's wallet. Cannot be transferred, sold, or moved. Carries no liquid value — only prestige, proof, and record.</p>
+        <ul class="class-props">
+          <li><div class="prop-dot"></div> Non-transferable · non-sellable</li>
+          <li><div class="prop-dot"></div> Immutable timestamp of victory</li>
+          <li><div class="prop-dot"></div> Permanently deflationary</li>
+          <li><div class="prop-dot"></div> Only won — never bought</li>
+        </ul>
+        <div class="big-glyph">🔒</div>
+      </div>
+      <div class="class-card public">
+        <span class="class-badge">Class B — Public</span>
+        <h3>The Market</h3>
+        <p>Available to the public on competition day. Fully liquid. Freely tradeable against BTC, ETH, SOL and other assets. Supply shrinks with every competition event.</p>
+        <ul class="class-props">
+          <li><div class="prop-dot"></div> Freely tradeable on DEX</li>
+          <li><div class="prop-dot"></div> Reduced by every prize lock</li>
+          <li><div class="prop-dot"></div> Deflationary schedule tied to events</li>
+          <li><div class="prop-dot"></div> No presale · no VC allocation</li>
+        </ul>
+        <div class="big-glyph">📊</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEDGER -->
+<section id="ledger">
+  <div class="ledger-section">
+    <span class="section-label">The Immutable Record</span>
+    <h2 class="section-title">Every Win.<br>On-Chain. Forever.</h2>
+    <p class="section-body">The cumulative prize wallet history forms a trustless, public ledger of competition results. No authority can revise it. No database can lose it. A wallet holding locked prize tokens is verifiably a past champion.</p>
+
+    <div class="ledger-demo fade-in">
+      <div class="ledger-header">
+        <span>COMPETITION PRIZE LEDGER</span>
+        <span class="live-dot">IMMUTABLE</span>
+      </div>
+      <div class="ledger-row" style="background: var(--card); border-bottom: 1px solid var(--border);">
+        <span style="font-family: Space Mono, monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px;">DATE</span>
+        <span style="font-family: Space Mono, monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px;">EVENT</span>
+        <span style="font-family: Space Mono, monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px;">WALLET</span>
+        <span style="font-family: Space Mono, monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px;">PRIZE</span>
+        <span style="font-family: Space Mono, monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px;">STATUS</span>
+      </div>
+      <div class="ledger-row">
+        <span class="date">27 MAR 2026</span>
+        <span class="event">Championship Event #001</span>
+        <span class="wallet">Ax7k…3mPq</span>
+        <span class="prize-amt">50,000 TKNS</span>
+        <span class="status">LOCKED ✓</span>
+      </div>
+      <div class="ledger-row">
+        <span class="date">15 APR 2026</span>
+        <span class="event">Championship Event #002</span>
+        <span class="wallet">9rBz…v1Nw</span>
+        <span class="prize-amt">50,000 TKNS</span>
+        <span class="status">LOCKED ✓</span>
+      </div>
+      <div class="ledger-row">
+        <span class="date">02 MAY 2026</span>
+        <span class="event">Championship Event #003</span>
+        <span class="wallet">Fx2j…8aKt</span>
+        <span class="prize-amt">50,000 TKNS</span>
+        <span class="status">LOCKED ✓</span>
+      </div>
+      <div class="ledger-row" style="opacity: 0.4;">
+        <span class="date">TBD</span>
+        <span class="event">Championship Event #004</span>
+        <span class="wallet">—</span>
+        <span class="prize-amt">50,000 TKNS</span>
+        <span class="status">PENDING</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEFLATIONARY -->
+<section class="deflation">
+  <div class="deflation-inner">
+    <div>
+      <span class="section-label">Tokenomics</span>
+      <h2 class="section-title">More Events.<br>Less Supply.</h2>
+      <p class="section-body">Every competition permanently removes tokens from circulation. The prize pool is never recycled. The public float shrinks with each event, creating a hard deflationary schedule tied directly to the competition calendar.</p>
+      <br>
+      <p class="section-body">Holders can calculate future circulating supply from the known competition schedule. Scarcity is predictable. The more active the competition series, the more deflationary the token.</p>
+    </div>
+    <div class="supply-visual fade-in">
+      <div style="font-family: Space Mono, monospace; font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">Circulating Supply Over Time</div>
+
+      <div class="supply-bar-wrap">
+        <div class="supply-bar-fill" style="width: 100%"></div>
+        <span class="supply-bar-label">LAUNCH DAY</span>
+        <span class="supply-bar-pct">100%</span>
+      </div>
+      <div class="supply-bar-wrap">
+        <div class="supply-bar-fill" style="width: 85%"></div>
+        <span class="supply-bar-label">AFTER EVENT 1</span>
+        <span class="supply-bar-pct">85%</span>
+      </div>
+      <div class="supply-bar-wrap">
+        <div class="supply-bar-fill" style="width: 70%"></div>
+        <span class="supply-bar-label">AFTER EVENT 3</span>
+        <span class="supply-bar-pct">70%</span>
+      </div>
+      <div class="supply-bar-wrap">
+        <div class="supply-bar-fill" style="width: 55%"></div>
+        <span class="supply-bar-label">AFTER EVENT 6</span>
+        <span class="supply-bar-pct">55%</span>
+      </div>
+
+      <div class="supply-event-list">
+        <div class="supply-event">
+          <span>Event #001 · 27 Mar 2026</span>
+          <span class="locked-amt">−50,000 TKNS LOCKED</span>
+        </div>
+        <div class="supply-event">
+          <span>Event #002 · 15 Apr 2026</span>
+          <span class="locked-amt">−50,000 TKNS LOCKED</span>
+        </div>
+        <div class="supply-event">
+          <span>Event #003 · 02 May 2026</span>
+          <span class="locked-amt">−50,000 TKNS LOCKED</span>
+        </div>
+        <div class="supply-event">
+          <span>Each future event</span>
+          <span class="locked-amt">−50,000 TKNS LOCKED</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IP CLAIM -->
+<section class="claim-section" id="claim">
+  <div class="claim-inner">
+    <span class="section-label">Intellectual Property</span>
+    <h2 class="section-title">Original.<br>First.<br>Documented.</h2>
+
+    <div class="claim-quote">
+      A blockchain token system in which competition prize allocations are permanently locked, functioning simultaneously as a deflationary mechanism and an immutable historical record of competition results, while a separate liquid class remains freely tradeable — with the token launched on competition day to use event audience demand as the graduation engine.
+    </div>
+
+    <p style="font-family: Space Mono, monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; line-height: 2.2; margin-bottom: 32px;">
+      First Public Disclosure: March 2026<br>
+      All Rights Reserved · Original Author<br>
+      Archived via web.archive.org
+    </p>
+
+    <a href="whitepaper.html" class="btn-primary">Read Full Whitepaper</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">CPTS Protocol · © 2026</div>
+  <div class="footer-meta">
+    Competition Prize Token System<br>
+    Original Invention · All Rights Reserved<br>
+    First Published March 2026
+  </div>
+</footer>
+
+<script>
+  // Fade-in observer
+  const els = document.querySelectorAll('.fade-in');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  els.forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

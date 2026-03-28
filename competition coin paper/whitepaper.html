@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competition Prize Token System — Whitepaper</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --black: #0A0A0A;
+    --dark: #111111;
+    --mid: #1E1E1E;
+    --text: #E8E0D0;
+    --muted: #888880;
+    --border: #2A2A2A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'EB Garamond', Georgia, serif;
+    background: var(--black);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 18px;
+  }
+
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #1a1400 0%, var(--black) 70%);
+  }
+
+  .cover-content { position: relative; z-index: 1; max-width: 800px; }
+
+  .seal {
+    width: 80px; height: 80px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 40px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .cover h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--gold-light);
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+  }
+
+  .cover .subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 48px;
+  }
+
+  .cover-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    line-height: 2;
+  }
+
+  .doc {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  .section {
+    margin-bottom: 72px;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 28px;
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 36px 0 16px;
+  }
+
+  p { margin-bottom: 20px; color: #C8C0B0; }
+
+  .abstract {
+    background: var(--mid);
+    border-left: 3px solid var(--gold);
+    padding: 32px 36px;
+    margin-bottom: 60px;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  .callout {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+
+  .callout::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  .callout strong { color: var(--gold-light); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 32px 0;
+  }
+
+  .col-card {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+
+  .col-card .card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .col-card h4 {
+    font-size: 1.2rem;
+    color: var(--gold-light);
+    margin-bottom: 12px;
+  }
+
+  .col-card p { font-size: 0.95rem; color: var(--muted); margin: 0; }
+
+  .loop-diagram {
+    border: 1px solid var(--border);
+    padding: 40px;
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  .loop-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+
+  .loop-step {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    padding: 14px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-align: center;
+    min-width: 130px;
+  }
+
+  .loop-arrow {
+    color: var(--gold);
+    font-size: 1.2rem;
+    padding: 0 8px;
+  }
+
+  .loop-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .claim-box {
+    border: 1px solid var(--gold);
+    padding: 36px;
+    margin: 48px 0;
+    position: relative;
+  }
+
+  .claim-box .claim-label {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--black);
+    padding: 0 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .claim-text {
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 60px 0;
+  }
+
+  .timestamp-footer {
+    text-align: center;
+    padding: 48px 40px;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    line-height: 2.5;
+  }
+
+  .timestamp-footer .ts-hash {
+    color: var(--gold);
+    font-size: 13px;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    .cover { min-height: auto; padding: 60px 40px; }
+  }
+
+  @media (max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .loop-steps { flex-direction: column; }
+    .loop-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="seal">CPTS</div>
+    <h1>Competition Prize Token System</h1>
+    <p class="subtitle">A dual-class blockchain token protocol anchored to real-world competition events</p>
+    <div class="cover-meta">
+      VERSION 1.0 &nbsp;·&nbsp; MARCH 2026<br>
+      ORIGINAL CONCEPT &amp; SYSTEM DESIGN<br>
+      ALL RIGHTS RESERVED
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT BODY -->
+<div class="doc">
+
+  <!-- ABSTRACT -->
+  <div class="abstract">
+    This document describes an original blockchain token system in which a token is launched on the day of a competition event, operates a dual-class supply structure distinguishing permanently locked prize tokens from freely liquid public tokens, and functions simultaneously as a deflationary financial instrument and an immutable public ledger of competition history. The system is designed to be discipline-agnostic and repeatable across any structured competition format.
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <span class="section-num">01 — Introduction</span>
+    <h2>The Problem With Competition Records</h2>
+    <p>Competition results exist in databases owned by organizations, federations, and private entities. These records are mutable, subject to revision, and dependent on the continued operation of centralized authorities. A champion's record can be erased, disputed, or lost. There is no trustless, permanent proof of athletic or competitive achievement.</p>
+    <p>Existing blockchain solutions address financial primitives but have not been systematically applied to competition legitimacy. Prize money in cryptocurrency exists, but no system has used the token launch event itself as the competition day mechanism, nor structured the token supply so that prize allocations become permanent, non-transferable records embedded in the chain.</p>
+    <p>This system solves both problems simultaneously: it creates a liquid market instrument for the public and an immutable trophy system for winners, using the same token and the same launch event.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <span class="section-num">02 — Core Mechanism</span>
+    <h2>Dual-Class Token Structure</h2>
+    <p>The system operates a single token with two functionally distinct classes determined at the point of distribution, not at the point of minting.</p>
+
+    <div class="two-col">
+      <div class="col-card">
+        <span class="card-label">Class A</span>
+        <h4>Prize Tokens</h4>
+        <p>Awarded to competition winners. Permanently locked to the recipient's wallet. Non-transferable. Non-sellable. Carry no liquid value — only prestige, proof, and record.</p>
+      </div>
+      <div class="col-card">
+        <span class="card-label">Class B</span>
+        <h4>Public Tokens</h4>
+        <p>Available to the public on competition day. Fully liquid. Freely tradeable against BTC, ETH, SOL, and other assets. Subject to normal market mechanics.</p>
+      </div>
+    </div>
+
+    <p>The distinction between the two classes is enforced at the protocol or smart contract level. Prize tokens sent to a winner's wallet are flagged or sent to a dedicated lock contract, permanently removing them from circulating supply. They remain visible on-chain — confirming the win, the wallet, and the date — but cannot re-enter circulation.</p>
+
+    <div class="callout">
+      <strong>Key insight:</strong> Every competition event permanently removes tokens from supply. The token becomes more scarce with each event, creating a structural deflationary pressure tied directly to competition activity. The more events held, the more supply is locked, the more scarce the public float becomes.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <span class="section-num">03 — Launch Mechanics</span>
+    <h2>Competition Day as the Launch Event</h2>
+    <p>The token is not pre-launched or pre-sold. It launches on the day of the competition, concurrent with the event itself. This is a deliberate design choice that serves multiple functions:</p>
+
+    <h3>Demand Concentration</h3>
+    <p>The competition's natural audience — spectators, fans, participants, and communities — are present and engaged at the moment of launch. Their collective attention and excitement creates concentrated buy-side pressure precisely when the token needs it most: at the bonding curve stage.</p>
+
+    <h3>Bonding Curve Graduation</h3>
+    <p>The initial launch takes place on a bonding curve platform (such as pump.fun on Solana). The competition event is designed to drive sufficient buy volume to graduate the token from the bonding curve to a decentralized exchange, achieving independent market liquidity. The event is the graduation engine.</p>
+
+    <div class="loop-diagram">
+      <div class="loop-steps">
+        <div class="loop-step">COMPETITION<br>DAY</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">TOKEN<br>LAUNCHES</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">PUBLIC<br>BUYS IN</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">CURVE<br>GRADUATES</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-step">WINNER<br>RECEIVES PRIZE</div>
+      </div>
+      <div class="loop-note">↺ repeats at every future competition event</div>
+    </div>
+
+    <h3>Recurring Events</h3>
+    <p>Each subsequent competition event repeats the cycle. New prize tokens are locked to new winners, reducing circulating supply further. Renewed community interest drives new trading activity. The token accumulates a longer ledger of events, increasing its historical legitimacy and cultural value.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <span class="section-num">04 — The Immutable Ledger</span>
+    <h2>A Permanent Record of Competition History</h2>
+    <p>The cumulative prize wallet history forms a trustless, public, and permanent record of competition results. Each locked prize transaction contains:</p>
+
+    <div class="callout">
+      <strong>Recipient wallet address</strong> — the winner's permanent identifier<br><br>
+      <strong>Token amount</strong> — the prize allocation for that event<br><br>
+      <strong>Block timestamp</strong> — the immutable date of the competition<br><br>
+      <strong>Transaction hash</strong> — cryptographic proof that cannot be altered
+    </div>
+
+    <p>Any wallet holding locked prize tokens is verifiably a past champion. No federation, no organization, no central authority can revise this record. The blockchain timestamp replaces the need for any trusted intermediary to validate competition results.</p>
+
+    <p>Over time, the ledger becomes the definitive historical record of the competition series — permanent, public, and owned by no single entity. A fighter, athlete, or competitor who wins multiple events accumulates multiple locked entries in their wallet, each one a verifiable trophy.</p>
+
+    <h3>Prestige Without Liquidity</h3>
+    <p>The deliberate non-transferability of prize tokens creates a new category of digital asset: one whose value is entirely reputational. It cannot be bought, only won. It cannot be sold, only held. Its presence in a wallet is proof of achievement, not wealth — a distinction that gives the ledger its integrity.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <span class="section-num">05 — Discipline Agnosticism</span>
+    <h2>Universal Application Across Competition Formats</h2>
+    <p>The system is explicitly designed to operate across any structured competition format where a winner can be determined. This includes but is not limited to:</p>
+
+    <div class="callout">
+      Combat sports (boxing, MMA, wrestling, judo) &nbsp;·&nbsp; Team sports &nbsp;·&nbsp; Esports &nbsp;·&nbsp; Racing &nbsp;·&nbsp; Chess and strategy competitions &nbsp;·&nbsp; Academic competitions &nbsp;·&nbsp; Music and creative competitions &nbsp;·&nbsp; Any event with a defined winner
+    </div>
+
+    <p>The token is specific to the competition series, not the discipline. Each series deploys its own token, its own ledger, and its own community. The protocol is the same across all implementations.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <span class="section-num">06 — Tokenomics</span>
+    <h2>Supply Architecture</h2>
+
+    <h3>Initial Supply</h3>
+    <p>Total supply is fixed at launch. A defined percentage is reserved as the prize allocation pool — tokens earmarked for winner distribution across the life of the competition series. The remainder enters the public bonding curve on competition day.</p>
+
+    <h3>Deflationary Structure</h3>
+    <p>Every prize distribution permanently removes tokens from the circulating public float. The prize pool is not recycled — it is locked. This creates a hard, predictable deflationary schedule tied to the competition calendar. Participants in the public market can calculate the future circulating supply based on the known competition schedule.</p>
+
+    <h3>No Pre-Sale, No VC Allocation</h3>
+    <p>The system intentionally launches with no presale, no venture allocation, and no team reserve. The competition community is the first and only buyer. This aligns incentives between token holders and competition participants from day one.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 7 — IP CLAIM -->
+  <div class="section">
+    <span class="section-num">07 — Original Invention Claim</span>
+    <h2>Intellectual Property Statement</h2>
+
+    <div class="claim-box">
+      <span class="claim-label">ORIGINAL CLAIM</span>
+      <p class="claim-text">
+        "A blockchain token system in which (1) the token launches on the day of a scheduled competition event, (2) prize allocations awarded to competition winners are permanently locked to recipient wallets, functioning as non-transferable, immutable proof of victory and as a structural deflationary mechanism, (3) a separate liquid class of the same token is freely tradeable by the public, and (4) the cumulative prize wallet history forms a permanent, trustless ledger of competition results — with the launch-day buy pressure from competition audiences designed to graduate the token from a bonding curve to a decentralized exchange."
+      </p>
+    </div>
+
+    <p>This document constitutes a first public disclosure of the above system. The combination of elements described — simultaneous competition-day launch, dual-class supply with permanent prize locking, bonding curve graduation via event audience, and immutable competition ledger — has not been previously implemented or published to the author's knowledge.</p>
+
+    <p>All rights to this system design, its documentation, associated branding, and any derivative implementations are reserved by the original author. This whitepaper serves as a timestamped prior art document.</p>
+  </div>
+
+</div>
+
+<!-- TIMESTAMP FOOTER -->
+<div class="timestamp-footer">
+  <div>COMPETITION PRIZE TOKEN SYSTEM — WHITEPAPER v1.0</div>
+  <div class="ts-hash">FIRST PUBLISHED: MARCH 2026</div>
+  <div>ARCHIVE THIS DOCUMENT AT WEB.ARCHIVE.ORG TO ESTABLISH PRIOR ART</div>
+  <div style="margin-top: 16px; font-size: 10px;">© 2026 — ALL RIGHTS RESERVED — ORIGINAL AUTHOR</div>
+</div>
+
+</body>
+</html>

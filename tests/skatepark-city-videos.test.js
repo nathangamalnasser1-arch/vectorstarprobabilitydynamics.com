@@ -9,7 +9,7 @@ const assert = require('assert');
 const htmlPath = path.join(__dirname, '..', 'skatepark-city.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 
-const videoIds = ['swc2iJXfJos', '6R9w6y0nm4o', 'YdAK6B8hcUs'];
+const videoIds = ['swc2iJXfJos', '6R9w6y0nm4o', 'YdAK6B8hcUs', 'BEnHAAkA3OE'];
 
 assert.ok(html.includes('id="videos"'), 'Expected #videos section');
 videoIds.forEach((id) => {

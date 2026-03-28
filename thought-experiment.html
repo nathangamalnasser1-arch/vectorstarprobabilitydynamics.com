@@ -10,8 +10,14 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+    <button type="button" class="nav-mobile-toggle" id="nav-mobile-toggle" aria-expanded="false" aria-controls="vspd-sidebar-nav" aria-label="Open navigation menu">
+        <span class="nav-mobile-toggle-bar"></span>
+        <span class="nav-mobile-toggle-bar"></span>
+        <span class="nav-mobile-toggle-bar"></span>
+    </button>
+    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
     <!-- Fixed Vertical Sidebar Navigation -->
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" id="vspd-sidebar-nav" aria-label="Site navigation">
         <h3>Navigation</h3>
         <ul>
             <li><a href="index.html">Index</a></li>
@@ -30,6 +36,7 @@
             <li><a href="skatepark-city.html">Skatepark City</a></li>
             <li><a href="rbgg.html">Rival Boxing Golden Glove</a></li>
             <li><a href="driftcity/index.html">Drift City</a></li>
+            <li><a href="competition%20coin%20paper/index.html">Competition Coin Paper</a></li>
         </ul>
         <h3>Better Terminology</h3>
         <ul>
@@ -200,6 +207,7 @@
         <p>&copy; 2026 Vector-Star Probability Dynamics | White Paper Author: Nathan Gamal Nasser. Educational visualization.</p>
     </footer>
 
+    <script src="js/sidebar-nav.js"></script>
     <script src="js/main.js"></script>
     <script src="static/js/bouncing-balls.js"></script>
 </body>

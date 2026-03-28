@@ -1831,6 +1831,59 @@ input:checked + .toggle-slider:before {
     text-decoration: none;
 }
 
+/* Mobile: hamburger (top-left) + off-canvas drawer from the left */
+.nav-mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1002;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-shadow: 0 4px 14px var(--shadow);
+}
+
+.nav-mobile-toggle:focus-visible {
+    outline: 2px solid var(--cern-amber);
+    outline-offset: 2px;
+}
+
+.nav-mobile-toggle-bar {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--cern-amber);
+    border-radius: 1px;
+}
+
+.nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.nav-overlay.is-visible {
+    display: block;
+}
+
+body.nav-mobile-open {
+    overflow: hidden;
+}
+
 /* Main content adjustment for sidebar */
 .main-content-with-sidebar {
     margin-right: 300px;
@@ -1839,17 +1892,39 @@ input:checked + .toggle-slider:before {
 
 /* Responsive sidebar */
 @media (max-width: 1024px) {
+    .nav-mobile-toggle {
+        display: flex;
+    }
+
     .sidebar-nav {
-        position: relative;
-        width: 100%;
-        height: auto;
+        position: fixed;
+        left: 0;
+        right: auto;
+        top: 0;
+        width: min(280px, 88vw);
+        height: 100vh;
+        max-height: 100dvh;
         border-left: none;
-        border-bottom: 1px solid #f59e0b;
+        border-right: 1px solid var(--cern-amber);
+        border-bottom: none;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.55);
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+        z-index: 1001;
+    }
+
+    .sidebar-nav.is-open {
+        transform: translateX(0);
+    }
+
+    main,
+    .main-content {
+        padding-top: 3.5rem;
     }
 
     .main-content-with-sidebar {
         margin-right: 0;
-        padding: 2rem 1.5rem;
+        padding: 3.5rem 1.5rem 2rem;
     }
 }
 

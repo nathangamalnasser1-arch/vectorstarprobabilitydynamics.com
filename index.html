@@ -27,7 +27,7 @@
         @media (max-width: 1024px) {
             .main-content {
                 margin-right: 0;
-                padding: 2rem 1.5rem;
+                padding: 3.5rem 1.5rem 2rem;
             }
         }
 
@@ -353,19 +353,6 @@
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .sidebar-nav {
-                position: relative;
-                width: 100%;
-                height: auto;
-                border-left: none;
-                border-bottom: 1px solid var(--cern-amber);
-            }
-
-            .main-content {
-                margin-right: 0;
-                padding: 2rem 1.5rem;
-            }
-
             .dual-view {
                 grid-template-columns: 1fr;
             }
@@ -386,8 +373,14 @@
     </style>
 </head>
 <body>
+    <button type="button" class="nav-mobile-toggle" id="nav-mobile-toggle" aria-expanded="false" aria-controls="vspd-sidebar-nav" aria-label="Open navigation menu">
+        <span class="nav-mobile-toggle-bar"></span>
+        <span class="nav-mobile-toggle-bar"></span>
+        <span class="nav-mobile-toggle-bar"></span>
+    </button>
+    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
     <!-- Fixed Vertical Sidebar Navigation -->
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" id="vspd-sidebar-nav" aria-label="Site navigation">
         <h3>Navigation</h3>
         <ul>
             <li><a href="index.html" class="active">Index</a></li>
@@ -406,6 +399,7 @@
             <li><a href="skatepark-city.html">Skatepark City</a></li>
             <li><a href="rbgg.html">Rival Boxing Golden Glove</a></li>
             <li><a href="driftcity/index.html">Drift City</a></li>
+            <li><a href="competition%20coin%20paper/index.html">Competition Coin Paper</a></li>
         </ul>
         <h3>Better Terminology</h3>
         <ul>
@@ -656,6 +650,7 @@
         </footer>
     </main>
 
+    <script src="js/sidebar-nav.js"></script>
     <script src="js/visualization.js"></script>
     <script src="js/main.js"></script>
 </body>
