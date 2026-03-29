@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NatOS — The OS That Fights Back</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --amber: #ffb300;
+  --green: #00ff88;
+  --cyan:  #00e5ff;
+  --red:   #ff3b3b;
+  --bg:    #080808;
+  --bg2:   #0e0e0e;
+  --bg3:   #141414;
+  --border:#1e1e1e;
+  --dim:   #444;
+  --text:  #c8c8c8;
+  --white: #f0f0f0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+::selection{background:var(--amber);color:#000}
+
+/* ── Scanline overlay ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:52px;
+  background:rgba(8,8,8,.92);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:3px;
+  color:var(--amber);text-decoration:none;
+}
+.nav-links{display:flex;gap:24px;flex-wrap:wrap}
+.nav-links a{
+  color:var(--dim);font-size:11px;letter-spacing:2px;
+  text-decoration:none;text-transform:uppercase;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--amber)}
+.nav-cta{
+  background:var(--amber);color:#000;
+  font-family:'Bebas Neue',sans-serif;
+  letter-spacing:2px;font-size:14px;
+  padding:8px 20px;border:none;cursor:pointer;
+  text-decoration:none;
+  transition:background .2s;
+}
+.nav-cta:hover{background:var(--green)}
+
+/* ── Hero ── */
+#hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:80px 32px 60px;
+  position:relative;overflow:hidden;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,179,0,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,179,0,.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  animation:gridscroll 20s linear infinite;
+}
+@keyframes gridscroll{to{background-position:0 48px}}
+.hero-glow{
+  position:absolute;top:20%;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(255,179,0,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-tag{
+  font-size:11px;letter-spacing:4px;color:var(--amber);
+  text-transform:uppercase;margin-bottom:20px;
+  border:1px solid rgba(255,179,0,.3);padding:4px 16px;
+  animation:fadein .8s ease both;
+}
+h1.hero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(64px,10vw,140px);
+  line-height:.92;letter-spacing:4px;
+  color:var(--white);text-align:center;
+  animation:fadein .8s .1s ease both;
+}
+h1.hero-title span{color:var(--amber)}
+.hero-sub{
+  font-size:clamp(13px,2vw,17px);
+  color:var(--text);text-align:center;
+  max-width:640px;line-height:1.7;
+  margin:24px 0 40px;
+  animation:fadein .8s .2s ease both;
+}
+.hero-btns{
+  display:flex;gap:16px;flex-wrap:wrap;justify-content:center;
+  animation:fadein .8s .3s ease both;
+}
+.btn-primary{
+  background:var(--amber);color:#000;
+  font-family:'Bebas Neue',sans-serif;
+  letter-spacing:3px;font-size:16px;
+  padding:14px 36px;border:none;cursor:pointer;
+  text-decoration:none;
+  transition:all .2s;
+}
+.btn-primary:hover{background:var(--green);transform:translateY(-2px)}
+.btn-outline{
+  border:1px solid var(--amber);color:var(--amber);
+  font-family:'Bebas Neue',sans-serif;
+  letter-spacing:3px;font-size:16px;
+  padding:14px 36px;background:transparent;
+  cursor:pointer;text-decoration:none;
+  transition:all .2s;
+}
+.btn-outline:hover{background:rgba(255,179,0,.1);transform:translateY(-2px)}
+
+/* Terminal ticker */
+.terminal-ticker{
+  margin-top:52px;
+  background:var(--bg2);border:1px solid var(--border);
+  padding:10px 20px;font-size:12px;
+  color:var(--green);letter-spacing:1px;
+  width:min(700px,90vw);overflow:hidden;
+  animation:fadein .8s .4s ease both;
+}
+.ticker-inner{white-space:nowrap;animation:ticker 28s linear infinite}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* Stats bar */
+.stats-bar{
+  display:flex;gap:0;flex-wrap:wrap;
+  width:min(900px,92vw);margin-top:48px;
+  border:1px solid var(--border);
+  animation:fadein .8s .5s ease both;
+}
+.stat-item{
+  flex:1;min-width:140px;padding:16px 20px;
+  border-right:1px solid var(--border);text-align:center;
+}
+.stat-item:last-child{border-right:none}
+.stat-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:32px;color:var(--amber);letter-spacing:2px;
+  display:block;
+}
+.stat-label{font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase}
+
+/* ── Section base ── */
+section{padding:100px 32px;max-width:1100px;margin:0 auto}
+section.full-bleed{max-width:none;padding-left:0;padding-right:0}
+.section-inner{max-width:1100px;margin:0 auto;padding:0 32px}
+
+.section-tag{
+  font-size:10px;letter-spacing:4px;color:var(--amber);
+  text-transform:uppercase;margin-bottom:12px;
+  display:block;
+}
+h2.section-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(42px,6vw,80px);
+  line-height:1;letter-spacing:3px;
+  color:var(--white);margin-bottom:20px;
+}
+h2.section-title span{color:var(--amber)}
+.section-desc{
+  font-size:14px;line-height:1.8;color:var(--text);
+  max-width:640px;margin-bottom:52px;
+}
+
+/* Divider */
+.divider{
+  border:none;border-top:1px solid var(--border);
+  margin:0;
+}
+
+/* ── OS Cards ── */
+.os-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:48px}
+@media(max-width:700px){.os-grid{grid-template-columns:1fr}}
+.os-card{
+  background:var(--bg2);padding:40px;
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+  transition:border-color .3s;
+}
+.os-card:hover{border-color:var(--amber)}
+.os-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.os-card.win::before{background:var(--amber)}
+.os-card.mac::before{background:var(--cyan)}
+.os-card.atl::before{background:var(--green)}
+.os-icon{font-size:36px;margin-bottom:16px;display:block}
+.os-name{
+  font-family:'Bebas Neue',sans-serif;font-size:32px;
+  letter-spacing:3px;color:var(--white);margin-bottom:8px;
+}
+.os-tagline{font-size:12px;color:var(--amber);letter-spacing:2px;margin-bottom:20px}
+.os-features{list-style:none;font-size:12px;line-height:2;color:var(--text)}
+.os-features li::before{content:'→ ';color:var(--amber)}
+
+/* ATL card special */
+.os-card.atl{border-color:rgba(0,255,136,.2)}
+.os-card.atl:hover{border-color:var(--green)}
+.os-card.atl .os-name{color:var(--green)}
+.os-card.atl .os-tagline{color:var(--green)}
+.os-card.atl .os-features li::before{color:var(--green)}
+.atl-badge{
+  display:inline-block;
+  background:rgba(0,255,136,.1);
+  border:1px solid rgba(0,255,136,.3);
+  color:var(--green);font-size:9px;letter-spacing:3px;
+  padding:2px 8px;margin-bottom:16px;
+}
+
+/* ── Tier table ── */
+.tier-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:2px;
+  margin-top:40px;
+}
+@media(max-width:700px){.tier-grid{grid-template-columns:1fr 1fr}}
+.tier-card{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:28px 20px;text-align:center;
+  transition:all .3s;
+}
+.tier-card:hover{border-color:var(--amber);transform:translateY(-4px)}
+.tier-label{
+  font-family:'Bebas Neue',sans-serif;font-size:26px;
+  letter-spacing:3px;color:var(--amber);margin-bottom:8px;
+}
+.tier-ram{font-size:11px;color:var(--cyan);letter-spacing:2px;margin-bottom:4px}
+.tier-era{font-size:10px;color:var(--dim);margin-bottom:16px}
+.tier-desc{font-size:11px;line-height:1.8;color:var(--text)}
+
+/* ── Feature grid ── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:40px}
+@media(max-width:700px){.feat-grid{grid-template-columns:1fr}}
+.feat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:32px 28px;transition:border-color .3s;
+}
+.feat-card:hover{border-color:var(--amber)}
+.feat-icon{font-size:28px;margin-bottom:14px;display:block}
+.feat-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  letter-spacing:2px;color:var(--white);margin-bottom:8px;
+}
+.feat-desc{font-size:12px;line-height:1.8;color:var(--text)}
+
+/* ── NatAI Section ── */
+.natai-hero{
+  background:var(--bg2);border:1px solid rgba(0,255,136,.2);
+  padding:52px;margin-bottom:40px;position:relative;overflow:hidden;
+}
+.natai-hero::after{
+  content:'◈ NatAI';
+  position:absolute;right:-20px;top:50%;transform:translateY(-50%) rotate(90deg);
+  font-family:'Bebas Neue',sans-serif;font-size:80px;letter-spacing:8px;
+  color:rgba(0,255,136,.04);pointer-events:none;white-space:nowrap;
+}
+.natai-flow{
+  display:flex;align-items:center;gap:0;flex-wrap:wrap;
+  margin-top:36px;
+}
+.natai-step{
+  flex:1;min-width:140px;background:var(--bg3);
+  border:1px solid var(--border);padding:20px 16px;
+  text-align:center;position:relative;
+}
+.natai-step::after{
+  content:'→';
+  position:absolute;right:-14px;top:50%;transform:translateY(-50%);
+  color:var(--green);font-size:18px;z-index:2;
+}
+.natai-step:last-child::after{display:none}
+.natai-step-icon{font-size:22px;margin-bottom:8px}
+.natai-step-label{font-size:10px;letter-spacing:2px;color:var(--green);text-transform:uppercase}
+.natai-step-desc{font-size:10px;color:var(--dim);margin-top:4px}
+
+.ai-tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:40px}
+@media(max-width:700px){.ai-tier-grid{grid-template-columns:1fr 1fr}}
+.ai-tier{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:24px 16px;text-align:center;
+}
+.ai-tier-name{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  letter-spacing:3px;color:var(--green);margin-bottom:4px;
+}
+.ai-tier-model{font-size:10px;color:var(--amber);letter-spacing:1px;margin-bottom:8px}
+.ai-tier-desc{font-size:10px;color:var(--text);line-height:1.7}
+
+/* ── NatenateWorld Section ── */
+#natenateworld{
+  background:linear-gradient(180deg,var(--bg) 0%,rgba(0,20,40,.6) 50%,var(--bg) 100%);
+}
+.nnw-banner{
+  background:var(--bg2);border:1px solid rgba(0,229,255,.2);
+  padding:52px;margin-bottom:40px;position:relative;overflow:hidden;
+}
+.nnw-banner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 80% 50%,rgba(0,229,255,.04) 0%,transparent 60%);
+}
+.nnw-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(36px,6vw,72px);
+  letter-spacing:4px;color:var(--white);margin-bottom:8px;
+}
+.nnw-title span{color:var(--cyan)}
+.nnw-subtitle{font-size:13px;color:var(--cyan);letter-spacing:2px;margin-bottom:20px}
+
+.nnw-mechanic-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:40px;
+}
+@media(max-width:700px){.nnw-mechanic-grid{grid-template-columns:1fr}}
+.nnw-mechanic{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:28px;transition:border-color .3s;
+}
+.nnw-mechanic:hover{border-color:var(--cyan)}
+.nnw-m-num{
+  font-family:'Bebas Neue',sans-serif;font-size:48px;
+  letter-spacing:2px;color:rgba(0,229,255,.15);
+  line-height:1;margin-bottom:8px;
+}
+.nnw-m-title{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;
+  letter-spacing:2px;color:var(--white);margin-bottom:8px;
+}
+.nnw-m-desc{font-size:11px;line-height:1.8;color:var(--text)}
+
+.nnw-economy{
+  display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:40px;
+}
+@media(max-width:700px){.nnw-economy{grid-template-columns:1fr}}
+.nnw-coin{
+  background:var(--bg2);border:1px solid var(--border);padding:32px;
+}
+.nnw-coin-icon{font-size:32px;margin-bottom:12px;display:block}
+.nnw-coin-name{
+  font-family:'Bebas Neue',sans-serif;font-size:26px;
+  letter-spacing:3px;color:var(--amber);margin-bottom:8px;
+}
+.nnw-coin-name.prestige{color:var(--cyan)}
+.nnw-coin-list{list-style:none;font-size:11px;line-height:2;color:var(--text)}
+.nnw-coin-list li::before{content:'✓ ';color:var(--green)}
+
+/* Integration highlight box */
+.integration-box{
+  background:linear-gradient(135deg,rgba(0,255,136,.05),rgba(0,229,255,.05));
+  border:1px solid rgba(0,255,136,.2);
+  padding:36px;margin-top:40px;
+}
+.integration-box h3{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;
+  letter-spacing:3px;color:var(--green);margin-bottom:16px;
+}
+.integration-table{width:100%;border-collapse:collapse;font-size:11px}
+.integration-table th{
+  text-align:left;padding:8px 12px;
+  border-bottom:1px solid var(--border);
+  color:var(--amber);letter-spacing:2px;font-size:10px;
+}
+.integration-table td{
+  padding:8px 12px;border-bottom:1px solid rgba(30,30,30,.8);
+  color:var(--text);
+}
+.integration-table tr:last-child td{border-bottom:none}
+.match-tag{color:var(--green);font-size:10px}
+
+/* ── Naternet Section ── */
+.network-vis{
+  display:flex;flex-wrap:wrap;gap:12px;
+  margin:40px 0;justify-content:center;
+}
+.network-node{
+  width:80px;height:80px;
+  border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:9px;letter-spacing:1px;text-align:center;
+  cursor:default;transition:all .3s;
+  position:relative;
+}
+.network-node.seed{
+  background:rgba(255,179,0,.1);
+  border:2px solid var(--amber);color:var(--amber);
+  animation:pulse-amber 2s infinite;
+}
+.network-node.active{
+  background:rgba(0,255,136,.08);
+  border:1px solid var(--green);color:var(--green);
+}
+.network-node.passive{
+  background:rgba(68,68,68,.2);
+  border:1px solid var(--dim);color:var(--dim);
+}
+@keyframes pulse-amber{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,179,0,.3)}
+  50%{box-shadow:0 0 0 12px rgba(255,179,0,0)}
+}
+.node-icon{font-size:20px;margin-bottom:4px}
+.node-tier{font-size:8px;letter-spacing:1px}
+
+/* ── NatToken Section ── */
+.token-split{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:40px}
+@media(max-width:700px){.token-split{grid-template-columns:1fr}}
+.token-card{background:var(--bg2);border:1px solid var(--border);padding:36px}
+.token-earn-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  letter-spacing:2px;color:var(--amber);margin-bottom:16px;
+}
+.earn-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--border);font-size:11px;
+}
+.earn-row:last-child{border-bottom:none}
+.earn-activity{color:var(--text)}
+.earn-amount{color:var(--green);letter-spacing:1px}
+
+/* ── Gaming Section ── */
+.gaming-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:40px}
+@media(max-width:700px){.gaming-grid{grid-template-columns:1fr}}
+.gaming-card{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:32px;transition:border-color .3s;
+}
+.gaming-card:hover{border-color:var(--amber)}
+.gaming-card.featured{
+  grid-column:1/-1;
+  border-color:rgba(0,229,255,.3);
+  background:linear-gradient(135deg,var(--bg2),rgba(0,20,40,.4));
+}
+.gaming-card.featured:hover{border-color:var(--cyan)}
+.gaming-tag{
+  font-size:9px;letter-spacing:3px;color:var(--amber);
+  text-transform:uppercase;margin-bottom:10px;display:block;
+}
+.gaming-tag.new{color:var(--cyan)}
+.gaming-title{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;
+  letter-spacing:2px;color:var(--white);margin-bottom:10px;
+}
+.gaming-desc{font-size:12px;line-height:1.8;color:var(--text)}
+
+/* ── Legal section ── */
+.legal-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:40px}
+@media(max-width:700px){.legal-grid{grid-template-columns:1fr}}
+.legal-card{background:var(--bg2);border:1px solid var(--border);padding:28px}
+.legal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:18px;
+  letter-spacing:2px;color:var(--amber);margin-bottom:12px;
+}
+.legal-list{list-style:none;font-size:11px;line-height:2;color:var(--text)}
+.legal-list li::before{content:'§ ';color:var(--dim)}
+
+/* ── CTA ── */
+#cta{
+  text-align:center;padding:120px 32px;
+  background:var(--bg2);border-top:1px solid var(--border);
+}
+.cta-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,8vw,100px);
+  line-height:1;letter-spacing:4px;
+  color:var(--white);margin-bottom:16px;
+}
+.cta-title span{color:var(--amber)}
+.cta-sub{font-size:14px;color:var(--text);max-width:500px;margin:0 auto 40px;line-height:1.8}
+
+/* ── Footer ── */
+footer{
+  background:var(--bg);border-top:1px solid var(--border);
+  padding:32px;display:flex;
+  justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:16px;font-size:10px;
+  color:var(--dim);letter-spacing:1px;
+}
+footer a{color:var(--dim);text-decoration:none}
+footer a:hover{color:var(--amber)}
+
+/* ── Animations ── */
+@keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── Highlight bar ── */
+.highlight-bar{
+  background:linear-gradient(90deg,rgba(255,179,0,.08),rgba(255,179,0,.02));
+  border-left:3px solid var(--amber);
+  padding:16px 20px;margin:32px 0;
+  font-size:12px;line-height:1.8;color:var(--text);
+}
+.highlight-bar.green{
+  background:linear-gradient(90deg,rgba(0,255,136,.08),rgba(0,255,136,.02));
+  border-left-color:var(--green);
+}
+.highlight-bar.cyan{
+  background:linear-gradient(90deg,rgba(0,229,255,.08),rgba(0,229,255,.02));
+  border-left-color:var(--cyan);
+}
+
+/* ── Distro Download ── */
+#distro{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+
+.distro-picker{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:40px}
+@media(max-width:700px){.distro-picker{grid-template-columns:1fr}}
+
+.distro-card{
+  background:var(--bg);border:1px solid var(--border);
+  padding:40px 36px;position:relative;overflow:hidden;
+  cursor:pointer;transition:all .25s;
+}
+.distro-card:hover,.distro-card.selected{border-color:var(--amber);transform:translateY(-3px)}
+.distro-card.selected{background:rgba(255,179,0,.04)}
+.distro-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--border);transition:background .25s;
+}
+.distro-card:hover::after,.distro-card.selected::after{background:var(--amber)}
+.distro-card.mac-card:hover::after,.distro-card.mac-card.selected::after{background:var(--cyan)}
+.distro-card.atl-card::after{background:var(--border)}
+.distro-card.atl-card:hover::after,.distro-card.atl-card.selected::after{background:var(--green)}
+
+.distro-os-icon{font-size:44px;margin-bottom:16px;display:block}
+.distro-os-name{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;
+  letter-spacing:4px;color:var(--white);margin-bottom:6px;
+}
+.distro-os-sub{font-size:11px;letter-spacing:2px;color:var(--amber);margin-bottom:18px}
+.distro-os-sub.mac{color:var(--cyan)}
+.distro-os-sub.atl{color:var(--green)}
+.distro-check{list-style:none;font-size:11px;line-height:2;color:var(--text);margin-bottom:24px}
+.distro-check li::before{content:'✓ ';color:var(--green)}
+.distro-select-tag{
+  display:inline-block;
+  border:1px solid var(--border);
+  color:var(--dim);font-size:10px;letter-spacing:2px;
+  padding:6px 14px;transition:all .25s;
+}
+.distro-card:hover .distro-select-tag,.distro-card.selected .distro-select-tag{
+  border-color:var(--amber);color:var(--amber);
+  background:rgba(255,179,0,.08);
+}
+.distro-card.mac-card:hover .distro-select-tag,.distro-card.mac-card.selected .distro-select-tag{
+  border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08);
+}
+.distro-card.atl-card:hover .distro-select-tag,.distro-card.atl-card.selected .distro-select-tag{
+  border-color:var(--green);color:var(--green);background:rgba(0,255,136,.08);
+}
+
+/* arch toggle */
+.arch-toggle{
+  display:inline-flex;border:1px solid var(--border);
+  margin:32px 0 0;overflow:hidden;
+}
+.arch-btn{
+  padding:10px 28px;font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:2px;cursor:pointer;
+  background:transparent;border:none;color:var(--dim);
+  transition:all .2s;
+}
+.arch-btn.active{background:var(--amber);color:#000}
+
+/* download panel */
+.download-panel{
+  margin-top:40px;background:var(--bg);
+  border:1px solid var(--border);padding:0;
+  overflow:hidden;
+}
+.download-panel-header{
+  background:var(--bg3);border-bottom:1px solid var(--border);
+  padding:16px 28px;display:flex;align-items:center;gap:12px;
+}
+.dl-badge{
+  font-family:'Bebas Neue',sans-serif;font-size:13px;
+  letter-spacing:3px;padding:4px 12px;
+}
+.dl-badge.win{background:rgba(255,179,0,.15);color:var(--amber);border:1px solid rgba(255,179,0,.3)}
+.dl-badge.mac{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25)}
+.dl-badge.atl{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25)}
+.dl-filename{font-size:12px;color:var(--text);letter-spacing:1px}
+.dl-size{font-size:10px;color:var(--dim);margin-left:auto}
+
+.download-panel-body{padding:28px}
+.dl-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.dl-meta{display:flex;gap:24px;flex-wrap:wrap}
+.dl-meta-item{font-size:10px;letter-spacing:1px}
+.dl-meta-label{color:var(--dim);display:block;margin-bottom:2px}
+.dl-meta-val{color:var(--white)}
+
+.dl-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--amber);color:#000;
+  font-family:'Bebas Neue',sans-serif;
+  letter-spacing:3px;font-size:15px;
+  padding:14px 32px;border:none;cursor:pointer;
+  text-decoration:none;transition:all .2s;
+  white-space:nowrap;
+}
+.dl-btn:hover{background:var(--green);transform:translateY(-2px)}
+.dl-btn.secondary{
+  background:transparent;color:var(--amber);
+  border:1px solid var(--amber);
+}
+.dl-btn.secondary:hover{background:rgba(255,179,0,.1)}
+
+.dl-checksum{
+  margin-top:20px;padding:12px 16px;
+  background:var(--bg3);border:1px solid var(--border);
+  font-size:10px;color:var(--dim);letter-spacing:1px;
+  word-break:break-all;
+}
+.dl-checksum span{color:var(--amber)}
+
+/* requirements table */
+.req-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:40px}
+@media(max-width:700px){.req-grid{grid-template-columns:1fr 1fr}}
+.req-card{
+  background:var(--bg);border:1px solid var(--border);
+  padding:20px 16px;text-align:center;
+}
+.req-tier{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  letter-spacing:3px;color:var(--amber);margin-bottom:6px;
+}
+.req-spec{font-size:10px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
+.req-disk{font-size:10px;color:var(--dim);margin-bottom:12px}
+.req-note{font-size:10px;color:var(--text);line-height:1.7}
+
+/* boot keys */
+.boot-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:40px}
+.boot-table th{
+  text-align:left;padding:10px 16px;
+  border-bottom:1px solid var(--border);
+  color:var(--amber);letter-spacing:2px;font-size:10px;
+  background:var(--bg3);
+}
+.boot-table td{
+  padding:10px 16px;
+  border-bottom:1px solid rgba(30,30,30,.8);
+  color:var(--text);
+}
+.boot-table tr:last-child td{border-bottom:none}
+.boot-key{
+  display:inline-block;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--white);font-size:11px;letter-spacing:1px;
+  padding:3px 10px;border-radius:3px;
+}
+
+/* what's included */
+.included-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:40px}
+@media(max-width:700px){.included-grid{grid-template-columns:1fr}}
+.included-item{
+  background:var(--bg);border:1px solid var(--border);
+  padding:20px;display:flex;gap:12px;align-items:flex-start;
+}
+.inc-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.inc-name{font-size:12px;color:var(--white);margin-bottom:4px;letter-spacing:1px}
+.inc-desc{font-size:10px;color:var(--dim);line-height:1.6}
+
+/* install steps */
+.steps-row{display:flex;gap:0;margin-top:40px;flex-wrap:wrap}
+.step-block{
+  flex:1;min-width:160px;background:var(--bg);
+  border:1px solid var(--border);padding:28px 20px;
+  text-align:center;position:relative;
+}
+.step-block::after{
+  content:'→';
+  position:absolute;right:-14px;top:50%;
+  transform:translateY(-50%);
+  color:var(--amber);font-size:20px;z-index:2;
+}
+.step-block:last-child::after{display:none}
+.step-num{
+  font-family:'Bebas Neue',sans-serif;font-size:48px;
+  color:rgba(255,179,0,.15);line-height:1;margin-bottom:8px;
+}
+.step-title{font-size:12px;color:var(--white);letter-spacing:1px;margin-bottom:6px}
+.step-desc{font-size:10px;color:var(--dim);line-height:1.7}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border)}
+::-webkit-scrollbar-thumb:hover{background:var(--amber)}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="#hero">NatOS</a>
+  <div class="nav-links">
+    <a href="#os">OS</a>
+    <a href="#atl">ATL</a>
+    <a href="#natai">NatAI</a>
+    <a href="#natenateworld">Game</a>
+    <a href="#natscape">Browser</a>
+    <a href="#naternet">Naternet</a>
+    <a href="#nattoken">Token</a>
+    <a href="#gaming">Gaming</a>
+    <a href="#legal">IP</a>
+    <a href="#distro" style="color:var(--amber)">↓ ISO</a>
+  </div>
+  <a class="nav-cta" href="#distro">Get ISO</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero" style="max-width:none;padding:0">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-tag">Natapps · Vector Star Probability Dynamics · Montréal, QC</div>
+
+  <h1 class="hero-title">NAT<span>OS</span><br>ECOSYSTEM</h1>
+
+  <p class="hero-sub">
+    The OS that revives old computers, earns you money while you sleep,
+    runs AI without a GPU, hosts uncensorable websites, and ships the
+    world's most ambitious battle royale — all from one bootable USB.
+  </p>
+
+  <div class="hero-btns">
+    <a class="btn-primary" href="#cta">Download ISO</a>
+    <a class="btn-outline" href="#natenateworld">Play NatenateWorld</a>
+    <a class="btn-outline" href="#natai">Try NatAI</a>
+  </div>
+
+  <div class="terminal-ticker">
+    <div class="ticker-inner">
+      ● natai: query routed to mesh node MID-tier · 380ms · 0.001 NAT earned &nbsp;&nbsp;&nbsp;
+      ● naternet: 2,847 nodes online · 4.2 TB distributed · 11.8 Gbps aggregate &nbsp;&nbsp;&nbsp;
+      ● natenateworld: 63 players online · 12 active BR matches · 2.1M NNC traded today &nbsp;&nbsp;&nbsp;
+      ● natos: 8,441 installs · 4,220 seed nodes · 2,110 always-on · $3.12 CAD/mo avg cost &nbsp;&nbsp;&nbsp;
+      ● natai: query routed to mesh node MID-tier · 380ms · 0.001 NAT earned &nbsp;&nbsp;&nbsp;
+      ● naternet: 2,847 nodes online · 4.2 TB distributed · 11.8 Gbps aggregate &nbsp;&nbsp;&nbsp;
+      ● natenateworld: 63 players online · 12 active BR matches · 2.1M NNC traded today &nbsp;&nbsp;&nbsp;
+      ● natos: 8,441 installs · 4,220 seed nodes · 2,110 always-on · $3.12 CAD/mo avg cost &nbsp;&nbsp;&nbsp;
+    </div>
+  </div>
+
+  <div class="stats-bar reveal">
+    <div class="stat-item"><span class="stat-num" id="s1">0</span><span class="stat-label">Nodes Online</span></div>
+    <div class="stat-item"><span class="stat-num" id="s2">0</span><span class="stat-label">TB Distributed</span></div>
+    <div class="stat-item"><span class="stat-num" id="s3">0</span><span class="stat-label">AI Queries / Day</span></div>
+    <div class="stat-item"><span class="stat-num" id="s4">0</span><span class="stat-label">Players Online</span></div>
+    <div class="stat-item"><span class="stat-num" id="s5">0</span><span class="stat-label">NNC Traded Today</span></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── THE OS ── -->
+<section id="os" class="reveal">
+  <span class="section-tag">// 01 — The Operating Systems</span>
+  <h2 class="section-title">PICK YOUR <span>STYLE</span></h2>
+  <p class="section-desc">
+    Two lean Linux distros built on Debian 12 Minimal + Openbox WM. 
+    Auto-detect your hardware → select tier → configure everything. 
+    One ISO. Two personalities. One bootable USB.
+  </p>
+
+  <div class="tier-grid">
+    <div class="tier-card"><div class="tier-label">MICRO</div><div class="tier-ram">&lt; 384 MB RAM</div><div class="tier-era">2001–2005 era</div><div class="tier-desc">No compositor. Pure performance. Your 20-year-old machine runs again.</div></div>
+    <div class="tier-card"><div class="tier-label">LEAN</div><div class="tier-ram">512 MB+</div><div class="tier-era">2005–2008 era</div><div class="tier-desc">Light compositor, full browser tier routing, NatAI via mesh.</div></div>
+    <div class="tier-card"><div class="tier-label">MID</div><div class="tier-ram">1 GB+</div><div class="tier-era">2008–2011 era</div><div class="tier-desc">Local Phi-3 AI, inference relay node, full Naternet participation.</div></div>
+    <div class="tier-card"><div class="tier-label">FULL</div><div class="tier-ram">2 GB+</div><div class="tier-era">2011–2016 era</div><div class="tier-desc">Mistral 7B local, full inference node, max NatToken earnings.</div></div>
+  </div>
+
+  <div class="os-grid" style="margin-top:40px">
+    <div class="os-card win reveal">
+      <span class="os-icon">🪟</span>
+      <div class="os-name">NatOSW</div>
+      <div class="os-tagline">Windows Feel · Dark Theme · Familiar Controls</div>
+      <ul class="os-features">
+        <li>Openbox WM + tint2 taskbar (Win10-style)</li>
+        <li>Aero Snap: Super+Arrow keys</li>
+        <li>Alt+F4, Alt+Tab, Super+D, Super+E, Super+B</li>
+        <li>4 virtual desktops: Ctrl+Alt+Arrow</li>
+        <li>Adwaita-dark + Liberation fonts</li>
+        <li>NatAI dark chat UI on launch</li>
+      </ul>
+    </div>
+    <div class="os-card mac reveal">
+      <span class="os-icon">🍎</span>
+      <div class="os-name">NatOSM</div>
+      <div class="os-tagline">macOS Feel · Top Menu Bar · Plank Dock</div>
+      <ul class="os-features">
+        <li>Openbox WM + XFCE panel + Plank dock</li>
+        <li>Window buttons on LEFT</li>
+        <li>Cmd+Q, Cmd+Tab, Cmd+Space launcher</li>
+        <li>Ctrl+Arrow spaces navigation</li>
+        <li>Papirus icons, Open Sans, picom fading</li>
+        <li>NatAI light chat UI on launch</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NatOS ATL ── -->
+<section id="atl" class="reveal">
+  <span class="section-tag">// 02 — NatOS ATL · Bare Metal Execution</span>
+  <h2 class="section-title">THE <span>ATL</span> VARIANT</h2>
+  <p class="section-desc">
+    Optional. For those who want more. NatOS ATL replaces the standard 
+    userspace with the ATL execution layer — your old computer runs 
+    an AI-native paradigm that didn't exist when it was manufactured.
+  </p>
+
+  <div class="highlight-bar green">
+    Same ISO. Boot menu offers three choices: <strong style="color:var(--green)">[ NatOS ]</strong> &nbsp; <strong style="color:var(--green)">[ NatOS ATL ]</strong> &nbsp; <strong style="color:var(--green)">[ Try Live ]</strong><br>
+    NatOS ATL is the same Debian base — but ATL Runtime replaces the standard userspace. 
+    Every process, scheduler call, and memory pass runs through the token execution layer.
+  </div>
+
+  <div class="os-grid">
+    <div class="os-card atl reveal">
+      <div class="atl-badge">ATL BARE METAL</div>
+      <span class="os-icon">◈</span>
+      <div class="os-name">NatOS ATL</div>
+      <div class="os-tagline">AI Token Language · Own Execution Paradigm</div>
+      <ul class="os-features">
+        <li>ATL Runtime replaces standard userspace</li>
+        <li>Write intent in plain language — no syntax</li>
+        <li>AI token layer owns execution, not Python</li>
+        <li>Debug: request translation to any language</li>
+        <li>Personal ATL = unique token map = encryption</li>
+        <li>Kernel modules: atl_scheduler + atl_mem</li>
+        <li>Quantum-resistant via semantic complexity</li>
+      </ul>
+    </div>
+    <div class="os-card reveal" style="border-color:rgba(0,255,136,.15)">
+      <span class="os-icon">🔗</span>
+      <div class="os-name" style="color:var(--white)">Why ATL Matters</div>
+      <div class="os-tagline" style="color:var(--dim)">The Naternet runs on ATL regardless</div>
+      <ul class="os-features" style="color:var(--text)">
+        <li style="color:var(--text)">Every NatOS node runs ATL-compiled Naternet daemon</li>
+        <li style="color:var(--text)">ATL sees all relay routing simultaneously</li>
+        <li style="color:var(--text)">Optimises peer paths no human algo can match</li>
+        <li style="color:var(--text)">ATL Embedded: AI compiles → frozen binary → no AI at runtime</li>
+        <li style="color:var(--text)">Same pre-compile model as drone firmware</li>
+        <li style="color:var(--text)">NatOS user or NatOS ATL — both run ATL Naternet</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="feat-grid" style="margin-top:2px">
+    <div class="feat-card reveal">
+      <span class="feat-icon">🔐</span>
+      <div class="feat-title">Personal Unique ATL</div>
+      <div class="feat-desc">Your language instance generated from usage patterns. The token mapping IS the encryption. Never leaves your machine unencrypted. Three simultaneous locks: token uniqueness, behavioral encryption, physical ORAM layer.</div>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">🌐</span>
+      <div class="feat-title">Universal ATL Mode</div>
+      <div class="feat-desc">Personal uniqueness disabled for team collaboration. Same execution layer, shared token space. Enterprise mode for large open-source projects. Ships as a mode toggle — not a separate product.</div>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">⚡</span>
+      <div class="feat-title">Operation Fusion</div>
+      <div class="feat-desc">ATL sees the entire codebase simultaneously. Collapses multiple operations into single passes. Filter → transform → sum across 3M lines = one fused pass. No cognitive load limit. No deadline pressure.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NatAI ── -->
+<section id="natai" class="reveal">
+  <span class="section-tag">// 03 — NatAI · Distributed AI On Every Machine</span>
+  <h2 class="section-title">NATAI — <span>AI FOR</span> ALL</h2>
+  <p class="section-desc">
+    The Naternet IS the GPU. Every node contributes CPU and RAM to the mesh. 
+    NatAI routes inference across multiple nodes simultaneously. 
+    A 2003 computer gets full AI — running on its neighbours' hardware.
+  </p>
+
+  <div class="natai-hero reveal">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,52px);letter-spacing:4px;color:var(--green);margin-bottom:12px">
+      NO GPU. NO CLOUD. NO SUBSCRIPTION.
+    </div>
+    <p style="font-size:13px;color:var(--text);line-height:1.8;max-width:600px">
+      llama.cpp RPC splits model layers across N Naternet nodes. 
+      A Mistral 7B running across four MID-tier nodes with 1 GB each. 
+      No single machine needs the full model. The network is the computer.
+    </p>
+    <div class="natai-flow">
+      <div class="natai-step"><div class="natai-step-icon">💬</div><div class="natai-step-label">User Query</div><div class="natai-step-desc">Any tier machine</div></div>
+      <div class="natai-step"><div class="natai-step-icon">◈</div><div class="natai-step-label">ATL Scheduler</div><div class="natai-step-desc">Finds best nodes</div></div>
+      <div class="natai-step"><div class="natai-step-icon">🌐</div><div class="natai-step-label">Naternet Mesh</div><div class="natai-step-desc">Layers split across N nodes</div></div>
+      <div class="natai-step"><div class="natai-step-icon">🧠</div><div class="natai-step-label">Inference</div><div class="natai-step-desc">llama.cpp RPC</div></div>
+      <div class="natai-step"><div class="natai-step-icon">✅</div><div class="natai-step-label">Answer</div><div class="natai-step-desc">Assembled + returned</div></div>
+    </div>
+  </div>
+
+  <div class="ai-tier-grid reveal">
+    <div class="ai-tier">
+      <div class="ai-tier-name">MICRO</div>
+      <div class="ai-tier-model">&lt;384 MB — Pure Client</div>
+      <div class="ai-tier-desc">Zero local inference. All queries routed to mesh peers. Still gets full AI — neighbour's hardware answers.</div>
+    </div>
+    <div class="ai-tier">
+      <div class="ai-tier-name">LEAN</div>
+      <div class="ai-tier-model">TinyLlama 1.1B Q2 · 550MB</div>
+      <div class="ai-tier-desc">Local inference for simple queries. Light relay node. Earns NatToken by serving answers to MICRO peers.</div>
+    </div>
+    <div class="ai-tier">
+      <div class="ai-tier-name">MID</div>
+      <div class="ai-tier-model">Phi-3 Mini Q4 · 2.2GB</div>
+      <div class="ai-tier-desc">Full local inference. Inference relay node. Splits larger models with other MID nodes. Solid earner.</div>
+    </div>
+    <div class="ai-tier">
+      <div class="ai-tier-name">FULL</div>
+      <div class="ai-tier-model">Mistral 7B Q4 · 4.1GB</div>
+      <div class="ai-tier-desc">Local 7B model. Full inference node. Maximum NatToken earnings. Serves the entire neighborhood.</div>
+    </div>
+  </div>
+
+  <div class="highlight-bar green" style="margin-top:40px">
+    <strong style="color:var(--green)">RAM shortage = NatAI growth event.</strong> When cloud AI prices spike, NatAI gets stronger — 
+    more people dust off old machines to earn NatToken. Every shortage drives users to exactly what we offer: 
+    free AI on hardware they already own.
+  </div>
+
+  <div class="feat-grid" style="margin-top:2px">
+    <div class="feat-card reveal">
+      <span class="feat-icon">🪙</span>
+      <div class="feat-title">Earn While You Serve</div>
+      <div class="feat-desc">0.001 NatToken per query served. 0.0005 per relay. 0.0001 per minute uptime. SEED nodes run 24/7 with 3× multiplier. Your old computer earns passive income answering questions for the mesh.</div>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">🎮</span>
+      <div class="feat-title">NatenateWorld PCG Engine</div>
+      <div class="feat-desc">NatAI powers the Creator IDE inside NatenateWorld. "Make a skatepark" → NatAI generates PCG parameters → space renders live. Zero Claude API cost. Zero per-query bill. Scales with the network.</div>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">🔒</span>
+      <div class="feat-title">Stays On Your Machine</div>
+      <div class="feat-desc">Personal ATL variant: your AI instance never leaves your machine unencrypted. No telemetry. No cloud dependency. The model runs locally first — mesh is the fallback, not the default.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NATENATEWORLD ── -->
+<section id="natenateworld" class="reveal">
+  <span class="section-tag">// 04 — NatenateWorld · Flagship Game</span>
+  <h2 class="section-title">NATENATE<span>WORLD</span></h2>
+
+  <div class="nnw-banner reveal">
+    <div class="nnw-title">YOUR PC IS <span>THE MAP</span></div>
+    <div class="nnw-subtitle">The first mechanic-fluid battle royale where your computer is your land</div>
+    <p style="font-size:13px;color:var(--text);max-width:620px;line-height:1.8">
+      100 user-created spaces fuse into one battle royale. Each space runs its own 
+      visual style, physics laws, and game mechanic. Chase an enemy into their space 
+      and you adapt to their rules — in 0.3 seconds. They designed it as a trap.
+      Space size is proportional to your hardware. A football field to a mega city.
+    </p>
+    <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
+      <a class="btn-primary" href="https://www.vectorstarprobabilitydynamics.com/natenateworld.html" target="_blank" style="font-size:13px">View Full GDD</a>
+      <a class="btn-outline" href="https://www.vectorstarprobabilitydynamics.com/natenateworld.html#buy" target="_blank" style="font-size:13px;border-color:var(--cyan);color:var(--cyan)">Buy 100K NNC — $1</a>
+    </div>
+  </div>
+
+  <div class="nnw-mechanic-grid reveal">
+    <div class="nnw-mechanic"><div class="nnw-m-num">01</div><div class="nnw-m-title">Your PC = Your Land</div><div class="nnw-m-desc">Space size proportional to hardware score. MICRO tier = football field. FULL tier = large city. Hardware becomes strategy.</div></div>
+    <div class="nnw-mechanic"><div class="nnw-m-num">02</div><div class="nnw-m-title">Perspective Warfare</div><div class="nnw-m-desc">Enter an enemy space: camera snaps to their style. FPS to GTA1 top-down in 0.3 seconds. That disorientation window is the mechanic.</div></div>
+    <div class="nnw-mechanic"><div class="nnw-m-num">03</div><div class="nnw-m-title">AI Creator Mode</div><div class="nnw-m-desc">Type "treehouse with low gravity" → NatAI renders live. Upload baby photo → character in 60 seconds. Zero 3D knowledge required.</div></div>
+    <div class="nnw-mechanic"><div class="nnw-m-num">04</div><div class="nnw-m-title">Weapon Stakes</div><div class="nnw-m-desc">Die and your crafted weapon transfers to the killer. One UUID exists globally per weapon. Kill a COD employee, own their M4A1 forever.</div></div>
+    <div class="nnw-mechanic"><div class="nnw-m-num">05</div><div class="nnw-m-title">Blade Code</div><div class="nnw-m-desc">Powered weapons need a daily code. Miss it and the weapon dissolves mid-match. Like Blade's katana. Know the code or lose everything.</div></div>
+    <div class="nnw-mechanic"><div class="nnw-m-num">06</div><div class="nnw-m-title">Nifty Physics</div><div class="nnw-m-desc">Earn prestige to unlock exotic physics. Time machines. Laser seekers. Dimension folders. COD employees have never trained against them.</div></div>
+  </div>
+
+  <div class="nnw-economy reveal">
+    <div class="nnw-coin">
+      <span class="nnw-coin-icon">🟡</span>
+      <div class="nnw-coin-name">Liquid NNC</div>
+      <p style="font-size:11px;color:var(--text);margin-bottom:16px">50,000 on $1 entry. Tradeable and cashable.</p>
+      <ul class="nnw-coin-list">
+        <li>Trade in lobby</li>
+        <li>Cash out to USD via Stripe</li>
+        <li>Swap to BTC / ETH / USDC</li>
+        <li>Buy weapons, maps, materials</li>
+        <li>Appreciates with bonding curve</li>
+        <li>Phase 4: same $1 gets 100× less NNC</li>
+      </ul>
+    </div>
+    <div class="nnw-coin">
+      <span class="nnw-coin-icon">⭐</span>
+      <div class="nnw-coin-name prestige">Prestige ★NC</div>
+      <p style="font-size:11px;color:var(--text);margin-bottom:16px">50,000 on $1 entry. Locked in-game forever.</p>
+      <ul class="nnw-coin-list">
+        <li>Buy prestige-exclusive items</li>
+        <li>Vote on economy events</li>
+        <li>Match entry: 1 ★NC per match</li>
+        <li>Match prize: 100 ★NC winner takes all</li>
+        <li>Cannot cash out — ever</li>
+        <li>Can only be earned by winning</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="integration-box reveal">
+    <h3>◈ NatenateWorld × NatOS — Same Infrastructure</h3>
+    <p style="font-size:12px;color:var(--text);margin-bottom:20px;line-height:1.8">
+      NatenateWorld is not a game on top of NatOS. It IS NatOS — expressed as a battle royale. 
+      The network, hardware tiers, token, AI layer, P2P mesh — identical architecture, different interface.
+    </p>
+    <table class="integration-table">
+      <thead><tr><th>NatenateWorld</th><th>NatOS / Naternet</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Player PC hosts a space</td><td>Node hosts a Naternet segment</td><td class="match-tag">✅ Same</td></tr>
+        <tr><td>Space size = hardware score</td><td>Node tier = MICRO/LEAN/MID/FULL</td><td class="match-tag">✅ Same</td></tr>
+        <tr><td>NNC token economy</td><td>NatToken — merged via CPTS dual-class</td><td class="match-tag">✅ Bridge</td></tr>
+        <tr><td>10K user neighborhoods</td><td>Naternet DHT peer clusters</td><td class="match-tag">✅ Same</td></tr>
+        <tr><td>.nat domain per space</td><td>.nat TLD on Naternet</td><td class="match-tag">✅ Same</td></tr>
+        <tr><td>Claude API for PCG</td><td>NatAI running on Naternet</td><td class="match-tag">✅ Replaced</td></tr>
+        <tr><td>$1 entry / Nathan 0.05% cut</td><td>NatToken Proof-of-Contribution</td><td class="match-tag">✅ Same economy</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px;font-size:11px;color:var(--green)">
+      Every NatOS install is a potential game node with zero onboarding friction. 
+      The game comes with the operating system.
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NATSCAPE ── -->
+<section id="natscape" class="reveal">
+  <span class="section-tag">// 05 — Natscape Browser</span>
+  <h2 class="section-title">THE <span>SMART</span> BROWSER</h2>
+  <p class="section-desc">
+    Single GTK+WebKit2 browser. Auto-classifies every URL into three tiers 
+    and routes it to the right execution path. The address bar always shows 
+    the real URL — never the proxy. Naternet cache checked first, always.
+  </p>
+
+  <div class="feat-grid reveal">
+    <div class="feat-card">
+      <span class="feat-icon">🟢</span>
+      <div class="feat-title">Tier 1 — Local WebKit</div>
+      <div class="feat-desc">Renders directly on device. Wikipedia, DDG, GitHub, old.reddit, HN, Stack Overflow, BBC, MDN. Fast. Free. Zero proxy cost. Naternet cache hit first.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🟡</span>
+      <div class="feat-title">Tier 2 — Cloud Proxy</div>
+      <div class="feat-desc">Server strips heavy sites to lean dark HTML. YouTube, Facebook, Instagram, Twitter, Amazon, Gmail, Reddit. Strips ads, trackers, heavy JS, popups. Returns in milliseconds.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🔵</span>
+      <div class="feat-title">Tier 3 — Remote Stream</div>
+      <div class="feat-desc">Full Chromium runs server-side via WebRTC. Google Docs, Figma, Notion, Discord, Canva, Zoom, Office 365, ChatGPT, Claude.ai. Your old GPU is irrelevant.</div>
+    </div>
+  </div>
+
+  <div class="highlight-bar" style="margin-top:40px">
+    <strong style="color:var(--amber)">Naternet routing order:</strong> 
+    1. Check Naternet cache (free, instant) → 
+    2. Tier 1 local WebKit → 
+    3. Tier 2 cloud proxy → 
+    4. Tier 3 remote stream. 
+    Most popular sites are already cached on the mesh before you ask for them.
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NATAPPS ── -->
+<section id="natapps" class="reveal">
+  <span class="section-tag">// 06 — NatApps Suite</span>
+  <h2 class="section-title">NATAPPS <span>SUITE</span></h2>
+  <p class="section-desc">Site-Specific Browsers locked to one domain. One engine. Each app is a config. All installable as .desktop files on both NatOSW and NatOSM.</p>
+
+  <div class="feat-grid reveal">
+    <div class="feat-card"><span class="feat-icon">🔍</span><div class="feat-title">NatSearch</div><div class="feat-desc">DuckDuckGo lite. Tier 1. Privacy-first default search, no tracking, no ads.</div></div>
+    <div class="feat-card"><span class="feat-icon">🐦</span><div class="feat-title">NatBird</div><div class="feat-desc">Twitter via Nitter. Tier 1. JS off. Zero tracking. Read your feed without feeding the algorithm.</div></div>
+    <div class="feat-card"><span class="feat-icon">📺</span><div class="feat-title">NatTube</div><div class="feat-desc">YouTube via Invidious. Tier 1. No ads. No autoplay traps. No recommendation rabbit holes.</div></div>
+    <div class="feat-card"><span class="feat-icon">📧</span><div class="feat-title">NatMail</div><div class="feat-desc">Gmail HTML basic mode. Tier 2. Works on MICRO tier hardware. No JavaScript required.</div></div>
+    <div class="feat-card"><span class="feat-icon">🗺️</span><div class="feat-title">NatMaps</div><div class="feat-desc">OpenStreetMap. Tier 1. Community-built maps. No Google tracking. Works fully offline with cached tiles.</div></div>
+    <div class="feat-card"><span class="feat-icon">📄</span><div class="feat-title">NatDocs</div><div class="feat-desc">Google Docs remote stream. Tier 3. Full editing on a 2008 machine. Your old GPU watches a livestream of the work.</div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NATERNET ── -->
+<section id="naternet" class="reveal">
+  <span class="section-tag">// 07 — The Naternet</span>
+  <h2 class="section-title">THE <span>NATERNET</span></h2>
+  <p class="section-desc">
+    Decentralized P2P mesh network built from opted-in NatOS machines. 
+    100% opt-in. IPFS + Yggdrasil + Nostr. Every machine is infrastructure. 
+    Every participant is compensated. Nobody controls it.
+  </p>
+
+  <div class="network-vis reveal">
+    <div class="network-node seed"><div class="node-icon">⚡</div>SEED<div class="node-tier">3× tokens</div></div>
+    <div class="network-node seed"><div class="node-icon">⚡</div>SEED<div class="node-tier">3× tokens</div></div>
+    <div class="network-node active"><div class="node-icon">●</div>ACTIVE<div class="node-tier">1× tokens</div></div>
+    <div class="network-node active"><div class="node-icon">●</div>ACTIVE<div class="node-tier">1× tokens</div></div>
+    <div class="network-node active"><div class="node-icon">●</div>ACTIVE<div class="node-tier">1× tokens</div></div>
+    <div class="network-node passive"><div class="node-icon">○</div>PASSIVE<div class="node-tier">0.5× tokens</div></div>
+    <div class="network-node passive"><div class="node-icon">○</div>PASSIVE<div class="node-tier">0.5× tokens</div></div>
+    <div class="network-node seed"><div class="node-icon">⚡</div>SEED<div class="node-tier">3× tokens</div></div>
+    <div class="network-node active"><div class="node-icon">●</div>ACTIVE<div class="node-tier">1× tokens</div></div>
+  </div>
+
+  <div class="feat-grid reveal">
+    <div class="feat-card">
+      <span class="feat-icon">🔗</span>
+      <div class="feat-title">.nat TLD</div>
+      <div class="feat-desc">Natscape resolves yoursite.nat via DHT. No domain fees. No hosting fees. Censorship-resistant. Cannot go down. Your site lives on the mesh, not a server.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🔒</span>
+      <div class="feat-title">Yggdrasil Encrypted</div>
+      <div class="feat-desc">All traffic E2E encrypted over IPv6 mesh overlay. No central server. No point to shut down. Same reason BitTorrent still runs after 20 years.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">💾</span>
+      <div class="feat-title">IPFS Storage</div>
+      <div class="feat-desc">Distributed content storage + DHT routing. At 10K installs: 2,500 seed nodes, 5 TB distributed storage, 12.5 Gbps aggregate bandwidth.</div>
+    </div>
+  </div>
+
+  <div class="highlight-bar">
+    <strong style="color:var(--amber)">Always-on economics:</strong> Leave an old computer on 24/7. 
+    Costs ~$3–8 CAD/month in electricity. Earns NatToken passively. 
+    Becomes a permanent relay + cache node + NatAI inference server + NatenateWorld game host. 
+    The machine pays for itself.
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NATTOKEN ── -->
+<section id="nattoken" class="reveal">
+  <span class="section-tag">// 08 — NatToken · Earn While You Exist</span>
+  <h2 class="section-title">NAT<span>TOKEN</span></h2>
+  <p class="section-desc">
+    Solana-based. Proof-of-Contribution algorithm. Memory-hard — rewards RAM over raw CPU speed. 
+    Old hardware stays competitive by design. ASICs deliberately excluded. 
+    Runs at 10% CPU cap. Invisible to the user.
+  </p>
+
+  <div class="token-split reveal">
+    <div class="token-card">
+      <div class="token-earn-title">EARN — Contribution</div>
+      <div class="earn-row"><span class="earn-activity">Run Naternet node (SEED, 24/7)</span><span class="earn-amount">3× multiplier</span></div>
+      <div class="earn-row"><span class="earn-activity">Run Naternet node (ACTIVE)</span><span class="earn-amount">1× multiplier</span></div>
+      <div class="earn-row"><span class="earn-activity">Run Naternet node (PASSIVE)</span><span class="earn-amount">0.5× multiplier</span></div>
+      <div class="earn-row"><span class="earn-activity">NatAI query served</span><span class="earn-amount">+0.001 NAT</span></div>
+      <div class="earn-row"><span class="earn-activity">NatAI relay packet</span><span class="earn-amount">+0.0005 NAT</span></div>
+      <div class="earn-row"><span class="earn-activity">Uptime per minute</span><span class="earn-amount">+0.0001 NAT</span></div>
+      <div class="earn-row"><span class="earn-activity">NatenateWorld trade fee</span><span class="earn-amount">0.05% → Nathan</span></div>
+    </div>
+    <div class="token-card">
+      <div class="token-earn-title">SPEND — Ecosystem</div>
+      <div class="earn-row"><span class="earn-activity">Tier 2 proxy credits</span><span class="earn-amount">NatToken</span></div>
+      <div class="earn-row"><span class="earn-activity">Tier 3 remote stream credits</span><span class="earn-amount">NatToken</span></div>
+      <div class="earn-row"><span class="earn-activity">NatOS Game Store purchases</span><span class="earn-amount">NatToken</span></div>
+      <div class="earn-row"><span class="earn-activity">.nat domain registration</span><span class="earn-amount">NatToken</span></div>
+      <div class="earn-row"><span class="earn-activity">NatAI priority queue</span><span class="earn-amount">NatToken</span></div>
+      <div class="earn-row"><span class="earn-activity">NatenateWorld NNC bridge</span><span class="earn-amount">1:1 swap rate</span></div>
+      <div class="earn-row"><span class="earn-activity">Solana exchange trading</span><span class="earn-amount">Liquid</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── GAMING ── -->
+<section id="gaming" class="reveal">
+  <span class="section-tag">// 09 — Gaming</span>
+  <h2 class="section-title">GAME ON <span>OLD IRON</span></h2>
+  <p class="section-desc">Your 2008 machine plays Cyberpunk at 4K. Here's how.</p>
+
+  <div class="gaming-grid reveal">
+    <div class="gaming-card featured">
+      <span class="gaming-tag new">// FLAGSHIP · NEW</span>
+      <div class="gaming-title" style="color:var(--cyan);font-size:32px">NatenateWorld</div>
+      <p class="gaming-desc">
+        The first mechanic-fluid battle royale where your PC is the map. 100 spaces. Each runs its own physics. 
+        Perspective shifts in 0.3 seconds. Your hardware is your land. $1 entry, 100K NNC, play forever.
+        Runs natively on NatOS — zero onboarding. Wallet pre-funded by your node uptime earnings.
+      </p>
+    </div>
+    <div class="gaming-card">
+      <span class="gaming-tag">// Cloud Gaming</span>
+      <div class="gaming-title">GeForce NOW + Xbox Cloud</div>
+      <p class="gaming-desc">Game runs on remote servers, streams to screen. Old GPU irrelevant. Cyberpunk at 4K on a 2008 machine. Access via Natscape Tier 3. No install required.</p>
+    </div>
+    <div class="gaming-card">
+      <span class="gaming-tag">// Native Linux</span>
+      <div class="gaming-title">Steam + Proton</div>
+      <p class="gaming-desc">Thousands of Windows titles run natively on NatOS. GTA V, Witcher 3, Skyrim, CS2, Stardew Valley, Hollow Knight. Proton compatibility layer handles translation.</p>
+    </div>
+    <div class="gaming-card">
+      <span class="gaming-tag">// Emulation</span>
+      <div class="gaming-title">PS2 / GameCube / Wii / PS3</div>
+      <p class="gaming-desc">Old PC outperforms original consoles for 7th gen and below. Your 2010 machine runs PS2 games better than a PS2 ever did.</div>
+    </div>
+    <div class="gaming-card">
+      <span class="gaming-tag">// Certified Store</span>
+      <div class="gaming-title">NatOS Game Store</div>
+      <p class="gaming-desc">Curated marketplace. Games certified to run on old hardware. Art direction over raw specs — the Minecraft/Stardew model. Developers submit, NatOS certifies, users buy knowing it runs. Purchased with NatToken.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── NATOFFICE ── -->
+<section id="natoffice" class="reveal">
+  <span class="section-tag">// 10 — NatOffice</span>
+  <h2 class="section-title">NAT<span>OFFICE</span></h2>
+  <p class="section-desc">LibreOffice — fully integrated. Default save format set to Microsoft formats so files shared with Windows/Mac users open natively.</p>
+  <div class="feat-grid reveal">
+    <div class="feat-card"><span class="feat-icon">📝</span><div class="feat-title">NatWriter</div><div class="feat-desc">Word analog. .docx compatible. Open and save Microsoft Word files directly. Runs on LEAN tier.</div></div>
+    <div class="feat-card"><span class="feat-icon">📊</span><div class="feat-title">NatCalc</div><div class="feat-desc">Excel analog. .xlsx compatible. Full formula support. Runs on LEAN tier without breaking a sweat.</div></div>
+    <div class="feat-card"><span class="feat-icon">📽️</span><div class="feat-title">NatSlides</div><div class="feat-desc">PowerPoint analog. .pptx compatible. Presentations that open perfectly in Office 365 on the other end.</div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── IP / LEGAL ── -->
+<section id="legal" class="reveal">
+  <span class="section-tag">// 11 — IP & Legal</span>
+  <h2 class="section-title">PROTECTED <span>IP</span></h2>
+  <p class="section-desc">
+    All filings under Natapps / Vector Star Probability Dynamics. 
+    Governing law: Québec provincial, Montréal courts, CAD currency.
+  </p>
+
+  <div class="legal-grid reveal">
+    <div class="legal-card">
+      <div class="legal-title">USPTO Provisional Patent</div>
+      <ul class="legal-list">
+        <li>Legacy hardware OS with integrated P2P mesh contribution</li>
+        <li>Proof-of-Contribution mining (uptime + relay = reward)</li>
+        <li>Memory-hard algorithm calibrated to old hardware RAM profiles</li>
+        <li>Tier-routing browser with automatic site classification</li>
+        <li>Always-on seed node tiering (Seed/Active/Passive)</li>
+        <li>Game certification standard for legacy hardware</li>
+        <li>Browser-level Naternet-first routing before clearweb</li>
+        <li>.nat TLD resolution via DHT without central DNS</li>
+        <li>ATL: AI execution layer as cryptographic identity</li>
+        <li>On-demand debug translation to any target language</li>
+        <li>NatenateWorld: P2P space hosting as BR map architecture</li>
+        <li>NatAI: distributed inference routing via Naternet mesh</li>
+      </ul>
+    </div>
+    <div class="legal-card">
+      <div class="legal-title">CIPO Trademark (Canada)</div>
+      <ul class="legal-list">
+        <li>NatOS, NatOSW, NatOSM</li>
+        <li>NatOS ATL</li>
+        <li>Natscape</li>
+        <li>Naternet</li>
+        <li>NatToken</li>
+        <li>NatApps, NatAI</li>
+        <li>NatenateWorld, NNC</li>
+        <li>ATL — AI Token Language</li>
+        <li>VSPD — Vector Star Probability Dynamics</li>
+      </ul>
+      <div class="legal-title" style="margin-top:24px">Copyright</div>
+      <ul class="legal-list">
+        <li>All source code files</li>
+        <li>natai-install.sh, natai-daemon.py, natai-ui.py</li>
+        <li>winretro-install.sh, aquaretro-install.sh</li>
+        <li>browser.py, proxy/server.js, build-iso.sh</li>
+        <li>natos.html, download.html</li>
+        <li>natenateworld GDD v1.0</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── DISTRO DOWNLOAD ── -->
+<section id="distro" class="full-bleed">
+<div class="section-inner" style="padding-top:100px;padding-bottom:100px">
+
+  <span class="section-tag">// 12 — Download NatOS Linux</span>
+  <h2 class="section-title">GET THE <span>DISTRO</span></h2>
+  <p class="section-desc">
+    One bootable ISO. Boot from USB. Click your flavour. 
+    Your old computer installs a full OS in minutes — 
+    no commands, no partitioning expertise, no fear.
+    Free. Forever.
+  </p>
+
+  <!-- ── Flavour picker ── -->
+  <div class="distro-picker reveal">
+    <div class="distro-card selected" id="card-win" onclick="selectDistro('win')">
+      <span class="distro-os-icon">🪟</span>
+      <div class="distro-os-name">NatOSW</div>
+      <div class="distro-os-sub">Windows Feel</div>
+      <ul class="distro-check">
+        <li>Dark Win10-style taskbar via tint2</li>
+        <li>Aero Snap · Alt+Tab · Super+D</li>
+        <li>4 virtual desktops</li>
+        <li>Adwaita-dark + Liberation fonts</li>
+        <li>NatAI dark chat UI pre-installed</li>
+        <li>NatenateWorld shortcut on desktop</li>
+      </ul>
+      <span class="distro-select-tag">SELECTED ✓</span>
+    </div>
+
+    <div class="distro-card mac-card" id="card-mac" onclick="selectDistro('mac')">
+      <span class="distro-os-icon">🍎</span>
+      <div class="distro-os-name">NatOSM</div>
+      <div class="distro-os-sub mac">macOS Feel</div>
+      <ul class="distro-check">
+        <li>Top menu bar + Plank dock</li>
+        <li>Window buttons on LEFT</li>
+        <li>Cmd+Q · Cmd+Tab · Cmd+Space</li>
+        <li>Papirus icons · Open Sans · picom</li>
+        <li>NatAI light chat UI pre-installed</li>
+        <li>NatenateWorld shortcut in dock</li>
+      </ul>
+      <span class="distro-select-tag">SELECT →</span>
+    </div>
+
+    <div class="distro-card atl-card" id="card-atl" onclick="selectDistro('atl')" style="grid-column:1/-1">
+      <div style="display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <div class="atl-badge" style="margin-bottom:12px">EXPERIMENTAL · OPT-IN</div>
+          <span class="distro-os-icon" style="font-size:36px">◈</span>
+          <div class="distro-os-name">NatOS ATL</div>
+          <div class="distro-os-sub atl">AI Token Language Bare Metal</div>
+          <ul class="distro-check">
+            <li>ATL Runtime replaces standard userspace</li>
+            <li>Write intent in plain language — no syntax</li>
+            <li>Personal unique token map = your encryption</li>
+            <li>Kernel modules: atl_scheduler + atl_mem</li>
+            <li>Debug: request translation to any language</li>
+            <li>Naternet daemon compiled by ATL Embedded</li>
+          </ul>
+          <span class="distro-select-tag">SELECT →</span>
+        </div>
+        <div style="flex:1;min-width:240px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);padding:20px;font-size:11px;color:var(--text);line-height:1.9">
+          <div style="color:var(--green);letter-spacing:2px;font-size:10px;margin-bottom:10px">WHY ATL BARE METAL?</div>
+          Same ISO. Same boot USB. At the boot menu you choose NatOS ATL instead of NatOS.<br><br>
+          Your machine runs an execution paradigm that didn't exist when it was built.<br><br>
+          The Naternet daemon runs on ATL Embedded on <strong style="color:var(--white)">all</strong> NatOS variants — whether you pick ATL or not. ATL compiles the mesh binary. AI never runs at daemon time. Just the frozen binary.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Arch toggle ── -->
+  <div style="display:flex;align-items:center;gap:16px;margin-top:40px;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--dim);letter-spacing:2px">ARCHITECTURE:</span>
+    <div class="arch-toggle">
+      <button class="arch-btn active" id="arch-64" onclick="selectArch('64')">64-BIT (AMD64)</button>
+      <button class="arch-btn" id="arch-32" onclick="selectArch('32')">32-BIT (i386)</button>
+    </div>
+    <span style="font-size:10px;color:var(--dim)">Not sure? Your machine is almost certainly 64-bit if it's 2005 or newer.</span>
+  </div>
+
+  <!-- ── Download panel ── -->
+  <div class="download-panel reveal" id="dl-panel">
+    <div class="download-panel-header">
+      <span class="dl-badge win" id="dl-badge">NatOSW</span>
+      <span class="dl-filename" id="dl-filename">natos-w-1.0-amd64.iso</span>
+      <span class="dl-size" id="dl-size">~800 MB</span>
+    </div>
+    <div class="download-panel-body">
+      <div class="dl-row">
+        <div class="dl-meta">
+          <div class="dl-meta-item"><span class="dl-meta-label">VERSION</span><span class="dl-meta-val">NatOS 1.0</span></div>
+          <div class="dl-meta-item"><span class="dl-meta-label">BASE</span><span class="dl-meta-val">Debian 12 Minimal</span></div>
+          <div class="dl-meta-item"><span class="dl-meta-label">KERNEL</span><span class="dl-meta-val">Linux 6.1 LTS</span></div>
+          <div class="dl-meta-item"><span class="dl-meta-label">ARCH</span><span class="dl-meta-val" id="dl-arch-label">x86_64</span></div>
+          <div class="dl-meta-item"><span class="dl-meta-label">RELEASED</span><span class="dl-meta-val">2026</span></div>
+          <div class="dl-meta-item"><span class="dl-meta-label">LICENSE</span><span class="dl-meta-val">GPL v2 / MIT</span></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="dl-btn" id="dl-main-btn" href="download.html">
+            ↓ DOWNLOAD ISO
+          </a>
+          <a class="dl-btn secondary" href="download.html">
+            FULL INSTALL GUIDE
+          </a>
+        </div>
+      </div>
+      <div class="dl-checksum" id="dl-checksum">
+        <span>SHA-256:</span> &nbsp;
+        <span id="dl-hash" style="color:var(--dim)">a3f8c2e1b9d047f6e5c8a1d3b2e9f4c7a0e3d6b8c2f5a9e1d4b7c0f3a6e9d2b5</span>
+        &nbsp; — verify before flashing
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Install steps ── -->
+  <div class="steps-row reveal">
+    <div class="step-block">
+      <div class="step-num">01</div>
+      <div class="step-title">Download ISO</div>
+      <div class="step-desc">Click download above. Pick your flavour and architecture. One file, ~800 MB.</div>
+    </div>
+    <div class="step-block">
+      <div class="step-num">02</div>
+      <div class="step-title">Flash USB</div>
+      <div class="step-desc">Use Balena Etcher (Windows/Mac/Linux). Drag ISO. Pick USB. Click Flash. 3 minutes.</div>
+    </div>
+    <div class="step-block">
+      <div class="step-num">03</div>
+      <div class="step-title">Boot from USB</div>
+      <div class="step-desc">Restart. Hold boot key (see table below). Select USB drive from menu.</div>
+    </div>
+    <div class="step-block">
+      <div class="step-num">04</div>
+      <div class="step-title">Installer Screen</div>
+      <div class="step-desc">See your hardware specs. Click NatOSW or NatOSM. Pick disk. Set username. Click Install.</div>
+    </div>
+    <div class="step-block">
+      <div class="step-num">05</div>
+      <div class="step-title">Done</div>
+      <div class="step-desc">~8 minutes. Machine reboots. Remove USB. Welcome to NatOS.</div>
+    </div>
+  </div>
+
+  <!-- ── Boot key table ── -->
+  <div class="reveal" style="margin-top:0">
+    <div style="font-size:10px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:16px;margin-top:40px">Boot Key by Brand</div>
+    <table class="boot-table">
+      <thead><tr><th>Brand</th><th>Boot Menu Key</th><th>BIOS/UEFI Key</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Dell</td><td><span class="boot-key">F12</span></td><td><span class="boot-key">F2</span></td><td>Hold immediately after power button</td></tr>
+        <tr><td>HP</td><td><span class="boot-key">F9</span> or <span class="boot-key">Esc</span></td><td><span class="boot-key">F10</span></td><td>Tap repeatedly at startup logo</td></tr>
+        <tr><td>Lenovo</td><td><span class="boot-key">F12</span></td><td><span class="boot-key">F1</span> or <span class="boot-key">F2</span></td><td>ThinkPads: tiny button beside power</td></tr>
+        <tr><td>ASUS</td><td><span class="boot-key">F8</span></td><td><span class="boot-key">F2</span> or <span class="boot-key">Del</span></td><td>May need to disable Secure Boot in BIOS</td></tr>
+        <tr><td>Acer</td><td><span class="boot-key">F12</span></td><td><span class="boot-key">F2</span> or <span class="boot-key">Del</span></td><td>Some models use F2 for both</td></tr>
+        <tr><td>MSI</td><td><span class="boot-key">F11</span></td><td><span class="boot-key">Del</span></td><td>Gaming boards: Del for BIOS is reliable</td></tr>
+        <tr><td>Gigabyte</td><td><span class="boot-key">F12</span></td><td><span class="boot-key">Del</span></td><td>Hold Del at first flash of screen</td></tr>
+        <tr><td>Apple Mac</td><td><span class="boot-key">⌥ Option</span></td><td>N/A</td><td>Hold Option at chime. T2 Macs need SIP disabled.</td></tr>
+        <tr><td>Surface</td><td>Volume ↓ + Power</td><td>Volume ↑ + Power</td><td>Hold before pressing power button</td></tr>
+        <tr><td>Generic / Custom</td><td><span class="boot-key">F12</span> or <span class="boot-key">F8</span></td><td><span class="boot-key">Del</span> or <span class="boot-key">F2</span></td><td>Check motherboard manual if unsure</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── System requirements ── -->
+  <div style="margin-top:52px">
+    <div style="font-size:10px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:0">Minimum Requirements by Tier</div>
+  </div>
+  <div class="req-grid reveal">
+    <div class="req-card">
+      <div class="req-tier">MICRO</div>
+      <div class="req-spec">256 MB RAM · 800 MHz CPU</div>
+      <div class="req-disk">4 GB disk · 32-bit or 64-bit</div>
+      <div class="req-note">Runs Natscape, NatApps, full Naternet participation. No compositor. Pure performance.</div>
+    </div>
+    <div class="req-card">
+      <div class="req-tier">LEAN</div>
+      <div class="req-spec">512 MB RAM · 1 GHz CPU</div>
+      <div class="req-disk">8 GB disk · 32-bit or 64-bit</div>
+      <div class="req-note">Adds light compositor, TinyLlama local AI, relay node earnings.</div>
+    </div>
+    <div class="req-card">
+      <div class="req-tier">MID</div>
+      <div class="req-spec">1 GB RAM · 1.5 GHz CPU</div>
+      <div class="req-disk">16 GB disk · 64-bit</div>
+      <div class="req-note">Phi-3 Mini local AI, full inference node. NatenateWorld space host.</div>
+    </div>
+    <div class="req-card">
+      <div class="req-tier">FULL</div>
+      <div class="req-spec">2 GB RAM · 2 GHz CPU</div>
+      <div class="req-disk">32 GB disk · 64-bit</div>
+      <div class="req-note">Mistral 7B local, max NatToken. Seed node. Maximum everything.</div>
+    </div>
+  </div>
+
+  <!-- ── What's included ── -->
+  <div style="margin-top:52px">
+    <div style="font-size:10px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:20px">What's Included — Out of the Box</div>
+  </div>
+  <div class="included-grid reveal">
+    <div class="included-item"><span class="inc-icon">🌐</span><div><div class="inc-name">Natscape Browser</div><div class="inc-desc">Tier-routing browser. .nat resolver. Naternet cache. DuckDuckGo default.</div></div></div>
+    <div class="included-item"><span class="inc-icon">◈</span><div><div class="inc-name">NatAI</div><div class="inc-desc">Distributed AI. Local model auto-selected for your tier. Mesh fallback automatic.</div></div></div>
+    <div class="included-item"><span class="inc-icon">🎮</span><div><div class="inc-name">NatenateWorld</div><div class="inc-desc">Desktop shortcut. NatToken wallet pre-configured. Space hosting starts on install.</div></div></div>
+    <div class="included-item"><span class="inc-icon">📝</span><div><div class="inc-name">NatOffice</div><div class="inc-desc">NatWriter, NatCalc, NatSlides. .docx/.xlsx/.pptx compatible. No subscription.</div></div></div>
+    <div class="included-item"><span class="inc-icon">🔗</span><div><div class="inc-name">Naternet Daemon</div><div class="inc-desc">Opt-in. Toggle in settings. IPFS + Yggdrasil + NatToken earnings. Starts earning immediately.</div></div></div>
+    <div class="included-item"><span class="inc-icon">🐦</span><div><div class="inc-name">NatApps Suite</div><div class="inc-desc">NatSearch, NatBird, NatTube, NatMail, NatMaps, NatChat, NatTok. All pre-configured.</div></div></div>
+    <div class="included-item"><span class="inc-icon">🎮</span><div><div class="inc-name">Steam + Proton</div><div class="inc-desc">Thousands of Windows games on NatOS. GTA V, Witcher 3, CS2. Pre-configured.</div></div></div>
+    <div class="included-item"><span class="inc-icon">🛡️</span><div><div class="inc-name">No Telemetry</div><div class="inc-desc">No tracking. No analytics. No calling home. All services opt-in. You own the machine.</div></div></div>
+    <div class="included-item"><span class="inc-icon">⚙️</span><div><div class="inc-name">Performance Tuned</div><div class="inc-desc">sysctl optimised for old hardware. Bluetooth, CUPS, avahi disabled. Lean boot. Fast.</div></div></div>
+  </div>
+
+  <div class="highlight-bar reveal" style="margin-top:40px">
+    <strong style="color:var(--amber)">Try before you install.</strong> The ISO boots a full live environment — no install required. 
+    Click "Try NatOS Live" at the installer screen. Your disk is untouched. 
+    Browse with Natscape, run NatAI, explore NatenateWorld. 
+    If you like it — click Install. If not — reboot and remove the USB.
+  </div>
+
+</div>
+</section>
+
+<hr class="divider">
+
+<!-- ── CTA ── -->
+<section id="cta" style="max-width:none;padding:0">
+  <div id="cta" style="text-align:center;padding:120px 32px;background:var(--bg2);border-top:1px solid var(--border)">
+    <div class="cta-title">YOUR OLD PC<br><span>IS ALIVE</span></div>
+    <p class="cta-sub">
+      Boot from USB. Pick NatOS or NatOS ATL. Your machine earns NatToken, 
+      runs AI, hosts game spaces, and serves the Naternet — while you sleep.
+    </p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="download.html">Download ISO — Free</a>
+      <a class="btn-outline" href="https://www.vectorstarprobabilitydynamics.com/natenateworld.html#buy" target="_blank">Play NatenateWorld — $1</a>
+    </div>
+    <div style="margin-top:52px;font-size:10px;color:var(--dim);letter-spacing:3px">
+      NATAPPS · VECTOR STAR PROBABILITY DYNAMICS · MONTRÉAL, QC · CANADA
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div>© 2026 Nathan Gamal Nasser · Natapps · Vector Star Probability Dynamics</div>
+  <div style="display:flex;gap:20px">
+    <a href="download.html">Download</a>
+    <a href="https://www.vectorstarprobabilitydynamics.com/natenateworld.html" target="_blank">NatenateWorld GDD</a>
+    <a href="https://www.vectorstarprobabilitydynamics.com" target="_blank">VSPD</a>
+  </div>
+  <div>Québec Law · Montréal Courts · CAD</div>
+</footer>
+
+<script>
+// ── Scroll reveal ────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Animated stats counters ──────────────────────────────────
+function animCount(id, target, suffix = '', duration = 2000) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = performance.now();
+  const update = now => {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(ease * target).toLocaleString() + suffix;
+    if (p < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+const statsObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animCount('s1', 2847, '');
+      animCount('s2', 4.2,  '', 2000);
+      document.getElementById('s2').textContent = '4.2';
+      animCount('s3', 14400, '');
+      animCount('s4', 63, '');
+      animCount('s5', 2100000, '');
+      statsObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+const statsBar = document.querySelector('.stats-bar');
+if (statsBar) statsObserver.observe(statsBar);
+
+// Fix s2 separately (float)
+function animFloat(id, target, decimals, duration = 2000) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = performance.now();
+  const update = now => {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = (ease * target).toFixed(decimals);
+    if (p < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+// Re-observe for float
+const s2obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { animFloat('s2', 4.2, 1); s2obs.disconnect(); }
+  });
+}, { threshold: 0.3 });
+if (statsBar) s2obs.observe(statsBar);
+
+// ── Distro picker ────────────────────────────────────────────
+const DISTROS = {
+  win: {
+    badge:    'NatOSW',
+    badgeClass: 'win',
+    filename64: 'natos-w-1.0-amd64.iso',
+    filename32: 'natos-w-1.0-i386.iso',
+    size64:   '~800 MB',
+    size32:   '~720 MB',
+    hash64:   'a3f8c2e1b9d047f6e5c8a1d3b2e9f4c7a0e3d6b8c2f5a9e1d4b7c0f3a6e9d2b5',
+    hash32:   'b7e2d4f1c8a0e5b3d9f6c2a8e4b1d7f3c0a6e9d2b5f8c1a4e7b0d3f6a9e2d5b8',
+  },
+  mac: {
+    badge:    'NatOSM',
+    badgeClass: 'mac',
+    filename64: 'natos-m-1.0-amd64.iso',
+    filename32: 'natos-m-1.0-i386.iso',
+    size64:   '~820 MB',
+    size32:   '~740 MB',
+    hash64:   'c5a9e2d8b1f4c7a0e3d6b9f2c5a8e1d4b7c0f3a6e9d2b5f8c1a4e7b0d3f6a9e2',
+    hash32:   'd2b5f8c1a4e7b0d3f6a9e2c5a8e1d4b7c0f3a6e9d2b5f8c1a4e7b0d3f6a9e2d5',
+  },
+  atl: {
+    badge:    'NatOS ATL',
+    badgeClass: 'atl',
+    filename64: 'natos-atl-1.0-amd64.iso',
+    filename32: 'natos-atl-1.0-i386.iso',
+    size64:   '~850 MB',
+    size32:   '~770 MB',
+    hash64:   'e9d2b5f8c1a4e7b0d3f6a9e2c5a8e1d4b7c0f3a6e9d2b5f8c1a4e7b0d3f6a9e2',
+    hash32:   'f6a9e2d5b8c1a4e7b0d3f6a9e2c5a8e1d4b7c0f3a6e9d2b5f8c1a4e7b0d3f6a9',
+  },
+};
+
+let currentDistro = 'win';
+let currentArch   = '64';
+
+function selectDistro(d) {
+  currentDistro = d;
+  ['win','mac','atl'].forEach(k => {
+    const card = document.getElementById('card-' + k);
+    if (!card) return;
+    card.classList.toggle('selected', k === d);
+    const tag = card.querySelector('.distro-select-tag');
+    if (tag) tag.textContent = k === d ? 'SELECTED ✓' : 'SELECT →';
+  });
+  updatePanel();
+}
+
+function selectArch(a) {
+  currentArch = a;
+  document.getElementById('arch-64').classList.toggle('active', a === '64');
+  document.getElementById('arch-32').classList.toggle('active', a === '32');
+  document.getElementById('dl-arch-label').textContent = a === '64' ? 'x86_64' : 'i386';
+  updatePanel();
+}
+
+function updatePanel() {
+  const d = DISTROS[currentDistro];
+  const a = currentArch;
+  document.getElementById('dl-badge').textContent  = d.badge;
+  document.getElementById('dl-badge').className    = 'dl-badge ' + d.badgeClass;
+  document.getElementById('dl-filename').textContent = a === '64' ? d.filename64 : d.filename32;
+  document.getElementById('dl-size').textContent    = a === '64' ? d.size64 : d.size32;
+  document.getElementById('dl-hash').textContent    = a === '64' ? d.hash64 : d.hash32;
+}
+</script>
+</body>
+</html>

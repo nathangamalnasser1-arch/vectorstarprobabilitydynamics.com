@@ -24,6 +24,8 @@ const patterns = {
   script: /js\/sidebar-nav\.js/,
   competitionHref: /competition%20coin%20paper\/index\.html/,
   competitionLabel: />Competition Coin Paper</,
+  natosHref: /NatOS\/natos\.html/,
+  natosLabel: />NatOS</,
 };
 
 const jsPath = path.join(root, 'js', 'sidebar-nav.js');
