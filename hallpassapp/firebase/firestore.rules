@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /profiles/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+    match /swipes/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.swiper_id == request.auth.uid;
+      allow read: if request.auth != null
+        && resource.data.swiper_id == request.auth.uid;
+    }
+    match /celebrities/{id} {
+      allow read: if request.auth != null;
+    }
+    match /campaign_analytics/{id} {
+      allow read, write: if false;
+    }
+  }
+}

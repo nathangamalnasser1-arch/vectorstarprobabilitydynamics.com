@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f4f1;
+  --foreground: #1c1412;
+  --hp-ink: #1c1412;
+  --hp-ink-muted: #5c534f;
+  --hp-rose: #c45c5c;
+  --hp-rose-deep: #a34444;
+  --hp-surface: #fffdfb;
+  --hp-border: rgba(28, 20, 18, 0.12);
+  --hp-shadow: 0 24px 60px rgba(28, 20, 18, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-hp-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-hp-display), ui-serif, Georgia, serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #120e0c;
+    --foreground: #f3ebe6;
+    --hp-ink: #f3ebe6;
+    --hp-ink-muted: #b9ada7;
+    --hp-rose: #e07878;
+    --hp-rose-deep: #c45c5c;
+    --hp-surface: #1a1412;
+    --hp-border: rgba(243, 235, 230, 0.12);
+    --hp-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+}
+
+body {
+  background: radial-gradient(
+      1200px 600px at 10% -10%,
+      rgba(196, 92, 92, 0.12),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 500px at 90% 0%,
+      rgba(90, 120, 160, 0.08),
+      transparent 50%
+    ),
+    var(--background);
+  color: var(--foreground);
+}
+
+.hp-input {
+  width: 100%;
+  border-radius: 0.875rem;
+  border: 1px solid var(--hp-border);
+  background: var(--hp-surface);
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  color: var(--hp-ink);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.hp-input:focus {
+  border-color: rgba(196, 92, 92, 0.45);
+  box-shadow: 0 0 0 3px rgba(196, 92, 92, 0.2);
+}
+
+.hp-btn-primary {
+  border-radius: 9999px;
+  background: linear-gradient(
+    135deg,
+    var(--hp-rose) 0%,
+    var(--hp-rose-deep) 100%
+  );
+  padding: 0.85rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fffdfb;
+  box-shadow: var(--hp-shadow);
+}
+
+.hp-intent-card {
+  display: block;
+  cursor: pointer;
+  border-radius: 1.25rem;
+  border: 1px solid var(--hp-border);
+  background: var(--hp-surface);
+  padding: 1rem 1.15rem;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.hp-intent-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--hp-shadow);
+}
+
+.hp-intent-card--active {
+  border-color: rgba(196, 92, 92, 0.55);
+  box-shadow: 0 12px 30px rgba(196, 92, 92, 0.15);
+}
