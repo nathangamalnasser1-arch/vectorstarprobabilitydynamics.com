@@ -26,6 +26,10 @@ const patterns = {
   competitionLabel: />Competition Coin Paper</,
   natosHref: /NatOS\/natos\.html/,
   natosLabel: />NatOS</,
+  hallpassHref: /hallpassapp\//,
+  hallpassLabel: />Hall Pass</,
+  iamcuriousHref: /iamcurious\/dist\/index\.html/,
+  iamcuriousLabel: />I Am Curious</,
 };
 
 const jsPath = path.join(root, 'js', 'sidebar-nav.js');
