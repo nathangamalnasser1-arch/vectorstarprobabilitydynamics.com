@@ -1,0 +1,9 @@
+name = "iamcurious-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+# Optional. Used for provider attribution headers.
+SITE_URL = "https://www.vectorstarprobabilitydynamics.com"
+# Change if you want a different free model.
+OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"

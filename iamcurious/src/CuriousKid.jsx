@@ -41,24 +41,24 @@ function parseAssistantPayload(text) {
   }
 }
 
-async function askClaude(history, ageKey) {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    const err = new Error('NO_API_KEY');
+async function askGuide(history, ageKey) {
+  const proxyUrl = import.meta.env.VITE_AI_PROXY_URL;
+  if (!proxyUrl) {
+    const err = new Error('NO_PROXY_URL');
     throw err;
   }
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(proxyUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 300,
-      system: buildSystemPrompt(ageKey),
+      app: 'iamcurious',
+      version: 1,
+      mode: 'safe-kid-guide',
       messages: history,
+      ageKey,
+      systemPrompt: buildSystemPrompt(ageKey),
     }),
   });
   const data = await res.json();
@@ -157,10 +157,10 @@ function TreeNode({ node, depth = 0 }) {
 }
 
 function failMessage(err) {
-  if (err?.message === 'NO_API_KEY') {
+  if (err?.message === 'NO_PROXY_URL') {
     return {
       message:
-        'To run this app, add VITE_ANTHROPIC_API_KEY to iamcurious/.env, then run npm run build (see iamcurious/package.json).',
+        'To run this app, add VITE_AI_PROXY_URL to iamcurious/.env (example: https://your-worker.workers.dev), then run npm run build.',
       options: [],
     };
   }
@@ -200,7 +200,7 @@ export default function CuriousKid() {
     const h = [{ role: 'user', content: `I am curious about ${topic}` }];
     setHistory(h);
     try {
-      const r = await askClaude(h, age);
+      const r = await askGuide(h, age);
       setCurrent(r);
       setHistory([...h, { role: 'assistant', content: JSON.stringify(r) }]);
     } catch (e) {
@@ -221,7 +221,7 @@ export default function CuriousKid() {
     setHistory(h);
     setCurrent(null);
     try {
-      const r = await askClaude(h, age);
+      const r = await askGuide(h, age);
       setCurrent(r);
       setHistory([...h, { role: 'assistant', content: JSON.stringify(r) }]);
     } catch (e) {

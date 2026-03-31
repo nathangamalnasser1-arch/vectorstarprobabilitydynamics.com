@@ -11,6 +11,8 @@ const appDir = path.join(root, 'iamcurious');
 const distIndex = path.join(appDir, 'dist', 'index.html');
 const pkgPath = path.join(appDir, 'package.json');
 const componentPath = path.join(appDir, 'src', 'CuriousKid.jsx');
+const proxyWorkerPath = path.join(root, 'iamcurious-proxy', 'worker.js');
+const proxyReadmePath = path.join(root, 'iamcurious-proxy', 'README.md');
 
 let failed = 0;
 
@@ -34,11 +36,28 @@ if (!fs.existsSync(componentPath)) {
   fail('iamcurious/src/CuriousKid.jsx missing');
 } else {
   const src = fs.readFileSync(componentPath, 'utf8');
-  if (!src.includes('VITE_ANTHROPIC_API_KEY') || !src.includes('api.anthropic.com')) {
-    fail('CuriousKid.jsx missing API env or endpoint');
+  if (!src.includes('VITE_AI_PROXY_URL') || !src.includes('askGuide(')) {
+    fail('CuriousKid.jsx missing proxy URL wiring');
   } else {
-    console.log('OK: CuriousKid.jsx API wiring');
+    console.log('OK: CuriousKid.jsx proxy wiring');
   }
+}
+
+if (!fs.existsSync(proxyWorkerPath)) {
+  fail('iamcurious-proxy/worker.js missing');
+} else {
+  const worker = fs.readFileSync(proxyWorkerPath, 'utf8');
+  if (!worker.includes('openrouter.ai/api/v1/chat/completions') || !worker.includes('OPENROUTER_API_KEY')) {
+    fail('Proxy worker missing OpenRouter integration');
+  } else {
+    console.log('OK: proxy worker OpenRouter wiring');
+  }
+}
+
+if (!fs.existsSync(proxyReadmePath)) {
+  fail('iamcurious-proxy/README.md missing');
+} else {
+  console.log('OK: proxy setup README present');
 }
 
 if (!fs.existsSync(distIndex)) {
