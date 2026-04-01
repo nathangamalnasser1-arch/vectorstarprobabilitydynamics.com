@@ -85,6 +85,73 @@
   .ticker-inner { display: inline-block; animation: ticker 35s linear infinite; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
+  /* GALLERY CAROUSEL */
+  #gallery { background: var(--dark2); padding: 120px 60px; }
+  .jay-carousel-wrap { position: relative; max-width: 960px; margin: 48px auto 0; }
+  .jay-carousel-viewport {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 0;
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 4px;
+    background: var(--dark3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) var(--dark3);
+  }
+  .jay-carousel-viewport::-webkit-scrollbar { height: 6px; }
+  .jay-carousel-viewport::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+  .jay-carousel-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .jay-carousel-slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    max-height: min(70vh, 640px);
+    margin: 0 auto;
+    vertical-align: middle;
+  }
+  .jay-carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(201,168,76,0.45);
+    background: rgba(10,10,10,0.75);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: none;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .jay-carousel-btn:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); color: var(--gold-light); }
+  .jay-carousel-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .jay-carousel-prev { left: 8px; }
+  .jay-carousel-next { right: 8px; }
+  .jay-carousel-dots { display: flex; justify-content: center; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+  .jay-carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    background: transparent;
+    padding: 0;
+    cursor: none;
+    opacity: 0.45;
+    transition: opacity 0.2s, background 0.2s;
+  }
+  .jay-carousel-dot:hover { opacity: 0.85; }
+  .jay-carousel-dot.is-active { background: var(--gold); opacity: 1; }
+
   /* SECTIONS */
   section { padding: 120px 60px; }
   .section-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
@@ -205,6 +272,7 @@
     .process-steps { grid-template-columns: 1fr 1fr; gap: 40px; }
     .process-steps::before { display: none; }
     .testimonials-grid { grid-template-columns: 1fr; }
+    #gallery { padding: 80px 28px; }
     #contact { grid-template-columns: 1fr; gap: 48px; padding: 80px 28px; }
     .contact-info { padding-top: 0; }
     footer { flex-direction: column; gap: 16px; text-align: center; padding: 32px 28px; }
@@ -264,6 +332,9 @@
     .testimonials-grid { grid-template-columns: 1fr; gap: 16px; }
     .testimonial { padding: 28px 24px; }
 
+    #gallery { padding: 64px 20px; }
+    .jay-carousel-btn { width: 40px; height: 40px; font-size: 1.4rem; }
+
     /* Contact */
     #contact { grid-template-columns: 1fr; gap: 40px; padding: 64px 20px; }
     .contact-info { padding-top: 0; }
@@ -284,6 +355,7 @@
   <div class="nav-logo">JAYDEN</div>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
+    <li><a href="#gallery">Gallery</a></li>
     <li><a href="#services">Services</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#process">Process</a></li>
@@ -317,6 +389,22 @@
 
 <!-- TICKER -->
 <div class="ticker"><div class="ticker-inner" id="tickerInner"></div></div>
+
+<!-- GALLERY -->
+<section id="gallery" class="reveal" aria-label="Photo gallery">
+  <div class="section-label">Portfolio</div>
+  <h2 class="section-title">IN THE FIELD</h2>
+  <div class="jay-carousel-wrap">
+    <button type="button" class="jay-carousel-btn jay-carousel-prev" id="jayCarouselPrev" aria-label="Previous image">‹</button>
+    <div class="jay-carousel-viewport" id="jayCarouselViewport" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Jayden photo gallery">
+      <div class="jay-carousel-slide"><img src="jay/jay1.png" alt="Jayden — e-commerce consulting" width="1200" height="900" loading="lazy" decoding="async"></div>
+      <div class="jay-carousel-slide"><img src="jay/jay2.png" alt="Jayden — brand and growth strategy" width="1200" height="900" loading="lazy" decoding="async"></div>
+      <div class="jay-carousel-slide"><img src="jay/jajy3.png" alt="Jayden — client collaboration" width="1200" height="900" loading="lazy" decoding="async"></div>
+    </div>
+    <button type="button" class="jay-carousel-btn jay-carousel-next" id="jayCarouselNext" aria-label="Next image">›</button>
+    <div class="jay-carousel-dots" id="jayCarouselDots" aria-label="Choose slide"></div>
+  </div>
+</section>
 
 <!-- ABOUT -->
 <section id="about" class="reveal">
@@ -563,7 +651,7 @@
     ring.style.transform = `translate(${rx-20}px,${ry-20}px)`;
     requestAnimationFrame(animateRing);
   })();
-  document.querySelectorAll('a,button,.service-card,.kpi-card,input,select,textarea').forEach(el=>{
+  document.querySelectorAll('a,button,.service-card,.kpi-card,.jay-carousel-btn,.jay-carousel-dot,.jay-carousel-viewport,input,select,textarea').forEach(el=>{
     el.addEventListener('mouseenter',()=>{ cursor.style.width='20px'; cursor.style.height='20px'; });
     el.addEventListener('mouseleave',()=>{ cursor.style.width='12px'; cursor.style.height='12px'; });
   });
@@ -580,6 +668,70 @@
     entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
   },{threshold:0.1});
   reveals.forEach(r=>obs.observe(r));
+
+  // Gallery carousel (scroll-snap + prev/next + dots)
+  (function () {
+    const viewport = document.getElementById('jayCarouselViewport');
+    const prevBtn = document.getElementById('jayCarouselPrev');
+    const nextBtn = document.getElementById('jayCarouselNext');
+    const dotsRoot = document.getElementById('jayCarouselDots');
+    if (!viewport || !prevBtn || !nextBtn || !dotsRoot) return;
+    const slides = viewport.querySelectorAll('.jay-carousel-slide');
+    const n = slides.length;
+    if (n === 0) return;
+
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'jay-carousel-dot' + (i === 0 ? ' is-active' : '');
+      b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      b.addEventListener('click', function () { goTo(i); });
+      dotsRoot.appendChild(b);
+    }
+
+    function slideW() { return viewport.clientWidth || 1; }
+
+    function idxFromScroll() {
+      const w = slideW();
+      return Math.min(n - 1, Math.max(0, Math.round(viewport.scrollLeft / w)));
+    }
+
+    function syncDots() {
+      const idx = idxFromScroll();
+      dotsRoot.querySelectorAll('.jay-carousel-dot').forEach(function (d, j) {
+        d.classList.toggle('is-active', j === idx);
+      });
+    }
+
+    function goTo(i) {
+      const w = slideW();
+      viewport.scrollTo({ left: Math.max(0, i) * w, behavior: 'smooth' });
+    }
+
+    prevBtn.addEventListener('click', function () {
+      goTo(Math.max(0, idxFromScroll() - 1));
+    });
+    nextBtn.addEventListener('click', function () {
+      goTo(Math.min(n - 1, idxFromScroll() + 1));
+    });
+
+    var scrollTimer;
+    viewport.addEventListener('scroll', function () {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(syncDots, 60);
+    }, { passive: true });
+
+    window.addEventListener('resize', function () {
+      var i = idxFromScroll();
+      viewport.scrollTo({ left: i * slideW(), behavior: 'auto' });
+      syncDots();
+    });
+
+    viewport.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevBtn.click(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); nextBtn.click(); }
+    });
+  })();
 </script>
 </body>
 </html>
