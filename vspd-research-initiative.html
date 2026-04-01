@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VSPD Research Initiative — Quantum Noir</title>
+  <meta name="description" content="Temporal Coarse-Graining and Gravitational Resolution Enhancement — VSPD Research Initiative" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            void: '#020617',
+            quantum: '#22d3ee',
+            gravity: '#8b5cf6',
+            nucleus: '#ffffff',
+          },
+          fontFamily: {
+            display: ['"Instrument Serif"', 'Georgia', 'serif'],
+            sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background: #020617; color: #e2e8f0; }
+    #root { min-height: 100vh; }
+    @keyframes nucleusPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .nucleus-pulse {
+      animation: nucleusPulse 4s ease-in-out infinite;
+    }
+    .bundle-layer {
+      transition: opacity 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    .proof-extra {
+      display: grid;
+      transition: grid-template-rows 0.35s ease, opacity 0.3s ease;
+    }
+    .proof-extra-inner {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-void antialiased font-sans text-slate-200">
+  <div id="root"></div>
+
+  <!-- UMD builds: works when opening this file directly (file://) — still needs network for CDNs -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script>
+    (function () {
+      var e = React.createElement;
+      var useState = React.useState;
+      var useMemo = React.useMemo;
+      var useCallback = React.useCallback;
+      var StrictMode = React.StrictMode;
+      var createRoot = ReactDOM.createRoot;
+
+      /** Lucide-style inline SVGs (no lucide-react / no ESM) */
+      function Icon(props) {
+        var name = props.name;
+        var className = props.className || '';
+        var common = {
+          className: className,
+          xmlns: 'http://www.w3.org/2000/svg',
+          width: 24,
+          height: 24,
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 1.5,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          'aria-hidden': true,
+        };
+        if (name === 'microscope') {
+          return e(
+            'svg',
+            common,
+            e('path', { d: 'M6 18h8' }),
+            e('path', { d: 'M10 22V12a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10' }),
+            e('path', { d: 'M14 12V9a2 2 0 0 0-2-2h-2' }),
+            e('path', { d: 'M14 6V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2' }),
+            e('circle', { cx: '14', cy: '16', r: '2' })
+          );
+        }
+        if (name === 'sparkles') {
+          return e(
+            'svg',
+            common,
+            e('path', {
+              d: 'm12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z',
+            }),
+            e('path', { d: 'M5 3v4' }),
+            e('path', { d: 'M19 17v4' }),
+            e('path', { d: 'M3 5h4' }),
+            e('path', { d: 'M17 19h4' })
+          );
+        }
+        if (name === 'layers') {
+          return e(
+            'svg',
+            common,
+            e('path', { d: 'm12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z' }),
+            e('path', { d: 'm22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65' }),
+            e('path', { d: 'm22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65' })
+          );
+        }
+        if (name === 'git-branch') {
+          return e(
+            'svg',
+            common,
+            e('line', { x1: '6', x2: '6', y1: '3', y2: '15' }),
+            e('circle', { cx: '18', cy: '6', r: '3' }),
+            e('circle', { cx: '6', cy: '18', r: '3' }),
+            e('path', { d: 'M18 9a9 9 0 0 1-9 9' })
+          );
+        }
+        if (name === 'chevron-down') {
+          return e('svg', common, e('path', { d: 'm6 9 6 6 6-6' }));
+        }
+        return e('span', { className: className });
+      }
+
+      function clamp01(t) {
+        return Math.max(0, Math.min(1, t));
+      }
+
+      function dilationToBlend(dilation) {
+        return clamp01(dilation / 100);
+      }
+
+      function blurPxForDilation(dilation) {
+        var b = 56 * (1 - dilationToBlend(dilation));
+        return Math.round(b * 10) / 10;
+      }
+
+      function describeGeodesicArc(base, tilt, radiusScale) {
+        var r = 120 * radiusScale;
+        var x1 = Math.cos(base) * r * 0.2;
+        var y1 = Math.sin(base) * r * 0.2;
+        var x2 = Math.cos(base + Math.PI * 0.85 + tilt) * r;
+        var y2 = Math.sin(base + Math.PI * 0.85 + tilt) * r;
+        var x3 = Math.cos(base + Math.PI * 1.7 + tilt * 2) * r * 0.65;
+        var y3 = Math.sin(base + Math.PI * 1.7 + tilt * 2) * r * 0.65;
+        return 'M ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' Q ' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' ' + x3.toFixed(2) + ' ' + y3.toFixed(2);
+      }
+
+      function GeodesicBundles(props) {
+        var intensity = props.intensity;
+        var size = props.size || 280;
+        var lines = useMemo(function () {
+          var arr = [];
+          var n = 48;
+          for (var i = 0; i < n; i++) {
+            var base = (i / n) * Math.PI * 2;
+            var tilt = (i % 7) * 0.15;
+            arr.push({ base: base, tilt: tilt, r: 0.35 + (i % 5) * 0.08 });
+          }
+          return arr;
+        }, []);
+
+        return e(
+          'svg',
+          {
+            className: 'absolute inset-0 pointer-events-none',
+            width: size,
+            height: size,
+            viewBox: '-140 -140 280 280',
+            style: {
+              opacity: intensity,
+              filter: intensity > 0.5 ? 'drop-shadow(0 0 6px rgba(34,211,238,0.6))' : undefined,
+            },
+            'aria-hidden': true,
+          },
+          lines.map(function (ln, idx) {
+            return e('path', {
+              key: idx,
+              d: describeGeodesicArc(ln.base, ln.tilt, ln.r),
+              fill: 'none',
+              stroke: 'url(#geoGradVSPD)',
+              strokeWidth: 1.2 + (idx % 3) * 0.4,
+              strokeLinecap: 'round',
+              opacity: 0.35 + (idx % 4) * 0.12,
+            });
+          }),
+          e(
+            'defs',
+            null,
+            e(
+              'linearGradient',
+              { id: 'geoGradVSPD', x1: '0%', y1: '0%', x2: '100%', y2: '100%' },
+              e('stop', { offset: '0%', stopColor: '#22d3ee' }),
+              e('stop', { offset: '50%', stopColor: '#a78bfa' }),
+              e('stop', { offset: '100%', stopColor: '#22d3ee' })
+            )
+          )
+        );
+      }
+
+      function ProbabilityCloud(props) {
+        var blurPx = props.blurPx;
+        var cloudOpacity = props.cloudOpacity;
+        return e(
+          'div',
+          {
+            className: 'absolute inset-0 flex items-center justify-center',
+            style: { opacity: cloudOpacity },
+          },
+          e('div', {
+            className: 'absolute rounded-full',
+            style: {
+              width: 'min(90vw, 320px)',
+              height: 'min(90vw, 320px)',
+              background:
+                'radial-gradient(circle at 45% 40%, rgba(34,211,238,0.45) 0%, transparent 42%),' +
+                'radial-gradient(circle at 60% 55%, rgba(139,92,246,0.25) 0%, transparent 38%),' +
+                'radial-gradient(circle at 50% 50%, rgba(34,211,238,0.15) 0%, transparent 55%),' +
+                'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(34,211,238,0.35) 0%, transparent 65%)',
+              filter: 'blur(' + blurPx + 'px)',
+              transform: 'scale(1.05)',
+            },
+          }),
+          e('div', {
+            className: 'absolute rounded-full mix-blend-screen',
+            style: {
+              width: 'min(85vw, 300px)',
+              height: 'min(85vw, 300px)',
+              background:
+                'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(34,211,238,0.2) 25%, transparent 70%)',
+              filter: 'blur(' + blurPx * 0.85 + 'px)',
+            },
+          })
+        );
+      }
+
+      function Nucleus() {
+        return e('div', {
+          className:
+            'nucleus-pulse relative z-10 rounded-full bg-nucleus shadow-[0_0_24px_rgba(255,255,255,0.9),0_0_60px_rgba(34,211,238,0.35)]',
+          style: { width: 14, height: 14 },
+          'aria-hidden': true,
+        });
+      }
+
+      function HeroSection() {
+        return e(
+          'section',
+          { className: 'relative px-4 pt-16 pb-12 md:pt-24 md:pb-16 overflow-hidden' },
+          e('div', {
+            className: 'pointer-events-none absolute inset-0 opacity-[0.07]',
+            style: {
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'0.5\'/%3E%3C/svg%3E")',
+            },
+          }),
+          e(
+            'div',
+            { className: 'max-w-4xl mx-auto text-center' },
+            e(
+              'p',
+              { className: 'text-quantum/90 text-sm font-medium tracking-[0.2em] uppercase mb-4' },
+              'VSPD Research Initiative'
+            ),
+            e(
+              'h1',
+              { className: 'font-display text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-6' },
+              'The Baseline of ',
+              e('span', { className: 'text-quantum italic' }, 'Flat Spacetime')
+            ),
+            e(
+              'p',
+              { className: 'text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed' },
+              e('strong', { className: 'text-white font-medium' }, 'Temporal Coarse-Graining'),
+              ' — In flat spacetime, our measurement epoch (Δt) is non-zero. Every observation is a ',
+              e('span', { className: 'text-quantum' }, 'time-averaged projection'),
+              ' that smears fast underlying structure, hiding deterministic behavior beneath a statistical envelope.'
+            )
+          ),
+          e(
+            'div',
+            {
+              className:
+                'relative mx-auto mt-14 flex h-[min(52vw,320px)] w-[min(92vw,360px)] items-center justify-center',
+            },
+            e(ProbabilityCloud, { blurPx: 38, cloudOpacity: 1 }),
+            e(Nucleus)
+          )
+        );
+      }
+
+      function TimeMicroscopeSection() {
+        var dilationState = useState(0);
+        var dilation = dilationState[0];
+        var setDilation = dilationState[1];
+
+        var blurPx = blurPxForDilation(dilation);
+        var bundleIntensity = dilationToBlend(dilation);
+        var cloudOpacity = 1 - bundleIntensity * 0.92;
+        var layerOpacity = 0.15 + 0.85 * bundleIntensity;
+
+        var onSlider = useCallback(function (ev) {
+          setDilation(Number(ev.target.value));
+        }, [setDilation]);
+
+        return e(
+          'section',
+          { className: 'px-4 py-16 md:py-24 border-t border-white/5' },
+          e(
+            'div',
+            { className: 'max-w-4xl mx-auto' },
+            e(
+              'div',
+              { className: 'flex items-center gap-3 mb-2' },
+              e(Icon, { name: 'microscope', className: 'w-8 h-8 text-quantum' }),
+              e('h2', { className: 'font-display text-3xl md:text-4xl text-white' }, 'Time Microscope')
+            ),
+            e(
+              'p',
+              { className: 'text-slate-400 mt-3 max-w-3xl leading-relaxed' },
+              'Move the control to simulate ',
+              e('span', { className: 'text-gravity font-medium' }, 'Gravitational Resolution Enhancement'),
+              ': as time dilation grows, the effective measurement span narrows — revealing structure that flat-spacetime averaging had washed out.'
+            ),
+            e(
+              'div',
+              { className: 'mt-10 p-6 md:p-10 rounded-2xl bg-slate-900/40 border border-white/10 backdrop-blur-sm' },
+              e(
+                'label',
+                {
+                  htmlFor: 'dilation-slider',
+                  className: 'block text-sm font-semibold text-quantum tracking-wide uppercase mb-4',
+                },
+                'Gravitational Gradient (Time Dilation Factor)'
+              ),
+              e('input', {
+                id: 'dilation-slider',
+                type: 'range',
+                min: 0,
+                max: 100,
+                value: dilation,
+                onInput: onSlider,
+                className:
+                  'w-full h-3 rounded-full appearance-none cursor-pointer bg-slate-800 accent-cyan-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br [&::-webkit-slider-thumb]:from-quantum [&::-webkit-slider-thumb]:to-gravity [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-quantum/40',
+                'aria-valuetext': 'Time dilation factor ' + dilation + ' percent',
+              }),
+              e(
+                'div',
+                { className: 'flex justify-between text-xs text-slate-500 mt-2 font-mono' },
+                e('span', null, '0 — flat epoch (blurred 1s envelope)'),
+                e('span', null, '100 — narrowed epoch (coherent bundles)')
+              ),
+              e(
+                'div',
+                {
+                  className:
+                    'relative mx-auto mt-12 flex h-[min(70vw,380px)] w-full max-w-[380px] items-center justify-center rounded-full',
+                  style: {
+                    background:
+                      'radial-gradient(circle at 50% 50%, rgba(34,211,238,0.06) 0%, transparent 55%)',
+                    boxShadow: 'inset 0 0 80px rgba(139,92,246,0.08)',
+                  },
+                },
+                e(ProbabilityCloud, { blurPx: blurPx, cloudOpacity: cloudOpacity }),
+                e(
+                  'div',
+                  {
+                    className: 'bundle-layer absolute inset-0 flex items-center justify-center',
+                    style: { opacity: layerOpacity },
+                  },
+                  e(GeodesicBundles, { intensity: bundleIntensity })
+                ),
+                e(Nucleus),
+                e(
+                  'div',
+                  {
+                    className:
+                      'absolute bottom-2 left-1/2 -translate-x-1/2 text-center text-[11px] text-slate-500 font-mono tabular-nums',
+                  },
+                  'Δt_eff ∝ ',
+                  (100 - dilation).toFixed(0),
+                  '%'
+                )
+              ),
+              e(
+                'p',
+                { className: 'mt-8 text-sm text-slate-400 text-center max-w-xl mx-auto' },
+                'Hydrogen 1s probability density: from diffuse glow toward ',
+                e('span', { className: 'text-white' }, 'sharp, coherent geodesic bundles'),
+                ' — a pedagogical visualization of how narrower temporal sampling resolves averaged-away structure.'
+              )
+            )
+          )
+        );
+      }
+
+      var proofCards = [
+        {
+          id: 'quantum-microscope',
+          title: 'Proof I: The Quantum Microscope',
+          icon: 'sparkles',
+          accent: 'text-quantum',
+          body: [
+            '2013 work resolved the transverse nodal structure of hydrogen — the familiar ring-like features in probability density.',
+            'VSPD reads these rings as trajectories magnified roughly 20,000×, still partially smeared by finite Δt in approximately flat spacetime.',
+          ],
+        },
+        {
+          id: 'cornell',
+          title: 'Proof II: The Cornell Resolution Limit',
+          icon: 'layers',
+          accent: 'text-gravity',
+          body: [
+            'EMPAD ptychography achieved 0.39 Å — a record that leaves only thermal motion as the dominant residual blur.',
+            'VSPD predicts that gravity de-blurs this jiggling not by a post-processing trick, but by physically narrowing the measurement epoch.',
+          ],
+        },
+        {
+          id: 'stm',
+          title: 'Proof III: The Tunneling Identity (STM)',
+          icon: 'git-branch',
+          accent: 'text-quantum',
+          body: [
+            'In STM, the atom is defined mainly by the electrons we tunnel through — the observable is inherently tied to measured currents.',
+            'That motivates moving from purely probabilistic “cloud” language toward deterministic path and vector descriptions where the experiment selects the relevant degrees of freedom.',
+          ],
+        },
+      ];
+
+      function ProofCard(props) {
+        var card = props.card;
+        var expanded = props.expanded;
+        var onToggle = props.onToggle;
+        return e(
+          'article',
+          {
+            className:
+              'rounded-2xl border border-white/10 bg-slate-900/30 overflow-hidden transition-colors duration-200 hover:border-cyan-400/35',
+          },
+          e(
+            'button',
+            {
+              type: 'button',
+              className:
+                'w-full text-left p-6 md:p-8 flex gap-4 items-start cursor-pointer select-none',
+              'aria-expanded': expanded,
+              onClick: function () {
+                onToggle(card.id);
+              },
+            },
+            e(
+              'div',
+              {
+                className:
+                  'shrink-0 w-12 h-12 rounded-xl bg-slate-800/80 flex items-center justify-center border border-white/10',
+              },
+              e(Icon, { name: card.icon, className: 'w-6 h-6 ' + card.accent })
+            ),
+            e(
+              'div',
+              { className: 'flex-1 min-w-0' },
+              e('h3', { className: 'font-display text-xl md:text-2xl text-white pr-8' }, card.title),
+              e(
+                'p',
+                { className: 'mt-3 text-slate-400 leading-relaxed' },
+                card.body[0]
+              ),
+              e(
+                'div',
+                {
+                  className: 'proof-extra',
+                  style: {
+                    gridTemplateRows: expanded ? '1fr' : '0fr',
+                    opacity: expanded ? 1 : 0,
+                  },
+                },
+                e(
+                  'div',
+                  { className: 'proof-extra-inner' },
+                  e(
+                    'p',
+                    {
+                      className:
+                        'mt-4 text-slate-300 leading-relaxed border-l-2 border-gravity/50 pl-4',
+                    },
+                    card.body[1]
+                  )
+                )
+              )
+            ),
+            e(Icon, {
+              name: 'chevron-down',
+              className:
+                'shrink-0 w-5 h-5 mt-1 transition-transform duration-200 ' +
+                (expanded ? '-rotate-180 text-quantum' : 'text-slate-600'),
+            })
+          )
+        );
+      }
+
+      function ProofGallery() {
+        var openState = useState(null);
+        var open = openState[0];
+        var setOpen = openState[1];
+        var toggle = useCallback(
+          function (id) {
+            setOpen(function (prev) {
+              return prev === id ? null : id;
+            });
+          },
+          [setOpen]
+        );
+
+        return e(
+          'section',
+          { className: 'px-4 py-16 md:py-24 border-t border-white/5' },
+          e(
+            'div',
+            { className: 'max-w-4xl mx-auto' },
+            e(
+              'h2',
+              { className: 'font-display text-3xl md:text-4xl text-white mb-4' },
+              'The Empirical Proof Gallery'
+            ),
+            e(
+              'p',
+              { className: 'text-slate-400 mb-10 max-w-2xl' },
+              'Interactive cards — tap to expand the detailed line of reasoning.'
+            ),
+            e(
+              'div',
+              { className: 'grid gap-4 md:gap-6' },
+              proofCards.map(function (c) {
+                return e(ProofCard, {
+                  key: c.id,
+                  card: c,
+                  expanded: open === c.id,
+                  onToggle: toggle,
+                });
+              })
+            )
+          )
+        );
+      }
+
+      function Footer() {
+        return e(
+          'footer',
+          { className: 'px-4 py-16 border-t border-white/10 bg-black/20' },
+          e(
+            'div',
+            { className: 'max-w-3xl mx-auto text-center' },
+            e(
+              'h2',
+              { className: 'font-display text-2xl md:text-3xl text-white mb-6' },
+              'Scientific Conclusion'
+            ),
+            e(
+              'p',
+              { className: 'text-slate-300 leading-relaxed text-lg' },
+              'VSPD does not replace quantum mechanics; it ',
+              e('em', { className: 'text-white not-italic font-medium' }, 'refines'),
+              ' how we interpret it. The wavefunction re-emerges as a ',
+              e('span', { className: 'text-quantum' }, 'temporal ensemble average'),
+              ' — the best summary of dynamics seen through a non-zero measurement epoch. Gravity’s role is to change that epoch, and with it, what structure honesty demands we draw from the same formalism.'
+            ),
+            e(
+              'p',
+              { className: 'mt-8 text-xs text-slate-600' },
+              'Single-file page · Tailwind · React (UMD) · CSS motion · Opens via file:// or http'
+            )
+          )
+        );
+      }
+
+      function App() {
+        return e(
+          'div',
+          { className: 'min-h-screen' },
+          e(HeroSection),
+          e(TimeMicroscopeSection),
+          e(ProofGallery),
+          e(Footer)
+        );
+      }
+
+      var root = createRoot(document.getElementById('root'));
+      root.render(e(StrictMode, null, e(App)));
+
+      function assertEq(a, b, name) {
+        if (a !== b) throw new Error(name + ': expected ' + b + ', got ' + a);
+      }
+      function assertApprox(a, b, eps, name) {
+        if (Math.abs(a - b) > eps) throw new Error(name + ': expected ~' + b + ', got ' + a);
+      }
+
+      function runTests() {
+        var tests = [
+          function () {
+            assertEq(clamp01(-1), 0, 'clamp01 lower');
+          },
+          function () {
+            assertEq(clamp01(2), 1, 'clamp01 upper');
+          },
+          function () {
+            assertEq(clamp01(0.5), 0.5, 'clamp01 mid');
+          },
+          function () {
+            assertEq(dilationToBlend(0), 0, 'blend 0');
+          },
+          function () {
+            assertEq(dilationToBlend(100), 1, 'blend 100');
+          },
+          function () {
+            assertEq(dilationToBlend(50), 0.5, 'blend 50');
+          },
+          function () {
+            assertEq(blurPxForDilation(100), 0, 'blur at max dilation');
+          },
+          function () {
+            assertApprox(blurPxForDilation(0), 56, 0.01, 'blur at zero');
+          },
+        ];
+        var failed = 0;
+        for (var i = 0; i < tests.length; i++) {
+          try {
+            tests[i]();
+          } catch (err) {
+            failed++;
+            console.error('[VSPD test]', err.message || err);
+          }
+        }
+        if (failed === 0) console.info('[VSPD] All inline unit tests passed:', tests.length);
+        else console.warn('[VSPD] Unit tests failed:', failed);
+      }
+
+      runTests();
+    })();
+  </script>
+</body>
+</html>

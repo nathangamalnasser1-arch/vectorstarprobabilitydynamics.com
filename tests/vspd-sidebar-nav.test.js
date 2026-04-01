@@ -32,6 +32,8 @@ const patterns = {
   iamcuriousLabel: />I Am Curious</,
   jaydenEcommerceHref: /jayden-ecommerce\.html/,
   jaydenEcommerceLabel: />Jayden E-Commerce</,
+  vspdResearchHref: /vspd-research-initiative\.html/,
+  vspdResearchLabel: />VSPD Research Initiative</,
 };
 
 const jsPath = path.join(root, 'js', 'sidebar-nav.js');
