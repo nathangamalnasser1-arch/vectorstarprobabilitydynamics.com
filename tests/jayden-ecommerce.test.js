@@ -19,6 +19,12 @@ const required = {
   imgJay1: /jay\/jay1\.png/,
   imgJay2: /jay\/jay2\.png/,
   imgJay3: /jay\/jajy3\.png/,
+  structuralReset: /Architecting the Structural Reset/i,
+  aiDiscoveryCard: /AI Discovery Rate[\s\S]*Rufus.*Perplexity/i,
+  revenue2026e: /2026E:\s*\$8\.8T/,
+  serviceImmersive: /Immersive CRO[\s\S]*20%[\s\S]*30%/i,
+  serviceOmnichannel: /91%[\s\S]*\$1 trillion/i,
+  serviceLastMile: /53%/,
 };
 
 let failed = 0;
