@@ -17,10 +17,6 @@
 /.next/
 /out/
 
-# firebase local cache / debug (do not commit)
-.firebase/
-firebase-debug.log
-
 # production
 /build
 

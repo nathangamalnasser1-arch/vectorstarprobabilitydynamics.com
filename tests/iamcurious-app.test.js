@@ -11,6 +11,7 @@ const appDir = path.join(root, 'iamcurious');
 const distIndex = path.join(appDir, 'dist', 'index.html');
 const pkgPath = path.join(appDir, 'package.json');
 const componentPath = path.join(appDir, 'src', 'CuriousKid.jsx');
+const firebaseClientPath = path.join(appDir, 'src', 'firebase-client.js');
 const proxyWorkerPath = path.join(root, 'iamcurious-proxy', 'worker.js');
 const proxyReadmePath = path.join(root, 'iamcurious-proxy', 'README.md');
 
@@ -40,6 +41,22 @@ if (!fs.existsSync(componentPath)) {
     fail('CuriousKid.jsx missing proxy URL wiring');
   } else {
     console.log('OK: CuriousKid.jsx proxy wiring');
+  }
+  if (!src.includes('signInWithPopup') || !src.includes('JOURNAL_COLLECTION')) {
+    fail('CuriousKid.jsx missing Google auth or cloud journal integration');
+  } else {
+    console.log('OK: CuriousKid.jsx Google auth + cloud journal wiring');
+  }
+}
+
+if (!fs.existsSync(firebaseClientPath)) {
+  fail('iamcurious/src/firebase-client.js missing');
+} else {
+  const firebaseClient = fs.readFileSync(firebaseClientPath, 'utf8');
+  if (!firebaseClient.includes('VITE_FIREBASE_API_KEY') || !firebaseClient.includes('GoogleAuthProvider')) {
+    fail('firebase-client.js missing Firebase env wiring');
+  } else {
+    console.log('OK: firebase-client.js Firebase env wiring');
   }
 }
 

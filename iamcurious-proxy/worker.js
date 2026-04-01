@@ -87,6 +87,10 @@ async function callOpenRouter({ messages, ageKey }, env) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin");
+    const allowedOrigin = env.ALLOWED_ORIGIN || "";
+    if (allowedOrigin && origin && origin !== allowedOrigin) {
+      return jsonResponse(403, { error: "Origin not allowed" }, origin);
+    }
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });

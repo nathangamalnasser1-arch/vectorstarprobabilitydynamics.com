@@ -30,6 +30,8 @@ const patterns = {
   hallpassLabel: />Hall Pass</,
   iamcuriousHref: /iamcurious\/dist\/index\.html/,
   iamcuriousLabel: />I Am Curious</,
+  jaydenEcommerceHref: /jayden-ecommerce\.html/,
+  jaydenEcommerceLabel: />Jayden E-Commerce</,
 };
 
 const jsPath = path.join(root, 'js', 'sidebar-nav.js');

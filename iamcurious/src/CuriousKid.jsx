@@ -1,4 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
+import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from 'firebase/firestore';
+import {
+  getFirebaseAuth,
+  getFirebaseDb,
+  getGoogleProvider,
+  isFirebaseConfigured,
+} from './firebase-client';
 
 const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A8E6CF', '#FF8B94', '#B5EAD7', '#FFDAC1', '#C7CEEA'];
 
@@ -7,6 +25,8 @@ const AGE_PROFILES = {
   middle: { label: '8 – 10 years', emoji: '🌟', desc: 'Clear words a 3rd-grader knows. 3–4 options. Slightly more detail is fine.' },
   older: { label: '11 – 13 years', emoji: '🚀', desc: 'More nuanced language. 4 options. Can mention concepts like documentary, podcast, or encyclopedia.' },
 };
+
+const JOURNAL_COLLECTION = 'iamcuriousJournal';
 
 function buildSystemPrompt(ageKey) {
   const p = AGE_PROFILES[ageKey];
@@ -41,6 +61,14 @@ function parseAssistantPayload(text) {
   }
 }
 
+function normalizeProxyContent(content) {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content.find((b) => b?.type === 'text')?.text || '';
+  }
+  return '';
+}
+
 async function askGuide(history, ageKey) {
   const proxyUrl = import.meta.env.VITE_AI_PROXY_URL;
   if (!proxyUrl) {
@@ -66,7 +94,7 @@ async function askGuide(history, ageKey) {
     const detail = data.error?.message || res.statusText || 'Request failed';
     throw new Error(detail);
   }
-  const text = data.content?.find((b) => b.type === 'text')?.text || '';
+  const text = normalizeProxyContent(data.content);
   return parseAssistantPayload(text);
 }
 
@@ -81,6 +109,18 @@ function saveJournal(entries) {
   try {
     localStorage.setItem('ck_journal', JSON.stringify(entries));
   } catch { /* ignore */ }
+}
+
+function toJournalDoc(entry, uid) {
+  return {
+    ownerUid: uid,
+    topic: entry.topic,
+    age: entry.age,
+    path: entry.path,
+    tree: entry.tree,
+    date: entry.date,
+    createdAt: serverTimestamp(),
+  };
 }
 
 const CSS = `
@@ -178,6 +218,12 @@ export default function CuriousKid() {
   const [current, setCurrent] = useState(null);
   const [history, setHistory] = useState([]);
   const [journal, setJournal] = useState(loadJournal);
+  const [firebaseReady] = useState(isFirebaseConfigured());
+  const [parentUser, setParentUser] = useState(null);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [cloudBusy, setCloudBusy] = useState(false);
+  const [cloudError, setCloudError] = useState('');
   const [pinSet, setPinSet] = useState('1234');
   const [pinIn, setPinIn] = useState('');
   const [unlocked, setUnlocked] = useState(false);
@@ -189,6 +235,80 @@ export default function CuriousKid() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [current, loading]);
+
+  useEffect(() => {
+    if (!firebaseReady) return undefined;
+    const auth = getFirebaseAuth();
+    if (!auth) return undefined;
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setParentUser(u || null);
+      setAuthError('');
+    });
+    return () => unsub();
+  }, [firebaseReady]);
+
+  useEffect(() => {
+    const loadCloudJournal = async () => {
+      if (!parentUser) return;
+      const db = getFirebaseDb();
+      if (!db) return;
+      setCloudBusy(true);
+      setCloudError('');
+      try {
+        const q = query(
+          collection(db, JOURNAL_COLLECTION),
+          where('ownerUid', '==', parentUser.uid),
+          orderBy('createdAt', 'desc'),
+        );
+        const snap = await getDocs(q);
+        const fromCloud = snap.docs.map((d) => {
+          const v = d.data();
+          return {
+            id: d.id,
+            topic: v.topic,
+            age: v.age,
+            path: Array.isArray(v.path) ? v.path : [],
+            tree: v.tree || null,
+            date: v.date || new Date().toLocaleDateString(),
+          };
+        });
+        setJournal(fromCloud);
+      } catch {
+        setCloudError('Could not load cloud journal right now.');
+      } finally {
+        setCloudBusy(false);
+      }
+    };
+    loadCloudJournal();
+  }, [parentUser]);
+
+  const signInParent = async () => {
+    if (!firebaseReady) return;
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      setAuthError('Firebase Auth is not configured.');
+      return;
+    }
+    setAuthBusy(true);
+    setAuthError('');
+    try {
+      await signInWithPopup(auth, getGoogleProvider());
+    } catch {
+      setAuthError('Google sign-in failed. Please try again.');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const signOutParent = async () => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+    await signOut(auth);
+    setUnlocked(false);
+    setPinIn('');
+    const local = loadJournal();
+    setJournal(local);
+  };
 
   const startExploration = async () => {
     if (!topic.trim()) return;
@@ -242,13 +362,54 @@ export default function CuriousKid() {
     };
     const u = [entry, ...journal];
     setJournal(u);
-    saveJournal(u);
+    if (!parentUser) {
+      saveJournal(u);
+      return;
+    }
+    const db = getFirebaseDb();
+    if (!db) return;
+    setDoc(doc(db, JOURNAL_COLLECTION, String(entry.id)), toJournalDoc(entry, parentUser.uid)).catch(() => {
+      setCloudError('Saved locally, but cloud save failed.');
+    });
   };
 
   const delEntry = (id) => {
     const u = journal.filter((e) => e.id !== id);
     setJournal(u);
-    saveJournal(u);
+    if (!parentUser) {
+      saveJournal(u);
+      return;
+    }
+    const db = getFirebaseDb();
+    if (!db) return;
+    deleteDoc(doc(db, JOURNAL_COLLECTION, String(id))).catch(() => {
+      setCloudError('Could not delete from cloud right now.');
+    });
+  };
+
+  const uploadLocalJournalToCloud = async () => {
+    if (!parentUser) return;
+    const db = getFirebaseDb();
+    if (!db) return;
+    const local = loadJournal();
+    if (local.length === 0) return;
+    setCloudBusy(true);
+    setCloudError('');
+    try {
+      await Promise.all(
+        local.map((entry) =>
+          setDoc(doc(db, JOURNAL_COLLECTION, String(entry.id)), toJournalDoc(entry, parentUser.uid)),
+        ),
+      );
+      const merged = [...local, ...journal].filter(
+        (item, idx, arr) => idx === arr.findIndex((x) => String(x.id) === String(item.id)),
+      );
+      setJournal(merged);
+    } catch {
+      setCloudError('Local upload failed. Please try again.');
+    } finally {
+      setCloudBusy(false);
+    }
   };
 
   const reset = () => {
@@ -530,12 +691,39 @@ export default function CuriousKid() {
             <h2 style={{ fontFamily: "'Fredoka One',cursive", fontSize: '1.6rem', color: '#FF6B6B', marginBottom: 4 }}>👩‍🏫 Parent & Teacher Mode</h2>
             <p style={{ color: '#bbb', fontWeight: 700, fontSize: '.85rem', marginBottom: 20 }}>Full exploration path trees and settings.</p>
 
-            {!unlocked ? (
+            {cloudError && (
+              <p style={{ color: '#FF6B6B', fontWeight: 800, fontSize: '.85rem', marginBottom: 14 }}>{cloudError}</p>
+            )}
+
+            {!firebaseReady ? (
+              <div style={{ background: 'white', borderRadius: 24, padding: 28, boxShadow: '0 8px 32px rgba(0,0,0,.08)', border: '2px solid #FFF0E6', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>⚙️</div>
+                <p style={{ fontWeight: 800, color: '#333', marginBottom: 8 }}>Google sign-in needs Firebase config</p>
+                <p style={{ color: '#888', fontSize: '.86rem' }}>
+                  Add VITE_FIREBASE_* values in <strong>iamcurious/.env</strong> and rebuild.
+                </p>
+              </div>
+            ) : !parentUser ? (
+              <div style={{ background: 'white', borderRadius: 24, padding: 28, boxShadow: '0 8px 32px rgba(0,0,0,.08)', border: '2px solid #FFF0E6', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🛡️</div>
+                <p style={{ fontWeight: 800, color: '#333', marginBottom: 6 }}>Parent login required</p>
+                <p style={{ color: '#bbb', fontSize: '.82rem', marginBottom: 18 }}>Sign in with Google to manage cloud journal data.</p>
+                {authError && (
+                  <p style={{ color: '#FF6B6B', fontWeight: 800, fontSize: '.85rem', marginBottom: 10 }}>{authError}</p>
+                )}
+                <button type="button" className="pri-btn" onClick={signInParent} disabled={authBusy}>
+                  {authBusy ? 'Opening Google…' : 'Sign in with Google'}
+                </button>
+              </div>
+            ) : !unlocked ? (
               <div style={{ background: 'white', borderRadius: 24, padding: 28, boxShadow: '0 8px 32px rgba(0,0,0,.08)', border: '2px solid #FFF0E6', textAlign: 'center' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: 10 }}>🔒</div>
                 <p style={{ fontWeight: 800, color: '#333', marginBottom: 6 }}>Enter your PIN</p>
                 <p style={{ color: '#bbb', fontSize: '.82rem', marginBottom: 18 }}>
                   Default PIN is <strong>1234</strong>
+                </p>
+                <p style={{ color: '#888', fontSize: '.8rem', marginBottom: 12 }}>
+                  Signed in as <strong>{parentUser.email || 'parent account'}</strong>
                 </p>
                 <input
                   type="password"
@@ -565,6 +753,9 @@ export default function CuriousKid() {
                 <button type="button" className="pri-btn" onClick={tryUnlock}>
                   Unlock 🔓
                 </button>
+                <div style={{ marginTop: 12 }}>
+                  <button type="button" className="ghost-btn" onClick={signOutParent}>Sign out</button>
+                </div>
               </div>
             ) : (
               <div>
@@ -605,7 +796,13 @@ export default function CuriousKid() {
                   </div>
                 </div>
 
-                <p style={{ fontWeight: 800, color: '#bbb', fontSize: '.82rem', marginBottom: 12, letterSpacing: 0.5 }}>EXPLORATION PATH TREES</p>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+                  <p style={{ fontWeight: 800, color: '#bbb', fontSize: '.82rem', letterSpacing: 0.5, margin: 0 }}>EXPLORATION PATH TREES</p>
+                  <button type="button" className="ghost-btn" onClick={uploadLocalJournalToCloud} disabled={cloudBusy}>
+                    {cloudBusy ? 'Syncing…' : 'Upload local journal'}
+                  </button>
+                  <button type="button" className="ghost-btn" onClick={signOutParent}>Sign out Google</button>
+                </div>
                 {journal.length === 0 && (
                   <div style={{ textAlign: 'center', padding: 30, color: '#ccc' }}>
                     <p style={{ fontWeight: 700 }}>No explorations saved yet.</p>

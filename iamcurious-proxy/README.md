@@ -46,4 +46,4 @@ npm run build
 
 - Default model is free-tier: `meta-llama/llama-3.1-8b-instruct:free`
 - You can change model in `iamcurious-proxy/wrangler.toml` (`OPENROUTER_MODEL`)
-- CORS is enabled for browser calls
+- Optional: set `ALLOWED_ORIGIN` in `wrangler.toml` to restrict browser origin
