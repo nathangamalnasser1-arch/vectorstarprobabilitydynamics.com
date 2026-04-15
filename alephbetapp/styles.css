@@ -43,6 +43,42 @@ body {
   flex-wrap: wrap;
 }
 
+.baby-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.baby-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.baby-toggle input {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.baby-slider-label {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.baby-slider-label input[type="range"] {
+  width: min(360px, 70vw);
+  height: 2.4rem;
+  accent-color: #2563eb;
+}
+
 .tab-button {
   border: 1px solid #93c5fd;
   background: #eff6ff;
@@ -77,11 +113,15 @@ body {
   cursor: pointer;
   scroll-snap-align: center;
   transition: transform 0.14s ease, box-shadow 0.14s ease;
+  --baby-letter-size: clamp(3.8rem, 7vw, 5.2rem);
+  --baby-letter-color: #0f172a;
+  --baby-motion-transform: translate(0px, 0px) rotate(0deg);
+  transform: var(--baby-motion-transform);
 }
 
 .letter-card:hover,
 .letter-card:focus-visible {
-  transform: translateY(-2px) scale(1.02);
+  transform: var(--baby-motion-transform) translateY(-2px) scale(1.02);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
   outline: 3px solid #60a5fa;
 }
@@ -93,9 +133,22 @@ body {
 .letter-hebrew {
   margin: 0;
   direction: rtl;
-  font-size: clamp(3.8rem, 7vw, 5.2rem);
+  font-size: var(--baby-letter-size);
   line-height: 1;
-  color: #0f172a;
+  color: var(--baby-letter-color);
+  transition: color 0.16s ease, font-size 0.16s ease;
+}
+
+.letter-card.baby-size-1 {
+  --baby-letter-size: clamp(3.2rem, 6.5vw, 4.6rem);
+}
+
+.letter-card.baby-size-2 {
+  --baby-letter-size: clamp(3.8rem, 7vw, 5.2rem);
+}
+
+.letter-card.baby-size-3 {
+  --baby-letter-size: clamp(4.6rem, 8vw, 6.2rem);
 }
 
 .letter-name {
@@ -190,6 +243,19 @@ body {
 }
 
 @media (max-width: 768px) {
+  .baby-controls {
+    align-items: stretch;
+  }
+
+  .baby-slider-label {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .baby-slider-label input[type="range"] {
+    width: min(92vw, 440px);
+  }
+
   .letters-track.is-mobile-single {
     flex-direction: column;
     gap: 0;

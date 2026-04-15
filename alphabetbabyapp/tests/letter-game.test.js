@@ -46,3 +46,61 @@ test("farm animals include horse and sound phrase", () => {
   assert.ok(horse);
   assert.equal(game.getAnimalSoundPhrase(horse), "Horse says Neigh");
 });
+
+test("baby mode size levels cycle across three steps", () => {
+  const game = loadGameScript();
+  assert.equal(game.normalizeBabySizeLevel(1), 1);
+  assert.equal(game.normalizeBabySizeLevel(3), 3);
+  assert.equal(game.normalizeBabySizeLevel(99), 1);
+
+  assert.equal(game.getNextBabySizeLevel(1), 2);
+  assert.equal(game.getNextBabySizeLevel(2), 3);
+  assert.equal(game.getNextBabySizeLevel(3), 1);
+});
+
+test("baby mode random color generator returns hsl values", () => {
+  const game = loadGameScript();
+  const fakeRandom = (() => {
+    const values = [0.5, 0.25, 0.75];
+    let index = 0;
+    return () => {
+      const value = values[index];
+      index = (index + 1) % values.length;
+      return value;
+    };
+  })();
+
+  assert.equal(game.getRandomKidColor(fakeRandom), "hsl(180deg 78% 53%)");
+});
+
+test("baby mode random motion creates deterministic shift and spin", () => {
+  const game = loadGameScript();
+  const fakeRandom = (() => {
+    const values = [0.0, 1.0, 0.5];
+    let index = 0;
+    return () => {
+      const value = values[index];
+      index = (index + 1) % values.length;
+      return value;
+    };
+  })();
+
+  const motion = game.getRandomBabyMotion(fakeRandom);
+  assert.equal(motion.shiftX, -18);
+  assert.equal(motion.shiftY, 15);
+  assert.equal(motion.rotation, 0);
+});
+
+test("baby mode chooses requested sound names randomly", () => {
+  const game = loadGameScript();
+  assert.equal(game.getRandomBabySoundName(() => 0.0), "laugh");
+  assert.equal(game.getRandomBabySoundName(() => 0.21), "boing");
+  assert.equal(game.getRandomBabySoundName(() => 0.99), "pop");
+});
+
+test("baby mode maps sounds to kid-friendly haptic patterns", () => {
+  const game = loadGameScript();
+  assert.equal(game.getHapticPatternForBabySound("laugh").join(","), "14,18,14");
+  assert.equal(game.getHapticPatternForBabySound("snap").join(","), "12");
+  assert.equal(game.getHapticPatternForBabySound("unknown").join(","), "18,12,30");
+});

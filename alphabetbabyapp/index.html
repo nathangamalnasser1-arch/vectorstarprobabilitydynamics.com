@@ -34,6 +34,27 @@
         </button>
       </nav>
 
+      <section class="baby-controls" aria-label="Baby mode controls">
+        <label class="baby-toggle">
+          <input type="checkbox" id="babyModeToggle" />
+          <span>Baby Mode</span>
+        </label>
+        <label class="baby-slider-label" for="babySizeSlider">
+          Letter Size
+          <input
+            type="range"
+            id="babySizeSlider"
+            min="1"
+            max="3"
+            step="1"
+            value="1"
+            aria-valuemin="1"
+            aria-valuemax="3"
+            aria-valuenow="1"
+          />
+        </label>
+      </section>
+
       <section id="lettersPanel" class="lesson-panel" aria-label="Alphabet letters">
         <div class="letters-track" id="lettersTrack"></div>
       </section>
