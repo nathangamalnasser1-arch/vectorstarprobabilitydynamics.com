@@ -33,6 +33,12 @@ const patterns = {
   vspdResearchHref: /vspd-research-initiative\.html/,
   vspdResearchLabel: />VSPD Research Initiative</,
 };
+const absentPatterns = {
+  hallpassHref: /hallpassapp\//,
+  hallpassLabel: />Hall Pass</,
+  jaydenLabel: />Jayden E-Commerce</i,
+  jaydenHref: /jayden|e-?commerce|\/jay\//i,
+};
 
 const jsPath = path.join(root, 'js', 'sidebar-nav.js');
 const js = fs.readFileSync(jsPath, 'utf8');
@@ -50,22 +56,22 @@ for (const file of pages) {
   const htmlPath = path.join(root, file);
   const html = fs.readFileSync(htmlPath, 'utf8');
   for (const [name, re] of Object.entries(patterns)) {
-    if (name === 'hallpassHref' || name === 'hallpassLabel') {
-      const absent = !re.test(html);
-      if (!absent) {
-        console.error('FAIL:', file, name, 'should be absent');
-        failed++;
-      } else {
-        console.log('OK:', file, name, 'absent');
-      }
-      continue;
-    }
+    if (name === 'hallpassHref' || name === 'hallpassLabel') continue;
     const ok = re.test(html);
     if (!ok) {
       console.error('FAIL:', file, name);
       failed++;
     } else {
       console.log('OK:', file, name);
+    }
+  }
+  for (const [name, re] of Object.entries(absentPatterns)) {
+    const absent = !re.test(html);
+    if (!absent) {
+      console.error('FAIL:', file, name, 'should be absent');
+      failed++;
+    } else {
+      console.log('OK:', file, name, 'absent');
     }
   }
 }
