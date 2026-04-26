@@ -30,8 +30,6 @@ const patterns = {
   hallpassLabel: />Hall Pass</,
   iamcuriousHref: /iamcurious\/dist\/index\.html/,
   iamcuriousLabel: />I Am Curious</,
-  jaydenEcommerceHref: /jayden-ecommerce\.html/,
-  jaydenEcommerceLabel: />Jayden E-Commerce</,
   vspdResearchHref: /vspd-research-initiative\.html/,
   vspdResearchLabel: />VSPD Research Initiative</,
 };
@@ -52,6 +50,16 @@ for (const file of pages) {
   const htmlPath = path.join(root, file);
   const html = fs.readFileSync(htmlPath, 'utf8');
   for (const [name, re] of Object.entries(patterns)) {
+    if (name === 'hallpassHref' || name === 'hallpassLabel') {
+      const absent = !re.test(html);
+      if (!absent) {
+        console.error('FAIL:', file, name, 'should be absent');
+        failed++;
+      } else {
+        console.log('OK:', file, name, 'absent');
+      }
+      continue;
+    }
     const ok = re.test(html);
     if (!ok) {
       console.error('FAIL:', file, name);
