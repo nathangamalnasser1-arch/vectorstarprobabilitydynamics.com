@@ -28,8 +28,6 @@ const patterns = {
   natosLabel: />NatOS</,
   hallpassHref: /hallpassapp\//,
   hallpassLabel: />Hall Pass</,
-  iamcuriousHref: /iamcurious\/dist\/index\.html/,
-  iamcuriousLabel: />I Am Curious</,
   vspdResearchHref: /vspd-research-initiative\.html/,
   vspdResearchLabel: />VSPD Research Initiative</,
 };
@@ -38,6 +36,8 @@ const absentPatterns = {
   hallpassLabel: />Hall Pass</,
   jaydenLabel: />Jayden E-Commerce</i,
   jaydenHref: /jayden|e-?commerce|\/jay\//i,
+  iamcuriousHref: /iamcurious\/dist\/index\.html/i,
+  iamcuriousLabel: />I Am Curious</i,
 };
 
 const jsPath = path.join(root, 'js', 'sidebar-nav.js');
