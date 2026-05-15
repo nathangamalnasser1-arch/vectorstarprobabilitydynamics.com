@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Boxing Sensor Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #222;
+    --accent: #ff3c00;
+    --accent2: #ffaa00;
+    --text: #f0f0f0;
+    --muted: #555;
+    --green: #00ff88;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    padding: 0 0 200px 0;
+    overflow-x: hidden;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 14px 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); }
+  header span { color: var(--muted); font-size: 11px; }
+
+  #status {
+    font-size: 10px; color: var(--green); letter-spacing: 1px;
+    padding: 6px 16px; background: #001a0a; border-bottom: 1px solid #002; min-height: 24px;
+  }
+  #status.err { color: var(--accent); background: #1a0000; border-color: #300; }
+
+  .section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .divider-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 6px 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+
+  .punch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .punch-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+    padding: 10px 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 1px; cursor: pointer; text-align: left; transition: all 0.1s; text-transform: uppercase;
+  }
+  .punch-btn .hand { font-size: 9px; color: var(--muted); display: block; margin-bottom: 2px; }
+  .punch-btn.selected { border-color: var(--accent); color: var(--accent); background: #1a0a00; }
+  .punch-btn.selected .hand { color: var(--accent2); }
+
+  .readings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .reading-box { background: var(--surface); border: 1px solid var(--border); padding: 8px; text-align: center; }
+  .reading-box .axis { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+  .reading-box .val { font-size: 16px; font-weight: 700; }
+  .reading-box.accel .val { color: var(--accent2); }
+  .reading-box.gyro .val  { color: var(--green); }
+  #chart { width: 100%; height: 80px; background: var(--surface); border: 1px solid var(--border); display: block; margin-top: 8px; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .summary-box { background: var(--surface); border: 1px solid var(--border); padding: 8px; text-align: center; }
+  .summary-box .s-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent2); }
+  .summary-box .s-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+  .rep-list { display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow-y: auto; }
+  .rep-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 6px 10px; font-size: 11px; }
+  .rep-item .meta { color: var(--muted); font-size: 10px; }
+  .rep-item .peak { color: var(--accent2); }
+
+  .export-row { display: flex; gap: 8px; }
+  .btn-sec { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px; cursor: pointer; text-transform: uppercase; }
+  .btn-sec.danger { color: var(--accent); border-color: #300; }
+
+  #permSection { display: none; }
+  #permBtn { width: 100%; background: var(--accent); border: none; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; padding: 14px; cursor: pointer; margin-top: 6px; }
+
+  /* ── Fixed bottom bar ── */
+  .record-wrap {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg); border-top: 1px solid var(--border);
+    padding: 10px 16px 18px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* Countdown ring */
+  .countdown-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 2px;
+  }
+
+  .ring-container {
+    position: relative;
+    width: 56px; height: 56px;
+    flex-shrink: 0;
+  }
+
+  #ringBg, #ringFill {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+  }
+
+  /* SVG ring */
+  .ring-svg {
+    position: absolute; inset: 0;
+    transform: rotate(-90deg);
+  }
+
+  .ring-track { fill: none; stroke: var(--border); stroke-width: 3; }
+  .ring-prog  { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round;
+                stroke-dasharray: 151; stroke-dashoffset: 151;
+                transition: stroke-dashoffset linear; }
+
+  .ring-number {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px; color: var(--text);
+    letter-spacing: 1px;
+  }
+  .ring-number.go { color: var(--green); font-size: 22px; }
+  .ring-number.idle { color: var(--muted); font-size: 14px; }
+
+  /* Countdown delay selector */
+  .delay-row {
+    display: flex; gap: 6px; flex: 1;
+  }
+  .delay-btn {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 1px; padding: 6px 4px;
+    cursor: pointer; text-align: center; text-transform: uppercase;
+    transition: all 0.1s;
+  }
+  .delay-btn.selected { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Main button row */
+  .btn-row { display: flex; gap: 8px; }
+
+  #startStopBtn {
+    min-width: 80px; border: 1px solid var(--accent); background: transparent;
+    color: var(--accent); font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px; padding: 10px 12px; cursor: pointer;
+  }
+  #startStopBtn.running { border-color: var(--accent2); color: var(--accent2); background: #1a1200; }
+
+  #punchBtn {
+    flex: 1; background: #181818; border: 2px solid var(--border); color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px;
+    padding: 14px; cursor: default; user-select: none; -webkit-user-select: none;
+    pointer-events: none; transition: background 0.1s, border-color 0.1s, color 0.1s;
+  }
+  #punchBtn.armed {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+    pointer-events: all; cursor: pointer;
+  }
+  #punchBtn.counting {
+    background: #1a1200; border-color: var(--accent2); color: var(--accent2);
+    pointer-events: all; cursor: pointer; /* allow cancel tap */
+  }
+  #punchBtn.capturing {
+    background: var(--green); border-color: var(--green); color: #000;
+    pointer-events: none;
+    animation: capturePulse 0.15s ease;
+  }
+  #punchBtn.flash { background: #fff !important; border-color: #fff !important; color: #000 !important; }
+
+  @keyframes capturePulse {
+    0%   { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  /* Capture progress bar */
+  #captureBar { height: 3px; background: var(--border); width: 100%; overflow: hidden; }
+  #captureProgress { height: 100%; background: var(--green); width: 0%; }
+
+  .rep-counter { text-align: center; min-width: 44px; }
+  .rep-counter .num { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--accent2); line-height: 1; }
+  .rep-counter .lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+  /* Vibration not supported warning */
+  #vibeWarning {
+    font-size: 9px; color: var(--accent2); letter-spacing: 1px;
+    text-align: center; display: none; padding: 2px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SENSOR LAB</h1>
+  <span>boxing data collector</span>
+</header>
+
+<div id="status">INITIALISING...</div>
+
+<div class="section" id="permSection">
+  <div class="label">iOS Permission Required</div>
+  <p style="color:var(--muted);font-size:11px;margin-bottom:8px;">Tap to grant motion sensor access.</p>
+  <button id="permBtn">GRANT PERMISSION</button>
+</div>
+
+<div class="section">
+  <div class="label">Punch Type</div>
+  <div class="punch-grid">
+    <button class="punch-btn selected" data-punch="jab"><span class="hand">LEFT HAND</span>JAB</button>
+    <button class="punch-btn" data-punch="straight"><span class="hand">RIGHT HAND</span>STRAIGHT</button>
+    <button class="punch-btn" data-punch="left_hook"><span class="hand">LEFT HAND</span>HOOK</button>
+    <button class="punch-btn" data-punch="right_hook"><span class="hand">RIGHT HAND</span>HOOK</button>
+    <button class="punch-btn" data-punch="left_uppercut"><span class="hand">LEFT HAND</span>UPPERCUT</button>
+    <button class="punch-btn" data-punch="right_uppercut"><span class="hand">RIGHT HAND</span>UPPERCUT</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Live Sensors</div>
+  <div class="divider-label">Accelerometer (m/s²)</div>
+  <div class="readings">
+    <div class="reading-box accel"><div class="axis">AX</div><div class="val" id="ax">0.00</div></div>
+    <div class="reading-box accel"><div class="axis">AY</div><div class="val" id="ay">0.00</div></div>
+    <div class="reading-box accel"><div class="axis">AZ</div><div class="val" id="az">0.00</div></div>
+  </div>
+  <div class="divider-label" style="margin-top:8px">Gyroscope (rad/s)</div>
+  <div class="readings">
+    <div class="reading-box gyro"><div class="axis">GX</div><div class="val" id="gx">0.00</div></div>
+    <div class="reading-box gyro"><div class="axis">GY</div><div class="val" id="gy">0.00</div></div>
+    <div class="reading-box gyro"><div class="axis">GZ</div><div class="val" id="gz">0.00</div></div>
+  </div>
+  <canvas id="chart"></canvas>
+</div>
+
+<div class="section">
+  <div class="label">Session Summary</div>
+  <div class="summary-grid">
+    <div class="summary-box"><div class="s-val" id="totalReps">0</div><div class="s-lbl">Total Reps</div></div>
+    <div class="summary-box"><div class="s-val" id="peakG">0.0</div><div class="s-lbl">Peak G</div></div>
+    <div class="summary-box"><div class="s-val" id="avgDur">0</div><div class="s-lbl">Avg ms</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Recorded Reps</div>
+  <div class="rep-list" id="repList">
+    <div style="color:var(--muted);font-size:11px">No reps yet.</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Export</div>
+  <div class="export-row">
+    <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
+    <button class="btn-sec" onclick="exportJSON()">↓ JSON</button>
+    <button class="btn-sec danger" onclick="clearData()">✕ CLEAR</button>
+  </div>
+</div>
+
+<!-- ── FIXED BOTTOM BAR ── -->
+<div class="record-wrap">
+
+  <!-- Countdown ring + delay selector -->
+  <div class="countdown-wrap">
+    <div class="ring-container">
+      <svg class="ring-svg" viewBox="0 0 56 56">
+        <circle class="ring-track" cx="28" cy="28" r="24"/>
+        <circle class="ring-prog"  cx="28" cy="28" r="24" id="ringProg"/>
+      </svg>
+      <div class="ring-number idle" id="ringNum">—</div>
+    </div>
+    <div style="flex:1">
+      <div class="label" style="margin-bottom:6px">Countdown</div>
+      <div class="delay-row" id="delayRow">
+        <div class="delay-btn" data-delay="1">1s</div>
+        <div class="delay-btn selected" data-delay="2">2s</div>
+        <div class="delay-btn" data-delay="3">3s</div>
+        <div class="delay-btn" data-delay="5">5s</div>
+      </div>
+      <div id="vibeWarning">⚠ VIBRATION NOT SUPPORTED ON THIS DEVICE</div>
+    </div>
+  </div>
+
+  <div id="captureBar"><div id="captureProgress"></div></div>
+
+  <div class="btn-row">
+    <div class="rep-counter">
+      <div class="num" id="repCount">0</div>
+      <div class="lbl">REPS</div>
+    </div>
+    <button id="punchBtn">PUNCH</button>
+    <button id="startStopBtn">START</button>
+  </div>
+
+</div>
+
+<script>
+// ─── Config ──────────────────────────────────────────────
+const CAPTURE_MS  = 700;
+const CHART_LEN   = 80;
+const CIRCUMF     = 2 * Math.PI * 24; // SVG ring circumference ≈ 150.8
+
+// ─── State ───────────────────────────────────────────────
+let selectedPunch  = 'jab';
+let sessionActive  = false;
+let phase          = 'idle'; // idle | counting | capturing
+let countdownDelay = 2;      // seconds
+let countdownTimer = null;
+let captureTimer   = null;
+let captureBuffer  = [];
+let captureStart   = 0;
+let allReps        = JSON.parse(localStorage.getItem('boxing_reps') || '[]');
+let chartAcc       = [], chartGyr = [];
+let sensorActive   = false;
+let vibeSupported  = ('vibrate' in navigator);
+
+const LABELS = {
+  jab:'JAB', straight:'STRAIGHT',
+  left_hook:'L HOOK', right_hook:'R HOOK',
+  left_uppercut:'L UPPERCUT', right_uppercut:'R UPPERCUT'
+};
+
+// ─── Init ────────────────────────────────────────────────
+updateRepList();
+updateSummary();
+checkVibration();
+initSensors();
+
+// ─── Vibration check ─────────────────────────────────────
+function checkVibration() {
+  if (!vibeSupported) {
+    document.getElementById('vibeWarning').style.display = 'block';
+  }
+}
+
+function vibrate(pattern) {
+  if (vibeSupported) {
+    try { navigator.vibrate(pattern); } catch(e) {}
+  }
+}
+
+// ─── Delay selector ──────────────────────────────────────
+document.querySelectorAll('.delay-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (phase !== 'idle') return; // don't change mid-countdown
+    document.querySelectorAll('.delay-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    countdownDelay = parseInt(btn.dataset.delay);
+  });
+});
+
+// ─── Punch type selector ─────────────────────────────────
+document.querySelectorAll('.punch-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (phase !== 'idle') return;
+    document.querySelectorAll('.punch-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedPunch = btn.dataset.punch;
+  });
+});
+
+// ─── Sensor init ─────────────────────────────────────────
+function initSensors() {
+  if (typeof DeviceMotionEvent === 'undefined') {
+    setStatus('DeviceMotion not supported on this browser.', true); return;
+  }
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    document.getElementById('permSection').style.display = 'block';
+    setStatus('Tap GRANT PERMISSION to enable motion sensors (iOS).', false);
+    document.getElementById('permBtn').addEventListener('click', () => {
+      DeviceMotionEvent.requestPermission().then(s => {
+        if (s === 'granted') {
+          document.getElementById('permSection').style.display = 'none';
+          startListening();
+        } else { setStatus('Permission denied.', true); }
+      }).catch(e => setStatus('Error: ' + e, true));
+    });
+  } else {
+    startListening();
+  }
+}
+
+function startListening() {
+  window.addEventListener('devicemotion', onMotion, { passive: true });
+  sensorActive = true;
+  setStatus('SENSORS ACTIVE — press START, select punch, tap PUNCH to begin countdown');
+}
+
+function onMotion(e) {
+  const a  = e.accelerationIncludingGravity || e.acceleration || {};
+  const r  = e.rotationRate || {};
+  const ax = +(a.x || 0), ay = +(a.y || 0), az = +(a.z || 0);
+  const gx = +((r.alpha || 0) * Math.PI / 180);
+  const gy = +((r.beta  || 0) * Math.PI / 180);
+  const gz = +((r.gamma || 0) * Math.PI / 180);
+
+  document.getElementById('ax').textContent = ax.toFixed(2);
+  document.getElementById('ay').textContent = ay.toFixed(2);
+  document.getElementById('az').textContent = az.toFixed(2);
+  document.getElementById('gx').textContent = gx.toFixed(2);
+  document.getElementById('gy').textContent = gy.toFixed(2);
+  document.getElementById('gz').textContent = gz.toFixed(2);
+
+  const am = Math.sqrt(ax*ax + ay*ay + az*az);
+  const gm = Math.sqrt(gx*gx + gy*gy + gz*gz);
+
+  chartAcc.push(am); chartGyr.push(gm);
+  if (chartAcc.length > CHART_LEN) chartAcc.shift();
+  if (chartGyr.length > CHART_LEN) chartGyr.shift();
+  drawChart();
+
+  if (phase === 'capturing') {
+    captureBuffer.push({
+      t:         Date.now() - captureStart,
+      ax, ay, az, gx, gy, gz,
+      accel_mag: +am.toFixed(4),
+      gyro_mag:  +gm.toFixed(4)
+    });
+  }
+}
+
+// ─── Chart ───────────────────────────────────────────────
+const canvas = document.getElementById('chart');
+const ctx    = canvas.getContext('2d');
+
+function drawChart() {
+  const w = canvas.offsetWidth || 300, h = 80;
+  canvas.width = w; canvas.height = h;
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, w, h);
+  const mx = Math.max(20, ...chartAcc, ...chartGyr);
+  function ln(d, c) {
+    if (d.length < 2) return;
+    ctx.beginPath(); ctx.strokeStyle = c; ctx.lineWidth = 1.5;
+    d.forEach((v, i) => {
+      const x = (i / (CHART_LEN - 1)) * w, y = h - (v / mx) * h * 0.9;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+  ln(chartAcc, '#ffaa00'); ln(chartGyr, '#00ff88');
+  ctx.font = '9px monospace';
+  ctx.fillStyle = '#ffaa00'; ctx.fillText('■ ACCEL', 4, 12);
+  ctx.fillStyle = '#00ff88'; ctx.fillText('■ GYRO', 58, 12);
+
+  // Red line during capture
+  if (phase === 'capturing') {
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(w - 2, 0); ctx.lineTo(w - 2, h);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+// ─── Ring UI helpers ─────────────────────────────────────
+const ringProg = document.getElementById('ringProg');
+const ringNum  = document.getElementById('ringNum');
+
+function ringIdle() {
+  ringProg.style.transition = 'none';
+  ringProg.style.strokeDashoffset = CIRCUMF;
+  ringProg.style.stroke = 'var(--accent)';
+  ringNum.textContent = '—';
+  ringNum.className   = 'ring-number idle';
+}
+
+function ringCountdown(totalMs) {
+  // Sweep ring from full to empty over totalMs
+  ringProg.style.transition = 'none';
+  ringProg.style.strokeDashoffset = 0;
+  ringProg.style.stroke = 'var(--accent)';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      ringProg.style.transition = `stroke-dashoffset ${totalMs}ms linear`;
+      ringProg.style.strokeDashoffset = CIRCUMF;
+    });
+  });
+}
+
+function ringGo() {
+  ringProg.style.transition = 'none';
+  ringProg.style.strokeDashoffset = 0;
+  ringProg.style.stroke = 'var(--green)';
+  ringNum.textContent = 'GO';
+  ringNum.className   = 'ring-number go';
+}
+
+// ─── Countdown tick display ───────────────────────────────
+function startCountdownDisplay(totalSec) {
+  let remaining = totalSec;
+  ringNum.className   = 'ring-number';
+  ringNum.textContent = remaining;
+
+  const tick = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(tick);
+      return;
+    }
+    ringNum.textContent = remaining;
+    // Small vibrate each tick so user knows it's counting
+    vibrate(40);
+  }, 1000);
+
+  return tick;
+}
+
+// ─── Start / Stop ─────────────────────────────────────────
+const startStopBtn = document.getElementById('startStopBtn');
+const punchBtn     = document.getElementById('punchBtn');
+
+startStopBtn.addEventListener('click', () => {
+  if (!sensorActive) { setStatus('Sensors not ready.', true); return; }
+  if (!sessionActive) {
+    sessionActive = true;
+    startStopBtn.textContent = 'STOP';
+    startStopBtn.classList.add('running');
+    punchBtn.classList.add('armed');
+    punchBtn.classList.remove('counting', 'capturing');
+    punchBtn.textContent = 'PUNCH';
+    ringIdle();
+    setStatus('SESSION ACTIVE — tap PUNCH to start countdown, throw on vibration');
+  } else {
+    endSession();
+  }
+});
+
+function endSession() {
+  sessionActive = false;
+  cancelCountdown();
+  cancelCapture();
+  phase = 'idle';
+  startStopBtn.textContent = 'START';
+  startStopBtn.classList.remove('running');
+  punchBtn.classList.remove('armed', 'counting', 'capturing');
+  punchBtn.textContent = 'PUNCH';
+  ringIdle();
+  document.getElementById('captureProgress').style.width = '0%';
+  setStatus('Session ended — export data or start a new session.');
+}
+
+// ─── Punch button ─────────────────────────────────────────
+punchBtn.addEventListener('click', onPunchTap);
+punchBtn.addEventListener('touchstart', e => {
+  e.preventDefault(); onPunchTap();
+}, { passive: false });
+
+function onPunchTap() {
+  if (!sessionActive) return;
+
+  if (phase === 'counting') {
+    // Allow cancel
+    cancelCountdown();
+    punchBtn.classList.remove('counting');
+    punchBtn.classList.add('armed');
+    punchBtn.textContent = 'PUNCH';
+    ringIdle();
+    setStatus('Cancelled — tap PUNCH to try again.');
+    return;
+  }
+
+  if (phase === 'capturing') return; // ignore during capture
+
+  if (phase === 'idle') {
+    beginCountdown();
+  }
+}
+
+// ─── Countdown ────────────────────────────────────────────
+let tickInterval = null;
+
+function beginCountdown() {
+  phase = 'counting';
+  punchBtn.classList.remove('armed');
+  punchBtn.classList.add('counting');
+  punchBtn.textContent = 'CANCEL';
+
+  const totalMs = countdownDelay * 1000;
+  ringCountdown(totalMs);
+  tickInterval = startCountdownDisplay(countdownDelay);
+
+  // Short vibrate to signal countdown has started
+  vibrate(60);
+
+  countdownTimer = setTimeout(() => {
+    clearInterval(tickInterval);
+    fireCapture();
+  }, totalMs);
+}
+
+function cancelCountdown() {
+  clearTimeout(countdownTimer);
+  clearInterval(tickInterval);
+  countdownTimer = null;
+  tickInterval   = null;
+  if (phase === 'counting') phase = 'idle';
+}
+
+// ─── Fire — vibrate, show GO, start capture ───────────────
+function fireCapture() {
+  // Long vibration = throw now
+  vibrate([0, 80, 30, 80]); // two strong pulses
+
+  phase = 'capturing';
+  captureBuffer = [];
+  captureStart  = Date.now();
+
+  ringGo();
+  punchBtn.classList.remove('counting');
+  punchBtn.classList.add('capturing');
+  punchBtn.textContent = '●';
+
+  // Capture bar animation
+  const bar = document.getElementById('captureProgress');
+  bar.style.transition = 'none'; bar.style.width = '0%';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    bar.style.transition = `width ${CAPTURE_MS}ms linear`;
+    bar.style.width = '100%';
+  }));
+
+  captureTimer = setTimeout(finishCapture, CAPTURE_MS);
+}
+
+function cancelCapture() {
+  clearTimeout(captureTimer);
+  captureTimer = null;
+  if (phase === 'capturing') phase = 'idle';
+}
+
+// ─── Finish capture ───────────────────────────────────────
+function finishCapture() {
+  if (phase !== 'capturing') return;
+  phase = 'idle';
+  clearTimeout(captureTimer);
+
+  // Short buzz = done
+  vibrate(30);
+
+  // Flash and reset button
+  punchBtn.classList.remove('capturing');
+  punchBtn.classList.add('flash');
+  setTimeout(() => {
+    punchBtn.classList.remove('flash');
+    punchBtn.classList.add('armed');
+    punchBtn.textContent = 'PUNCH';
+    document.getElementById('captureProgress').style.transition = 'none';
+    document.getElementById('captureProgress').style.width = '0%';
+    ringIdle();
+  }, 140);
+
+  if (captureBuffer.length < 3) {
+    setStatus('Too few samples captured — try again.', true); return;
+  }
+
+  const peakAccel = Math.max(...captureBuffer.map(s => s.accel_mag));
+  const peakGyro  = Math.max(...captureBuffer.map(s => s.gyro_mag));
+  const duration  = captureBuffer[captureBuffer.length - 1].t;
+
+  allReps.push({
+    id:             Date.now(),
+    punch_type:     selectedPunch,
+    timestamp:      new Date().toISOString(),
+    duration_ms:    duration,
+    peak_accel_ms2: +peakAccel.toFixed(3),
+    peak_gyro_rads: +peakGyro.toFixed(3),
+    sample_count:   captureBuffer.length,
+    samples:        captureBuffer.slice()
+  });
+
+  saveToStorage();
+  updateRepList();
+  updateSummary();
+  setStatus(`✓ ${LABELS[selectedPunch]} saved — ${(peakAccel / 9.81).toFixed(1)}g peak · ${duration}ms · tap PUNCH for next rep`);
+}
+
+// ─── Rep list ─────────────────────────────────────────────
+function updateRepList() {
+  const list = document.getElementById('repList');
+  document.getElementById('repCount').textContent = allReps.length;
+
+  if (!allReps.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:11px">No reps yet.</div>';
+    return;
+  }
+
+  list.innerHTML = [...allReps].reverse().map(r => `
+    <div class="rep-item">
+      <div>
+        <div>${LABELS[r.punch_type] || r.punch_type}</div>
+        <div class="meta">${r.duration_ms}ms · ${r.sample_count} samples</div>
+      </div>
+      <div class="peak">${(r.peak_accel_ms2 / 9.81).toFixed(1)}g</div>
+    </div>
+  `).join('');
+}
+
+function updateSummary() {
+  document.getElementById('totalReps').textContent = allReps.length;
+  if (!allReps.length) return;
+  document.getElementById('peakG').textContent  = (Math.max(...allReps.map(r => r.peak_accel_ms2)) / 9.81).toFixed(1);
+  document.getElementById('avgDur').textContent = Math.round(allReps.reduce((s, r) => s + r.duration_ms, 0) / allReps.length);
+}
+
+// ─── Storage / Export ─────────────────────────────────────
+function saveToStorage() {
+  try { localStorage.setItem('boxing_reps', JSON.stringify(allReps)); }
+  catch(e) { setStatus('Storage full — export now.', true); }
+}
+
+function exportCSV() {
+  if (!allReps.length) { alert('No data.'); return; }
+  const rows = ['rep_id,punch_type,rep_timestamp,duration_ms,peak_accel_ms2,peak_gyro_rads,sample_index,t_ms,ax,ay,az,gx,gy,gz,accel_mag,gyro_mag'];
+  allReps.forEach(rep => {
+    rep.samples.forEach((s, i) => {
+      rows.push([rep.id, rep.punch_type, rep.timestamp, rep.duration_ms,
+        rep.peak_accel_ms2, rep.peak_gyro_rads, i, s.t,
+        s.ax.toFixed(4), s.ay.toFixed(4), s.az.toFixed(4),
+        s.gx.toFixed(4), s.gy.toFixed(4), s.gz.toFixed(4),
+        s.accel_mag, s.gyro_mag].join(','));
+    });
+  });
+  dl('boxing_sensor_data.csv', rows.join('\n'), 'text/csv');
+  setStatus(`Exported ${allReps.length} reps as CSV`);
+}
+
+function exportJSON() {
+  if (!allReps.length) { alert('No data.'); return; }
+  dl('boxing_sensor_data.json', JSON.stringify(allReps, null, 2), 'application/json');
+  setStatus(`Exported ${allReps.length} reps as JSON`);
+}
+
+function dl(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function clearData() {
+  if (!confirm(`Delete all ${allReps.length} reps?`)) return;
+  allReps = []; localStorage.removeItem('boxing_reps');
+  updateRepList(); updateSummary(); setStatus('Cleared.');
+}
+
+function setStatus(msg, isErr = false) {
+  const el = document.getElementById('status');
+  el.textContent = msg; el.className = isErr ? 'err' : '';
+}
+</script>
+</body>
+</html>
