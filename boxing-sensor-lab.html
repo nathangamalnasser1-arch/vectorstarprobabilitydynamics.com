@@ -204,6 +204,7 @@
 <header>
   <h1>SENSOR LAB</h1>
   <span>boxing data collector</span>
+  <a href="boxing-trajectory-lab.html" style="background:var(--accent2);border:none;color:#000;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;padding:6px 14px;text-decoration:none;flex-shrink:0">↗ TRAJECTORY LAB</a>
 </header>
 
 <div id="status">INITIALISING...</div>
@@ -264,6 +265,7 @@
   <div class="export-row">
     <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
     <button class="btn-sec" onclick="exportJSON()">↓ JSON</button>
+    <button class="btn-sec" onclick="openTrajectory()" style="border-color:var(--accent2);color:var(--accent2)">↗ 3D VIEW</button>
     <button class="btn-sec danger" onclick="clearData()">✕ CLEAR</button>
   </div>
 </div>
@@ -753,6 +755,12 @@ function clearData() {
   if (!confirm(`Delete all ${allReps.length} reps?`)) return;
   allReps = []; localStorage.removeItem('boxing_reps');
   updateRepList(); updateSummary(); setStatus('Cleared.');
+}
+
+function openTrajectory() {
+  if (!allReps.length) { alert('No data to visualise.'); return; }
+  localStorage.setItem('boxing_trajectory_transfer', JSON.stringify(allReps));
+  window.location.href = 'boxing-trajectory-lab.html';
 }
 
 function setStatus(msg, isErr = false) {

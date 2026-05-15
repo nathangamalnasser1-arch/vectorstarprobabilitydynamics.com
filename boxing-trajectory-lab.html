@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Punch Trajectory Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #060608;
+    --surface: #0e0e12;
+    --border: #1e1e28;
+    --accent: #ff3c00;
+    --accent2: #ffaa00;
+    --text: #e8e8f0;
+    --muted: #44445a;
+    --green: #00ffaa;
+    --blue: #4488ff;
+    --purple: #bb44ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); }
+  header span { color: var(--muted); font-size: 10px; letter-spacing: 1px; flex: 1; }
+
+  #uploadBtn {
+    background: var(--accent);
+    border: none; color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 2px;
+    padding: 6px 14px; cursor: pointer;
+  }
+  #fileInput { display: none; }
+
+  /* Main layout */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-section {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .slabel {
+    font-size: 9px; letter-spacing: 2px; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+
+  /* Rep list */
+  .rep-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .rep-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 7px 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.1s;
+  }
+  .rep-card:hover { border-color: var(--muted); }
+  .rep-card.active { border-color: var(--accent2); }
+
+  .rep-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .rep-info { flex: 1; min-width: 0; }
+  .rep-name { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rep-meta { font-size: 9px; color: var(--muted); margin-top: 1px; }
+
+  /* Controls */
+  .ctrl-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .ctrl-btn {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 1px; padding: 6px 4px;
+    cursor: pointer; text-transform: uppercase; text-align: center;
+    transition: all 0.1s;
+  }
+  .ctrl-btn.active { border-color: var(--accent2); color: var(--accent2); }
+  .ctrl-btn:hover { border-color: var(--muted); color: var(--text); }
+
+  select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; padding: 6px; margin-bottom: 6px;
+    appearance: none; cursor: pointer;
+  }
+
+  /* Legend */
+  .legend { display: flex; flex-direction: column; gap: 4px; }
+  .legend-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Canvas */
+  .canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #threeCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  #threeCanvas:active { cursor: grabbing; }
+
+  /* Overlay info */
+  .overlay {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: none;
+  }
+
+  .info-box {
+    background: rgba(14,14,18,0.85);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    font-size: 10px;
+    backdrop-filter: blur(4px);
+  }
+  .info-box .ib-label { color: var(--muted); letter-spacing: 1px; margin-bottom: 3px; font-size: 9px; }
+  .info-box .ib-val { color: var(--accent2); font-size: 13px; }
+
+  .hint {
+    position: absolute;
+    bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(14,14,18,0.8);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    font-size: 9px; color: var(--muted); letter-spacing: 1px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* Empty state */
+  #emptyState {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    pointer-events: none;
+  }
+  #emptyState .es-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px; letter-spacing: 4px; color: var(--border);
+  }
+  #emptyState .es-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+
+  /* Status bar */
+  #statusBar {
+    padding: 4px 12px;
+    font-size: 9px; letter-spacing: 1px;
+    color: var(--green);
+    background: rgba(0,255,170,0.05);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #statusBar.err { color: var(--accent); background: rgba(255,60,0,0.05); }
+
+  /* Animate bar */
+  #animBar {
+    position: absolute;
+    bottom: 40px; left: 16px; right: 16px;
+    height: 2px; background: var(--border);
+    display: none;
+  }
+  #animProgress { height: 100%; background: var(--accent2); width: 0%; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TRAJECTORY LAB</h1>
+  <span>3D punch path visualiser</span>
+  <a href="boxing-sensor-lab.html" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 10px;text-decoration:none;flex-shrink:0">← SENSOR LAB</a>
+  <button id="uploadBtn" onclick="document.getElementById('fileInput').click()">LOAD JSON</button>
+  <input type="file" id="fileInput" accept=".json">
+</header>
+
+<div class="main">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="slabel">Display</div>
+      <div class="ctrl-row">
+        <div class="ctrl-btn active" id="btnAll" onclick="setView('all')">ALL</div>
+        <div class="ctrl-btn" id="btnSingle" onclick="setView('single')">SINGLE</div>
+      </div>
+
+      <div class="slabel" style="margin-top:8px">Gravity Axis</div>
+      <select id="gravityAxis">
+        <option value="y-">-Y (default)</option>
+        <option value="y+">+Y</option>
+        <option value="z-">-Z</option>
+        <option value="z+">+Z</option>
+        <option value="x-">-X</option>
+        <option value="x+">+X</option>
+      </select>
+
+      <div class="slabel">Filter β</div>
+      <select id="betaSel">
+        <option value="0.033">0.033 — low (smooth)</option>
+        <option value="0.1" selected>0.1 — medium</option>
+        <option value="0.3">0.3 — high (fast init)</option>
+      </select>
+
+      <div class="ctrl-btn" id="btnAnimate" onclick="toggleAnimate()" style="margin-top:4px">▶ ANIMATE</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="slabel">Legend</div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="slabel" style="padding:10px 12px 4px">Reps <span id="repCountLabel" style="color:var(--muted)"></span></div>
+    <div class="rep-scroll" id="repScroll">
+      <div style="color:var(--muted);font-size:10px;padding:4px">Load a JSON file to begin.</div>
+    </div>
+  </div>
+
+  <!-- 3D Canvas -->
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="threeCanvas"></canvas>
+
+    <div id="emptyState">
+      <div class="es-title">NO DATA</div>
+      <div class="es-sub">LOAD A JSON FILE EXPORTED FROM SENSOR LAB</div>
+    </div>
+
+    <div class="overlay" id="overlay" style="display:none">
+      <div class="info-box">
+        <div class="ib-label">PUNCH</div>
+        <div class="ib-val" id="ovPunch">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">PEAK G</div>
+        <div class="ib-val" id="ovPeak">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">DURATION</div>
+        <div class="ib-val" id="ovDur">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">SAMPLES</div>
+        <div class="ib-val" id="ovSamples">—</div>
+      </div>
+    </div>
+
+    <div class="hint" id="hint">DRAG TO ORBIT · SCROLL TO ZOOM · PINCH TO ZOOM</div>
+
+    <div id="animBar"><div id="animProgress"></div></div>
+  </div>
+</div>
+
+<div id="statusBar">READY — LOAD A JSON FILE FROM SENSOR LAB</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── Colour map ───────────────────────────────────────────
+const PUNCH_COLOR = {
+  jab:           0xff6600,
+  straight:      0x4488ff,
+  left_hook:     0x00ffaa,
+  right_hook:    0xff2266,
+  left_uppercut: 0xcc44ff,
+  right_uppercut:0xffdd00
+};
+const PUNCH_LABEL = {
+  jab:'JAB', straight:'STRAIGHT',
+  left_hook:'L HOOK', right_hook:'R HOOK',
+  left_uppercut:'L UPPERCUT', right_uppercut:'R UPPERCUT'
+};
+
+buildLegend();
+function buildLegend() {
+  const el = document.getElementById('legend');
+  el.innerHTML = Object.entries(PUNCH_LABEL).map(([k,v]) => {
+    const hex = '#' + PUNCH_COLOR[k].toString(16).padStart(6,'0');
+    return `<div class="legend-row"><div class="legend-dot" style="background:${hex}"></div>${v}</div>`;
+  }).join('');
+}
+
+// ─── Three.js setup ───────────────────────────────────────
+const wrap   = document.getElementById('canvasWrap');
+const canvas = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x060608, 1);
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.001, 100);
+camera.position.set(0.8, 0.6, 1.2);
+camera.lookAt(0, 0, 0);
+
+// Grid
+const grid = new THREE.GridHelper(2, 20, 0x1e1e28, 0x141418);
+scene.add(grid);
+
+// Axis helper (thin lines)
+function addAxis() {
+  const mat = (c) => new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: 0.4 });
+  const pts = (a, b) => { const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a), new THREE.Vector3(...b)]); return g; };
+  scene.add(new THREE.Line(pts([0,0,0],[0.3,0,0]), mat(0xff4444)));
+  scene.add(new THREE.Line(pts([0,0,0],[0,0.3,0]), mat(0x44ff44)));
+  scene.add(new THREE.Line(pts([0,0,0],[0,0,0.3]), mat(0x4444ff)));
+}
+addAxis();
+
+// Resize
+function resize() {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Render loop
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+animate();
+
+// ─── Orbit (manual, no OrbitControls) ────────────────────
+let isDrag = false;
+let prevX = 0, prevY = 0;
+let sph = { theta: 0.8, phi: 1.1, r: 1.8 };
+let pinchDist0 = null;
+
+function camFromSph() {
+  camera.position.set(
+    sph.r * Math.sin(sph.phi) * Math.sin(sph.theta),
+    sph.r * Math.cos(sph.phi),
+    sph.r * Math.sin(sph.phi) * Math.cos(sph.theta)
+  );
+  camera.lookAt(0, 0, 0);
+}
+camFromSph();
+
+canvas.addEventListener('mousedown', e => { isDrag = true; prevX = e.clientX; prevY = e.clientY; });
+window.addEventListener('mouseup',   () => isDrag = false);
+window.addEventListener('mousemove', e => {
+  if (!isDrag) return;
+  sph.theta -= (e.clientX - prevX) * 0.008;
+  sph.phi   = Math.max(0.05, Math.min(Math.PI - 0.05, sph.phi - (e.clientY - prevY) * 0.008));
+  prevX = e.clientX; prevY = e.clientY;
+  camFromSph();
+});
+canvas.addEventListener('wheel', e => {
+  sph.r = Math.max(0.3, Math.min(8, sph.r * (1 + e.deltaY * 0.001)));
+  camFromSph(); e.preventDefault();
+}, { passive: false });
+
+// Touch orbit + pinch
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    isDrag = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+  } else if (e.touches.length === 2) {
+    isDrag = false;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    pinchDist0 = Math.sqrt(dx*dx + dy*dy);
+  }
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && isDrag) {
+    sph.theta -= (e.touches[0].clientX - prevX) * 0.008;
+    sph.phi   = Math.max(0.05, Math.min(Math.PI - 0.05, sph.phi - (e.touches[0].clientY - prevY) * 0.008));
+    prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+    camFromSph();
+  } else if (e.touches.length === 2 && pinchDist0) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const d  = Math.sqrt(dx*dx + dy*dy);
+    sph.r = Math.max(0.3, Math.min(8, sph.r * (pinchDist0 / d)));
+    pinchDist0 = d;
+    camFromSph();
+  }
+}, { passive: false });
+canvas.addEventListener('touchend', e => {
+  if (e.touches.length === 0) { isDrag = false; pinchDist0 = null; }
+}, { passive: true });
+
+// ─── Madgwick filter ─────────────────────────────────────
+function madgwick(q, gx, gy, gz, ax, ay, az, dt, beta) {
+  let [q0, q1, q2, q3] = q;
+
+  let qDot0 = 0.5 * (-q1*gx - q2*gy - q3*gz);
+  let qDot1 = 0.5 * ( q0*gx + q2*gz - q3*gy);
+  let qDot2 = 0.5 * ( q0*gy - q1*gz + q3*gx);
+  let qDot3 = 0.5 * ( q0*gz + q1*gy - q2*gx);
+
+  let norm = Math.sqrt(ax*ax + ay*ay + az*az);
+  if (norm > 0.01) {
+    ax /= norm; ay /= norm; az /= norm;
+
+    const _2q0 = 2*q0, _2q1 = 2*q1, _2q2 = 2*q2, _2q3 = 2*q3;
+    const q0q0 = q0*q0, q1q1 = q1*q1, q2q2 = q2*q2, q3q3 = q3*q3;
+
+    const s0 = _2q0*q2q2 + _2q2*ax + _2q0*q1q1 - _2q1*ay;
+    const s1 = _2q1*q3q3 - _2q3*ax + 4*q0q0*q1 - _2q0*ay - 4*q1 + 8*q1*q1q1 + 8*q1*q2q2 + 4*q1*az;
+    const s2 = 4*q0q0*q2 + _2q0*ax + _2q2*q3q3 - _2q3*ay - 4*q2 + 8*q2*q1q1 + 8*q2*q2q2 + 4*q2*az;
+    const s3 = 4*q1q1*q3 - _2q1*ax + 4*q2q2*q3 - _2q2*ay;
+
+    norm = Math.sqrt(s0*s0 + s1*s1 + s2*s2 + s3*s3);
+    if (norm > 0) {
+      qDot0 -= beta * s0 / norm;
+      qDot1 -= beta * s1 / norm;
+      qDot2 -= beta * s2 / norm;
+      qDot3 -= beta * s3 / norm;
+    }
+  }
+
+  q0 += qDot0 * dt; q1 += qDot1 * dt;
+  q2 += qDot2 * dt; q3 += qDot3 * dt;
+  norm = Math.sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
+  return [q0/norm, q1/norm, q2/norm, q3/norm];
+}
+
+// Rotate vector by quaternion (body → world)
+function rotByQ([q0,q1,q2,q3], [vx,vy,vz]) {
+  return [
+    (1-2*(q2*q2+q3*q3))*vx + 2*(q1*q2-q0*q3)*vy + 2*(q1*q3+q0*q2)*vz,
+        2*(q1*q2+q0*q3)*vx + (1-2*(q1*q1+q3*q3))*vy + 2*(q2*q3-q0*q1)*vz,
+        2*(q1*q3-q0*q2)*vx + 2*(q2*q3+q0*q1)*vy + (1-2*(q1*q1+q2*q2))*vz
+  ];
+}
+
+// ─── Process rep → 3D positions ──────────────────────────
+const G = 9.81;
+
+function getGravityVec(axis) {
+  // Returns gravity vector in world frame based on user setting
+  const m = { 'y-': [0,-G,0], 'y+': [0,G,0], 'z-': [0,0,-G], 'z+': [0,0,G], 'x-': [-G,0,0], 'x+': [G,0,0] };
+  return m[axis] || [0,-G,0];
+}
+
+function processRep(rep) {
+  const s = rep.samples;
+  if (!s || s.length < 4) return null;
+
+  const beta = parseFloat(document.getElementById('betaSel').value);
+  const gravAxis = document.getElementById('gravityAxis').value;
+  const [gvx, gvy, gvz] = getGravityVec(gravAxis);
+
+  // Estimate sample rate from timestamps
+  const dt_avg = (s[s.length-1].t - s[0].t) / (s.length - 1) / 1000;
+  const dt_safe = dt_avg > 0 ? dt_avg : 0.016;
+
+  // Initialise filter — high beta to snap to gravity quickly using first samples
+  let q = [1, 0, 0, 0];
+  for (let i = 0; i < Math.min(20, s.length); i++) {
+    q = madgwick(q, s[i].gx, s[i].gy, s[i].gz, s[i].ax, s[i].ay, s[i].az, dt_safe, 5.0);
+  }
+
+  // Integrate
+  let vx = 0, vy = 0, vz = 0;
+  let px = 0, py = 0, pz = 0;
+  const positions = [[0, 0, 0]];
+
+  for (let i = 1; i < s.length; i++) {
+    const dt = Math.min((s[i].t - s[i-1].t) / 1000, 0.05);
+    if (dt <= 0) continue;
+
+    q = madgwick(q, s[i].gx, s[i].gy, s[i].gz, s[i].ax, s[i].ay, s[i].az, dt, beta);
+
+    // Rotate accel to world frame, subtract gravity
+    const [wx, wy, wz] = rotByQ(q, [s[i].ax, s[i].ay, s[i].az]);
+    const lax = wx - gvx;
+    const lay = wy - gvy;
+    const laz = wz - gvz;
+
+    // Simple zero-velocity damping (reduces drift slightly)
+    const speed = Math.sqrt(vx*vx + vy*vy + vz*vz);
+    const damping = speed > 0.5 ? 1.0 : 0.98;
+
+    vx = (vx + lax * dt) * damping;
+    vy = (vy + lay * dt) * damping;
+    vz = (vz + laz * dt) * damping;
+
+    px += vx * dt;
+    py += vy * dt;
+    pz += vz * dt;
+
+    positions.push([px, py, pz]);
+  }
+
+  return positions;
+}
+
+// ─── Scene management ────────────────────────────────────
+let repData    = [];   // parsed reps
+let repObjects = {};   // THREE objects keyed by rep id
+let selectedRep = null;
+let viewMode   = 'all';
+let animRunning = false;
+let animFrame   = null;
+
+function clearScene() {
+  for (const key in repObjects) {
+    scene.remove(repObjects[key]);
+    repObjects[key].geometry.dispose();
+    repObjects[key].material.dispose();
+  }
+  repObjects = {};
+}
+
+function buildRepLine(rep, positions, opacity = 1.0) {
+  const color = PUNCH_COLOR[rep.punch_type] || 0xffffff;
+  const pts   = positions.map(([x, y, z]) => new THREE.Vector3(x, y, z));
+  const geo   = new THREE.BufferGeometry().setFromPoints(pts);
+  const mat   = new THREE.LineBasicMaterial({ color, opacity, transparent: opacity < 1 });
+  const line  = new THREE.Line(geo, mat);
+  line.userData = { repId: rep.id, positions };
+  return line;
+}
+
+// Start sphere marker
+function buildStartMarker(color) {
+  const geo  = new THREE.SphereGeometry(0.008, 8, 8);
+  const mat  = new THREE.MeshBasicMaterial({ color });
+  return new THREE.Mesh(geo, mat);
+}
+
+function renderAll() {
+  clearScene();
+  repData.forEach(rep => {
+    const pos = processRep(rep);
+    if (!pos) return;
+    const line  = buildRepLine(rep, pos, 0.75);
+    const start = buildStartMarker(PUNCH_COLOR[rep.punch_type] || 0xffffff);
+    scene.add(line);
+    scene.add(start);
+    repObjects[rep.id] = line;
+  });
+}
+
+function renderSingle(rep) {
+  clearScene();
+  if (!rep) return;
+  const pos  = processRep(rep);
+  if (!pos) return;
+  const line  = buildRepLine(rep, pos, 1.0);
+  const start = buildStartMarker(PUNCH_COLOR[rep.punch_type] || 0xffffff);
+  scene.add(line);
+  scene.add(start);
+  repObjects[rep.id] = line;
+
+  updateOverlay(rep);
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('btnAll').classList.toggle('active', mode === 'all');
+  document.getElementById('btnSingle').classList.toggle('active', mode === 'single');
+  if (mode === 'all') {
+    document.getElementById('overlay').style.display = 'none';
+    renderAll();
+  } else if (selectedRep) {
+    document.getElementById('overlay').style.display = 'flex';
+    renderSingle(selectedRep);
+  }
+}
+
+function updateOverlay(rep) {
+  document.getElementById('ovPunch').textContent   = PUNCH_LABEL[rep.punch_type] || rep.punch_type;
+  document.getElementById('ovPeak').textContent    = (rep.peak_accel_ms2 / G).toFixed(2) + 'g';
+  document.getElementById('ovDur').textContent     = rep.duration_ms + 'ms';
+  document.getElementById('ovSamples').textContent = rep.sample_count;
+}
+
+// ─── Animate single trajectory ────────────────────────────
+function toggleAnimate() {
+  const btn = document.getElementById('btnAnimate');
+  if (animRunning) {
+    cancelAnimationFrame(animFrame);
+    animRunning = false;
+    btn.textContent = '▶ ANIMATE';
+    document.getElementById('animBar').style.display = 'none';
+    if (viewMode === 'single' && selectedRep) renderSingle(selectedRep);
+    else renderAll();
+    return;
+  }
+
+  const rep = viewMode === 'single' ? selectedRep : null;
+  if (!rep && viewMode === 'single') return;
+
+  animRunning = true;
+  btn.textContent = '■ STOP';
+  document.getElementById('animBar').style.display = 'block';
+
+  const target = rep || repData[0];
+  if (!target) return;
+
+  const positions = processRep(target);
+  if (!positions) return;
+
+  clearScene();
+
+  const color = PUNCH_COLOR[target.punch_type] || 0xffffff;
+  const drawn = [];
+  let idx = 0;
+  const totalSteps = positions.length;
+  const bar = document.getElementById('animProgress');
+
+  function step() {
+    if (!animRunning) return;
+    if (idx >= totalSteps - 1) {
+      animRunning = false;
+      btn.textContent = '▶ ANIMATE';
+      document.getElementById('animBar').style.display = 'none';
+      return;
+    }
+
+    drawn.push(new THREE.Vector3(...positions[idx]));
+    idx += Math.max(1, Math.floor(totalSteps / 120));
+
+    if (drawn.length >= 2) {
+      clearScene();
+      const geo = new THREE.BufferGeometry().setFromPoints(drawn);
+      const mat = new THREE.LineBasicMaterial({ color });
+      const line = new THREE.Line(geo, mat);
+      scene.add(line);
+
+      // Dot at current position
+      const dotGeo = new THREE.SphereGeometry(0.010, 8, 8);
+      const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.set(...positions[Math.min(idx, totalSteps-1)]);
+      scene.add(dot);
+    }
+
+    bar.style.width = ((idx / totalSteps) * 100) + '%';
+    animFrame = requestAnimationFrame(step);
+  }
+  step();
+}
+
+// ─── Rep list UI ─────────────────────────────────────────
+function buildRepList() {
+  const scroll = document.getElementById('repScroll');
+  document.getElementById('repCountLabel').textContent = `(${repData.length})`;
+
+  if (!repData.length) {
+    scroll.innerHTML = '<div style="color:var(--muted);font-size:10px;padding:4px">No reps in file.</div>';
+    return;
+  }
+
+  scroll.innerHTML = repData.map((rep, i) => {
+    const hex   = '#' + (PUNCH_COLOR[rep.punch_type] || 0xffffff).toString(16).padStart(6,'0');
+    const label = PUNCH_LABEL[rep.punch_type] || rep.punch_type;
+    const peak  = (rep.peak_accel_ms2 / G).toFixed(1) + 'g';
+    return `
+      <div class="rep-card" id="rc_${rep.id}" onclick="selectRep(${i})">
+        <div class="rep-dot" style="background:${hex}"></div>
+        <div class="rep-info">
+          <div class="rep-name">${label}</div>
+          <div class="rep-meta">${peak} · ${rep.duration_ms}ms</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function selectRep(idx) {
+  selectedRep = repData[idx];
+  document.querySelectorAll('.rep-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('rc_' + selectedRep.id)?.classList.add('active');
+
+  if (viewMode === 'single') {
+    document.getElementById('overlay').style.display = 'flex';
+    renderSingle(selectedRep);
+  }
+  setStatus(`Selected: ${PUNCH_LABEL[selectedRep.punch_type]} — ${selectedRep.sample_count} samples @ ${selectedRep.duration_ms}ms`);
+}
+
+// ─── File load ────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const json = JSON.parse(ev.target.result);
+      if (!Array.isArray(json)) throw new Error('Expected array of reps');
+      repData = json.filter(r => r.samples && r.samples.length > 3);
+      if (!repData.length) throw new Error('No valid reps found in file');
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('overlay').style.display = viewMode === 'single' ? 'flex' : 'none';
+
+      buildRepList();
+      selectedRep = repData[0];
+      document.getElementById('rc_' + selectedRep.id)?.classList.add('active');
+
+      if (viewMode === 'all') renderAll();
+      else renderSingle(selectedRep);
+
+      setStatus(`Loaded ${repData.length} reps from ${file.name}`);
+      e.target.value = '';
+    } catch(err) {
+      setStatus('Error: ' + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+});
+
+// Re-process when filter params change
+document.getElementById('gravityAxis').addEventListener('change', () => { if (repData.length) setView(viewMode); });
+document.getElementById('betaSel').addEventListener('change',     () => { if (repData.length) setView(viewMode); });
+
+// ─── Status ───────────────────────────────────────────────
+function setStatus(msg, isErr = false) {
+  const el = document.getElementById('statusBar');
+  el.textContent = msg; el.className = isErr ? 'err' : '';
+}
+
+// ─── Auto-load from Sensor Lab transfer ──────────────────
+(function loadTransfer() {
+  const raw = localStorage.getItem('boxing_trajectory_transfer');
+  if (!raw) return;
+  localStorage.removeItem('boxing_trajectory_transfer');
+  try {
+    const json = JSON.parse(raw);
+    if (!Array.isArray(json)) return;
+    repData = json.filter(r => r.samples && r.samples.length > 3);
+    if (!repData.length) return;
+    document.getElementById('emptyState').style.display = 'none';
+    buildRepList();
+    selectedRep = repData[0];
+    document.getElementById('rc_' + selectedRep.id)?.classList.add('active');
+    renderAll();
+    setStatus(`Loaded ${repData.length} reps from Sensor Lab`);
+  } catch(e) { /* silently ignore bad transfer data */ }
+})();
+</script>
+</body>
+</html>
