@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skate Realtime Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #060608; --surface: #0e0e12; --border: #1a2820;
+    --accent: #00cc88; --accent2: #00ffcc; --text: #e8e8f0;
+    --muted: #3a5048; --green: #00ffaa;
+    --left: #00ffaa; --right: #ff6600;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12px; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); }
+  header span { color: var(--muted); font-size: 10px; letter-spacing: 1px; flex: 1; }
+  header a { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 6px 10px; text-decoration: none; flex-shrink: 0; }
+
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar { width: 230px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+  .sidebar-section { padding: 12px; border-bottom: 1px solid var(--border); }
+  .slabel { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+
+  .code-display { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 10px; color: var(--accent2); text-align: center; padding: 6px 0 10px; }
+  #qrWrap { display: flex; justify-content: center; padding: 4px 0 8px; }
+
+  .hand-status { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+  .hand-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--border); transition: background 0.3s; }
+  .hand-dot.on { animation: blink 1.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .hand-label { font-size: 11px; letter-spacing: 1px; flex: 1; }
+  .hand-rate  { font-size: 9px; color: var(--muted); min-width: 28px; text-align: right; }
+
+  select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 6px; margin-bottom: 6px; appearance: none; cursor: pointer; }
+
+  .ctrl-btn { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 8px; cursor: pointer; text-transform: uppercase; text-align: center; transition: all 0.1s; display: block; margin-bottom: 6px; }
+  .ctrl-btn:hover { border-color: var(--muted); color: var(--text); }
+  .ctrl-btn.danger { color: #ff4444; border-color: #300; }
+
+  .canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+  #threeCanvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  #threeCanvas:active { cursor: grabbing; }
+
+  .overlay { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+  .info-box { background: rgba(14,14,18,0.88); border: 1px solid var(--border); padding: 8px 10px; backdrop-filter: blur(4px); }
+  .info-box .ib-label { color: var(--muted); letter-spacing: 1px; margin-bottom: 3px; font-size: 9px; }
+  .info-box .ib-val   { font-size: 13px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
+
+  .hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(14,14,18,0.8); border: 1px solid var(--border); padding: 6px 12px; font-size: 9px; color: var(--muted); letter-spacing: 1px; white-space: nowrap; pointer-events: none; }
+
+  #statusBar { padding: 4px 12px; font-size: 9px; letter-spacing: 1px; color: var(--green); background: rgba(0,255,170,0.04); border-top: 1px solid var(--border); flex-shrink: 0; }
+  #statusBar.err { color: #ff4444; background: rgba(255,60,0,0.04); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>REALTIME TRACER</h1>
+  <span>live dual-phone rollerblade route</span>
+  <a href="rollerblade-sensor.html">← SENSOR</a>
+  <a href="rollerblade-route-viewer.html">ROUTE VIEWER →</a>
+</header>
+
+<div class="main">
+
+  <div class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="slabel">Session Code</div>
+      <div class="code-display" id="codeDisplay">——</div>
+      <div id="qrWrap"></div>
+      <div style="font-size:9px;color:var(--muted);text-align:center">Scan on each phone to connect</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="slabel">Connections</div>
+      <div class="hand-status">
+        <div class="hand-dot" id="dotLeft"  style="background:var(--left)"></div>
+        <div class="hand-label" style="color:var(--left)">LEFT POCKET</div>
+        <div class="hand-rate" id="rateLeft">—</div>
+      </div>
+      <div class="hand-status">
+        <div class="hand-dot" id="dotRight" style="background:var(--right)"></div>
+        <div class="hand-label" style="color:var(--right)">RIGHT POCKET</div>
+        <div class="hand-rate" id="rateRight">—</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="slabel">Gravity Axis</div>
+      <select id="gravityAxis">
+        <option value="y-">-Y (default)</option>
+        <option value="y+">+Y</option>
+        <option value="z-">-Z</option>
+        <option value="z+">+Z</option>
+        <option value="x-">-X</option>
+        <option value="x+">+X</option>
+      </select>
+
+      <div class="slabel">Filter β</div>
+      <select id="betaSel">
+        <option value="0.033">0.033 — smooth</option>
+        <option value="0.1" selected>0.1 — medium</option>
+        <option value="0.3">0.3 — fast</option>
+      </select>
+
+      <div class="slabel">Trail Length</div>
+      <select id="trailLen">
+        <option value="200">200 pts</option>
+        <option value="500" selected>500 pts</option>
+        <option value="1000">1000 pts</option>
+        <option value="0">All</option>
+      </select>
+
+      <div class="slabel">Vertical Scale</div>
+      <select id="vScale">
+        <option value="1">1× true</option>
+        <option value="3" selected>3× exaggerated</option>
+        <option value="5">5×</option>
+      </select>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="ctrl-btn danger" onclick="resetRoutes()">↺ RESET ROUTES</button>
+    </div>
+
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="threeCanvas"></canvas>
+
+    <div class="overlay">
+      <div class="info-box">
+        <div class="ib-label">LEFT POCKET</div>
+        <div class="ib-val" id="ovLeft"  style="color:var(--left)">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">RIGHT POCKET</div>
+        <div class="ib-val" id="ovRight" style="color:var(--right)">—</div>
+      </div>
+    </div>
+
+    <div class="hint">DRAG TO ORBIT · SCROLL TO ZOOM</div>
+  </div>
+
+</div>
+
+<div id="statusBar">GENERATING SESSION...</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+// ─── Session code ─────────────────────────────────────────
+function randCode(n){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
+const SESSION_CODE=randCode(6), PEER_ID='sklab-'+SESSION_CODE;
+const STREAMER_URL=location.href.replace('rollerblade-realtime-viewer.html','rollerblade-realtime-streamer.html')+'?code='+SESSION_CODE;
+document.getElementById('codeDisplay').textContent=SESSION_CODE;
+new QRCode(document.getElementById('qrWrap'),{text:STREAMER_URL,width:160,height:160,colorDark:'#e8e8f0',colorLight:'#0e0e12',correctLevel:QRCode.CorrectLevel.M});
+
+// ─── State ────────────────────────────────────────────────
+const G=9.81;
+function makePocket(color){return{conn:null,q:[1,0,0,0],vx:0,vy:0,vz:0,px:0,py:0,pz:0,positions:[],lastT:null,initCount:0,line:null,dot:null,color,rateCount:0,peakG:0};}
+const pockets={left:makePocket(0x00ffaa),right:makePocket(0xff6600)};
+
+// ─── Madgwick ─────────────────────────────────────────────
+function madgwick(q,gx,gy,gz,ax,ay,az,dt,beta){let[q0,q1,q2,q3]=q;let d0=0.5*(-q1*gx-q2*gy-q3*gz),d1=0.5*(q0*gx+q2*gz-q3*gy),d2=0.5*(q0*gy-q1*gz+q3*gx),d3=0.5*(q0*gz+q1*gy-q2*gx);let n=Math.sqrt(ax*ax+ay*ay+az*az);if(n>0.01){ax/=n;ay/=n;az/=n;const _2q0=2*q0,_2q1=2*q1,_2q2=2*q2,_2q3=2*q3,q0q0=q0*q0,q1q1=q1*q1,q2q2=q2*q2,q3q3=q3*q3;const s0=_2q0*q2q2+_2q2*ax+_2q0*q1q1-_2q1*ay,s1=_2q1*q3q3-_2q3*ax+4*q0q0*q1-_2q0*ay-4*q1+8*q1*(q1q1+q2q2)+4*q1*az,s2=4*q0q0*q2+_2q0*ax+_2q2*q3q3-_2q3*ay-4*q2+8*q2*(q1q1+q2q2)+4*q2*az,s3=4*q1q1*q3-_2q1*ax+4*q2q2*q3-_2q2*ay;n=Math.sqrt(s0*s0+s1*s1+s2*s2+s3*s3);if(n>0){d0-=beta*s0/n;d1-=beta*s1/n;d2-=beta*s2/n;d3-=beta*s3/n;}}q0+=d0*dt;q1+=d1*dt;q2+=d2*dt;q3+=d3*dt;n=Math.sqrt(q0*q0+q1*q1+q2*q2+q3*q3);return[q0/n,q1/n,q2/n,q3/n];}
+function rotByQ([q0,q1,q2,q3],[vx,vy,vz]){return[(1-2*(q2*q2+q3*q3))*vx+2*(q1*q2-q0*q3)*vy+2*(q1*q3+q0*q2)*vz,2*(q1*q2+q0*q3)*vx+(1-2*(q1*q1+q3*q3))*vy+2*(q2*q3-q0*q1)*vz,2*(q1*q3-q0*q2)*vx+2*(q2*q3+q0*q1)*vy+(1-2*(q1*q1+q2*q2))*vz];}
+function gravVec(){const m={'y-':[0,-G,0],'y+':[0,G,0],'z-':[0,0,-G],'z+':[0,0,G],'x-':[-G,0,0],'x+':[G,0,0]};return m[document.getElementById('gravityAxis').value]||[0,-G,0];}
+
+function onData(side,data){
+  const h=pockets[side]; h.rateCount++;
+  const beta=h.initCount<40?5.0:parseFloat(document.getElementById('betaSel').value); h.initCount++;
+  if(h.lastT===null){h.lastT=data.t;return;}
+  const dt=Math.min((data.t-h.lastT)/1000,0.05); h.lastT=data.t; if(dt<=0)return;
+  h.q=madgwick(h.q,data.gx,data.gy,data.gz,data.ax,data.ay,data.az,dt,beta);
+  const[wx,wy,wz]=rotByQ(h.q,[data.ax,data.ay,data.az]);
+  const[gx,gy,gz]=gravVec();
+  const lax=wx-gx,lay=wy-gy,laz=wz-gz;
+  const linearMag=Math.sqrt(lax*lax+lay*lay+laz*laz);
+  const damp=linearMag<1.5?0.96:1.0;
+  const vScl=parseFloat(document.getElementById('vScale').value);
+  h.vx=(h.vx+lax*dt)*damp; h.vy=(h.vy+lay*dt)*damp; h.vz=(h.vz+laz*dt)*damp;
+  h.px+=h.vx*dt; h.py+=h.vy*dt*vScl; h.pz+=h.vz*dt;
+  const maxTrail=parseInt(document.getElementById('trailLen').value)||Infinity;
+  h.positions.push([h.px,h.py,h.pz]);
+  if(maxTrail>0&&h.positions.length>maxTrail) h.positions.shift();
+  const gMag=Math.sqrt(data.ax**2+data.ay**2+data.az**2)/G;
+  if(gMag>h.peakG) h.peakG=gMag;
+  updatePocketScene(side);
+  document.getElementById('ov'+side[0].toUpperCase()+side.slice(1)).textContent=h.peakG.toFixed(1)+'G PEAK';
+}
+
+function resetRoutes(){
+  for(const side of['left','right']){const h=pockets[side];Object.assign(h,{q:[1,0,0,0],vx:0,vy:0,vz:0,px:0,py:0,pz:0,positions:[],lastT:null,initCount:0,peakG:0});if(h.line){scene.remove(h.line);h.line.geometry.dispose();h.line.material.dispose();h.line=null;}if(h.dot){scene.remove(h.dot);h.dot.geometry.dispose();h.dot.material.dispose();h.dot=null;}}
+  document.getElementById('ovLeft').textContent='—'; document.getElementById('ovRight').textContent='—';
+  setStatus('Routes reset.');
+}
+
+// ─── Three.js ─────────────────────────────────────────────
+const wrap=document.getElementById('canvasWrap'),canvas=document.getElementById('threeCanvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)); renderer.setClearColor(0x060608,1);
+const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(50,1,0.001,500);
+scene.add(new THREE.GridHelper(20,40,0x1a2820,0x111618));
+(function(){const m=c=>new THREE.LineBasicMaterial({color:c,transparent:true,opacity:0.35});const l=(a,b,c)=>scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a),new THREE.Vector3(...b)]),m(c)));l([0,0,0],[0.5,0,0],0xff4444);l([0,0,0],[0,0.5,0],0x44ff44);l([0,0,0],[0,0,0.5],0x4444ff);})();
+function resize(){const w=wrap.clientWidth,h=wrap.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+resize(); window.addEventListener('resize',resize);
+let sph={theta:0.3,phi:0.5,r:8};
+function camFromSph(){camera.position.set(sph.r*Math.sin(sph.phi)*Math.sin(sph.theta),sph.r*Math.cos(sph.phi),sph.r*Math.sin(sph.phi)*Math.cos(sph.theta));camera.lookAt(0,0,0);}
+camFromSph();
+let isDrag=false,prevX=0,prevY=0;
+canvas.addEventListener('mousedown',e=>{isDrag=true;prevX=e.clientX;prevY=e.clientY;});
+window.addEventListener('mouseup',()=>isDrag=false);
+window.addEventListener('mousemove',e=>{if(!isDrag)return;sph.theta-=(e.clientX-prevX)*0.008;sph.phi=Math.max(0.05,Math.min(Math.PI-0.05,sph.phi-(e.clientY-prevY)*0.008));prevX=e.clientX;prevY=e.clientY;camFromSph();});
+canvas.addEventListener('wheel',e=>{sph.r=Math.max(0.5,Math.min(200,sph.r*(1+e.deltaY*0.001)));camFromSph();e.preventDefault();},{passive:false});
+(function renderLoop(){requestAnimationFrame(renderLoop);renderer.render(scene,camera);})();
+
+function updatePocketScene(side){
+  const h=pockets[side];
+  if(h.line){scene.remove(h.line);h.line.geometry.dispose();h.line.material.dispose();}
+  if(h.dot){scene.remove(h.dot);h.dot.geometry.dispose();h.dot.material.dispose();}
+  if(h.positions.length<2)return;
+  const pts=h.positions.map(([x,y,z])=>new THREE.Vector3(x,y,z));
+  h.line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:h.color,transparent:true,opacity:0.8}));
+  scene.add(h.line);
+  const[cx,cy,cz]=h.positions[h.positions.length-1];
+  h.dot=new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8),new THREE.MeshBasicMaterial({color:h.color}));
+  h.dot.position.set(cx,cy,cz); scene.add(h.dot);
+}
+
+// ─── PeerJS ───────────────────────────────────────────────
+const peer=new Peer(PEER_ID);
+peer.on('open',()=>setStatus('SESSION ACTIVE — scan QR on each phone · code: '+SESSION_CODE));
+peer.on('error',err=>setStatus('PeerJS: '+err.message,true));
+peer.on('connection',conn=>{
+  const side=conn.metadata?.device;
+  if(!side||!pockets[side]){conn.close();return;}
+  if(pockets[side].conn) pockets[side].conn.close();
+  pockets[side].conn=conn;
+  const dotEl=document.getElementById('dot'+side[0].toUpperCase()+side.slice(1));
+  dotEl.classList.add('on');
+  conn.on('data',data=>onData(side,data));
+  conn.on('close',()=>{pockets[side].conn=null;dotEl.classList.remove('on');setStatus(side.toUpperCase()+' pocket disconnected.');});
+  setStatus(side.toUpperCase()+' pocket connected.');
+});
+
+setInterval(()=>{for(const side of['left','right']){const h=pockets[side];document.getElementById('rate'+side[0].toUpperCase()+side.slice(1)).textContent=h.conn?h.rateCount+'Hz':'—';h.rateCount=0;}},1000);
+
+function setStatus(msg,isErr=false){const el=document.getElementById('statusBar');el.textContent=msg;el.className=isErr?'err':'';}
+</script>
+</body>
+</html>

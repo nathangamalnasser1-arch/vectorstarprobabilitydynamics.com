@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Skate Sensor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0a; --surface: #111; --border: #1e2a22;
+    --accent: #00cc88; --accent2: #00ffcc; --text: #f0f0f0;
+    --muted: #445544; --green: #00ff88;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; min-height: 100vh; padding-bottom: 180px; overflow-x: hidden; }
+
+  header { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--accent); }
+  header span { color: var(--muted); font-size: 11px; flex: 1; }
+  header a { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 1px; padding: 5px 10px; text-decoration: none; flex-shrink: 0; }
+  .hlink-traj { background: var(--accent2); color: #000; }
+  .hlink-rt   { background: var(--accent);  color: #000; }
+
+  #status { font-size: 10px; color: var(--green); letter-spacing: 1px; padding: 6px 16px; background: #001a0e; border-bottom: 1px solid #002; min-height: 24px; }
+  #status.err { color: #ff4444; background: #1a0000; }
+
+  .section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .divider-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; padding: 6px 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+
+  /* Device picker */
+  .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .device-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 14px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-align: center; text-transform: uppercase; transition: all 0.1s; }
+  .device-btn .sub { font-size: 9px; display: block; margin-bottom: 3px; color: var(--muted); }
+  .device-btn.selected { border-color: var(--accent); color: var(--accent); background: #001a10; }
+  .device-btn.selected .sub { color: var(--accent2); }
+
+  #permBtn { width: 100%; background: var(--accent); border: none; color: #000; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; padding: 14px; cursor: pointer; margin-top: 8px; }
+  #permSection { display: none; }
+
+  /* Live readings */
+  .readings { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+  .reading-box { background: var(--surface); border: 1px solid var(--border); padding: 8px; text-align: center; }
+  .reading-box .axis { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+  .reading-box .val  { font-size: 16px; font-weight: 700; }
+  .reading-box.accel .val { color: var(--accent2); }
+  .reading-box.gyro  .val { color: var(--green); }
+  #chart { width: 100%; height: 70px; background: var(--surface); border: 1px solid var(--border); display: block; margin-top: 8px; }
+
+  /* Session list */
+  .session-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
+  .session-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 6px 10px; font-size: 11px; }
+  .session-item .meta  { color: var(--muted); font-size: 10px; }
+  .session-item .peak  { color: var(--accent2); }
+
+  /* Export */
+  .export-row { display: flex; gap: 8px; }
+  .btn-sec { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px; cursor: pointer; text-transform: uppercase; }
+  .btn-sec.danger { color: #ff4444; border-color: #300; }
+
+  /* Fixed bottom bar */
+  .record-wrap { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 10px 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+
+  .timer-row { display: flex; align-items: center; justify-content: space-between; }
+  .timer-display { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--accent2); letter-spacing: 3px; }
+  .sample-count { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-align: right; }
+  .sample-count span { color: var(--accent); display: block; font-size: 14px; }
+
+  #recBtn { width: 100%; background: #181818; border: 2px solid var(--border); color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 4px; padding: 18px; cursor: default; transition: all 0.1s; pointer-events: none; }
+  #recBtn.armed { background: var(--accent); border-color: var(--accent); color: #000; pointer-events: all; cursor: pointer; }
+  #recBtn.recording { background: #1a0a00; border-color: #ff6600; color: #ff6600; pointer-events: all; cursor: pointer; animation: recPulse 1s infinite; }
+  @keyframes recPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SKATE SENSOR</h1>
+  <span>rollerblade motion tracer</span>
+  <a href="rollerblade-route-viewer.html" class="hlink-traj">↗ ROUTE VIEWER</a>
+  <a href="rollerblade-realtime-viewer.html" class="hlink-rt">⬤ REALTIME</a>
+</header>
+
+<div id="status">INITIALISING...</div>
+
+<div class="section" id="permSection">
+  <div class="label">iOS Permission Required</div>
+  <p style="color:var(--muted);font-size:11px;margin-bottom:8px">Tap to grant motion sensor access.</p>
+  <button id="permBtn">GRANT PERMISSION</button>
+</div>
+
+<div class="section">
+  <div class="label">Device / Pocket</div>
+  <div class="device-grid">
+    <button class="device-btn selected" data-device="left"><span class="sub">LEFT</span>POCKET</button>
+    <button class="device-btn" data-device="right"><span class="sub">RIGHT</span>POCKET</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Live Sensors</div>
+  <div class="divider-label">Accelerometer (m/s²)</div>
+  <div class="readings">
+    <div class="reading-box accel"><div class="axis">AX</div><div class="val" id="ax">0.00</div></div>
+    <div class="reading-box accel"><div class="axis">AY</div><div class="val" id="ay">0.00</div></div>
+    <div class="reading-box accel"><div class="axis">AZ</div><div class="val" id="az">0.00</div></div>
+  </div>
+  <div class="divider-label" style="margin-top:8px">Gyroscope (rad/s)</div>
+  <div class="readings">
+    <div class="reading-box gyro"><div class="axis">GX</div><div class="val" id="gx">0.00</div></div>
+    <div class="reading-box gyro"><div class="axis">GY</div><div class="val" id="gy">0.00</div></div>
+    <div class="reading-box gyro"><div class="axis">GZ</div><div class="val" id="gz">0.00</div></div>
+  </div>
+  <canvas id="chart"></canvas>
+</div>
+
+<div class="section">
+  <div class="label">Recorded Sessions</div>
+  <div class="session-list" id="sessionList">
+    <div style="color:var(--muted);font-size:11px">No sessions yet.</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Export</div>
+  <div class="export-row">
+    <button class="btn-sec" onclick="exportJSON()">↓ JSON</button>
+    <button class="btn-sec" onclick="exportCSV()">↓ CSV</button>
+    <button class="btn-sec danger" onclick="clearData()">✕ CLEAR</button>
+  </div>
+</div>
+
+<div class="record-wrap">
+  <div class="timer-row">
+    <div>
+      <div class="label" style="margin-bottom:2px">Recording Time</div>
+      <div class="timer-display" id="timerDisplay">00:00</div>
+    </div>
+    <div class="sample-count">
+      <div>SAMPLES</div>
+      <span id="sampleCount">0</span>
+    </div>
+  </div>
+  <button id="recBtn">RECORD</button>
+</div>
+
+<script>
+const CHART_LEN = 80;
+
+let selectedDevice = 'left';
+let sensorActive   = false;
+let recording      = false;
+let recordStart    = 0;
+let timerInterval  = null;
+let currentSamples = [];
+let allSessions    = JSON.parse(localStorage.getItem('skate_sessions') || '[]');
+let chartAcc       = [], chartGyr = [];
+
+updateSessionList();
+initSensors();
+
+// ─── Device picker ────────────────────────────────────────
+document.querySelectorAll('.device-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (recording) return;
+    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDevice = btn.dataset.device;
+  });
+});
+
+// ─── Sensors ─────────────────────────────────────────────
+function initSensors() {
+  if (typeof DeviceMotionEvent === 'undefined') { setStatus('DeviceMotion not supported.', true); return; }
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    document.getElementById('permSection').style.display = 'block';
+    setStatus('Tap GRANT PERMISSION to enable sensors (iOS).');
+    document.getElementById('permBtn').addEventListener('click', () => {
+      DeviceMotionEvent.requestPermission().then(s => {
+        if (s === 'granted') { document.getElementById('permSection').style.display = 'none'; startListening(); }
+        else setStatus('Permission denied.', true);
+      }).catch(e => setStatus('Error: ' + e, true));
+    });
+  } else { startListening(); }
+}
+
+function startListening() {
+  window.addEventListener('devicemotion', onMotion, { passive: true });
+  sensorActive = true;
+  document.getElementById('recBtn').classList.add('armed');
+  setStatus('SENSORS ACTIVE — select pocket, press RECORD to begin session');
+}
+
+function onMotion(e) {
+  const a  = e.accelerationIncludingGravity || e.acceleration || {};
+  const r  = e.rotationRate || {};
+  const ax = +(a.x||0), ay = +(a.y||0), az = +(a.z||0);
+  const gx = +((r.alpha||0)*Math.PI/180), gy = +((r.beta||0)*Math.PI/180), gz = +((r.gamma||0)*Math.PI/180);
+
+  document.getElementById('ax').textContent = ax.toFixed(2);
+  document.getElementById('ay').textContent = ay.toFixed(2);
+  document.getElementById('az').textContent = az.toFixed(2);
+  document.getElementById('gx').textContent = gx.toFixed(2);
+  document.getElementById('gy').textContent = gy.toFixed(2);
+  document.getElementById('gz').textContent = gz.toFixed(2);
+
+  const am = Math.sqrt(ax*ax+ay*ay+az*az);
+  const gm = Math.sqrt(gx*gx+gy*gy+gz*gz);
+  chartAcc.push(am); chartGyr.push(gm);
+  if (chartAcc.length > CHART_LEN) chartAcc.shift();
+  if (chartGyr.length > CHART_LEN) chartGyr.shift();
+  drawChart();
+
+  if (recording) {
+    currentSamples.push({
+      t: Date.now() - recordStart,
+      ax, ay, az, gx, gy, gz,
+      accel_mag: +am.toFixed(4),
+      gyro_mag:  +gm.toFixed(4)
+    });
+    document.getElementById('sampleCount').textContent = currentSamples.length;
+  }
+}
+
+// ─── Chart ───────────────────────────────────────────────
+const chartEl = document.getElementById('chart');
+const ctx     = chartEl.getContext('2d');
+function drawChart() {
+  const w = chartEl.offsetWidth||300, h = 70;
+  chartEl.width = w; chartEl.height = h;
+  ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,h);
+  const mx = Math.max(20,...chartAcc,...chartGyr);
+  function ln(d,c){if(d.length<2)return;ctx.beginPath();ctx.strokeStyle=c;ctx.lineWidth=1.5;d.forEach((v,i)=>{const x=(i/(CHART_LEN-1))*w,y=h-(v/mx)*h*0.9;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();}
+  ln(chartAcc,'#00ffcc'); ln(chartGyr,'#00ff88');
+  ctx.font='9px monospace';
+  ctx.fillStyle='#00ffcc'; ctx.fillText('■ ACCEL',4,12);
+  ctx.fillStyle='#00ff88'; ctx.fillText('■ GYRO',60,12);
+  if (recording) {
+    ctx.strokeStyle='#ff6600'; ctx.lineWidth=1; ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(w-2,0); ctx.lineTo(w-2,h); ctx.stroke(); ctx.setLineDash([]);
+  }
+}
+
+// ─── Record button ────────────────────────────────────────
+document.getElementById('recBtn').addEventListener('click', onRecTap);
+document.getElementById('recBtn').addEventListener('touchstart', e => { e.preventDefault(); onRecTap(); }, { passive: false });
+
+function onRecTap() {
+  if (!sensorActive) return;
+  if (!recording) {
+    startRecording();
+  } else {
+    stopRecording();
+  }
+}
+
+function startRecording() {
+  recording      = true;
+  recordStart    = Date.now();
+  currentSamples = [];
+  const btn = document.getElementById('recBtn');
+  btn.textContent = '■ STOP';
+  btn.classList.remove('armed'); btn.classList.add('recording');
+  timerInterval = setInterval(updateTimer, 500);
+  setStatus('RECORDING — ' + selectedDevice.toUpperCase() + ' POCKET — tap STOP when done');
+}
+
+function stopRecording() {
+  recording = false;
+  clearInterval(timerInterval);
+  const btn = document.getElementById('recBtn');
+  btn.textContent = 'RECORD'; btn.classList.remove('recording'); btn.classList.add('armed');
+
+  if (currentSamples.length < 5) { setStatus('Too few samples — try again.', true); return; }
+
+  const duration = currentSamples[currentSamples.length-1].t;
+  const peakAccel = Math.max(...currentSamples.map(s => s.accel_mag));
+  const peakGyro  = Math.max(...currentSamples.map(s => s.gyro_mag));
+
+  allSessions.push({
+    id:             Date.now(),
+    device:         selectedDevice,
+    timestamp:      new Date().toISOString(),
+    duration_ms:    duration,
+    peak_accel_ms2: +peakAccel.toFixed(3),
+    peak_gyro_rads: +peakGyro.toFixed(3),
+    sample_count:   currentSamples.length,
+    samples:        currentSamples.slice()
+  });
+
+  saveToStorage();
+  updateSessionList();
+  setStatus(`✓ ${selectedDevice.toUpperCase()} session saved — ${(duration/1000).toFixed(1)}s · ${currentSamples.length} samples`);
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('sampleCount').textContent  = '0';
+}
+
+function updateTimer() {
+  if (!recording) return;
+  const elapsed = Date.now() - recordStart;
+  const s = Math.floor(elapsed/1000) % 60;
+  const m = Math.floor(elapsed/60000);
+  document.getElementById('timerDisplay').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+// ─── Session list ────────────────────────────────────────
+function updateSessionList() {
+  const list = document.getElementById('sessionList');
+  if (!allSessions.length) { list.innerHTML = '<div style="color:var(--muted);font-size:11px">No sessions yet.</div>'; return; }
+  list.innerHTML = [...allSessions].reverse().map(s => `
+    <div class="session-item">
+      <div>
+        <div>${s.device.toUpperCase()} POCKET — ${(s.duration_ms/1000).toFixed(1)}s</div>
+        <div class="meta">${s.sample_count} samples · ${new Date(s.timestamp).toLocaleTimeString()}</div>
+      </div>
+      <div class="peak">${(s.peak_accel_ms2/9.81).toFixed(1)}g</div>
+    </div>`).join('');
+}
+
+// ─── Storage / Export ─────────────────────────────────────
+function saveToStorage() {
+  try { localStorage.setItem('skate_sessions', JSON.stringify(allSessions)); }
+  catch(e) { setStatus('Storage full — export now.', true); }
+}
+
+function exportJSON() {
+  if (!allSessions.length) { alert('No sessions.'); return; }
+  dl('skate_sensor_data.json', JSON.stringify(allSessions, null, 2), 'application/json');
+  setStatus(`Exported ${allSessions.length} sessions as JSON`);
+}
+
+function exportCSV() {
+  if (!allSessions.length) { alert('No sessions.'); return; }
+  const rows = ['session_id,device,timestamp,duration_ms,peak_accel_ms2,peak_gyro_rads,sample_index,t_ms,ax,ay,az,gx,gy,gz,accel_mag,gyro_mag'];
+  allSessions.forEach(sess => {
+    sess.samples.forEach((s, i) => {
+      rows.push([sess.id,sess.device,sess.timestamp,sess.duration_ms,sess.peak_accel_ms2,sess.peak_gyro_rads,
+        i,s.t,s.ax.toFixed(4),s.ay.toFixed(4),s.az.toFixed(4),
+        s.gx.toFixed(4),s.gy.toFixed(4),s.gz.toFixed(4),s.accel_mag,s.gyro_mag].join(','));
+    });
+  });
+  dl('skate_sensor_data.csv', rows.join('\n'), 'text/csv');
+  setStatus(`Exported ${allSessions.length} sessions as CSV`);
+}
+
+function dl(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content],{type}));
+  a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function clearData() {
+  if (!confirm(`Delete all ${allSessions.length} sessions?`)) return;
+  allSessions = []; localStorage.removeItem('skate_sessions');
+  updateSessionList(); setStatus('Cleared.');
+}
+
+function setStatus(msg, isErr=false) {
+  const el = document.getElementById('status');
+  el.textContent = msg; el.className = isErr ? 'err' : '';
+}
+</script>
+</body>
+</html>
