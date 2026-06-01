@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Skate Streamer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0a; --surface: #111; --border: #1e2a22;
+    --accent: #00cc88; --accent2: #00ffcc; --text: #f0f0f0;
+    --muted: #445544; --green: #00ff88;
+    --left: #00ffaa; --right: #ff6600;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; min-height: 100vh; padding-bottom: 40px; }
+
+  header { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 14px 16px; display: flex; align-items: baseline; gap: 12px; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); }
+  header span { color: var(--muted); font-size: 11px; flex: 1; }
+  header a { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-decoration: none; border: 1px solid var(--border); padding: 4px 8px; }
+
+  #statusBar { font-size: 10px; color: var(--green); letter-spacing: 1px; padding: 6px 16px; background: #001a0e; border-bottom: 1px solid #002; min-height: 24px; }
+  #statusBar.err { color: #ff4444; background: #1a0000; }
+
+  .section { padding: 16px; border-bottom: 1px solid var(--border); }
+  .label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+
+  #codeInput { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--accent2); font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 12px; padding: 10px 16px; text-align: center; text-transform: uppercase; outline: none; }
+  #codeInput:focus { border-color: var(--accent2); }
+
+  .pocket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .pocket-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; padding: 14px 8px; cursor: pointer; text-align: center; transition: all 0.1s; }
+  .pocket-btn.left.selected  { border-color: var(--left);  color: var(--left);  background: #001a12; }
+  .pocket-btn.right.selected { border-color: var(--right); color: var(--right); background: #1a0a00; }
+
+  #connectBtn { width: 100%; background: var(--accent); border: none; color: #000; font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; padding: 16px; cursor: pointer; margin-top: 8px; }
+  #connectBtn:disabled { background: var(--muted); cursor: default; }
+
+  #streamBtn { width: 100%; background: #181818; border: 2px solid var(--border); color: var(--muted); font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 4px; padding: 22px; cursor: default; transition: all 0.1s; }
+  #streamBtn.ready     { border-color: var(--green);   color: var(--green);   background: #001a0e; cursor: pointer; }
+  #streamBtn.streaming { border-color: var(--accent2); color: var(--accent2); background: #001a12; cursor: pointer; animation: sPulse 1.2s infinite; }
+  @keyframes sPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .readings { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 16px; }
+  .r-box { background: var(--surface); border: 1px solid var(--border); padding: 8px; text-align: center; }
+  .r-box .axis { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+  .r-box .val  { font-size: 16px; font-weight: 700; }
+  .r-box.accel .val { color: var(--accent2); }
+  .r-box.gyro  .val { color: var(--green); }
+
+  .big-stat { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 4px; color: var(--accent2); text-align: center; line-height: 1; margin-top: 16px; }
+  .big-stat-lbl { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-align: center; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>STREAMER</h1>
+  <span>send sensor data to viewer</span>
+  <a href="rollerblade-realtime-viewer.html">VIEWER</a>
+</header>
+
+<div id="statusBar">READY — enter session code and connect</div>
+
+<div class="section" id="connectSection">
+  <div class="label">Session Code</div>
+  <input type="text" id="codeInput" maxlength="6" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ABC123">
+
+  <div class="label" style="margin-top:16px">Pocket</div>
+  <div class="pocket-grid">
+    <button class="pocket-btn left selected"  data-device="left">LEFT</button>
+    <button class="pocket-btn right"           data-device="right">RIGHT</button>
+  </div>
+
+  <button id="connectBtn">CONNECT</button>
+</div>
+
+<div class="section" id="streamSection" style="display:none">
+  <button id="streamBtn">START</button>
+
+  <div class="big-stat"  id="peakG">0.0</div>
+  <div class="big-stat-lbl">PEAK G</div>
+
+  <div class="readings">
+    <div class="r-box accel"><div class="axis">AX</div><div class="val" id="ax">0.00</div></div>
+    <div class="r-box accel"><div class="axis">AY</div><div class="val" id="ay">0.00</div></div>
+    <div class="r-box accel"><div class="axis">AZ</div><div class="val" id="az">0.00</div></div>
+    <div class="r-box gyro"><div class="axis">GX</div><div class="val" id="gx">0.00</div></div>
+    <div class="r-box gyro"><div class="axis">GY</div><div class="val" id="gy">0.00</div></div>
+    <div class="r-box gyro"><div class="axis">GZ</div><div class="val" id="gz">0.00</div></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const urlCode = new URLSearchParams(location.search).get('code');
+if (urlCode) document.getElementById('codeInput').value = urlCode.toUpperCase();
+
+let selectedDevice = 'left', peer = null, conn = null, streaming = false, lastSend = 0, peakG = 0;
+
+document.querySelectorAll('.pocket-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pocket-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDevice = btn.dataset.device;
+  });
+});
+
+document.getElementById('connectBtn').addEventListener('click', async () => {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  if (code.length !== 6) { setStatus('Enter a 6-character session code.', true); return; }
+
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res !== 'granted') { setStatus('Motion sensor permission denied.', true); return; }
+    } catch(e) { setStatus('Permission error: '+e, true); return; }
+  }
+
+  document.getElementById('connectBtn').disabled = true;
+  setStatus('Connecting to session '+code+'...');
+
+  peer = new Peer();
+  peer.on('error', e => { setStatus('Peer error: '+e.message, true); document.getElementById('connectBtn').disabled = false; });
+  peer.on('open', () => {
+    conn = peer.connect('sklab-'+code, { metadata: { device: selectedDevice }, serialization: 'json' });
+    conn.on('open', () => {
+      document.getElementById('connectSection').style.display = 'none';
+      document.getElementById('streamSection').style.display  = 'block';
+      document.getElementById('streamBtn').classList.add('ready');
+      setStatus('CONNECTED — '+selectedDevice.toUpperCase()+' POCKET — tap START to stream');
+    });
+    conn.on('error', e => setStatus('Connection error: '+e, true));
+    conn.on('close', () => {
+      streaming = false; window.removeEventListener('devicemotion', onMotion);
+      setStatus('Disconnected from viewer.', true);
+      document.getElementById('streamBtn').className = '';
+      document.getElementById('streamBtn').textContent = 'START';
+    });
+  });
+});
+
+document.getElementById('streamBtn').addEventListener('click', () => {
+  if (!conn) return;
+  if (!streaming) {
+    streaming = true; peakG = 0;
+    window.addEventListener('devicemotion', onMotion, { passive: true });
+    document.getElementById('streamBtn').classList.remove('ready');
+    document.getElementById('streamBtn').classList.add('streaming');
+    document.getElementById('streamBtn').textContent = 'STOP';
+    setStatus('STREAMING — '+selectedDevice.toUpperCase()+' POCKET');
+  } else {
+    streaming = false; window.removeEventListener('devicemotion', onMotion);
+    document.getElementById('streamBtn').classList.remove('streaming');
+    document.getElementById('streamBtn').classList.add('ready');
+    document.getElementById('streamBtn').textContent = 'START';
+    setStatus('PAUSED — tap START to resume.');
+  }
+});
+
+function onMotion(e) {
+  const now = Date.now();
+  if (now - lastSend < 33) return;
+  lastSend = now;
+
+  const a = e.accelerationIncludingGravity || e.acceleration || {};
+  const r = e.rotationRate || {};
+  const ax=+(a.x||0), ay=+(a.y||0), az=+(a.z||0);
+  const gx=+((r.alpha||0)*Math.PI/180), gy=+((r.beta||0)*Math.PI/180), gz=+((r.gamma||0)*Math.PI/180);
+
+  document.getElementById('ax').textContent=ax.toFixed(2);
+  document.getElementById('ay').textContent=ay.toFixed(2);
+  document.getElementById('az').textContent=az.toFixed(2);
+  document.getElementById('gx').textContent=gx.toFixed(2);
+  document.getElementById('gy').textContent=gy.toFixed(2);
+  document.getElementById('gz').textContent=gz.toFixed(2);
+
+  const g=Math.sqrt(ax*ax+ay*ay+az*az)/9.81;
+  if(g>peakG){peakG=g;document.getElementById('peakG').textContent=peakG.toFixed(1);}
+
+  if(!conn||!streaming) return;
+  try { conn.send({ax,ay,az,gx,gy,gz,t:now}); } catch(_){}
+}
+
+function setStatus(msg,isErr=false){const el=document.getElementById('statusBar');el.textContent=msg;el.className=isErr?'err':'';}
+</script>
+</body>
+</html>
