@@ -127,6 +127,38 @@
     </div>
 
     <div class="sidebar-section">
+      <div class="slabel">Load Session JSON</div>
+
+      <div style="margin-bottom:8px">
+        <div style="font-size:9px;color:var(--left);letter-spacing:1px;margin-bottom:4px">LEFT POCKET</div>
+        <label class="ctrl-btn" style="color:var(--left);border-color:rgba(0,255,170,0.4);cursor:pointer;margin-bottom:3px">
+          ↑ CHOOSE FILE
+          <input type="file" accept=".json" id="fileLeft" style="display:none">
+        </label>
+        <div id="fileLeftName" style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      </div>
+
+      <div style="margin-bottom:8px">
+        <div style="font-size:9px;color:var(--right);letter-spacing:1px;margin-bottom:4px">RIGHT POCKET</div>
+        <label class="ctrl-btn" style="color:var(--right);border-color:rgba(255,102,0,0.4);cursor:pointer;margin-bottom:3px">
+          ↑ CHOOSE FILE
+          <input type="file" accept=".json" id="fileRight" style="display:none">
+        </label>
+        <div id="fileRightName" style="font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      </div>
+
+      <div class="slabel">Playback Speed</div>
+      <select id="pbSpeed">
+        <option value="1">1× real time</option>
+        <option value="4" selected>4× fast</option>
+        <option value="20">20× turbo</option>
+      </select>
+
+      <button class="ctrl-btn" id="btnPlay" onclick="startPlayback()" style="color:var(--accent);border-color:var(--accent)">▶ PLAY SESSION</button>
+      <button class="ctrl-btn danger" id="btnStop" onclick="stopPlayback()" style="display:none">■ STOP PLAYBACK</button>
+    </div>
+
+    <div class="sidebar-section">
       <button class="ctrl-btn danger" onclick="resetRoutes()">↺ RESET ROUTES</button>
     </div>
 
@@ -257,6 +289,77 @@ connectRelay();
 setInterval(()=>{for(const side of['left','right']){const h=pockets[side];document.getElementById('rate'+side[0].toUpperCase()+side.slice(1)).textContent=h.rateCount>0?h.rateCount+'Hz':'—';h.rateCount=0;}},1000);
 
 function setStatus(msg,isErr=false){const el=document.getElementById('statusBar');el.textContent=msg;el.className=isErr?'err':'';}
+
+// ─── Session Playback ─────────────────────────────────────
+const loadedSamples={left:null,right:null};
+let playbackTimers=[];
+let playbackActive=false;
+
+function loadSessionFile(side,file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const session=Array.isArray(data)?data[0]:data;
+      loadedSamples[side]=session.samples;
+      const nameEl=document.getElementById('file'+side[0].toUpperCase()+side.slice(1)+'Name');
+      nameEl.textContent=file.name+' ('+session.samples.length+' pts)';
+      setStatus('Loaded '+side+': '+session.samples.length+' samples — press PLAY');
+    }catch(err){setStatus('Error loading '+side+' JSON: '+err.message,true);}
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('fileLeft').addEventListener('change',e=>{if(e.target.files[0])loadSessionFile('left',e.target.files[0]);});
+document.getElementById('fileRight').addEventListener('change',e=>{if(e.target.files[0])loadSessionFile('right',e.target.files[0]);});
+
+function stopPlayback(){
+  playbackTimers.forEach(t=>clearTimeout(t));
+  playbackTimers=[];
+  playbackActive=false;
+  document.getElementById('btnPlay').style.display='block';
+  document.getElementById('btnStop').style.display='none';
+  for(const side of['left','right']){
+    const d=document.getElementById('dot'+side[0].toUpperCase()+side.slice(1));
+    d.classList.remove('on');
+    document.getElementById('rate'+side[0].toUpperCase()+side.slice(1)).textContent='—';
+  }
+  setStatus('Playback stopped.');
+}
+
+function startPlayback(){
+  if(!loadedSamples.left&&!loadedSamples.right){setStatus('Load at least one session JSON first.',true);return;}
+  stopPlayback();
+  resetRoutes();
+  const speed=parseFloat(document.getElementById('pbSpeed').value);
+  document.getElementById('btnPlay').style.display='none';
+  document.getElementById('btnStop').style.display='block';
+  playbackActive=true;
+  let totalSamples=0;
+  const allT=[];
+  for(const side of['left','right']){
+    const samples=loadedSamples[side];
+    if(!samples||!samples.length)continue;
+    document.getElementById('dot'+side[0].toUpperCase()+side.slice(1)).classList.add('on');
+    const t0=samples[0].t;
+    samples.forEach(s=>{
+      allT.push((s.t-t0)/speed);
+      const delay=(s.t-t0)/speed;
+      playbackTimers.push(setTimeout(()=>{if(!playbackActive)return;onData(side,s);},delay));
+      totalSamples++;
+    });
+  }
+  const endDelay=(allT.length?Math.max(...allT):0)+200;
+  playbackTimers.push(setTimeout(()=>{
+    if(!playbackActive)return;
+    playbackActive=false;
+    document.getElementById('btnPlay').style.display='block';
+    document.getElementById('btnStop').style.display='none';
+    for(const side of['left','right'])document.getElementById('dot'+side[0].toUpperCase()+side.slice(1)).classList.remove('on');
+    setStatus('Playback complete — '+totalSamples+' samples.');
+  },endDelay));
+  setStatus('Playing '+totalSamples+' samples at '+speed+'×…');
+}
 </script>
 </body>
 </html>
