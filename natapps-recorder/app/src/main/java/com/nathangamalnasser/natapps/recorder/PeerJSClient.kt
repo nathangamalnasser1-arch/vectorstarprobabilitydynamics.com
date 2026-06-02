@@ -45,13 +45,13 @@ class PeerJSClient(private val context: Context) {
     private val http = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(0,  TimeUnit.SECONDS)
-        .pingInterval(10, TimeUnit.SECONDS)
         .build()
 
-    private var ws:      WebSocket?           = null
-    private var pc:      PeerConnection?      = null
-    private var dc:      DataChannel?         = null
-    private var factory: PeerConnectionFactory? = null
+    private var ws:          WebSocket?             = null
+    private var pc:          PeerConnection?        = null
+    private var dc:          DataChannel?           = null
+    private var factory:     PeerConnectionFactory? = null
+    private var heartbeatJob: Job?                  = null
 
     private val main = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val io   = CoroutineScope(Dispatchers.IO   + SupervisorJob())
@@ -89,6 +89,7 @@ class PeerJSClient(private val context: Context) {
     fun isConnected() = dc?.state() == DataChannel.State.OPEN
 
     fun disconnect() {
+        heartbeatJob?.cancel(); heartbeatJob = null
         dc?.close(); pc?.close(); ws?.close(1000, null)
         dc = null; pc = null; ws = null
         setState(State.IDLE, "Disconnected")
@@ -109,7 +110,15 @@ class PeerJSClient(private val context: Context) {
         try {
             val msg = JSONObject(text)
             when (msg.getString("type")) {
-                "OPEN"      -> io.launch { createOffer() }
+                "OPEN"      -> {
+                    heartbeatJob = io.launch {
+                        while (true) {
+                            delay(5000)
+                            ws?.send("{\"type\":\"HEARTBEAT\"}")
+                        }
+                    }
+                    io.launch { createOffer() }
+                }
                 "ANSWER"    -> {
                     signalingDone = true
                     val sdp = msg.getJSONObject("payload").getJSONObject("sdp")
