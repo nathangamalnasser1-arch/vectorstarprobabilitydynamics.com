@@ -31,10 +31,6 @@ android {
     buildFeatures {
         viewBinding true
     }
-    packagingOptions {
-        pickFirst 'META-INF/INDEX.LIST'
-        pickFirst 'META-INF/io.netty.versions.properties'
-    }
 }
 
 dependencies {
@@ -44,10 +40,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'androidx.lifecycle:lifecycle-service:2.7.0'
-
-    // WebRTC for PeerJS connection to the web viewer
-    implementation 'io.getstream:stream-webrtc-android:1.1.3'
-
-    // HTTP client for PeerJS WebSocket signaling
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }

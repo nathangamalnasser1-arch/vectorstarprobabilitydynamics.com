@@ -73,10 +73,9 @@
   <div class="sidebar">
 
     <div class="sidebar-section">
-      <div class="slabel">Session Code</div>
-      <div class="code-display" id="codeDisplay">——</div>
-      <div id="qrWrap"></div>
-      <div style="font-size:9px;color:var(--muted);text-align:center">Scan on each phone to connect</div>
+      <div class="slabel">Relay Server</div>
+      <div class="code-display" id="codeDisplay" style="font-size:11px;letter-spacing:0">ws://localhost:9001</div>
+      <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:4px">Run relay/relay.js on this PC<br>Enter PC IP in phone app</div>
     </div>
 
     <div class="sidebar-section">
@@ -155,15 +154,8 @@
 <div id="statusBar">GENERATING SESSION...</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-// ─── Session code ─────────────────────────────────────────
-function randCode(n){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
-const SESSION_CODE=randCode(6), PEER_ID='sklab-'+SESSION_CODE;
-const STREAMER_URL=location.href.replace('rollerblade-realtime-viewer.html','rollerblade-realtime-streamer.html')+'?code='+SESSION_CODE;
-document.getElementById('codeDisplay').textContent=SESSION_CODE;
-new QRCode(document.getElementById('qrWrap'),{text:STREAMER_URL,width:160,height:160,colorDark:'#e8e8f0',colorLight:'#0e0e12',correctLevel:QRCode.CorrectLevel.M});
+// ─── Relay WebSocket ──────────────────────────────────────
 
 // ─── State ────────────────────────────────────────────────
 const G=9.81;
@@ -236,23 +228,33 @@ function updatePocketScene(side){
   h.dot.position.set(cx,cy,cz); scene.add(h.dot);
 }
 
-// ─── PeerJS ───────────────────────────────────────────────
-const peer=new Peer(PEER_ID);
-peer.on('open',()=>setStatus('SESSION ACTIVE — scan QR on each phone · code: '+SESSION_CODE));
-peer.on('error',err=>setStatus('PeerJS: '+err.message,true));
-peer.on('connection',conn=>{
-  const side=conn.metadata?.device;
-  if(!side||!pockets[side]){conn.close();return;}
-  if(pockets[side].conn) pockets[side].conn.close();
-  pockets[side].conn=conn;
-  const dotEl=document.getElementById('dot'+side[0].toUpperCase()+side.slice(1));
-  dotEl.classList.add('on');
-  conn.on('data',data=>onData(side,data));
-  conn.on('close',()=>{pockets[side].conn=null;dotEl.classList.remove('on');setStatus(side.toUpperCase()+' pocket disconnected.');});
-  setStatus(side.toUpperCase()+' pocket connected.');
-});
+// ─── Relay WebSocket connection ───────────────────────────
+function connectRelay(){
+  const ws=new WebSocket('ws://localhost:9001');
+  ws.onopen=()=>{
+    ws.send(JSON.stringify({type:'register',role:'viewer'}));
+    setStatus('Relay connected — waiting for phones…');
+  };
+  ws.onmessage=e=>{
+    try{
+      const msg=JSON.parse(e.data);
+      if(msg.type==='status'){
+        const side=msg.device;
+        if(!pockets[side]) return;
+        const dotEl=document.getElementById('dot'+side[0].toUpperCase()+side.slice(1));
+        if(msg.connected){dotEl.classList.add('on');setStatus(side.toUpperCase()+' pocket connected.');}
+        else{dotEl.classList.remove('on');setStatus(side.toUpperCase()+' pocket disconnected.');}
+      } else if(msg.type==='sensor'){
+        onData(msg.device,msg);
+      }
+    }catch(e){}
+  };
+  ws.onclose=()=>{setStatus('Relay disconnected — retrying…',true);setTimeout(connectRelay,2000);};
+  ws.onerror=()=>{};
+}
+connectRelay();
 
-setInterval(()=>{for(const side of['left','right']){const h=pockets[side];document.getElementById('rate'+side[0].toUpperCase()+side.slice(1)).textContent=h.conn?h.rateCount+'Hz':'—';h.rateCount=0;}},1000);
+setInterval(()=>{for(const side of['left','right']){const h=pockets[side];document.getElementById('rate'+side[0].toUpperCase()+side.slice(1)).textContent=h.rateCount>0?h.rateCount+'Hz':'—';h.rateCount=0;}},1000);
 
 function setStatus(msg,isErr=false){const el=document.getElementById('statusBar');el.textContent=msg;el.className=isErr?'err':'';}
 </script>

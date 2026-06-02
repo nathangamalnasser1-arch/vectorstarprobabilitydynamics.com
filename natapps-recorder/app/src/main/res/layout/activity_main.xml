@@ -49,21 +49,19 @@
         <View android:layout_width="match_parent" android:layout_height="1dp"
             android:background="@color/border" android:layout_marginBottom="12dp" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="VIEWER SESSION CODE" android:textColor="@color/muted"
+            android:text="RELAY SERVER IP" android:textColor="@color/muted"
             android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="8dp" />
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:layout_marginBottom="8dp">
             <EditText android:id="@+id/etSessionCode"
                 android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
-                android:hint="ABC123"
-                android:inputType="textCapCharacters|textNoSuggestions"
-                android:maxLength="6"
-                android:textSize="22sp" android:fontFamily="monospace"
+                android:hint="192.168.x.x"
+                android:inputType="text|textNoSuggestions"
+                android:textSize="18sp" android:fontFamily="monospace"
                 android:textColor="@color/accent2" android:textColorHint="@color/muted"
                 android:background="@color/surface"
                 android:paddingStart="12dp" android:paddingEnd="12dp"
-                android:letterSpacing="0.15"
                 android:imeOptions="actionGo"
                 android:layout_marginEnd="8dp" />
             <Button android:id="@+id/btnConnect"

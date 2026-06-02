@@ -115,12 +115,12 @@ class MainActivity : AppCompatActivity() {
                 binding.tvPeerStatus.text.contains("Connecting")) {
                 svc.disconnectFromViewer()
             } else {
-                val code = binding.etSessionCode.text.toString().trim().uppercase()
-                if (code.length != 6) {
-                    Toast.makeText(this, "Enter the 6-character code shown on the viewer", Toast.LENGTH_SHORT).show()
+                val ip = binding.etSessionCode.text.toString().trim()
+                if (ip.isEmpty()) {
+                    Toast.makeText(this, "Enter the PC's IP address shown in the relay console", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                svc.connectToViewer(code)
+                svc.connectToViewer(ip)
             }
         }
 
