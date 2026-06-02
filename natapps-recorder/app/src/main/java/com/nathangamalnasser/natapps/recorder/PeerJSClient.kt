@@ -122,6 +122,8 @@ class PeerJSClient(private val context: Context) {
                         c.getString("candidate")
                     ))
                 }
+                "EXPIRE"    -> setState(State.ERROR, "Viewer not found — open the viewer first")
+                "LEAVE"     -> setState(State.ERROR, "Viewer disconnected")
                 "ERROR"     -> setState(State.ERROR, "Peer: ${msg.optString("payload")}")
             }
         } catch (e: Exception) { Log.e(TAG, "parse", e) }
