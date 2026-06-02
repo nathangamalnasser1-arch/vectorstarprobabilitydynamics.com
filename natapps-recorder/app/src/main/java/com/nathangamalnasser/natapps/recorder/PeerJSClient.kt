@@ -78,7 +78,6 @@ class PeerJSClient(private val context: Context) {
     }
 
     fun send(json: String) {
-        if (dc?.state() != DataChannel.State.OPEN) return
         try {
             dc?.send(DataChannel.Buffer(ByteBuffer.wrap(json.toByteArray()), false))
         } catch (_: Exception) {}
