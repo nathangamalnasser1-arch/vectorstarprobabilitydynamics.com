@@ -36,14 +36,16 @@ class PeerJSClient(private val context: Context) {
     var onOpen: (() -> Unit)? = null
     var onClose: (() -> Unit)? = null
 
-    private var deviceSide  = "left"
-    private var myPeerId    = ""
-    private var targetPeerId= ""
-    private var connId      = ""
+    private var deviceSide       = "left"
+    private var myPeerId         = ""
+    private var targetPeerId     = ""
+    private var connId           = ""
+    private var signalingDone    = false
 
     private val http = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(0,  TimeUnit.SECONDS)
+        .pingInterval(10, TimeUnit.SECONDS)
         .build()
 
     private var ws:      WebSocket?           = null
@@ -70,6 +72,7 @@ class PeerJSClient(private val context: Context) {
                 .createPeerConnectionFactory()
         }
 
+        signalingDone = false
         setState(State.CONNECTING, "Connecting to session ${sessionCode.uppercase()}…")
 
         val token = UUID.randomUUID().toString().take(8)
@@ -98,8 +101,7 @@ class PeerJSClient(private val context: Context) {
         override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) =
             setState(State.ERROR, "Server error: ${t.message}")
         override fun onClosed(ws: WebSocket, code: Int, reason: String) {
-            if (dc?.state() != DataChannel.State.OPEN)
-                setState(State.ERROR, "Signaling closed")
+            if (!signalingDone) setState(State.ERROR, "Signaling closed")
         }
     }
 
@@ -109,6 +111,7 @@ class PeerJSClient(private val context: Context) {
             when (msg.getString("type")) {
                 "OPEN"      -> io.launch { createOffer() }
                 "ANSWER"    -> {
+                    signalingDone = true
                     val sdp = msg.getJSONObject("payload").getJSONObject("sdp")
                     pc?.setRemoteDescription(SimpleSdp(),
                         SessionDescription(SessionDescription.Type.ANSWER, sdp.getString("sdp")))
