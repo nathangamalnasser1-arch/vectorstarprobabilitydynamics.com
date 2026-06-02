@@ -182,9 +182,8 @@ class PeerJSClient(private val context: Context) {
             }.toString())
         }
         override fun onConnectionChange(s: PeerConnection.PeerConnectionState) {
-            if (s == PeerConnection.PeerConnectionState.FAILED ||
-                s == PeerConnection.PeerConnectionState.DISCONNECTED)
-                setState(State.ERROR, "WebRTC disconnected")
+            if (s == PeerConnection.PeerConnectionState.FAILED)
+                setState(State.ERROR, "WebRTC failed — reconnect")
         }
         override fun onSignalingChange(s: PeerConnection.SignalingState)           {}
         override fun onIceConnectionChange(s: PeerConnection.IceConnectionState)   {}
