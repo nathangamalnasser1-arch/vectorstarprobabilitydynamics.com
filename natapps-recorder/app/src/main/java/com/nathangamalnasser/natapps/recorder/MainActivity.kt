@@ -90,18 +90,15 @@ class MainActivity : AppCompatActivity() {
         svc.onPeerState = { state, msg ->
             runOnUiThread {
                 binding.tvPeerStatus.text = msg
-                val connected = state == PeerJSClient.State.CONNECTED
                 binding.btnConnect.text = if (
                     state == PeerJSClient.State.CONNECTED ||
                     state == PeerJSClient.State.CONNECTING
                 ) "DISCONNECT" else "CONNECT"
-                binding.btnRecord.isEnabled = connected ||
+                binding.btnRecord.isEnabled = state != PeerJSClient.State.IDLE ||
                         service?.recState == RecordingService.RecState.RECORDING
             }
         }
-        if (svc.isPeerConnected()) {
-            binding.tvPeerStatus.text = "Live — streaming to viewer"
-            binding.btnConnect.text   = "DISCONNECT"
+        if (svc.isPeerConnected() || binding.tvPeerStatus.text.contains("Connecting")) {
             binding.btnRecord.isEnabled = true
         }
     }

@@ -96,7 +96,6 @@
             android:layout_width="match_parent" android:layout_height="64dp"
             android:text="●  START RECORDING" android:textSize="20sp" android:letterSpacing="0.08"
             android:textColor="@color/bg" android:background="@color/accent"
-            android:enabled="false"
             android:layout_marginBottom="20dp" />
 
         <!-- SENSORS -->
