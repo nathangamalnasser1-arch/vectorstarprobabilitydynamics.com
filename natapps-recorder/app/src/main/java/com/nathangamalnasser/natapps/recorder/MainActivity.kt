@@ -99,6 +99,11 @@ class MainActivity : AppCompatActivity() {
                         service?.recState == RecordingService.RecState.RECORDING
             }
         }
+        if (svc.isPeerConnected()) {
+            binding.tvPeerStatus.text = "Live — streaming to viewer"
+            binding.btnConnect.text   = "DISCONNECT"
+            binding.btnRecord.isEnabled = true
+        }
     }
 
     // ── Clicks ────────────────────────────────────────────────────────────────
