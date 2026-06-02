@@ -1,21 +1,16 @@
 package com.nathangamalnasser.natapps.recorder
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.widget.ArrayAdapter
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.nathangamalnasser.natapps.recorder.databinding.ActivityMainBinding
@@ -26,40 +21,19 @@ class MainActivity : AppCompatActivity() {
     private var service: RecordingService? = null
     private var bound = false
 
-    private val bt = BluetoothController()
-    private var btAdapter: BluetoothAdapter? = null
-
-    // Current mode: "left" = LEFT phone (server), "right" = RIGHT phone (client)
-    private var deviceSide = "left"
-
-    // ── Service connection ────────────────────────────────────────────────────
-
-    private val svcConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, binder: IBinder) {
-            service = (binder as RecordingService.LocalBinder).get()
+    private val svcConn = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, b: IBinder) {
+            service = (b as RecordingService.LocalBinder).get()
             bound = true
-            wireServiceCallbacks()
-            refreshRecordingUi()
+            wireCallbacks()
+            refreshUi()
         }
-        override fun onServiceDisconnected(name: ComponentName) {
-            bound = false; service = null
-        }
+        override fun onServiceDisconnected(name: ComponentName) { bound = false; service = null }
     }
-
-    // ── Permissions ───────────────────────────────────────────────────────────
 
     private val permLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { granted ->
-        val allGranted = granted.values.all { it }
-        if (!allGranted) {
-            Toast.makeText(this, "Bluetooth permissions required", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private val btEnableLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { /* user has enabled or declined BT */ }
+    ) { /* permissions handled */ }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -68,119 +42,98 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        btAdapter = (getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        requestNeededPermissions()
+        val intent = Intent(this, RecordingService::class.java)
+        startService(intent)
+        bindService(intent, svcConn, Context.BIND_AUTO_CREATE)
 
-        requestPermissions()
-        startAndBindService()
-        setupBtController()
-        setupClickListeners()
+        setupClicks()
         setMode("left")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (bound) unbindService(svcConnection)
-        bt.disconnect()
+        if (bound) unbindService(svcConn)
     }
 
-    // ── Setup ─────────────────────────────────────────────────────────────────
+    // ── Permissions ───────────────────────────────────────────────────────────
 
-    private fun requestPermissions() {
+    private fun requestNeededPermissions() {
         val needed = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!has(Manifest.permission.BLUETOOTH_CONNECT)) needed += Manifest.permission.BLUETOOTH_CONNECT
-            if (!has(Manifest.permission.BLUETOOTH_SCAN))    needed += Manifest.permission.BLUETOOTH_SCAN
-        } else {
-            if (!has(Manifest.permission.ACCESS_FINE_LOCATION)) needed += Manifest.permission.ACCESS_FINE_LOCATION
-        }
+        if (!has(Manifest.permission.INTERNET)) needed += Manifest.permission.INTERNET
         if (needed.isNotEmpty()) permLauncher.launch(needed.toTypedArray())
     }
 
-    private fun has(p: String) = ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
+    private fun has(p: String) =
+        ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
 
-    private fun startAndBindService() {
-        val intent = Intent(this, RecordingService::class.java)
-        startService(intent)
-        bindService(intent, svcConnection, Context.BIND_AUTO_CREATE)
-    }
+    // ── Service wiring ────────────────────────────────────────────────────────
 
-    private fun wireServiceCallbacks() {
+    private fun wireCallbacks() {
         val svc = service ?: return
-        svc.onStateChanged = { state -> runOnUiThread { refreshRecordingUi() } }
+        svc.onStateChanged = { runOnUiThread { refreshUi() } }
         svc.onTimerTick    = { elapsed, count, peak ->
             runOnUiThread {
                 val min = elapsed / 60000; val sec = (elapsed / 1000) % 60
-                binding.tvTimer.text = "%02d:%02d".format(min, sec)
+                binding.tvTimer.text      = "%02d:%02d".format(min, sec)
                 binding.tvSampleCount.text = "Samples: $count"
                 binding.tvPeakAccel.text   = "Peak: ${"%.2f".format(peak / 9.81)}g"
             }
         }
         svc.onSensorUpdate = { ax, ay, az, gx, gy, gz ->
             runOnUiThread {
-                binding.tvAx.text = "%.2f".format(ax)
-                binding.tvAy.text = "%.2f".format(ay)
-                binding.tvAz.text = "%.2f".format(az)
-                binding.tvGx.text = "%.3f".format(gx)
-                binding.tvGy.text = "%.3f".format(gy)
-                binding.tvGz.text = "%.3f".format(gz)
+                binding.tvAx.text = "%.2f".format(ax); binding.tvAy.text = "%.2f".format(ay)
+                binding.tvAz.text = "%.2f".format(az); binding.tvGx.text = "%.3f".format(gx)
+                binding.tvGy.text = "%.3f".format(gy); binding.tvGz.text = "%.3f".format(gz)
             }
         }
-        // Forward each sample to BT peer if connected
-        svc.sampleReadyCallback = { json ->
-            if (bt.isConnected()) bt.sendSample(json)
+        svc.onPeerState = { state, msg ->
+            runOnUiThread {
+                binding.tvPeerStatus.text = msg
+                val connected = state == PeerJSClient.State.CONNECTED
+                binding.btnConnect.text = if (
+                    state == PeerJSClient.State.CONNECTED ||
+                    state == PeerJSClient.State.CONNECTING
+                ) "DISCONNECT" else "CONNECT"
+                binding.btnRecord.isEnabled = connected ||
+                        service?.recState == RecordingService.RecState.RECORDING
+            }
         }
-        svc.deviceSide = deviceSide
     }
 
-    private fun setupBtController() {
-        bt.onStateChange = { state, msg ->
-            binding.tvBtStatus.text = msg
-            when (state) {
-                BluetoothController.State.CONNECTED -> {
-                    binding.btnBtAction.text = "DISCONNECT"
-                    binding.btnBtAction.isEnabled = true
-                }
-                BluetoothController.State.WAITING, BluetoothController.State.CONNECTING -> {
-                    binding.btnBtAction.text = "CANCEL"
-                    binding.btnBtAction.isEnabled = true
-                }
-                else -> {
-                    val isLeft = deviceSide == "left"
-                    binding.btnBtAction.text = if (isLeft) "WAIT FOR RIGHT PHONE" else "CONNECT TO LEFT PHONE"
-                    binding.btnBtAction.isEnabled = true
-                }
-            }
-        }
-        bt.onCommand = { cmd ->
-            when (cmd) {
-                BluetoothController.CMD_START -> service?.startRecording()
-                BluetoothController.CMD_STOP  -> service?.stopRecording()
-            }
-        }
-        bt.onRemoteSample = { json -> service?.addRemoteSample(json) }
-    }
+    // ── Clicks ────────────────────────────────────────────────────────────────
 
-    private fun setupClickListeners() {
+    private fun setupClicks() {
         binding.btnLeft.setOnClickListener  { setMode("left") }
         binding.btnRight.setOnClickListener { setMode("right") }
 
-        binding.btnBtAction.setOnClickListener {
-            when (bt.state) {
-                BluetoothController.State.CONNECTED -> bt.disconnect()
-                BluetoothController.State.WAITING   -> bt.cancelServer()
-                BluetoothController.State.CONNECTING -> bt.disconnect()
-                else -> initiateBtAction()
+        binding.btnConnect.setOnClickListener {
+            val svc = service ?: return@setOnClickListener
+            if (svc.isPeerConnected() ||
+                binding.tvPeerStatus.text.contains("Connecting")) {
+                svc.disconnectFromViewer()
+            } else {
+                val code = binding.etSessionCode.text.toString().trim().uppercase()
+                if (code.length != 6) {
+                    Toast.makeText(this, "Enter the 6-character code shown on the viewer", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                svc.connectToViewer(code)
             }
+        }
+
+        binding.etSessionCode.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) {
+                binding.btnConnect.performClick(); true
+            } else false
         }
 
         binding.btnRecord.setOnClickListener {
             val svc = service ?: return@setOnClickListener
             if (svc.recState == RecordingService.RecState.RECORDING) {
                 svc.stopRecording()
-                bt.sendCommand(BluetoothController.CMD_STOP)
             } else {
                 svc.startRecording()
-                bt.sendCommand(BluetoothController.CMD_START)
             }
         }
 
@@ -189,65 +142,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ── Mode ──────────────────────────────────────────────────────────────────
+
     private fun setMode(side: String) {
-        deviceSide = side
         service?.deviceSide = side
-        val activeColor   = getColor(R.color.accent)
-        val inactiveColor = getColor(R.color.surface)
-        val activeText    = getColor(R.color.bg)
-        val inactiveText  = getColor(R.color.accent)
+        val accent   = getColor(R.color.accent)
+        val surface  = getColor(R.color.surface)
+        val bg       = getColor(R.color.bg)
 
         if (side == "left") {
-            binding.btnLeft.setBackgroundColor(activeColor);   binding.btnLeft.setTextColor(activeText)
-            binding.btnRight.setBackgroundColor(inactiveColor); binding.btnRight.setTextColor(inactiveText)
-            binding.tvModeHint.text = "LEFT phone — waits for RIGHT to connect"
+            binding.btnLeft.setBackgroundColor(accent);   binding.btnLeft.setTextColor(bg)
+            binding.btnRight.setBackgroundColor(surface); binding.btnRight.setTextColor(accent)
+            binding.tvModeHint.text = "Left pocket"
         } else {
-            binding.btnLeft.setBackgroundColor(inactiveColor); binding.btnLeft.setTextColor(inactiveText)
-            binding.btnRight.setBackgroundColor(activeColor);  binding.btnRight.setTextColor(activeText)
-            binding.tvModeHint.text = "RIGHT phone — connects to LEFT phone"
-        }
-        binding.btnBtAction.text = if (side == "left") "WAIT FOR RIGHT PHONE" else "CONNECT TO LEFT PHONE"
-
-        // Drop existing BT connection when mode changes
-        if (bt.isConnected() || bt.state == BluetoothController.State.WAITING) bt.disconnect()
-    }
-
-    private fun initiateBtAction() {
-        val adapter = btAdapter ?: run {
-            Toast.makeText(this, "Bluetooth not available", Toast.LENGTH_SHORT).show(); return
-        }
-        if (!adapter.isEnabled) {
-            btEnableLauncher.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)); return
-        }
-
-        if (deviceSide == "left") {
-            bt.startServer(adapter)
-        } else {
-            // Show paired device picker
-            val paired = adapter.bondedDevices.toList()
-            if (paired.isEmpty()) {
-                Toast.makeText(this, "No paired devices — pair in Android Settings first", Toast.LENGTH_LONG).show()
-                return
-            }
-            val names = paired.map { it.name ?: it.address }.toTypedArray()
-            AlertDialog.Builder(this)
-                .setTitle("Select LEFT phone")
-                .setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, names)) { _, i ->
-                    bt.connectToDevice(adapter, paired[i])
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+            binding.btnLeft.setBackgroundColor(surface); binding.btnLeft.setTextColor(accent)
+            binding.btnRight.setBackgroundColor(accent); binding.btnRight.setTextColor(bg)
+            binding.tvModeHint.text = "Right pocket"
         }
     }
 
-    private fun refreshRecordingUi() {
+    // ── UI refresh ────────────────────────────────────────────────────────────
+
+    private fun refreshUi() {
         val recording = service?.recState == RecordingService.RecState.RECORDING
         binding.btnRecord.text = if (recording) "■  STOP" else "●  START RECORDING"
         binding.btnRecord.setBackgroundColor(
             getColor(if (recording) R.color.stop_red else R.color.accent)
         )
         if (!recording) {
-            binding.tvTimer.text = "00:00"
+            binding.tvTimer.text       = "00:00"
             binding.tvSampleCount.text = "Samples: 0"
             binding.tvPeakAccel.text   = "Peak: 0.0g"
         }
