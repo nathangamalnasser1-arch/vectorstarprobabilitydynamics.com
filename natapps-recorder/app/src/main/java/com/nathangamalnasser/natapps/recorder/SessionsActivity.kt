@@ -4,15 +4,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nathangamalnasser.natapps.recorder.databinding.ActivitySessionsBinding
@@ -74,15 +73,17 @@ class SessionsActivity : AppCompatActivity() {
             val ts = json.getJSONObject(0).optLong("id", System.currentTimeMillis())
             val date = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(ts))
             val outName = "natapps_session_$date.json"
+            val shareFile = File(filesDir, outName)
+            shareFile.writeText(file.readText())
 
-            val outFile = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), outName)
-            } else {
-                @Suppress("DEPRECATION")
-                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), outName)
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", shareFile)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/json"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, outName)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            outFile.writeText(file.readText())
-            Toast.makeText(this, "Exported to ${outFile.absolutePath}", Toast.LENGTH_LONG).show()
+            startActivity(Intent.createChooser(intent, "Share session"))
         } catch (e: Exception) {
             Toast.makeText(this, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
