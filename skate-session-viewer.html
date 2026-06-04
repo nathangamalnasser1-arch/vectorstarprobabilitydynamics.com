@@ -14,7 +14,7 @@ body{background:#080808;color:#ccc;font-family:monospace;display:flex;flex-direc
 .bl{color:#00d4ff}.br{color:#ff6b35}.bw{color:#666}
 #main{display:flex;flex:1;overflow:hidden;min-height:0}
 #left-col{display:flex;flex-direction:column;flex:1;min-width:0}
-#scene-wrap{position:relative;flex:1;min-height:0;background:#050508}
+#scene-wrap{position:relative;flex:1;min-height:300px;background:#050508}
 #c3d{width:100%;height:100%}
 #slabels{position:absolute;top:8px;left:0;width:100%;display:flex;justify-content:space-around;pointer-events:none}
 .skl{font-size:10px;letter-spacing:.1em;padding:2px 9px;border-radius:2px;border:1px solid}
@@ -142,11 +142,11 @@ const scene=new THREE.Scene();scene.background=new THREE.Color(0x050508);
 scene.fog=new THREE.Fog(0x050508,14,28);
 const camera=new THREE.PerspectiveCamera(46,2,.1,100);
 camera.position.set(0,2.8,6.5);camera.lookAt(0,0,0);
-function rsz(){const W=wrap.clientWidth,H=wrap.clientHeight;renderer.setSize(W,H,false);camera.aspect=W/H;camera.updateProjectionMatrix();}
-rsz();new ResizeObserver(rsz).observe(wrap);
-scene.add(new THREE.AmbientLight(0x334455,4));
-const sun=new THREE.DirectionalLight(0xffffff,3);sun.position.set(3,6,4);sun.castShadow=true;scene.add(sun);
-scene.add(Object.assign(new THREE.DirectionalLight(0x2244ff,1.2),{position:new THREE.Vector3(-4,2,-3)}));
+function rsz(){const W=wrap.clientWidth,H=wrap.clientHeight;if(W>0&&H>0){renderer.setSize(W,H,false);camera.aspect=W/H;camera.updateProjectionMatrix();}}
+window.addEventListener('resize',rsz);new ResizeObserver(rsz).observe(wrap);setTimeout(rsz,50);
+scene.add(new THREE.AmbientLight(0xffffff,2.5));
+const sun=new THREE.DirectionalLight(0xffffff,4);sun.position.set(3,6,4);sun.castShadow=true;scene.add(sun);
+const fill=new THREE.DirectionalLight(0x8899ff,2);fill.position.set(-4,2,-3);scene.add(fill);
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0x080810,roughness:1}));
 floor.rotation.x=-Math.PI/2;floor.position.y=-.42;floor.receiveShadow=true;scene.add(floor);
 scene.add(Object.assign(new THREE.GridHelper(20,40,0x1a1a2a,0x111120),{position:new THREE.Vector3(0,-.41,0)}));
