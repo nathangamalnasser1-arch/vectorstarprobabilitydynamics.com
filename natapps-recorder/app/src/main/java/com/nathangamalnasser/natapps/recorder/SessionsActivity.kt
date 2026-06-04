@@ -18,8 +18,11 @@ import com.nathangamalnasser.natapps.recorder.databinding.ActivitySessionsBindin
 import com.nathangamalnasser.natapps.recorder.databinding.ItemSessionBinding
 import org.json.JSONArray
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class SessionsActivity : AppCompatActivity() {
 
@@ -43,6 +46,7 @@ class SessionsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnBack.setOnClickListener { finish() }
+        binding.btnExportAll.setOnClickListener { exportAllSessions() }
 
         adapter = SessionAdapter(
             onExport = { file -> exportSession(file) },
@@ -84,6 +88,35 @@ class SessionsActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivity(Intent.createChooser(intent, "Share session"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun exportAllSessions() {
+        val files = service?.getSessionFiles() ?: emptyList()
+        if (files.isEmpty()) {
+            Toast.makeText(this, "No sessions to export", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val zipFile = File(filesDir, "natapps_sessions_$stamp.zip")
+            ZipOutputStream(FileOutputStream(zipFile)).use { zip ->
+                files.forEach { f ->
+                    zip.putNextEntry(ZipEntry(f.name))
+                    zip.write(f.readBytes())
+                    zip.closeEntry()
+                }
+            }
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", zipFile)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/zip"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, zipFile.name)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, "Share all sessions"))
         } catch (e: Exception) {
             Toast.makeText(this, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }

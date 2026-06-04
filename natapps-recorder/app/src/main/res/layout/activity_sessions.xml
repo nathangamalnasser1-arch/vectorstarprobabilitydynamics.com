@@ -35,6 +35,16 @@
             android:textSize="20sp"
             android:letterSpacing="0.1"
             android:fontFamily="sans-serif-condensed" />
+
+        <Button
+            android:id="@+id/btnExportAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EXPORT ALL"
+            android:textColor="@color/accent"
+            android:textSize="11sp"
+            android:letterSpacing="0.08"
+            android:background="@null" />
     </LinearLayout>
 
     <TextView
