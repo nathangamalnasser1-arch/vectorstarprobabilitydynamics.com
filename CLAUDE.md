@@ -19,7 +19,8 @@ The nav links are in index.html and all other pages. Match the filename exactly.
 Example: nav links to rollerblade-route-viewer.html — that is the file to edit, not a new one.
 
 ## App file delivery
-When Android app files change, zip only the changed files and send as a zip.
+Always zip the ENTIRE natapps-recorder/ project folder and send with SendUserFile.
+Never send just changed files. The user opens the full project in Android Studio and builds.
 The user compiles the APK themselves. Never commit or push APK files.
 
 ## Keep explanations short and plain
