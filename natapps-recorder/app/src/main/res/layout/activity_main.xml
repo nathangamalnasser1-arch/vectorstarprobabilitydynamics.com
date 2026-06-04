@@ -170,6 +170,13 @@
             android:text="GYRO: checking..."
             android:textColor="@color/muted"
             android:textSize="11sp" android:fontFamily="monospace"
+            android:layout_marginBottom="4dp" />
+
+        <TextView android:id="@+id/tvGpsStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="GPS: idle"
+            android:textColor="@color/muted"
+            android:textSize="11sp" android:fontFamily="monospace"
             android:layout_marginBottom="8dp" />
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

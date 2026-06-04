@@ -6,14 +6,19 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -47,6 +52,7 @@ class RecordingService : Service(), SensorEventListener {
     var onSensorUpdate:  ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
     var onPeerState:     ((PeerJSClient.State, String) -> Unit)? = null
     var onGyroStatus:    ((Boolean) -> Unit)?                   = null  // true = working
+    var onGpsStatus:     ((Boolean, Int) -> Unit)?              = null  // hasGps, fixCount
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
@@ -54,6 +60,7 @@ class RecordingService : Service(), SensorEventListener {
     private var accelSensor: Sensor? = null
     private var gyroSensor:  Sensor? = null
     private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var locationManager: LocationManager
 
     private lateinit var peerClient: PeerJSClient
 
@@ -70,17 +77,40 @@ class RecordingService : Service(), SensorEventListener {
     private var gyroStatusFired  = false
 
     private val localSamples = Collections.synchronizedList(mutableListOf<JSONObject>())
+    private val gpsTrack     = Collections.synchronizedList(mutableListOf<JSONObject>())
+    private var gpsFixCount  = 0
 
     private val scope    = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var timerJob: Job? = null
+
+    // ── GPS listener ──────────────────────────────────────────────────────────
+
+    private val gpsListener = object : LocationListener {
+        override fun onLocationChanged(loc: Location) {
+            if (recState != RecState.RECORDING) return
+            gpsFixCount++
+            val pt = JSONObject().apply {
+                put("t",   System.currentTimeMillis() - startTime)
+                put("lat", loc.latitude)
+                put("lng", loc.longitude)
+                put("alt", loc.altitude.round(1))
+                put("acc", loc.accuracy.toDouble().round(1))
+            }
+            gpsTrack.add(pt)
+            scope.launch(Dispatchers.Main) { onGpsStatus?.invoke(true, gpsFixCount) }
+        }
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
+    }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     override fun onCreate() {
         super.onCreate()
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelSensor   = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        gyroSensor    = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        sensorManager   = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelSensor     = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        gyroSensor      = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         val pm = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NatappsRecorder:WL")
 
@@ -126,11 +156,20 @@ class RecordingService : Service(), SensorEventListener {
         gyroNonZeroCount = 0
         gyroStatusFired  = false
         localSamples.clear()
+        gpsTrack.clear()
+        gpsFixCount = 0
 
         if (!wakeLock.isHeld) wakeLock.acquire(6 * 60 * 60 * 1000L)
 
         sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME)
         sensorManager.registerListener(this, gyroSensor,  SensorManager.SENSOR_DELAY_GAME)
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, 1000L, 1f, gpsListener, mainLooper)
+            scope.launch(Dispatchers.Main) { onGpsStatus?.invoke(false, 0) }
+        }
 
         startForeground(NOTIF_ID, buildNotif("● Recording…  00:00"))
 
@@ -153,6 +192,7 @@ class RecordingService : Service(), SensorEventListener {
         recState = RecState.IDLE
         timerJob?.cancel()
         sensorManager.unregisterListener(this)
+        try { locationManager.removeUpdates(gpsListener) } catch (_: Exception) {}
         if (wakeLock.isHeld) wakeLock.release()
         saveSession()
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -217,14 +257,25 @@ class RecordingService : Service(), SensorEventListener {
             .also { it.timeZone = TimeZone.getTimeZone("UTC") }
             .format(Date(startTime))
 
-        val arr = JSONArray().also { localSamples.forEach { s -> it.put(s) } }
+        val arr    = JSONArray().also { localSamples.forEach { s -> it.put(s) } }
+        val gpsArr = JSONArray().also { gpsTrack.forEach { pt -> it.put(pt) } }
+
         val session = JSONObject().apply {
             put("id", startTime); put("device", deviceSide)
             put("timestamp", iso); put("duration_ms", duration)
             put("peak_accel_ms2", peakAccel.round(3))
             put("peak_gyro_rads", peakGyro.round(4))
             put("sample_count", localSamples.size)
+            put("gps_count", gpsTrack.size)
+            if (gpsTrack.isNotEmpty()) {
+                val first = gpsTrack[0]
+                put("gps_origin", JSONObject().apply {
+                    put("lat", first.getDouble("lat"))
+                    put("lng", first.getDouble("lng"))
+                })
+            }
             put("samples", arr)
+            put("gps", gpsArr)
         }
         File(filesDir, "session_${startTime}.json").writeText(JSONArray().put(session).toString())
     }

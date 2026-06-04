@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestNeededPermissions() {
         val needed = mutableListOf<String>()
         if (!has(Manifest.permission.INTERNET)) needed += Manifest.permission.INTERNET
+        if (!has(Manifest.permission.ACCESS_FINE_LOCATION)) needed += Manifest.permission.ACCESS_FINE_LOCATION
         if (needed.isNotEmpty()) permLauncher.launch(needed.toTypedArray())
     }
 
@@ -95,6 +96,17 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     binding.tvGyroStatus.text = "GYRO: DEAD  ✕  (orientation unavailable)"
                     binding.tvGyroStatus.setTextColor(getColor(R.color.stop_red))
+                }
+            }
+        }
+        svc.onGpsStatus = { hasGps, count ->
+            runOnUiThread {
+                if (!hasGps) {
+                    binding.tvGpsStatus.text = "GPS: waiting for fix…"
+                    binding.tvGpsStatus.setTextColor(getColor(R.color.muted))
+                } else {
+                    binding.tvGpsStatus.text = "GPS: $count pts  ●"
+                    binding.tvGpsStatus.setTextColor(getColor(R.color.green))
                 }
             }
         }
