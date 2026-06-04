@@ -310,30 +310,32 @@ document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();toggl
 /* ── ANIMATE ──────────────────────────────────────────────────────────────── */
 function animate(ts){
   requestAnimationFrame(animate);
-  if(playing&&lastTs!==null){
-    cT=Math.min(cT+(ts-lastTs)*speed,TOTAL);
-    if(cT>=TOTAL){playing=false;btnP.textContent='▶';}
-    scrub.value=cT;tdisp.textContent=fmt(cT)+' / '+fmt(TOTAL);
+  // Always track lastTs while playing so pause/resume never causes a time jump
+  if(playing){
+    if(lastTs!==null){
+      cT=Math.min(cT+(ts-lastTs)*speed,TOTAL);
+      if(cT>=TOTAL){playing=false;btnP.textContent='▶';}
+      scrub.value=cT;tdisp.textContent=fmt(cT)+' / '+fmt(TOTAL);
+    }
+    lastTs=ts;
+  } else {
+    lastTs=null; // reset while paused so resume always starts with a clean 1-frame delta
   }
-  lastTs=ts;
   if(lQ){
     const li=bisect(L,cT,s=>s[0]);
     if(li>=0&&lQ[li]){const[w,x,y,z]=lQ[li];LS3.quaternion.set(x,y,z,w);}
     const rt=cT-OFF;
     if(rt>=0){const ri=bisect(R,rt,s=>s[0]);if(ri>=0&&rQ[ri]){const[w,x,y,z]=rQ[ri];RS3.quaternion.set(x,y,z,w);}}
-    // Info bar
     if(li>=0&&li<L.length){
       const[,ax,ay,az,gx,gy,gz]=L[li];
       const am=Math.sqrt(ax*ax+ay*ay+az*az),gm=Math.sqrt(gx*gx+gy*gy+gz*gz);
       document.getElementById('i-la').textContent=(am/9.81).toFixed(2)+'G';
       document.getElementById('i-lg').textContent=gm.toFixed(2)+' r/s';
-      // Speed from path
       const pi=bisect(PATH,cT,p=>p[0]);
       if(pi>0&&pi<PATH.length){
         const dt=(PATH[pi][0]-PATH[pi-1][0])/1000||.1;
         const dx=PATH[pi][1]-PATH[pi-1][1],dy=PATH[pi][2]-PATH[pi-1][2];
-        const spd=Math.sqrt(dx*dx+dy*dy)/dt;
-        document.getElementById('i-spd').textContent=spd.toFixed(1)+' m/s';
+        document.getElementById('i-spd').textContent=(Math.sqrt(dx*dx+dy*dy)/dt).toFixed(1)+' m/s';
       }
     }
     const rt2=cT-OFF;if(rt2>=0){const ri=bisect(R,rt2,s=>s[0]);if(ri>=0){const[,ax,ay,az]=R[ri];document.getElementById('i-ra').textContent=(Math.sqrt(ax*ax+ay*ay+az*az)/9.81).toFixed(2)+'G';}}
@@ -347,7 +349,7 @@ function animate(ts){
 }
 
 /* ── INIT ─────────────────────────────────────────────────────────────────── */
-btnP.disabled=true;rszTL();precompute();animate(0);
+btnP.disabled=true;rszTL();precompute();requestAnimationFrame(animate);
 </script>
 </body>
 </html>
