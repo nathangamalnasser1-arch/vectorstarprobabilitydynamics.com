@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VectorStar ⟡ Skate Session</title>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#080808;color:#ccc;font-family:monospace;display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -149,7 +149,7 @@ const sun=new THREE.DirectionalLight(0xffffff,4);sun.position.set(3,6,4);sun.cas
 const fill=new THREE.DirectionalLight(0x8899ff,2);fill.position.set(-4,2,-3);scene.add(fill);
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0x080810,roughness:1}));
 floor.rotation.x=-Math.PI/2;floor.position.y=-.42;floor.receiveShadow=true;scene.add(floor);
-scene.add(Object.assign(new THREE.GridHelper(20,40,0x1a1a2a,0x111120),{position:new THREE.Vector3(0,-.41,0)}));
+const grid=new THREE.GridHelper(20,40,0x1a1a2a,0x111120);grid.position.y=-.41;scene.add(grid);
 
 function mkSkate(hex){
   const g=new THREE.Group(),mat=new THREE.MeshPhongMaterial({color:hex,shininess:60});
