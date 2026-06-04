@@ -87,6 +87,17 @@ class MainActivity : AppCompatActivity() {
                 binding.tvGy.text = "%.3f".format(gy); binding.tvGz.text = "%.3f".format(gz)
             }
         }
+        svc.onGyroStatus = { working ->
+            runOnUiThread {
+                if (working) {
+                    binding.tvGyroStatus.text = "GYRO: OK  ●"
+                    binding.tvGyroStatus.setTextColor(getColor(R.color.green))
+                } else {
+                    binding.tvGyroStatus.text = "GYRO: DEAD  ✕  (orientation unavailable)"
+                    binding.tvGyroStatus.setTextColor(getColor(R.color.stop_red))
+                }
+            }
+        }
         svc.onPeerState = { state, msg ->
             runOnUiThread {
                 binding.tvPeerStatus.text = msg

@@ -46,6 +46,7 @@ class RecordingService : Service(), SensorEventListener {
     var onTimerTick:     ((Long, Int, Double) -> Unit)?         = null
     var onSensorUpdate:  ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
     var onPeerState:     ((PeerJSClient.State, String) -> Unit)? = null
+    var onGyroStatus:    ((Boolean) -> Unit)?                   = null  // true = working
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
@@ -63,6 +64,10 @@ class RecordingService : Service(), SensorEventListener {
     private var lastSampleMs = 0L
     private var peakAccel    = 0.0
     private var peakGyro     = 0.0
+
+    private var gyroSampleCount  = 0
+    private var gyroNonZeroCount = 0
+    private var gyroStatusFired  = false
 
     private val localSamples = Collections.synchronizedList(mutableListOf<JSONObject>())
 
@@ -112,11 +117,14 @@ class RecordingService : Service(), SensorEventListener {
 
     fun startRecording() {
         if (recState == RecState.RECORDING) return
-        recState     = RecState.RECORDING
-        startTime    = System.currentTimeMillis()
-        lastSampleMs = 0L
-        peakAccel    = 0.0
-        peakGyro     = 0.0
+        recState         = RecState.RECORDING
+        startTime        = System.currentTimeMillis()
+        lastSampleMs     = 0L
+        peakAccel        = 0.0
+        peakGyro         = 0.0
+        gyroSampleCount  = 0
+        gyroNonZeroCount = 0
+        gyroStatusFired  = false
         localSamples.clear()
 
         if (!wakeLock.isHeld) wakeLock.acquire(6 * 60 * 60 * 1000L)
@@ -156,7 +164,18 @@ class RecordingService : Service(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER -> { ax = event.values[0]; ay = event.values[1]; az = event.values[2] }
-            Sensor.TYPE_GYROSCOPE     -> { gx = event.values[0]; gy = event.values[1]; gz = event.values[2] }
+            Sensor.TYPE_GYROSCOPE     -> {
+                gx = event.values[0]; gy = event.values[1]; gz = event.values[2]
+                if (!gyroStatusFired) {
+                    gyroSampleCount++
+                    if (gx != 0f || gy != 0f || gz != 0f) gyroNonZeroCount++
+                    if (gyroSampleCount >= 60) {
+                        gyroStatusFired = true
+                        val working = gyroNonZeroCount >= 5
+                        scope.launch(Dispatchers.Main) { onGyroStatus?.invoke(working) }
+                    }
+                }
+            }
         }
 
         val now = System.currentTimeMillis()

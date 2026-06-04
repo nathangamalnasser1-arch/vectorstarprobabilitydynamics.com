@@ -165,6 +165,13 @@
             </LinearLayout>
         </LinearLayout>
 
+        <TextView android:id="@+id/tvGyroStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="GYRO: checking..."
+            android:textColor="@color/muted"
+            android:textSize="11sp" android:fontFamily="monospace"
+            android:layout_marginBottom="8dp" />
+
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:layout_marginBottom="24dp">
             <TextView android:id="@+id/tvPeakAccel"
