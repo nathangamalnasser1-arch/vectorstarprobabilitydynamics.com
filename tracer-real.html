@@ -944,6 +944,26 @@ function updateGraphs(){
     gx.textAlign='left';gx.restore()
   }
 
+  // 360° spin event markers on G-FORCE row
+  if(SPIN_EVENTS.length&&DUR>0){
+    gx.save()
+    SPIN_EVENTS.forEach(ev=>{
+      if(ev.type!=='360'&&ev.type!=='2x180a'&&ev.type!=='2x180b')return
+      const mx=ev.t/DUR*W
+      const is360=ev.type==='360'
+      const col=is360?'rgba(255,210,0,0.55)':'rgba(255,160,0,0.4)'
+      gx.strokeStyle=col;gx.lineWidth=(is360?2:1.5)*DPR
+      if(!is360)gx.setLineDash([3*DPR,3*DPR])
+      gx.beginPath();gx.moveTo(mx,2);gx.lineTo(mx,rh-2);gx.stroke()
+      gx.setLineDash([])
+      if(is360){
+        gx.fillStyle=col;gx.font=`bold ${Math.round(6.5*DPR)}px Courier New`
+        gx.textAlign='center';gx.fillText('360°',mx,14*DPR)
+      }
+    })
+    gx.textAlign='left';gx.restore()
+  }
+
   // G-force peak markers (above 2.5g) on G-FORCE row
   if(G_PROFILE.length&&DUR>0&&MAX_G>0){
     const PEAK_THRESH=Math.min(2.5,MAX_G*0.75)
