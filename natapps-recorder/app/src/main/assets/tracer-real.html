@@ -194,6 +194,25 @@ OV_Y=FIT.cy
 let GPS_SC=0, SPEED_DATA=[], ALT_DATA=[], MAX_SPD=1, MAX_ALT=1
 let showGhost=true, activeTab='3d'
 let SPIN_EVENTS=[]
+let G_PEAKS=[]
+
+function computeGPeaks(){
+  G_PEAKS=[]
+  if(!G_PROFILE||G_PROFILE.length===0||!DUR||!MAX_G)return
+  const THRESH=Math.min(2.5,MAX_G*0.75)
+  let inPeak=false,peakMax=0,peakIdx=0
+  for(let i=0;i<G_PROFILE.length;i++){
+    const v=G_PROFILE[i]
+    if(v>=THRESH){
+      if(!inPeak){inPeak=true;peakMax=v;peakIdx=i}
+      else if(v>peakMax){peakMax=v;peakIdx=i}
+    }else if(inPeak){
+      G_PEAKS.push({t:peakIdx/G_PROFILE.length*DUR,g:peakMax})
+      inPeak=false;peakMax=0
+    }
+  }
+  if(inPeak)G_PEAKS.push({t:peakIdx/G_PROFILE.length*DUR,g:peakMax})
+}
 
 function computeSpinEvents(){
   SPIN_EVENTS=[]
@@ -234,6 +253,7 @@ function computeTrailData(){
 }
 computeTrailData()
 computeSpinEvents()
+computeGPeaks()
 
 function lookup(arr,ms){
   if(!arr||arr.length===0)return[0,0,0,0]
@@ -413,6 +433,41 @@ function drawTimelineGraph(){
   fill(G_PROFILE,'rgba(30,148,255,0.28)',MAX_G); line(G_PROFILE,'rgba(30,148,255,0.7)',MAX_G)
   tctx.strokeStyle='rgba(0,255,238,.06)';tctx.lineWidth=DPR*.5
   tctx.beginPath();tctx.moveTo(0,0);tctx.lineTo(W,0);tctx.stroke()
+  // G-force peak markers (diamond at bottom, blue→red by intensity)
+  if(G_PEAKS&&G_PEAKS.length&&DUR>0&&MAX_G>0){
+    const THRESH=Math.min(2.5,MAX_G*0.75)
+    G_PEAKS.forEach(pk=>{
+      const x=Math.round(pk.t/DUR*W)+0.5
+      const alpha=Math.min(1,(pk.g-THRESH)/(MAX_G-THRESH))
+      const r=Math.round(30+225*alpha),g2=Math.round(148-100*alpha),b=Math.round(255-255*alpha)
+      const col=`rgb(${r},${g2},${b})`
+      const ds=DPR*(2+alpha*3)
+      tctx.save()
+      tctx.fillStyle=col;tctx.globalAlpha=0.9
+      tctx.beginPath();tctx.moveTo(x,H-ds*2);tctx.lineTo(x-ds,H-ds*0.7);tctx.lineTo(x,H);tctx.lineTo(x+ds,H-ds*0.7);tctx.closePath();tctx.fill()
+      tctx.restore()
+    })
+  }
+  // spin event markers
+  if(SPIN_EVENTS&&SPIN_EVENTS.length&&DUR>0){
+    SPIN_EVENTS.forEach(ev=>{
+      const x=Math.round(ev.t/DUR*W)+0.5
+      const is360=ev.type==='360'
+      const is2x=ev.type==='2x180a'||ev.type==='2x180b'
+      const col=is360?'#ffd700':is2x?'#ffaa00':'#ff7700'
+      tctx.save()
+      tctx.globalAlpha=is360?0.9:0.65
+      tctx.strokeStyle=col
+      tctx.lineWidth=DPR*(is360?2.5:1.5)
+      if(!is360&&!is2x)tctx.setLineDash([DPR*3,DPR*3])
+      tctx.beginPath();tctx.moveTo(x,DPR*8);tctx.lineTo(x,H);tctx.stroke()
+      tctx.setLineDash([])
+      const r=DPR*(is360?4:3)
+      tctx.globalAlpha=1;tctx.fillStyle=col
+      tctx.beginPath();tctx.arc(x,r,r,0,Math.PI*2);tctx.fill()
+      tctx.restore()
+    })
+  }
 }
 
 // ── Camera ───────────────────────────────────────────────────
@@ -499,7 +554,21 @@ document.getElementById('bF').addEventListener('pointerdown',e=>{if(liveMode)ret
 document.getElementById('bR').addEventListener('pointercancel',stopAll)
 document.getElementById('bF').addEventListener('pointercancel',stopAll)
 addEventListener('pointerup',stopAll)
-function seekClick(e,el){if(liveMode)return;const r=el.getBoundingClientRect();playMs=(e.clientX-r.left)/r.width*DUR;clr()}
+function seekClick(e,el){
+  if(liveMode)return
+  const r=el.getBoundingClientRect()
+  const clickX=e.clientX-r.left
+  let ms=clickX/r.width*DUR
+  {
+    const SNAP_PX=28
+    let nearest=null,nearestD=Infinity
+    const check=t=>{const d=Math.abs(t/DUR*r.width-clickX);if(d<SNAP_PX&&d<nearestD){nearestD=d;nearest=t}}
+    if(SPIN_EVENTS&&DUR>0)SPIN_EVENTS.forEach(ev=>check(ev.t))
+    if(G_PEAKS&&DUR>0)G_PEAKS.forEach(pk=>check(pk.t))
+    if(nearest!==null)ms=nearest
+  }
+  playMs=ms;clr()
+}
 document.getElementById('bar').onclick=e=>seekClick(e,e.currentTarget)
 // drag-scrub on timeline
 const tstrip=document.getElementById('tstrip')
@@ -799,6 +868,7 @@ function applySession(sessions){
   GPS_SC=sc
   MAX_G=Math.max(...G_PROFILE)||15
   MAX_ROT=Math.max(...R_PROFILE)||1000
+  computeGPeaks()
   OV_Y=GPS.reduce((sum,g)=>sum+g[1],0)/GPS.length
 
   // Reset playback
