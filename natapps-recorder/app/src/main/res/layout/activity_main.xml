@@ -45,36 +45,53 @@
             android:text="Left pocket" android:textColor="@color/muted"
             android:textSize="11sp" android:layout_marginBottom="20dp" />
 
-        <!-- VIEWER CONNECTION -->
+        <!-- LIVE VIEW -->
         <View android:layout_width="match_parent" android:layout_height="1dp"
             android:background="@color/border" android:layout_marginBottom="12dp" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="RELAY SERVER IP" android:textColor="@color/muted"
-            android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="8dp" />
+            android:text="LIVE VIEW" android:textColor="@color/muted"
+            android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tvLiveUrl"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="starting…"
+            android:textColor="@color/accent2" android:textSize="16sp"
+            android:fontFamily="monospace" android:layout_marginBottom="2dp"
+            android:clickable="true" android:focusable="true" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Tap URL to show QR code for viewer · or scan after starting a session"
+            android:textColor="@color/muted" android:textSize="11sp"
+            android:layout_marginBottom="12dp" />
 
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="CLOUD RELAY (4G / 5G / INTERNET)"
+            android:textColor="@color/muted" android:textSize="10sp"
+            android:letterSpacing="0.15" android:layout_marginBottom="6dp" />
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/etSessionCode"
-                android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
-                android:hint="192.168.x.x"
+            android:orientation="horizontal" android:layout_marginBottom="4dp">
+            <EditText android:id="@+id/etRelayUrl"
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:hint="yourapp.railway.app"
                 android:inputType="text|textNoSuggestions"
-                android:textSize="18sp" android:fontFamily="monospace"
+                android:textSize="14sp" android:fontFamily="monospace"
                 android:textColor="@color/accent2" android:textColorHint="@color/muted"
                 android:background="@color/surface"
                 android:paddingStart="12dp" android:paddingEnd="12dp"
                 android:imeOptions="actionGo"
                 android:layout_marginEnd="8dp" />
             <Button android:id="@+id/btnConnect"
-                android:layout_width="wrap_content" android:layout_height="52dp"
-                android:text="CONNECT" android:textSize="13sp" android:letterSpacing="0.06"
+                android:layout_width="wrap_content" android:layout_height="48dp"
+                android:text="CONNECT" android:textSize="12sp" android:letterSpacing="0.06"
                 android:textColor="@color/bg" android:background="@color/accent"
-                android:paddingStart="16dp" android:paddingEnd="16dp" />
+                android:paddingStart="14dp" android:paddingEnd="14dp" />
         </LinearLayout>
-
-        <TextView android:id="@+id/tvPeerStatus"
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Blank = built-in relay (WiFi only). Domain = cloud relay (any network)."
+            android:textColor="@color/muted" android:textSize="10sp"
+            android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tvRelayStatus"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Not connected"
-            android:textColor="@color/muted" android:textSize="12sp"
+            android:text="Relay: idle"
+            android:textColor="@color/muted" android:textSize="11sp"
             android:fontFamily="monospace" android:layout_marginBottom="20dp" />
 
         <!-- RECORDING -->

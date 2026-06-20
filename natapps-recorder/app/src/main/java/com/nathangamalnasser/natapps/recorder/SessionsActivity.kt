@@ -49,6 +49,7 @@ class SessionsActivity : AppCompatActivity() {
         binding.btnExportAll.setOnClickListener { exportAllSessions() }
 
         adapter = SessionAdapter(
+            onView   = { file -> viewSession(file) },
             onExport = { file -> exportSession(file) },
             onDelete = { file -> confirmDelete(file) }
         )
@@ -69,6 +70,28 @@ class SessionsActivity : AppCompatActivity() {
         val files = service?.getSessionFiles() ?: emptyList()
         adapter?.setFiles(files)
         binding.tvEmpty.visibility = if (files.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+    }
+
+    private fun viewSession(file: File) {
+        val ip = service?.getLocalIp() ?: "?"
+        val url = "http://$ip:8080/?session=${file.name}"
+        val qr = android.widget.ImageView(this).apply {
+            setImageBitmap(MainActivity.generateQr(url, 512))
+            setPadding(48, 24, 48, 8)
+        }
+        AlertDialog.Builder(this)
+            .setTitle("View Session")
+            .setMessage("Scan QR or tap Open to view in browser")
+            .setView(qr)
+            .setPositiveButton("Open in Browser") { _, _ ->
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+                } catch (e: Exception) {
+                    Toast.makeText(this, "No browser found", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Close", null)
+            .show()
     }
 
     private fun exportSession(file: File) {
@@ -137,6 +160,7 @@ class SessionsActivity : AppCompatActivity() {
     // ── Adapter ───────────────────────────────────────────────────────────────
 
     class SessionAdapter(
+        private val onView:   (File) -> Unit,
         private val onExport: (File) -> Unit,
         private val onDelete: (File) -> Unit
     ) : RecyclerView.Adapter<SessionAdapter.VH>() {
@@ -165,12 +189,14 @@ class SessionsActivity : AppCompatActivity() {
                 val min  = dur / 60000; val sec = (dur / 1000) % 60
                 val channels = if (arr.length() > 1) "Left + Right" else obj.optString("device", "?").replaceFirstChar { it.uppercase() }
                 val count = obj.optInt("sample_count", 0)
-                holder.b.tvTitle.text = "$date  ·  $channels"
+                val name  = obj.optString("name", "")
+                holder.b.tvTitle.text = if (name.isNotEmpty()) "$name  ·  $date  ·  $channels" else "$date  ·  $channels"
                 holder.b.tvMeta.text  = "Duration %02d:%02d  ·  %,d samples".format(min, sec, count)
             } catch (e: Exception) {
                 holder.b.tvTitle.text = file.name
                 holder.b.tvMeta.text  = "Error reading file"
             }
+            holder.b.btnView.setOnClickListener   { onView(file) }
             holder.b.btnExport.setOnClickListener { onExport(file) }
             holder.b.btnDelete.setOnClickListener { onDelete(file) }
         }
