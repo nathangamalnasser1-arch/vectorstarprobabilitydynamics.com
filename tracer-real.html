@@ -191,6 +191,7 @@ OV_Y=FIT.cy
 
 let GPS_SC=0, SPEED_DATA=[], ALT_DATA=[], MAX_SPD=1, MAX_ALT=1
 let showGhost=true, activeTab='3d'
+let SPIN_EVENTS=[]
 
 function computeTrailData(){
   SPEED_DATA=[]
@@ -300,10 +301,13 @@ function drawCube(){
     const ac=[rv[2][0]-rv[0][0],rv[2][1]-rv[0][1],rv[2][2]-rv[0][2]]
     const nz=ab[0]*ac[1]-ab[1]*ac[0]   // Z of cross product = facing camera?
     const depth=(rv[0][2]+rv[1][2]+rv[2][2]+rv[3][2])/4
-    return{...f,pv,depth,vis:nz>0}
+    return{...f,pv,depth,nz,vis:nz>0}
   })
   faces.sort((a,b)=>a.depth-b.depth)   // back→front painter order
   lastCubeFaces=[...faces].reverse()    // front→back for hit testing
+
+  // only label the single most front-facing face
+  const frontFace=faces.reduce((b,f)=>f.vis&&f.nz>(b?b.nz:-Infinity)?f:b,null)
 
   faces.forEach(f=>{
     cx.beginPath()
@@ -313,12 +317,14 @@ function drawCube(){
     if(f.vis){
       cx.fillStyle='rgba(0,255,238,0.13)'; cx.fill()
       cx.strokeStyle='rgba(0,255,238,0.75)'; cx.lineWidth=1.4*DPR; cx.stroke()
-      const fcx=f.pv.reduce((s,p)=>s+p[0],0)/4
-      const fcy=f.pv.reduce((s,p)=>s+p[1],0)/4
-      cx.fillStyle='rgba(0,255,238,0.95)'
-      cx.font=`bold ${Math.round(S*0.12)}px Courier New`
-      cx.textAlign='center'; cx.textBaseline='middle'
-      cx.fillText(f.label,fcx,fcy)
+      if(f===frontFace){
+        const fcx=f.pv.reduce((s,p)=>s+p[0],0)/4
+        const fcy=f.pv.reduce((s,p)=>s+p[1],0)/4
+        cx.fillStyle='rgba(0,255,238,0.95)'
+        cx.font=`bold ${Math.round(S*0.12)}px Courier New`
+        cx.textAlign='center'; cx.textBaseline='middle'
+        cx.fillText(f.label,fcx,fcy)
+      }
     }else{
       cx.fillStyle='rgba(0,20,30,0.55)'; cx.fill()
       cx.strokeStyle='rgba(0,255,238,0.1)'; cx.lineWidth=0.5*DPR; cx.stroke()
@@ -719,6 +725,36 @@ function applySession(sessions){
     if(r>R_PROFILE[bi])R_PROFILE[bi]=r
   }
 
+  // Detect spin events: integrate gyro_mag over continuous high-rotation periods
+  {
+    const THRESH=120   // °/s minimum to count as spinning
+    const events=[]
+    let spinStart=-1, spinAccum=0
+    for(let i=1;i<samps.length;i++){
+      const s=samps[i], rot=s.gyro_mag*R2D
+      const dt=(s.t-samps[i-1].t)/1000
+      if(rot>=THRESH){
+        if(spinStart<0)spinStart=s.t
+        spinAccum+=rot*dt
+      }else if(spinStart>=0){
+        const type=spinAccum>=315?'360':spinAccum>=135?'180':null
+        if(type)events.push({t:(spinStart+s.t)/2,start:spinStart,end:s.t,accum:spinAccum,type})
+        spinStart=-1;spinAccum=0
+      }
+    }
+    if(spinStart>=0){
+      const type=spinAccum>=315?'360':spinAccum>=135?'180':null
+      if(type)events.push({t:(spinStart+samps[samps.length-1].t)/2,start:spinStart,end:samps[samps.length-1].t,accum:spinAccum,type})
+    }
+    // tag consecutive 180s that are close together as a 2×180 pair
+    for(let i=0;i<events.length-1;i++){
+      if(events[i].type==='180'&&events[i+1].type==='180'&&events[i+1].start-events[i].end<2000){
+        events[i].type='2x180a';events[i+1].type='2x180b'
+      }
+    }
+    SPIN_EVENTS=events
+  }
+
   DUR=dur
   GPS_SC=sc
   MAX_G=Math.max(...G_PROFILE)||15
@@ -775,6 +811,26 @@ function updateGraphs(){
   drawChartRow(gx,rh,  rh,W,R_PROFILE, true, [255,210,0],   'ROTATION', 'rps')
   drawChartRow(gx,rh*2,rh,W,SPEED_DATA,false,[0,255,238],   'SPEED',    'spd')
   drawChartRow(gx,rh*3,rh,W,ALT_DATA,  false,[0,255,128],   'ALTITUDE', 'alt')
+
+  // Spin event markers on ROTATION row
+  if(SPIN_EVENTS.length&&DUR>0){
+    const ry=rh  // ROTATION row y offset
+    gx.save()
+    SPIN_EVENTS.forEach(ev=>{
+      const mx=ev.t/DUR*W
+      const is360=ev.type==='360'
+      const is2x=ev.type==='2x180a'||ev.type==='2x180b'
+      const clr=is360?'#ffd200':is2x?'#ff5500':'#ff9500'
+      gx.strokeStyle=clr;gx.lineWidth=(is360?2.5:1.8)*DPR
+      gx.setLineDash(is360?[]:[4*DPR,3*DPR])
+      gx.beginPath();gx.moveTo(mx,ry+2);gx.lineTo(mx,ry+rh-2);gx.stroke()
+      gx.setLineDash([])
+      const lbl=is360?'360°':is2x?(ev.type==='2x180a'?'½+':'½'):'180°'
+      gx.fillStyle=clr;gx.font=`bold ${Math.round(7.5*DPR)}px Courier New`
+      gx.textAlign='center';gx.fillText(lbl,mx,ry+rh-5*DPR)
+    })
+    gx.textAlign='left';gx.restore()
+  }
 }
 
 function drawChartRow(gx,y0,rowH,W,data,isProfile,col,label,unit){
