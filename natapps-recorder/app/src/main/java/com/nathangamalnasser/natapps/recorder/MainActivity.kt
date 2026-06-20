@@ -6,13 +6,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.view.inputmethod.EditorInfo
-import android.widget.Toast
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
 import com.nathangamalnasser.natapps.recorder.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -49,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         setupClicks()
         setMode("left")
+        updateLiveUrl()
     }
 
     override fun onDestroy() {
@@ -60,9 +68,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestNeededPermissions() {
         val needed = mutableListOf<String>()
-        if (!has(Manifest.permission.INTERNET)) needed += Manifest.permission.INTERNET
         if (!has(Manifest.permission.ACCESS_FINE_LOCATION)) needed += Manifest.permission.ACCESS_FINE_LOCATION
         if (needed.isNotEmpty()) permLauncher.launch(needed.toTypedArray())
+    }
+
+    private fun updateLiveUrl() {
+        val ip = service?.getLocalIp() ?: runCatching {
+            java.net.NetworkInterface.getNetworkInterfaces()?.toList()
+                ?.flatMap { it.inetAddresses.toList() }
+                ?.firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
+                ?.hostAddress
+        }.getOrNull() ?: "?"
+        binding.tvLiveUrl.text = "http://$ip:8080"
     }
 
     private fun has(p: String) =
@@ -112,18 +129,19 @@ class MainActivity : AppCompatActivity() {
         }
         svc.onPeerState = { state, msg ->
             runOnUiThread {
-                binding.tvPeerStatus.text = msg
+                binding.tvRelayStatus.text = when (state) {
+                    PeerJSClient.State.CONNECTED  -> "Relay: streaming ●"
+                    PeerJSClient.State.CONNECTING -> "Relay: connecting…"
+                    PeerJSClient.State.ERROR      -> "Relay: $msg"
+                    else                          -> "Relay: idle"
+                }
                 binding.btnConnect.text = if (
                     state == PeerJSClient.State.CONNECTED ||
                     state == PeerJSClient.State.CONNECTING
                 ) "DISCONNECT" else "CONNECT"
-                binding.btnRecord.isEnabled = state != PeerJSClient.State.IDLE ||
-                        service?.recState == RecordingService.RecState.RECORDING
             }
         }
-        if (svc.isPeerConnected() || binding.tvPeerStatus.text.contains("Connecting")) {
-            binding.btnRecord.isEnabled = true
-        }
+        updateLiveUrl()
     }
 
     // ── Clicks ────────────────────────────────────────────────────────────────
@@ -134,23 +152,17 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnConnect.setOnClickListener {
             val svc = service ?: return@setOnClickListener
-            if (svc.isPeerConnected() ||
-                binding.tvPeerStatus.text.contains("Connecting")) {
+            if (svc.isPeerConnected()) {
                 svc.disconnectFromViewer()
             } else {
-                val ip = binding.etSessionCode.text.toString().trim()
-                if (ip.isEmpty()) {
-                    Toast.makeText(this, "Enter the PC's IP address shown in the relay console", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                svc.connectToViewer(ip)
+                val input = binding.etRelayUrl.text.toString().trim()
+                svc.connectToViewer(input.ifEmpty { "localhost" })
             }
         }
 
-        binding.etSessionCode.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_GO) {
-                binding.btnConnect.performClick(); true
-            } else false
+        binding.etRelayUrl.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) { binding.btnConnect.performClick(); true }
+            else false
         }
 
         binding.btnRecord.setOnClickListener {
@@ -158,13 +170,49 @@ class MainActivity : AppCompatActivity() {
             if (svc.recState == RecordingService.RecState.RECORDING) {
                 svc.stopRecording()
             } else {
-                svc.startRecording()
+                val input = EditText(this).apply {
+                    hint = "Session name (optional)"
+                    setSingleLine(true)
+                    setPadding(48, 32, 48, 16)
+                }
+                AlertDialog.Builder(this)
+                    .setTitle("New Session")
+                    .setView(input)
+                    .setPositiveButton("START") { _, _ ->
+                        svc.startRecording(input.text.toString().trim())
+                        showLiveQr()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             }
         }
+
+        binding.tvLiveUrl.setOnClickListener { showLiveQr() }
 
         binding.btnSessions.setOnClickListener {
             startActivity(Intent(this, SessionsActivity::class.java))
         }
+    }
+
+    // ── QR code ───────────────────────────────────────────────────────────────
+
+    private fun showLiveQr() {
+        val ip = service?.getLocalIp() ?: "?"
+        if (ip == "?") { android.widget.Toast.makeText(this, "No WiFi IP yet", android.widget.Toast.LENGTH_SHORT).show(); return }
+        showQrDialog("http://$ip:8080/?live=1", "Scan to watch live on any browser")
+    }
+
+    fun showQrDialog(url: String, subtitle: String) {
+        val qr = ImageView(this).apply {
+            setImageBitmap(generateQr(url, 512))
+            setPadding(48, 32, 48, 8)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(subtitle)
+            .setMessage(url)
+            .setView(qr)
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     // ── Mode ──────────────────────────────────────────────────────────────────
@@ -198,6 +246,18 @@ class MainActivity : AppCompatActivity() {
             binding.tvTimer.text       = "00:00"
             binding.tvSampleCount.text = "Samples: 0"
             binding.tvPeakAccel.text   = "Peak: 0.0g"
+        }
+        updateLiveUrl()
+    }
+
+    companion object {
+        fun generateQr(text: String, size: Int): Bitmap {
+            val hints = mapOf(EncodeHintType.MARGIN to 1)
+            val bits = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size, hints)
+            val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565)
+            for (x in 0 until size) for (y in 0 until size)
+                bmp.setPixel(x, y, if (bits[x, y]) Color.BLACK else Color.WHITE)
+            return bmp
         }
     }
 }

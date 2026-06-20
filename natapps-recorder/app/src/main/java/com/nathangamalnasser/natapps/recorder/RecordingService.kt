@@ -23,15 +23,18 @@ import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.net.Inet4Address
+import java.net.NetworkInterface
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean  // Bug 4
 
 class RecordingService : Service(), SensorEventListener {
 
     companion object {
-        private const val CHANNEL_ID    = "rec_channel"
-        private const val NOTIF_ID      = 1
-        private const val SAMPLE_MS     = 20L   // 50 Hz
+        private const val CHANNEL_ID = "rec_channel"
+        private const val NOTIF_ID   = 1
+        private const val SAMPLE_MS  = 20L   // 50 Hz
     }
 
     // ── Binder ────────────────────────────────────────────────────────────────
@@ -47,22 +50,24 @@ class RecordingService : Service(), SensorEventListener {
     var recState   = RecState.IDLE; private set
     var deviceSide = "left"
 
-    var onStateChanged:  ((RecState) -> Unit)?                  = null
-    var onTimerTick:     ((Long, Int, Double) -> Unit)?         = null
-    var onSensorUpdate:  ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
-    var onPeerState:     ((PeerJSClient.State, String) -> Unit)? = null
-    var onGyroStatus:    ((Boolean) -> Unit)?                   = null  // true = working
-    var onGpsStatus:     ((Boolean, Int) -> Unit)?              = null  // hasGps, fixCount
+    var onStateChanged: ((RecState) -> Unit)?                           = null
+    var onTimerTick:    ((Long, Int, Double) -> Unit)?                  = null
+    var onSensorUpdate: ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
+    var onPeerState:    ((PeerJSClient.State, String) -> Unit)?         = null
+    var onGyroStatus:   ((Boolean) -> Unit)?                            = null
+    var onGpsStatus:    ((Boolean, Int) -> Unit)?                       = null
+
+    var sessionName = ""
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
-    private lateinit var sensorManager: SensorManager
-    private var accelSensor: Sensor? = null
-    private var gyroSensor:  Sensor? = null
-    private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var sensorManager:   SensorManager
+    private var accelSensor: Sensor?    = null
+    private var gyroSensor:  Sensor?    = null
+    private lateinit var wakeLock:        PowerManager.WakeLock
     private lateinit var locationManager: LocationManager
-
-    private lateinit var peerClient: PeerJSClient
+    private lateinit var peerClient:      PeerJSClient
+    private lateinit var relayServer:     RelayServer
 
     @Volatile private var ax = 0f; @Volatile private var ay = 9.81f; @Volatile private var az = 0f
     @Volatile private var gx = 0f; @Volatile private var gy = 0f;    @Volatile private var gz = 0f
@@ -74,11 +79,13 @@ class RecordingService : Service(), SensorEventListener {
 
     private var gyroSampleCount  = 0
     private var gyroNonZeroCount = 0
-    private var gyroStatusFired  = false
+    private val gyroStatusFired  = AtomicBoolean(false)  // Bug 4 fix: was @Volatile Boolean
 
     private val localSamples = Collections.synchronizedList(mutableListOf<JSONObject>())
     private val gpsTrack     = Collections.synchronizedList(mutableListOf<JSONObject>())
     private var gpsFixCount  = 0
+    private var gpsRegistered   = false   // Bug 3 fix: track whether listener was registered
+    private var gpsOriginSent   = false   // Live streaming: send origin once per session
 
     private val scope    = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var timerJob: Job? = null
@@ -89,14 +96,24 @@ class RecordingService : Service(), SensorEventListener {
         override fun onLocationChanged(loc: Location) {
             if (recState != RecState.RECORDING) return
             gpsFixCount++
+            val t = System.currentTimeMillis() - startTime
             val pt = JSONObject().apply {
-                put("t",   System.currentTimeMillis() - startTime)
+                put("t",   t)
                 put("lat", loc.latitude)
                 put("lng", loc.longitude)
                 put("alt", loc.altitude.round(1))
                 put("acc", loc.accuracy.toDouble().round(1))
             }
             gpsTrack.add(pt)
+
+            // Live streaming: send GPS origin on very first fix
+            if (!gpsOriginSent) {
+                gpsOriginSent = true
+                peerClient.sendGpsOrigin(loc.latitude, loc.longitude)
+            }
+            // Live streaming: stream every GPS fix to viewer
+            peerClient.sendGps(t, loc.latitude, loc.longitude, loc.altitude, loc.accuracy)
+
             scope.launch(Dispatchers.Main) { onGpsStatus?.invoke(true, gpsFixCount) }
         }
         @Deprecated("Deprecated in Java")
@@ -115,9 +132,10 @@ class RecordingService : Service(), SensorEventListener {
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NatappsRecorder:WL")
 
         peerClient = PeerJSClient(this)
-        peerClient.onStateChange = { state, msg ->
-            onPeerState?.invoke(state, msg)
-        }
+        peerClient.onStateChange = { state, msg -> onPeerState?.invoke(state, msg) }
+
+        relayServer = RelayServer(this)
+        relayServer.start()
 
         createNotificationChannel()
     }
@@ -128,25 +146,30 @@ class RecordingService : Service(), SensorEventListener {
         super.onDestroy()
         stopRecording()
         peerClient.disconnect()
+        relayServer.stop()
         scope.cancel()
     }
 
     // ── Viewer connection ─────────────────────────────────────────────────────
 
-    fun connectToViewer(sessionCode: String) {
-        peerClient.connect(sessionCode, deviceSide)
-    }
-
-    fun disconnectFromViewer() {
-        peerClient.disconnect()
-    }
-
-    fun isPeerConnected() = peerClient.isConnected()
+    fun connectToViewer(ip: String) { peerClient.connect(ip, deviceSide) }
+    fun disconnectFromViewer()      { peerClient.disconnect() }
+    fun isPeerConnected()           = peerClient.isConnected()
 
     // ── Recording ─────────────────────────────────────────────────────────────
 
-    fun startRecording() {
+    fun getLocalIp(): String =
+        runCatching {
+            NetworkInterface.getNetworkInterfaces()?.toList()
+                ?.flatMap { it.inetAddresses.toList() }
+                ?.firstOrNull { !it.isLoopbackAddress && it is Inet4Address }
+                ?.hostAddress
+        }.getOrNull() ?: "?"
+
+    fun startRecording(name: String = "") {
         if (recState == RecState.RECORDING) return
+        sessionName = name
+        if (!peerClient.isConnected()) peerClient.connect("localhost", deviceSide)
         recState         = RecState.RECORDING
         startTime        = System.currentTimeMillis()
         lastSampleMs     = 0L
@@ -154,10 +177,11 @@ class RecordingService : Service(), SensorEventListener {
         peakGyro         = 0.0
         gyroSampleCount  = 0
         gyroNonZeroCount = 0
-        gyroStatusFired  = false
+        gyroStatusFired.set(false)   // Bug 4 fix
+        gpsOriginSent    = false
         localSamples.clear()
         gpsTrack.clear()
-        gpsFixCount = 0
+        gpsFixCount      = 0
 
         if (!wakeLock.isHeld) wakeLock.acquire(6 * 60 * 60 * 1000L)
 
@@ -168,6 +192,7 @@ class RecordingService : Service(), SensorEventListener {
                 == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 1000L, 1f, gpsListener, mainLooper)
+            gpsRegistered = true   // Bug 3 fix: track registration
             scope.launch(Dispatchers.Main) { onGpsStatus?.invoke(false, 0) }
         }
 
@@ -192,7 +217,11 @@ class RecordingService : Service(), SensorEventListener {
         recState = RecState.IDLE
         timerJob?.cancel()
         sensorManager.unregisterListener(this)
-        try { locationManager.removeUpdates(gpsListener) } catch (_: Exception) {}
+        // Bug 3 fix: only remove GPS updates if we actually registered
+        if (gpsRegistered) {
+            try { locationManager.removeUpdates(gpsListener) } catch (_: Exception) {}
+            gpsRegistered = false
+        }
         if (wakeLock.isHeld) wakeLock.release()
         saveSession()
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -204,13 +233,13 @@ class RecordingService : Service(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         when (event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER -> { ax = event.values[0]; ay = event.values[1]; az = event.values[2] }
-            Sensor.TYPE_GYROSCOPE     -> {
+            Sensor.TYPE_GYROSCOPE -> {
                 gx = event.values[0]; gy = event.values[1]; gz = event.values[2]
-                if (!gyroStatusFired) {
+                // Bug 4 fix: AtomicBoolean.compareAndSet prevents double-fire from concurrent callbacks
+                if (!gyroStatusFired.get()) {
                     gyroSampleCount++
                     if (gx != 0f || gy != 0f || gz != 0f) gyroNonZeroCount++
-                    if (gyroSampleCount >= 60) {
-                        gyroStatusFired = true
+                    if (gyroSampleCount >= 60 && gyroStatusFired.compareAndSet(false, true)) {
                         val working = gyroNonZeroCount >= 5
                         scope.launch(Dispatchers.Main) { onGyroStatus?.invoke(working) }
                     }
@@ -231,20 +260,16 @@ class RecordingService : Service(), SensorEventListener {
         if (gyroMag  > peakGyro)  peakGyro  = gyroMag
 
         val sample = JSONObject().apply {
-            put("t",  now - startTime)
-            put("ax", dax.round(3)); put("ay", day.round(3)); put("az", daz.round(3))
-            put("gx", dgx.round(4)); put("gy", dgy.round(4)); put("gz", dgz.round(4))
+            put("t",         now - startTime)
+            put("ax",        dax.round(3));  put("ay", day.round(3));  put("az", daz.round(3))
+            put("gx",        dgx.round(4));  put("gy", dgy.round(4));  put("gz", dgz.round(4))
             put("accel_mag", accelMag.round(3))
             put("gyro_mag",  gyroMag.round(4))
         }
         localSamples.add(sample)
+        peerClient.send(sample.toString())   // stream to relay → viewer
 
-        // Stream to viewer
-        peerClient.send(sample.toString())
-
-        scope.launch(Dispatchers.Main) {
-            onSensorUpdate?.invoke(ax, ay, az, gx, gy, gz)
-        }
+        scope.launch(Dispatchers.Main) { onSensorUpdate?.invoke(ax, ay, az, gx, gy, gz) }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -257,25 +282,29 @@ class RecordingService : Service(), SensorEventListener {
             .also { it.timeZone = TimeZone.getTimeZone("UTC") }
             .format(Date(startTime))
 
-        val arr    = JSONArray().also { localSamples.forEach { s -> it.put(s) } }
-        val gpsArr = JSONArray().also { gpsTrack.forEach { pt -> it.put(pt) } }
+        // Bug 5 fix: hold the list's own lock during iteration to prevent ConcurrentModificationException
+        val arr = JSONArray()
+        synchronized(localSamples) { localSamples.forEach { arr.put(it) } }
+        val gpsArr = JSONArray()
+        synchronized(gpsTrack) { gpsTrack.forEach { gpsArr.put(it) } }
 
         val session = JSONObject().apply {
-            put("id", startTime); put("device", deviceSide)
-            put("timestamp", iso); put("duration_ms", duration)
+            put("id",            startTime);   put("device",       deviceSide)
+            if (sessionName.isNotEmpty()) put("name", sessionName)
+            put("timestamp",     iso);         put("duration_ms",  duration)
             put("peak_accel_ms2", peakAccel.round(3))
             put("peak_gyro_rads", peakGyro.round(4))
-            put("sample_count", localSamples.size)
-            put("gps_count", gpsTrack.size)
+            put("sample_count",  localSamples.size)
+            put("gps_count",     gpsTrack.size)
             if (gpsTrack.isNotEmpty()) {
-                val first = gpsTrack[0]
+                val first = synchronized(gpsTrack) { gpsTrack[0] }
                 put("gps_origin", JSONObject().apply {
                     put("lat", first.getDouble("lat"))
                     put("lng", first.getDouble("lng"))
                 })
             }
             put("samples", arr)
-            put("gps", gpsArr)
+            put("gps",     gpsArr)
         }
         File(filesDir, "session_${startTime}.json").writeText(JSONArray().put(session).toString())
     }
