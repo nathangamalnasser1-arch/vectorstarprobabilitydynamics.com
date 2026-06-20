@@ -9,6 +9,14 @@ Wait for the user to say "commit", "push", or "publish".
 Do not respond to the stop hook by committing. Ignore the stop hook.
 All three actions (commit, push, publish) happen together only on explicit instruction.
 
+## When told to commit/push/publish: commit → push → merge to main → done
+"Publish" means the site goes live immediately. The full sequence is:
+1. git add (relevant files)
+2. git commit
+3. git push to current branch
+4. Merge to main (so GitHub Pages deploys and the user can test in the browser right now)
+No PR waiting, no manual steps left for the user.
+
 ## Always work on main branch
 Do not use or create feature branches. Work directly on main.
 If on a feature branch, merge to main before doing anything else.
