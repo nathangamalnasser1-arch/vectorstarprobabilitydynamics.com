@@ -126,7 +126,7 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh}
   <div class="pb" id="bS">⏮</div><div class="pb" id="bR">⏪</div>
   <div class="pb" id="bP">▶</div><div class="pb" id="bF">⏩</div>
   <div class="pb" id="bE">⏭</div>
-  <div id="spd" onclick="cycleSpd()">2×</div>
+  <div id="spd" onclick="cycleSpd()">1×</div>
 </div>
 <div id="cam">
   <div class="cb" id="cU">↑</div><div class="cb" id="cL">←</div>
@@ -195,6 +195,32 @@ let GPS_SC=0, SPEED_DATA=[], ALT_DATA=[], MAX_SPD=1, MAX_ALT=1
 let showGhost=true, activeTab='3d'
 let SPIN_EVENTS=[]
 
+function computeSpinEvents(){
+  SPIN_EVENTS=[]
+  if(IMU.length<2)return
+  const THRESH=120,events=[]
+  let spinStart=-1,spinAccum=0
+  for(let i=1;i<IMU.length;i++){
+    const rot=IMU[i][2],dt=(IMU[i][0]-IMU[i-1][0])/1000
+    if(rot>=THRESH){if(spinStart<0)spinStart=IMU[i][0];spinAccum+=rot*dt}
+    else if(spinStart>=0){
+      const type=spinAccum>=315?'360':spinAccum>=135?'180':null
+      if(type)events.push({t:(spinStart+IMU[i][0])/2,start:spinStart,end:IMU[i][0],accum:spinAccum,type})
+      spinStart=-1;spinAccum=0
+    }
+  }
+  if(spinStart>=0){
+    const type=spinAccum>=315?'360':spinAccum>=135?'180':null
+    if(type)events.push({t:(spinStart+IMU[IMU.length-1][0])/2,start:spinStart,end:IMU[IMU.length-1][0],accum:spinAccum,type})
+  }
+  for(let i=0;i<events.length-1;i++){
+    if(events[i].type==='180'&&events[i+1].type==='180'&&events[i+1].start-events[i].end<2000){
+      events[i].type='2x180a';events[i+1].type='2x180b'
+    }
+  }
+  SPIN_EVENTS=events
+}
+
 function computeTrailData(){
   SPEED_DATA=[]
   for(let i=1;i<GPS.length;i++){
@@ -207,6 +233,7 @@ function computeTrailData(){
   MAX_ALT=Math.max(0.001,...ALT_DATA.map(a=>a[1]))||0.001
 }
 computeTrailData()
+computeSpinEvents()
 
 function lookup(arr,ms){
   if(!arr||arr.length===0)return[0,0,0,0]
@@ -808,6 +835,9 @@ function switchTab(t){
   gp.style.display=t==='gr'?'block':'none'
   document.getElementById('tab3D').classList.toggle('active',t==='3d')
   document.getElementById('tabGr').classList.toggle('active',t==='gr')
+  // hide 3D-only controls when in graph tab
+  const d3only=['btnSplit','btnCam','btnGhost','btn2D','followBtn','zoom','cam','cubeWrap']
+  d3only.forEach(id=>{const el=document.getElementById(id);if(el)el.style.visibility=t==='gr'?'hidden':'visible'})
   if(t==='gr'){
     const gc=document.getElementById('graphCanvas')
     gc.width=innerWidth*DPR;gc.height=Math.max(200,(innerHeight-120))*DPR
@@ -828,21 +858,43 @@ function updateGraphs(){
 
   // Spin event markers on ROTATION row
   if(SPIN_EVENTS.length&&DUR>0){
-    const ry=rh  // ROTATION row y offset
     gx.save()
     SPIN_EVENTS.forEach(ev=>{
       const mx=ev.t/DUR*W
-      const is360=ev.type==='360'
-      const is2x=ev.type==='2x180a'||ev.type==='2x180b'
+      const is360=ev.type==='360',is2x=ev.type==='2x180a'||ev.type==='2x180b'
       const clr=is360?'#ffd200':is2x?'#ff5500':'#ff9500'
       gx.strokeStyle=clr;gx.lineWidth=(is360?2.5:1.8)*DPR
       gx.setLineDash(is360?[]:[4*DPR,3*DPR])
-      gx.beginPath();gx.moveTo(mx,ry+2);gx.lineTo(mx,ry+rh-2);gx.stroke()
+      gx.beginPath();gx.moveTo(mx,rh+2);gx.lineTo(mx,rh*2-2);gx.stroke()
       gx.setLineDash([])
       const lbl=is360?'360°':is2x?(ev.type==='2x180a'?'½+':'½'):'180°'
       gx.fillStyle=clr;gx.font=`bold ${Math.round(7.5*DPR)}px Courier New`
-      gx.textAlign='center';gx.fillText(lbl,mx,ry+rh-5*DPR)
+      gx.textAlign='center';gx.fillText(lbl,mx,rh*2-6*DPR)
     })
+    gx.textAlign='left';gx.restore()
+  }
+
+  // G-force peak markers (above 2.5g) on G-FORCE row
+  if(G_PROFILE.length&&DUR>0&&MAX_G>0){
+    const PEAK_THRESH=Math.min(2.5,MAX_G*0.75)
+    gx.save()
+    let inPeak=false,peakStart=0,peakMax=0,peakIdx=0
+    for(let i=0;i<G_PROFILE.length;i++){
+      const v=G_PROFILE[i],x=(i/(G_PROFILE.length-1))*W
+      if(v>=PEAK_THRESH){
+        if(!inPeak){inPeak=true;peakStart=x;peakMax=v;peakIdx=i}
+        else if(v>peakMax){peakMax=v;peakIdx=i}
+      }else if(inPeak){
+        const px=(peakIdx/(G_PROFILE.length-1))*W
+        const alpha=Math.min(1,(peakMax-PEAK_THRESH)/(MAX_G-PEAK_THRESH))
+        const r=Math.round(30+225*alpha),g2=Math.round(148-100*alpha),b=Math.round(255-255*alpha)
+        gx.strokeStyle=`rgba(${r},${g2},${b},0.85)`;gx.lineWidth=1.5*DPR
+        gx.beginPath();gx.moveTo(px,2);gx.lineTo(px,rh-2);gx.stroke()
+        gx.fillStyle=`rgba(${r},${g2},${b},0.85)`;gx.font=`bold ${Math.round(6.5*DPR)}px Courier New`
+        gx.textAlign='center';gx.fillText(peakMax.toFixed(1)+'g',px,rh-6*DPR)
+        inPeak=false;peakMax=0
+      }
+    }
     gx.textAlign='left';gx.restore()
   }
 }
