@@ -47,6 +47,31 @@ class PeerJSClient(private val context: Context) {
         } catch (_: Exception) {}
     }
 
+    fun sendGpsOrigin(lat: Double, lng: Double) {
+        try {
+            ws?.send(JSONObject().apply {
+                put("type",   "gps_origin")
+                put("device", deviceSide)
+                put("lat",    lat)
+                put("lng",    lng)
+            }.toString())
+        } catch (_: Exception) {}
+    }
+
+    fun sendGps(t: Long, lat: Double, lng: Double, alt: Double, acc: Float) {
+        try {
+            ws?.send(JSONObject().apply {
+                put("type",   "gps")
+                put("device", deviceSide)
+                put("t",      t)
+                put("lat",    lat)
+                put("lng",    lng)
+                put("alt",    alt)
+                put("acc",    acc.toDouble())
+            }.toString())
+        } catch (_: Exception) {}
+    }
+
     fun isConnected() = ws != null
 
     fun disconnect() {

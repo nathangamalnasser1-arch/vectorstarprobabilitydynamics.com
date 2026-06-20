@@ -51,7 +51,9 @@ canvas:not(#cubeCanvas):not(#arCanvas){position:fixed;top:0;left:0;width:100%;he
 /* tabs */
 #tabBar{display:flex;gap:2px;margin:0 auto;pointer-events:all}
 .tabt{font:7px/1 'Courier New';letter-spacing:2px;border:1px solid rgba(0,255,238,.15);padding:5px 9px;cursor:pointer;color:rgba(0,255,238,.35);background:rgba(0,0,0,.5)}
-.tabt.active{color:#00ffee;border-color:rgba(0,255,238,.5);background:rgba(0,30,20,.6);text-shadow:0 0 10px #00ffee}
+.tabt.active{color:#00ffee;border-color:rgba(0,255,238,.5);background:rgba(0,30,20,.6);text-shadow:0 0 10px #00ffee;border-bottom:2px solid #00ffee}
+#c{cursor:grab}
+#c.dragging{cursor:grabbing}
 /* graph panel */
 #graphPanel{position:fixed;inset:0;z-index:8;background:#000103;display:none;padding-top:50px;padding-bottom:68px}
 #graphCanvas{display:block;width:100%;height:100%}
@@ -101,7 +103,7 @@ canvas:not(#cubeCanvas):not(#arCanvas){position:fixed;top:0;left:0;width:100%;he
   </div>
   <div style="font:8px/1 'Courier New';letter-spacing:3px;color:rgba(0,255,238,.2);margin-top:22px;cursor:pointer;padding:8px 12px" onclick="hideLiveOverlay()">CLOSE ›</div>
 </div>
-<div id="hud"><h1>TRACER</h1><span id="sessionName"></span><div id="loadBtn" onclick="showUpload()" style="font:7px/1 'Courier New';letter-spacing:2px;border:1px solid rgba(0,255,238,.15);padding:5px 8px;cursor:pointer;color:rgba(0,255,238,.4);margin-left:14px;flex-shrink:0">LOAD</div><div id="liveBtn" onclick="showLiveOverlay()" style="font:7px/1 'Courier New';letter-spacing:2px;border:1px solid rgba(0,255,238,.35);padding:5px 8px;cursor:pointer;color:rgba(0,255,238,.8);margin-left:6px;flex-shrink:0">LIVE</div><div id="liveDot" style="width:8px;height:8px;border-radius:50%;background:#00ffee;margin-left:9px;flex-shrink:0;opacity:0"></div><div id="tabBar"><div id="tab3D" onclick="switchTab('3d')" class="tabt active">3D</div><div id="tabGr" onclick="switchTab('gr')" class="tabt">GRAPHS</div></div><div id="timer">00:00</div></div>
+<div id="hud"><h1>TRACER</h1><span id="sessionName"></span><div id="loadBtn" onclick="showUpload()" style="font:7px/1 'Courier New';letter-spacing:2px;border:1px solid rgba(0,255,238,.4);padding:5px 8px;cursor:pointer;color:rgba(0,255,238,.85);margin-left:14px;flex-shrink:0">LOAD</div><div id="liveBtn" onclick="showLiveOverlay()" style="font:7px/1 'Courier New';letter-spacing:2px;border:1px solid rgba(0,255,238,.2);padding:5px 8px;cursor:pointer;color:rgba(0,255,238,.5);margin-left:6px;flex-shrink:0">LIVE</div><div id="liveDot" style="width:8px;height:8px;border-radius:50%;background:#00ffee;margin-left:9px;flex-shrink:0;opacity:0"></div><div id="tabBar"><div id="tab3D" onclick="switchTab('3d')" class="tabt active">3D</div><div id="tabGr" onclick="switchTab('gr')" class="tabt">GRAPHS</div></div><div id="timer">00:00</div></div>
 <div id="stats">
   <div class="stat-row">
     <div class="stat-label">G-force</div><div class="stat-val" id="gval">0.00</div>
@@ -207,6 +209,8 @@ function computeTrailData(){
 computeTrailData()
 
 function lookup(arr,ms){
+  if(!arr||arr.length===0)return[0,0,0,0]
+  if(arr.length===1)return arr[0]
   if(ms<=arr[0][0])return arr[0]
   if(ms>=arr[arr.length-1][0])return arr[arr.length-1]
   let lo=0,hi=arr.length-1
@@ -390,7 +394,8 @@ let followMode=false,view2D=false
 let tx=FIT.cx,ty=FIT.cy,tz=FIT.cz
 
 let drag=false,mx=0,my=0,lastDrag=0
-canvas.addEventListener('mousedown',e=>{if(view2D)return;drag=true;mx=e.clientX;my=e.clientY;lastDrag=Date.now()})
+canvas.addEventListener('mousedown',e=>{if(view2D)return;drag=true;mx=e.clientX;my=e.clientY;lastDrag=Date.now();canvas.classList.add('dragging')})
+addEventListener('mouseup',()=>canvas.classList.remove('dragging'))
 addEventListener('mouseup',()=>drag=false)
 addEventListener('mousemove',e=>{if(!drag)return;theta-=(e.clientX-mx)*.005;phi=Math.max(.05,Math.min(1.55,phi-(e.clientY-my)*.005));mx=e.clientX;my=e.clientY;lastDrag=Date.now()})
 canvas.addEventListener('wheel',e=>{camR=Math.max(2,Math.min(30,camR*(1+e.deltaY*.001)));e.preventDefault()},{passive:false})
@@ -448,7 +453,7 @@ function toggleGhost(){
 }
 
 // ── Playback ─────────────────────────────────────────────────
-const SPDS=[0.5,1,2,5,10,20];let si=2
+const SPDS=[0.5,1,2,5,10,20];let si=1
 let playMs=0,lastFT=null,paused=true
 function cycleSpd(){si=(si+1)%SPDS.length;document.getElementById('spd').textContent=SPDS[si]+'×'}
 const bL=[],bR=[]
@@ -456,18 +461,24 @@ function clr(){bL.length=0;bR.length=0}
 let peakG=0,peakRot=0
 document.getElementById('bP').onclick=()=>{paused=!paused;document.getElementById('bP').textContent=paused?'▶':'⏸'}
 function resetCam(){if(!followMode){tx=FIT.cx;ty=FIT.cy;tz=FIT.cz;camR=FIT.r}}
-document.getElementById('bS').onclick=()=>{playMs=0;clr();peakG=0;peakRot=0;resetCam()}
-document.getElementById('bE').onclick=()=>{playMs=DUR-100;clr();resetCam()}
+document.getElementById('bS').onclick=()=>{if(liveMode)return;playMs=0;clr();peakG=0;peakRot=0;resetCam()}
+document.getElementById('bE').onclick=()=>{if(liveMode)return;playMs=Math.max(0,DUR-100);clr();resetCam()}
 let ri=null,fi=null
-const startRew=()=>{ri=setInterval(()=>{playMs=Math.max(0,playMs-300*SPDS[si]);clr()},16)}
-const startFF= ()=>{fi=setInterval(()=>{playMs=Math.min(DUR,playMs+300*SPDS[si]);clr()},16)}
+const startRew=()=>{stopAll();ri=setInterval(()=>{playMs=Math.max(0,playMs-300*SPDS[si]);clr()},16)}
+const startFF= ()=>{stopAll();fi=setInterval(()=>{playMs=Math.min(DUR,playMs+300*SPDS[si]);clr()},16)}
 const stopAll=()=>{clearInterval(ri);clearInterval(fi);ri=fi=null}
-document.getElementById('bR').addEventListener('pointerdown',e=>{e.preventDefault();startRew()})
-document.getElementById('bF').addEventListener('pointerdown',e=>{e.preventDefault();startFF()})
+document.getElementById('bR').addEventListener('pointerdown',e=>{if(liveMode)return;e.preventDefault();startRew()})
+document.getElementById('bF').addEventListener('pointerdown',e=>{if(liveMode)return;e.preventDefault();startFF()})
+document.getElementById('bR').addEventListener('pointercancel',stopAll)
+document.getElementById('bF').addEventListener('pointercancel',stopAll)
 addEventListener('pointerup',stopAll)
-function seekClick(e,el){const r=el.getBoundingClientRect();playMs=(e.clientX-r.left)/r.width*DUR;clr()}
+function seekClick(e,el){if(liveMode)return;const r=el.getBoundingClientRect();playMs=(e.clientX-r.left)/r.width*DUR;clr()}
 document.getElementById('bar').onclick=e=>seekClick(e,e.currentTarget)
-document.getElementById('tstrip').onclick=e=>seekClick(e,e.currentTarget)
+// drag-scrub on timeline
+const tstrip=document.getElementById('tstrip')
+tstrip.addEventListener('pointerdown',e=>{tstrip.setPointerCapture(e.pointerId);seekClick(e,tstrip)})
+tstrip.addEventListener('pointermove',e=>{if(e.buttons)seekClick(e,tstrip)})
+tstrip.addEventListener('click',e=>seekClick(e,e.currentTarget))
 
 // ── Draw helpers ─────────────────────────────────────────────
 function drawGhost(pfn){
@@ -567,7 +578,7 @@ function frame(ts){
     while(bL.length&&bL[0][3]<liveMs-TRAIL_MS)bL.shift()
     while(bR.length&&bR[0][3]<liveMs-TRAIL_MS)bR.shift()
     tx+=(liveLastPos[0]-tx)*.12;ty+=(liveLastPos[1]-ty)*.12;tz+=(liveLastPos[2]-tz)*.12
-    if(!drag&&Date.now()-lastDrag>3000&&!view2D)theta+=.001
+    if(!drag&&Date.now()-lastDrag>3000&&followMode&&!view2D)theta+=.001
   }else{
     if(!paused){
       playMs=Math.min(playMs+dt*SPDS[si],DUR)
@@ -678,6 +689,8 @@ function applySession(sessions){
   // prefer left sensor for primary GPS/IMU
   sessions.sort((a,b)=>a.device==='left'?-1:b.device==='left'?1:0)
   const primary=sessions[0]
+  if(!primary?.gps_origin?.lat||!Array.isArray(primary.gps)||primary.gps.length<2||!Array.isArray(primary.samples)||!primary.samples.length)
+    throw new Error('Session missing gps_origin, gps, or samples')
   const lat0=primary.gps_origin.lat, lng0=primary.gps_origin.lng
   const cosLat=Math.cos(lat0*Math.PI/180)
   const G_MS2=9.81, R2D=180/Math.PI
@@ -764,6 +777,7 @@ function applySession(sessions){
   // Reset playback
   computeTrailData()
   playMs=0;clr();peakG=0;peakRot=0
+  camSyncOffsetMs=0;document.getElementById('arSyncLabel').textContent='+0ms'
   const p0new=gpsAt(0);tx=p0new[0];ty=p0new[1];tz=p0new[2]
   camR=followMode?5:12
   drawTimelineGraph()
@@ -902,6 +916,7 @@ function fmtChartVal(v,unit){
 
 // click on graph = seek
 document.getElementById('graphPanel').addEventListener('click',e=>{
+  if(liveMode)return
   const r=e.currentTarget.getBoundingClientRect()
   const x=(e.clientX-r.left)/r.width
   playMs=Math.max(0,Math.min(DUR,x*DUR));clr()
@@ -916,7 +931,8 @@ async function toggleCamera(){
     camStream=null
     document.getElementById('camVid').srcObject=null
     document.getElementById('camPip').style.display='none'
-    document.getElementById('btnCam').textContent='◎ CAM'
+    const btn=document.getElementById('btnCam')
+    btn.textContent='◎ CAM';btn.style.color=''
     if(camRec&&camRec.state==='recording')camRec.stop()
     return
   }
@@ -926,8 +942,9 @@ async function toggleCamera(){
     const vid=document.getElementById('camVid')
     vid.srcObject=stream;await vid.play()
     document.getElementById('camPip').style.display='block'
-    document.getElementById('btnCam').textContent='✕ CAM'
-  }catch(e){alert('Camera: '+e.message)}
+    const btn=document.getElementById('btnCam')
+    btn.textContent='✕ CAM';btn.style.color='rgba(0,255,238,.9)'
+  }catch(e){document.getElementById('btnCam').style.color='';console.warn('Camera:',e.message)}
 }
 
 function toggleCamRec(){
@@ -938,7 +955,8 @@ function toggleCamRec(){
     return
   }
   camChunks=[]
-  camRec=new MediaRecorder(camStream,{mimeType:'video/webm;codecs=vp8'})
+  const camMime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch(_){return false}})||''
+  camRec=new MediaRecorder(camStream,camMime?{mimeType:camMime}:{})
   camRec.ondataavailable=e=>{if(e.data.size)camChunks.push(e.data)}
   camRec.onstop=()=>{
     const a=document.createElement('a')
@@ -1007,7 +1025,8 @@ function connectLive(){
   setLiveStatus('Connecting…')
   document.getElementById('liveConnBtn').textContent='CANCEL'
   if(liveWs)try{liveWs.close()}catch(_){}
-  const ws=new WebSocket('ws://'+ip+':9001')
+  const wsProto=location.protocol==='https:'?'wss:':'ws:'
+  const ws=new WebSocket(wsProto+'//'+ip+':9001')
   liveWs=ws
   ws.onopen=()=>{
     ws.send(JSON.stringify({type:'register',role:'viewer'}))
@@ -1022,6 +1041,7 @@ function connectLive(){
     setLiveStatus('Disconnected')
   }
   ws.onerror=()=>{
+    if(liveWs===ws){liveWs=null;setLiveMode(false)}
     setLiveStatus('Cannot reach relay')
     document.getElementById('liveConnBtn').textContent='CONNECT'
   }
@@ -1061,7 +1081,8 @@ function toggleSplit(){
   const p=document.getElementById('splitPanel')
   p.style.display=splitMode?'flex':'none'
   document.getElementById('btnSplit').textContent=splitMode?'✕ SPLIT':'⊞ SPLIT'
-  if(splitMode)setTimeout(resizeArCanvas,50)
+  if(splitMode){setTimeout(resizeArCanvas,50)}
+  else{arCalibStep=0;updateCalibStatus()}
 }
 
 function resizeArCanvas(){
@@ -1239,27 +1260,31 @@ function renderAR(){
 
 function handleLiveMsg(msg){
   if(msg.type==='gps_origin'){
-    liveOriginLat=msg.lat
-    liveOriginLng=msg.lng
-    liveCosLat=Math.cos(msg.lat*Math.PI/180)
+    const lat=+msg.lat,lng=+msg.lng
+    if(!isFinite(lat)||!isFinite(lng))return
+    liveOriginLat=lat;liveOriginLng=lng
+    liveCosLat=Math.cos(lat*Math.PI/180)
     liveGPS=[];liveAltMin=null
     tx=0;ty=0;tz=0
   }else if(msg.type==='gps'){
-    const x=(msg.lng-liveOriginLng)*liveCosLat*111320*LIVE_SC
-    const z=(msg.lat-liveOriginLat)*111320*LIVE_SC
-    const alt=msg.alt||0
+    const lat=+msg.lat,lng=+msg.lng,t=+msg.t
+    if(!isFinite(lat)||!isFinite(lng)||!isFinite(t))return
+    const x=(lng-liveOriginLng)*liveCosLat*111320*LIVE_SC
+    const z=(lat-liveOriginLat)*111320*LIVE_SC
+    const alt=isFinite(+msg.alt)?+msg.alt:0
     if(liveAltMin===null)liveAltMin=alt
     const y=(alt-liveAltMin)*LIVE_SC
     liveLastPos=[x,y,z]
     liveGPS.push([x,y,z])
-    liveMs=msg.t
+    liveMs=t
     bL.push([x-0.04,y,z,liveMs])
     bR.push([x+0.04,y,z,liveMs])
   }else if(msg.type==='sensor'){
-    liveG=(msg.accel_mag||9.81)/9.81
-    liveRot=(msg.gyro_mag||0)*(180/Math.PI)
+    const am=+msg.accel_mag,gm=+msg.gyro_mag
+    liveG=isFinite(am)?am/9.81:1
+    liveRot=isFinite(gm)?gm*(180/Math.PI):0
   }else if(msg.type==='status'){
-    setLiveStatus(msg.connected?'● Sensor connected':'○ Sensor disconnected')
+    setLiveStatus(msg.connected===true?'● Sensor connected':'○ Sensor disconnected')
   }
 }
 
