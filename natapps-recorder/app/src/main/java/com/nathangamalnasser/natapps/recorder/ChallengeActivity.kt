@@ -11,12 +11,13 @@ import com.google.firebase.ktx.Firebase
 
 class ChallengeActivity : AppCompatActivity() {
 
-    private val db  by lazy { Firebase.firestore }
-    private val uid get() = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    private val db  by lazy { try { Firebase.firestore } catch (e: Exception) { null } }
+    private val uid get() = try { FirebaseAuth.getInstance().currentUser?.uid ?: "" } catch (e: Exception) { "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_challenge)
+        if (db == null) { toast("Firebase not configured yet"); finish(); return }
 
         val spinner = findViewById<Spinner>(R.id.spinnerSport)
         spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
@@ -35,7 +36,7 @@ class ChallengeActivity : AppCompatActivity() {
     }
 
     private fun sendChallenge(target: String, sport: String) {
-        db.collection("sessions")
+        db!!.collection("sessions")
             .whereEqualTo("uid", uid)
             .whereEqualTo("sport", sport)
             .orderBy("uisScore", Query.Direction.DESCENDING)
@@ -43,7 +44,7 @@ class ChallengeActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { snap ->
                 val best = snap.documents.firstOrNull()?.getLong("uisScore") ?: 0L
-                db.collection("challenges").add(mapOf(
+                db!!.collection("challenges").add(mapOf(
                     "challenger_uid" to uid,
                     "challenged_uid" to target,
                     "sport"          to sport,
@@ -58,7 +59,7 @@ class ChallengeActivity : AppCompatActivity() {
     }
 
     private fun loadIncoming() {
-        db.collection("challenges")
+        db!!.collection("challenges")
             .whereEqualTo("challenged_uid", uid)
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(20)

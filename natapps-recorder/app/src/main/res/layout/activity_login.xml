@@ -41,6 +41,13 @@
     <Button android:id="@+id/btnEmailSignIn"
         android:layout_width="match_parent" android:layout_height="52dp"
         android:text="Sign in / Create account" android:textSize="14sp"
-        android:textColor="@color/accent" android:background="@color/surface" />
+        android:textColor="@color/accent" android:background="@color/surface"
+        android:layout_marginBottom="20dp" />
+
+    <Button android:id="@+id/btnGuest"
+        android:layout_width="match_parent" android:layout_height="48dp"
+        android:text="Try as Guest" android:textSize="13sp"
+        android:textColor="@color/muted" android:background="@color/bg"
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>

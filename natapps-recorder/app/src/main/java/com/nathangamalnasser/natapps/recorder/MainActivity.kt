@@ -32,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     private var bound = false
     private var appMode = "rollerblade"
     private var role    = "sensor1"  // "sensor1" | "hub" | "cam"
+    private var activeSessionId   = 0L
+    private var activeSessionName = ""
 
     private val svcConn = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, b: IBinder) {
@@ -47,9 +49,9 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { granted ->
         // After permissions granted, re-activate Nearby if already in that role
-        if (role == "sensor1" && service?.nearbyTransport == null) {
+        if (role == "sensor1" && service?.isNearbyAdvertising() == false) {
             service?.startNearbyAdvertising()
-        } else if (role == "hub" && service?.nearbyReceiver == null) {
+        } else if (role == "hub" && service?.isNearbyDiscovering() == false) {
             service?.startNearbyDiscovery()
         }
     }
@@ -59,10 +61,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Auth gate
-        if (FirebaseAuth.getInstance().currentUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish(); return
+        // Auth gate — skip if guest mode or Firebase not configured
+        if (!intent.getBooleanExtra("guest", false)) {
+            try {
+                if (FirebaseAuth.getInstance().currentUser == null) {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish(); return
+                }
+            } catch (_: Exception) { /* Firebase not configured, continue as guest */ }
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -86,9 +92,9 @@ class MainActivity : AppCompatActivity() {
     // ── User info ─────────────────────────────────────────────────────────────
 
     private fun showUserInfo() {
-        val user = FirebaseAuth.getInstance().currentUser ?: return
-        binding.tvUserInfo.text = user.displayName?.takeIf { it.isNotEmpty() }
-            ?: user.email?.substringBefore('@') ?: "Signed in"
+        val user = try { FirebaseAuth.getInstance().currentUser } catch (_: Exception) { null }
+        binding.tvUserInfo.text = user?.displayName?.takeIf { it.isNotEmpty() }
+            ?: user?.email?.substringBefore('@') ?: "Guest"
     }
 
     // ── Service callbacks ─────────────────────────────────────────────────────
@@ -206,23 +212,29 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("New Session")
                     .setView(input)
                     .setPositiveButton("START") { _, _ ->
-                        svc.appMode = appMode
                         val name = input.text.toString().trim()
+                        val sessionId = System.currentTimeMillis()
+                        activeSessionId   = sessionId
+                        activeSessionName = name
+                        svc.appMode = appMode
                         svc.sendStartCommand(name)
-                        svc.startRecording(name)
-                        if (role != "cam") showLiveQr(appMode == "boxing")
+                        svc.startRecording(name, sessionId)
+                        if (role != "cam") showSessionQr(sessionId, name)
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
             }
         }
 
-        binding.tvLiveUrl.setOnClickListener { showLiveQr(appMode == "boxing") }
+        binding.tvLiveUrl.setOnClickListener {
+            if (activeSessionId > 0L) showSessionQr(activeSessionId, activeSessionName)
+            else toast("Start a session first to get a QR code")
+        }
         binding.btnSessions.setOnClickListener   { startActivity(Intent(this, SessionsActivity::class.java)) }
         binding.btnSocial.setOnClickListener     { startActivity(Intent(this, SocialFeedActivity::class.java)) }
         binding.btnChallenge.setOnClickListener  { startActivity(Intent(this, ChallengeActivity::class.java)) }
         binding.btnSignOut.setOnClickListener    {
-            FirebaseAuth.getInstance().signOut()
+            try { FirebaseAuth.getInstance().signOut() } catch (_: Exception) {}
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
@@ -335,27 +347,42 @@ class MainActivity : AppCompatActivity() {
     // ── Live URL / QR ─────────────────────────────────────────────────────────
 
     private fun updateLiveUrl() {
-        val ip = service?.getLocalIp() ?: runCatching {
-            java.net.NetworkInterface.getNetworkInterfaces()?.toList()
-                ?.flatMap { it.inetAddresses.toList() }
-                ?.firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
-                ?.hostAddress
-        }.getOrNull() ?: "?"
-        binding.tvLiveUrl.text = "http://$ip:8080"
+        val recording = service?.recState == RecordingService.RecState.RECORDING
+        binding.tvLiveUrl.text = if (recording && activeSessionId > 0L)
+            "● Live — tap to show QR again" else "Tap START RECORDING to get a session link"
     }
 
-    private fun showLiveQr(boxing: Boolean = false) {
-        val ip = service?.getLocalIp() ?: "?"
-        if (ip == "?") { toast("No WiFi IP yet"); return }
-        val url = if (boxing) "http://$ip:8080/boxing?live=1" else "http://$ip:8080/?live=1"
-        showQrDialog(url, if (boxing) "Scan to watch boxing live" else "Scan to watch live")
-    }
+    private fun showSessionQr(sessionId: Long, name: String) {
+        val page = if (appMode == "boxing") "boxing-realtime-viewer.html" else "tracer-real.html"
+        val encodedName = java.net.URLEncoder.encode(name.ifEmpty { "Session" }, "UTF-8")
+        val url = "https://vectorstarprobabilitydynamics.com/$page?sid=$sessionId&name=$encodedName"
 
-    fun showQrDialog(url: String, subtitle: String) {
+        val qrView = ImageView(this)
+        qrView.setImageBitmap(generateQr(url, 480))
+        qrView.setPadding(48, 24, 48, 0)
+
+        val shareBtn = android.widget.Button(this)
+        shareBtn.text = "SHARE LINK"
+        shareBtn.setPadding(48, 24, 48, 24)
+        shareBtn.setOnClickListener {
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, url)
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Join my APEX session: ${name.ifEmpty { "Session" }}")
+            startActivity(Intent.createChooser(shareIntent, "Share session link"))
+        }
+
+        val container = android.widget.LinearLayout(this)
+        container.orientation = android.widget.LinearLayout.VERTICAL
+        container.addView(qrView)
+        container.addView(shareBtn)
+
         AlertDialog.Builder(this)
-            .setTitle(subtitle).setMessage(url)
-            .setView(ImageView(this).apply { setImageBitmap(generateQr(url, 512)); setPadding(48,32,48,8) })
-            .setPositiveButton("OK", null).show()
+            .setTitle(if (name.isEmpty()) "Session QR" else name)
+            .setMessage("Up to 10 viewers — scan or share the link\n\n$url")
+            .setView(container)
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     // ── UI refresh ────────────────────────────────────────────────────────────
@@ -365,6 +392,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnRecord.text = if (recording) "■  STOP" else "●  START RECORDING"
         binding.btnRecord.setBackgroundColor(getColor(if (recording) R.color.stop_red else R.color.accent))
         if (!recording) {
+            activeSessionId   = 0L
+            activeSessionName = ""
             binding.tvTimer.text       = if (appMode == "boxing") "3:00" else "00:00"
             binding.tvRoundInfo.text   = if (appMode == "boxing") "ROUND 1" else ""
             binding.tvSampleCount.text = "Samples: 0"

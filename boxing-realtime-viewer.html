@@ -6,6 +6,9 @@
 <title>Boxing Live</title>
 <!-- Firebase SDK (only loaded when user chooses Firebase mode) -->
 <script>
+// ── Set your Firebase RTDB URL once (Firebase Console → Realtime Database → copy URL) ──
+var APEX_RTDB_URL = 'https://accelperformaceexponential-default-rtdb.firebaseio.com'
+
 var _fbApp=null,_fbListeners=[]
 function loadFirebase(cb){
   if(window.firebase){cb();return}
@@ -18,9 +21,9 @@ function loadFirebase(cb){
   }
   document.head.appendChild(s1)
 }
-function connectFirebase(){
-  var dbUrl=document.getElementById('fbDbUrl').value.trim()
-  var sid  =document.getElementById('fbSession').value.trim()
+function connectFirebase(overrideSid,overrideDb){
+  var dbUrl=overrideDb||document.getElementById('fbDbUrl').value.trim()
+  var sid  =overrideSid||document.getElementById('fbSession').value.trim()
   if(!dbUrl||!sid){setSt('Enter Firebase DB URL and Session ID');return}
   setSt('Loading Firebase SDK…')
   loadFirebase(function(){
@@ -605,7 +608,26 @@ function drawImpactRow(ri,rH,W,TAB,DUR){
 
 // ── Connect ──────────────────────────────────────────────────
 const params=new URLSearchParams(location.search)
-if(params.has('live')){const host=params.get('host')||location.hostname||'localhost';connectTo(host)}
+
+// ?sid=SESSION_ID — from APEX app QR code / shared link
+;(function(){
+  const sid=params.get('sid')
+  if(sid){
+    const name=params.get('name')||''
+    if(name){
+      const pill=document.getElementById('pill')
+      if(pill) pill.title=decodeURIComponent(name)
+    }
+    if(APEX_RTDB_URL){
+      document.getElementById('overlay').classList.add('h')
+      setTimeout(()=>connectFirebase(sid,APEX_RTDB_URL),400)
+    } else {
+      document.getElementById('fbSession').value=sid
+    }
+  }
+})()
+
+if(params.has('live')&&!params.has('sid')){const host=params.get('host')||location.hostname||'localhost';connectTo(host)}
 
 function doConnect(){const ip=document.getElementById('ipIn').value.trim()||'localhost';connectTo(ip)}
 function connectTo(ip){

@@ -45,23 +45,22 @@ class CamService : LifecycleService() {
     }
 
     private fun setupCamera() {
-        ProcessCameraProvider.getInstance(this).also { future ->
-            future.addListener({
-                try {
-                    val provider = future.get()
-                    val recorder = Recorder.Builder()
-                        .setQualitySelector(QualitySelector.from(Quality.HD))
-                        .build()
-                    videoCapture = VideoCapture.withOutput(recorder)
-                    provider.unbindAll()
-                    provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, videoCapture)
-                    onStatusChange?.invoke("CAM ready")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Camera setup failed", e)
-                    onStatusChange?.invoke("CAM error: ${e.message}")
-                }
-            }, ContextCompat.getMainExecutor(this))
-        }
+        val future = ProcessCameraProvider.getInstance(this)
+        future.addListener({
+            try {
+                val provider = future.get()
+                val recorder = Recorder.Builder()
+                    .setQualitySelector(QualitySelector.from(Quality.HD))
+                    .build()
+                videoCapture = VideoCapture.withOutput(recorder)
+                provider.unbindAll()
+                provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, videoCapture!!)
+                onStatusChange?.invoke("CAM ready")
+            } catch (e: Exception) {
+                Log.e(TAG, "Camera setup failed", e)
+                onStatusChange?.invoke("CAM error: ${e.message}")
+            }
+        }, ContextCompat.getMainExecutor(this))
     }
 
     fun startRecording(sessionId: Long) {
@@ -70,33 +69,28 @@ class CamService : LifecycleService() {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(sessionId))
         val fileName  = "Natapps_${timestamp}.mp4"
 
-        val outputOptions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Save directly to MediaStore gallery (Movies/NatappsRecorder)
+        val hasAudio = ContextCompat.checkSelfPermission(this,
+            android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        // prepareRecording is called inside each branch so Kotlin sees the concrete output type
+        val pending: PendingRecording = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val cv = ContentValues().apply {
                 put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
                 put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
                 put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/NatappsRecorder")
             }
-            MediaStoreOutputOptions.Builder(contentResolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
-                .setContentValues(cv)
-                .build()
+            val opts = MediaStoreOutputOptions
+                .Builder(contentResolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+                .setContentValues(cv).build()
+            vc.output.prepareRecording(this, opts)
         } else {
-            // Android 9 and below: save to external Movies directory
-            val dir = android.os.Environment.getExternalStoragePublicDirectory(
+            val dir  = android.os.Environment.getExternalStoragePublicDirectory(
                 android.os.Environment.DIRECTORY_MOVIES)
-            val file = java.io.File(dir, fileName)
-            FileOutputOptions.Builder(file).build()
+            val opts = FileOutputOptions.Builder(java.io.File(dir, fileName)).build()
+            vc.output.prepareRecording(this, opts)
         }
 
-        recording = vc.output
-            .prepareRecording(this, outputOptions)
-            .apply {
-                if (ContextCompat.checkSelfPermission(this@CamService,
-                        android.Manifest.permission.RECORD_AUDIO)
-                    == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                    withAudioEnabled()
-                }
-            }
+        recording = (if (hasAudio) pending.withAudioEnabled() else pending)
             .start(ContextCompat.getMainExecutor(this)) { event ->
                 when (event) {
                     is VideoRecordEvent.Start -> {
@@ -113,6 +107,7 @@ class CamService : LifecycleService() {
                             onStatusChange?.invoke("CAM saved to gallery ✓")
                         }
                     }
+                    else -> {}
                 }
             }
     }
@@ -127,7 +122,7 @@ class CamService : LifecycleService() {
     }
     private fun buildNotif(text: String): Notification =
         NotificationCompat.Builder(this, CHANNEL)
-            .setContentTitle("Natapps CAM").setContentText(text)
+            .setContentTitle("APEX CAM").setContentText(text)
             .setSmallIcon(R.drawable.ic_record).setOngoing(true).setSilent(true).build()
     private fun updateNotif(text: String) =
         getSystemService(NotificationManager::class.java).notify(NOTIF_ID, buildNotif(text))

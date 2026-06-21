@@ -1206,6 +1206,9 @@ function disconnectLive(){
 }
 
 // ── Firebase RTDB live mode ───────────────────────────────────────────────────
+// ── Set your Firebase RTDB URL once (Firebase Console → Realtime Database → copy URL) ──
+var APEX_RTDB_URL = 'https://accelperformaceexponential-default-rtdb.firebaseio.com'
+
 var _fbTracerApp=null
 function loadFirebaseTracer(cb){
   if(window.firebase){cb();return}
@@ -1218,9 +1221,9 @@ function loadFirebaseTracer(cb){
   }
   document.head.appendChild(s1)
 }
-function connectFirebaseTracer(){
-  var dbUrl=document.getElementById('fbDbUrlT').value.trim()
-  var sid  =document.getElementById('fbSessionT').value.trim()
+function connectFirebaseTracer(overrideSid,overrideDb){
+  var dbUrl=overrideDb||document.getElementById('fbDbUrlT').value.trim()
+  var sid  =overrideSid||document.getElementById('fbSessionT').value.trim()
   if(!dbUrl||!sid){setLiveStatus('Enter DB URL + Session ID');return}
   setLiveStatus('Loading Firebase…')
   loadFirebaseTracer(function(){
@@ -1486,11 +1489,27 @@ function handleLiveMsg(msg){
   }
 }
 
-// ── Auto-load session from URL param ?session=session_XXXXXX.json ─────────
+// ── Auto-connect from QR / shared link ───────────────────────────────────
 ;(function(){
   const p=new URLSearchParams(location.search)
+
+  // ?sid=SESSION_ID  — from APEX app QR code / shared link
+  const sid=p.get('sid')
+  if(sid){
+    const name=p.get('name')||''
+    if(name) document.getElementById('sessionName').textContent='· '+decodeURIComponent(name)
+    if(APEX_RTDB_URL){
+      setTimeout(()=>connectFirebaseTracer(sid,APEX_RTDB_URL),400)
+    } else {
+      // Fallback: pre-fill form and show live overlay for manual DB URL entry
+      document.getElementById('fbSessionT').value=sid
+      showLiveOverlay()
+    }
+  }
+
+  // Legacy: load saved session file
   const s=p.get('session')
-  if(s){
+  if(s&&!sid){
     fetch('/session/'+encodeURIComponent(s))
       .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
       .then(d=>{
@@ -1499,11 +1518,9 @@ function handleLiveMsg(msg){
       })
       .catch(()=>{})
   }
-  // ── Auto-connect to live relay when URL contains ?live=1 ─────────────────
-  // The QR code on the skater's phone encodes http://[ip]:8080/?live=1
-  // Opening that URL serves tracer-real.html from the phone, so location.hostname
-  // IS the relay IP — no need to re-enter it.
-  if(p.has('live')){
+
+  // Legacy: auto-connect to local relay when URL contains ?live=1
+  if(p.has('live')&&!sid){
     const ip=location.hostname
     if(ip&&ip!=='null'&&ip!=='localhost'){
       document.getElementById('liveIp').value=ip

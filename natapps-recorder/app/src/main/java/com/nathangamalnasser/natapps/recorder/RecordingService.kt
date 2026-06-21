@@ -94,6 +94,9 @@ class RecordingService : Service(), SensorEventListener {
     private var nearbyTransport: NearbyTransport? = null
     private var nearbyReceiver:  NearbyReceiver?  = null
 
+    fun isNearbyAdvertising() = nearbyTransport != null
+    fun isNearbyDiscovering()  = nearbyReceiver  != null
+
     // Firebase (hub role)
     private var hubWriter: FirebaseHubWriter? = null
 
@@ -268,22 +271,28 @@ class RecordingService : Service(), SensorEventListener {
                 ?.hostAddress
         }.getOrNull() ?: "?"
 
-    fun startRecording(name: String = "") {
+    fun startRecording(name: String = "", presetSessionId: Long = 0L) {
         if (recState == RecState.RECORDING) return
         sessionName = name
 
         if (!peerClient.isConnected()) peerClient.connect("localhost", deviceSide)
 
-        // Firebase RTDB writer (hub role only)
+        val sid = if (presetSessionId > 0L) presetSessionId else System.currentTimeMillis()
+
+        // Firebase RTDB writer (hub role only — requires google-services.json)
         if (role == "hub") {
-            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            val sid = System.currentTimeMillis()
-            startTime = sid
-            hubWriter = FirebaseHubWriter(sid, uid, appMode)
-            hubWriter?.writeSessionStart()
-            scope.launch(Dispatchers.Main) { onFirebaseState?.invoke("Firebase: recording ●") }
+            try {
+                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                startTime = sid
+                hubWriter = FirebaseHubWriter(sid, uid, appMode)
+                hubWriter?.writeSessionStart()
+                scope.launch(Dispatchers.Main) { onFirebaseState?.invoke("Firebase: recording ●") }
+            } catch (e: Exception) {
+                startTime = sid
+                scope.launch(Dispatchers.Main) { onFirebaseState?.invoke("Firebase: not configured") }
+            }
         } else {
-            startTime = System.currentTimeMillis()
+            startTime = sid
         }
 
         recState         = RecState.RECORDING
@@ -519,7 +528,7 @@ class RecordingService : Service(), SensorEventListener {
         val pi = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE)
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Natapps Recorder").setContentText(text)
+            .setContentTitle("APEX").setContentText(text)
             .setSmallIcon(R.drawable.ic_record)
             .setContentIntent(pi).setOngoing(true).setSilent(true).build()
     }

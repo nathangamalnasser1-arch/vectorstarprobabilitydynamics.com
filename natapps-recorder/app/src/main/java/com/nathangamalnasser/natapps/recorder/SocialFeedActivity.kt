@@ -10,19 +10,20 @@ import com.google.firebase.ktx.Firebase
 
 class SocialFeedActivity : AppCompatActivity() {
 
-    private val db  by lazy { Firebase.firestore }
-    private val uid get() = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    private val db  by lazy { try { Firebase.firestore } catch (e: Exception) { null } }
+    private val uid get() = try { FirebaseAuth.getInstance().currentUser?.uid ?: "" } catch (e: Exception) { "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_social)
+        if (db == null) { toast("Firebase not configured yet"); finish(); return }
         loadFeed()
 
         val etFollow = findViewById<EditText>(R.id.etFollowUid)
         findViewById<Button>(R.id.btnFollow).setOnClickListener {
             val target = etFollow.text.toString().trim()
             if (target.isEmpty() || target == uid) return@setOnClickListener
-            db.collection("follows").document("${uid}_$target")
+            db!!.collection("follows").document("${uid}_$target")
                 .set(mapOf("follower" to uid, "followee" to target, "at" to System.currentTimeMillis()))
                 .addOnSuccessListener { toast("Now following!") }
                 .addOnFailureListener { toast("Failed") }
@@ -33,7 +34,7 @@ class SocialFeedActivity : AppCompatActivity() {
     }
 
     private fun loadFeed() {
-        db.collection("sessions")
+        db!!.collection("sessions")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(50)
             .get()
