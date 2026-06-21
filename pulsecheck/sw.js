@@ -1,5 +1,5 @@
 const CACHE = 'pulsecheck-v1'
-const ASSETS = ['./index.html', './css/app.css', './js/db.js', './js/app.js']
+const ASSETS = ['./index.html', './css/app.css', './js/db.js', './js/app.js', './icons/icon.svg', './manifest.json']
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})))

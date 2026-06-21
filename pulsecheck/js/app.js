@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Intercept back button while checkpoint is open
   window.addEventListener('popstate', () => {
-    if (!q('#checkpoint-overlay').classList.contains('hidden')) {
+    if (!q('#checkpoint-overlay').hidden) {
       history.pushState({ cp: true }, '')
     }
   })

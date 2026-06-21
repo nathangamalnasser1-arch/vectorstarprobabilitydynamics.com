@@ -18,8 +18,17 @@ const required = {
   speedballTrackerLink: /speedball-tracker\.html/,
   natenateworldHeading: /natenateworld/,
   natenateworldLink: /natenateworld\.html/,
+  boxingSensorLab: /boxing-sensor-lab\.html/,
+  boxingTrajectoryLab: /boxing-trajectory-lab\.html/,
+  boxingRealtimeViewer: /boxing-realtime-viewer\.html/,
+  rollerbladeSensor: /rollerblade-sensor\.html/,
+  rollerbladeRouteViewer: /rollerblade-route-viewer\.html/,
+  rollerbladeRealtimeViewer: /rollerblade-realtime-viewer\.html/,
+  pulseCheckHeading: /<h2>PulseCheck<\/h2>/,
+  pulseCheckLink: /pulsecheck\/index\.html/,
   moreToCome: /more to come|coming soon/i,
   playButtons: /Play Now/,
+  openButtons: /class="app-btn">Open/,
   targetBlank: /target="_blank"/,
   noopener: /rel="noopener noreferrer"/,
 };
@@ -33,6 +42,13 @@ for (const [name, pattern] of Object.entries(required)) {
   } else {
     console.log('OK:', name);
   }
+}
+
+if (/<<<<<<<|=======|>>>>>>>/.test(html)) {
+  console.error('FAIL: merge conflict markers present');
+  failed++;
+} else {
+  console.log('OK: noMergeConflictMarkers');
 }
 
 if (failed > 0) {
