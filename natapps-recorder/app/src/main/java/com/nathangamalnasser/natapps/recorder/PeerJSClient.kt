@@ -15,9 +15,10 @@ class PeerJSClient(private val context: Context) {
 
     enum class State { IDLE, CONNECTING, CONNECTED, ERROR }
 
-    var onStateChange: ((State, String) -> Unit)? = null
-    var onOpen:  (() -> Unit)? = null
-    var onClose: (() -> Unit)? = null
+    var onStateChange:  ((State, String) -> Unit)? = null
+    var onOpen:         (() -> Unit)? = null
+    var onClose:        (() -> Unit)? = null
+    var onRemoteStart:  ((String) -> Unit)? = null
 
     private var deviceSide = "left"
 
@@ -84,6 +85,16 @@ class PeerJSClient(private val context: Context) {
         } catch (_: Exception) {}
     }
 
+    fun sendStartCommand(sessionName: String) {
+        try {
+            ws?.send(JSONObject().apply {
+                put("type",    "start_recording")
+                put("device",  deviceSide)
+                put("session", sessionName)
+            }.toString())
+        } catch (_: Exception) {}
+    }
+
     fun sendRoundEnd(round: Int, t: Long) {
         try {
             ws?.send(JSONObject().apply {
@@ -106,6 +117,15 @@ class PeerJSClient(private val context: Context) {
     // ── WebSocket ─────────────────────────────────────────────────────────────
 
     private val wsListener = object : WebSocketListener() {
+        override fun onMessage(ws: WebSocket, text: String) {
+            try {
+                val obj = JSONObject(text)
+                if (obj.optString("type") == "start_recording") {
+                    onRemoteStart?.invoke(obj.optString("session", ""))
+                }
+            } catch (_: Exception) {}
+        }
+
         override fun onOpen(ws: WebSocket, response: Response) {
             ws.send(JSONObject().apply {
                 put("type",   "register")

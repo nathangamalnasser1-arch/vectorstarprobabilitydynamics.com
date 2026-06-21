@@ -190,7 +190,9 @@ class MainActivity : AppCompatActivity() {
                     .setView(input)
                     .setPositiveButton("START") { _, _ ->
                         svc.appMode = appMode
-                        svc.startRecording(input.text.toString().trim())
+                        val name = input.text.toString().trim()
+                        svc.sendStartCommand(name)
+                        svc.startRecording(name)
                         showLiveQr(appMode == "boxing")
                     }
                     .setNegativeButton("Cancel", null)

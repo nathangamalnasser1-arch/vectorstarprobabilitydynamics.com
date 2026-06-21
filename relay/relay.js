@@ -32,6 +32,10 @@ wss.on('connection', ws => {
           console.log(`[+] ${msg.device} connected`)
         }
         break
+      case 'start_recording':
+        sensors.forEach((sWs) => { if (sWs !== ws) trySend(sWs, raw) })
+        broadcast(raw)
+        break
       case 'gps_origin':
         cachedOrigin = raw; broadcast(raw); break
       case 'round_start':

@@ -141,6 +141,11 @@ class RecordingService : Service(), SensorEventListener {
 
         peerClient = PeerJSClient(this)
         peerClient.onStateChange = { state, msg -> onPeerState?.invoke(state, msg) }
+        peerClient.onRemoteStart = { name ->
+            if (recState != RecState.RECORDING) {
+                scope.launch(Dispatchers.Main) { startRecording(name) }
+            }
+        }
 
         relayServer = RelayServer(this)
         relayServer.start()
@@ -163,6 +168,7 @@ class RecordingService : Service(), SensorEventListener {
     fun connectToViewer(ip: String) { peerClient.connect(ip, deviceSide) }
     fun disconnectFromViewer()      { peerClient.disconnect() }
     fun isPeerConnected()           = peerClient.isConnected()
+    fun sendStartCommand(name: String) { peerClient.sendStartCommand(name) }
 
     // ── Recording ─────────────────────────────────────────────────────────────
 
