@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>APEX × Calories — Brainstorm</title>
+<style>
+body{background:#000508;color:#00ffee;font-family:'Courier New',monospace;padding:32px;max-width:720px;margin:0 auto;line-height:1.7}
+h1{font-size:22px;letter-spacing:0.12em;margin-bottom:4px}
+h2{font-size:13px;letter-spacing:0.1em;color:rgba(0,255,238,0.5);margin:28px 0 8px;text-transform:uppercase}
+p,li{font-size:13px;color:rgba(0,255,238,0.8)}
+code{background:rgba(0,255,238,0.07);padding:2px 8px;font-size:12px;border:1px solid rgba(0,255,238,0.15)}
+.box{background:rgba(0,255,238,0.05);border:1px solid rgba(0,255,238,0.15);padding:16px 20px;margin:12px 0}
+ul{padding-left:20px}
+.muted{color:rgba(0,255,238,0.35)}
+</style>
+</head>
+<body>
+
+<h1>APEX × CALORIES BRAINSTORM</h1>
+<p class="muted">Parked — work on another day</p>
+
+<h2>Core idea</h2>
+<p>
+  APEX score is computed from accelerometer + gyroscope magnitudes.
+  Accelerometer magnitude <code>|a|</code> is proportional to force on the body segment (F = ma).
+  Summing force over time gives impulse, which relates to mechanical work done (Joules).
+  Mechanical work ÷ body efficiency (~25%) = total metabolic energy = calories.
+</p>
+
+<h2>Proposed formula</h2>
+<div class="box">
+  <code>APEX_raw = (Σ|accel_mag − 9.81| × w_a + Σ|gyro_mag| × w_g) / duration_s</code><br><br>
+  <code>estimated_cal = APEX_raw × body_weight_kg × sport_factor × duration_s</code>
+</div>
+
+<h2>Sport calibration factors (to be tuned)</h2>
+<ul>
+  <li>Boxing — MET ≈ 10 → sport_factor ≈ 0.0028</li>
+  <li>Rollerblade — MET ≈ 9 → sport_factor ≈ 0.0025</li>
+  <li>New sports get their own factor when added</li>
+</ul>
+
+<h2>Sanity check</h2>
+<p>APEX 1000 boxing, 70 kg, 3 min → should give ~40–50 cal. Plausible for a hard round.</p>
+
+<h2>What the user needs to provide</h2>
+<ul>
+  <li>Body weight (kg) — add to Firestore <code>/users/{uid}</code> profile</li>
+  <li>Duration and APEX_raw are already computed at session end</li>
+</ul>
+
+<h2>Challenge implication</h2>
+<p>
+  Challenge = who burns more calories in the same sport + same duration.
+  Cross-sport comparison stays valid because the physics formula is the same —
+  only the sport_factor differs. Heavier person burns more for same APEX = accounted for
+  if challenges are normalised by weight (APEX_raw, not calories) or kept same-weight.
+  Decision needed: challenge on raw APEX or on calories?
+</p>
+
+<h2>Open questions</h2>
+<ul>
+  <li>Normalise by body weight for fair challenges? (APEX is already weight-neutral; calories are not)</li>
+  <li>Show both APEX (0–1000) and estimated calories in the session summary?</li>
+  <li>Calibrate sport_factor against real heart-rate data at some point</li>
+  <li>Does the challenge stay on APEX (weight-neutral) or calories (weight-aware)?</li>
+</ul>
+
+</body>
+</html>

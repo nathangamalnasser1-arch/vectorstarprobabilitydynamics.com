@@ -96,10 +96,18 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh}
   <div style="border:1px solid rgba(0,255,238,.3);padding:44px 64px;text-align:center;max-width:440px">
     <div style="font:9px/1 'Courier New';letter-spacing:5px;color:rgba(0,255,238,.4);text-transform:uppercase;margin-bottom:18px">LIVE VIEWER</div>
     <div style="font:24px/1 'Courier New';letter-spacing:3px;color:#00ffee;text-shadow:0 0 24px #00ffee;margin-bottom:20px">◉ STREAM</div>
-    <div style="font:8px/1.8 'Courier New';letter-spacing:2px;color:rgba(0,255,238,.3);margin-bottom:20px">Same WiFi as phone → enter phone IP (e.g. 192.168.1.x)<br>Internet / 4G → enter cloud relay domain</div>
+    <div style="font:8px/1.8 'Courier New';letter-spacing:2px;color:rgba(0,255,238,.3);margin-bottom:20px">Same WiFi → phone IP (192.168.1.x)  |  Internet → relay domain</div>
     <input id="liveIp" type="text" placeholder="192.168.1.x  or  relay.domain.com" autocomplete="off" style="width:300px">
     <div id="liveConnBtn" onclick="liveConnBtnClick()" style="background:rgba(0,0,0,.7);border:1px solid rgba(0,255,238,.35);color:#00ffee;font:9px/1 'Courier New';letter-spacing:3px;padding:10px 24px;cursor:pointer;display:inline-block;margin-bottom:14px">CONNECT</div>
-    <div id="liveStatus" style="font:8px/1.5 'Courier New';letter-spacing:2px;color:rgba(255,210,0,.7);min-height:14px"></div>
+
+    <div style="font:7px/1 'Courier New';letter-spacing:3px;color:rgba(0,255,238,.2);margin:10px 0 8px">— or Firebase RTDB —</div>
+    <input id="fbDbUrlT" type="text" placeholder="https://your-project-default-rtdb.firebaseio.com"
+      style="background:rgba(0,20,20,.8);border:1px solid rgba(0,255,238,.2);color:#00ffee;font:11px/1 'Courier New';padding:8px 10px;outline:none;width:300px;display:block;margin:0 auto 8px">
+    <input id="fbSessionT" type="text" placeholder="Session ID (number from app)"
+      style="background:rgba(0,20,20,.8);border:1px solid rgba(0,255,238,.2);color:#00ffee;font:11px/1 'Courier New';padding:8px 10px;outline:none;width:220px;display:inline-block;margin-right:8px">
+    <div onclick="connectFirebaseTracer()" style="background:rgba(0,255,238,.12);border:1px solid rgba(0,255,238,.4);color:#00ffee;font:9px/1 'Courier New';letter-spacing:2px;padding:10px 16px;cursor:pointer;display:inline-block">FIREBASE</div>
+
+    <div id="liveStatus" style="font:8px/1.5 'Courier New';letter-spacing:2px;color:rgba(255,210,0,.7);min-height:14px;margin-top:8px"></div>
   </div>
   <div style="font:8px/1 'Courier New';letter-spacing:3px;color:rgba(0,255,238,.2);margin-top:22px;cursor:pointer;padding:8px 12px" onclick="hideLiveOverlay()">CLOSE ›</div>
 </div>
@@ -1195,6 +1203,53 @@ function disconnectLive(){
   setLiveMode(false)
   document.getElementById('liveConnBtn').textContent='CONNECT'
   setLiveStatus('')
+}
+
+// ── Firebase RTDB live mode ───────────────────────────────────────────────────
+var _fbTracerApp=null
+function loadFirebaseTracer(cb){
+  if(window.firebase){cb();return}
+  var s1=document.createElement('script')
+  s1.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js'
+  s1.onload=function(){
+    var s2=document.createElement('script')
+    s2.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js'
+    s2.onload=cb; document.head.appendChild(s2)
+  }
+  document.head.appendChild(s1)
+}
+function connectFirebaseTracer(){
+  var dbUrl=document.getElementById('fbDbUrlT').value.trim()
+  var sid  =document.getElementById('fbSessionT').value.trim()
+  if(!dbUrl||!sid){setLiveStatus('Enter DB URL + Session ID');return}
+  setLiveStatus('Loading Firebase…')
+  loadFirebaseTracer(function(){
+    try{
+      if(_fbTracerApp) firebase.app('tracer').delete()
+      _fbTracerApp=firebase.initializeApp({databaseURL:dbUrl},'tracer')
+    }catch(e){
+      try{_fbTracerApp=firebase.app('tracer')}catch(e2){}
+    }
+    var db=firebase.app('tracer').database()
+    var base='sessions/'+sid
+    setLiveStatus('Listening to Firebase…')
+    db.ref(base+'/left/latest').on('value',function(snap){
+      var d=snap.val(); if(!d) return
+      d.device='left'
+      handleLiveMsg(d)
+    })
+    db.ref(base+'/right/latest').on('value',function(snap){
+      var d=snap.val(); if(!d) return
+      d.device='right'
+      handleLiveMsg(d)
+    })
+    db.ref(base+'/meta').once('value',function(snap){
+      var m=snap.val()
+      setLiveStatus(m&&m.status==='recording'?'Firebase: live ●':'Firebase: waiting…')
+      setLiveMode(true)
+      hideLiveOverlay()
+    })
+  })
 }
 
 function setLiveMode(on){

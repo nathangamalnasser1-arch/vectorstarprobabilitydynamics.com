@@ -4,6 +4,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Boxing Live</title>
+<!-- Firebase SDK (only loaded when user chooses Firebase mode) -->
+<script>
+var _fbApp=null,_fbListeners=[]
+function loadFirebase(cb){
+  if(window.firebase){cb();return}
+  var s1=document.createElement('script')
+  s1.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js'
+  s1.onload=function(){
+    var s2=document.createElement('script')
+    s2.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js'
+    s2.onload=cb; document.head.appendChild(s2)
+  }
+  document.head.appendChild(s1)
+}
+function connectFirebase(){
+  var dbUrl=document.getElementById('fbDbUrl').value.trim()
+  var sid  =document.getElementById('fbSession').value.trim()
+  if(!dbUrl||!sid){setSt('Enter Firebase DB URL and Session ID');return}
+  setSt('Loading Firebase SDK…')
+  loadFirebase(function(){
+    try{
+      if(_fbApp) firebase.app().delete()
+      _fbApp=firebase.initializeApp({databaseURL:dbUrl},'boxing-viewer')
+    }catch(e){
+      try{_fbApp=firebase.app('boxing-viewer')}catch(e2){}
+    }
+    var db=firebase.app('boxing-viewer').database()
+    var basePath='sessions/'+sid
+    setSt('Connecting to Firebase…')
+    ;['left','right'].forEach(function(side){
+      db.ref(basePath+'/'+side+'/latest').on('value',function(snap){
+        var d=snap.val(); if(!d) return
+        d.type='sensor'; d.device=side
+        handleMsg(d)
+      })
+    })
+    db.ref(basePath+'/meta').once('value',function(snap){
+      var m=snap.val()
+      if(m&&m.status==='recording') setSt('Firebase: live ●')
+      else setSt('Firebase: connected (waiting for session)')
+      document.getElementById('overlay').classList.add('h')
+    })
+  })
+}
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#000508;color:#00ffee;font-family:'Courier New',monospace;overflow:hidden;height:100vh;width:100vw}
@@ -39,11 +84,23 @@ canvas.show{display:block}
 
 <div id="overlay">
   <h1>BOXING LIVE</h1>
-  <p>Same WiFi as phone → enter phone IP (e.g. 192.168.x.x)<br>Internet / 4G → enter cloud relay domain</p>
+
+  <p style="font-size:11px;opacity:0.6">— WebSocket relay —</p>
+  <p>Same WiFi → phone IP (192.168.x.x)&nbsp;&nbsp;|&nbsp;&nbsp;Internet → relay domain</p>
   <div style="display:flex;gap:8px">
     <input id="ipIn" placeholder="192.168.x.x  or  relay.domain.com" />
     <button class="gbtn" onclick="doConnect()">CONNECT</button>
   </div>
+
+  <p style="font-size:11px;opacity:0.4;margin-top:8px">— or — Firebase RTDB —</p>
+  <input id="fbDbUrl" placeholder="https://your-project-default-rtdb.firebaseio.com"
+    style="background:rgba(0,255,238,0.04);border:1px solid rgba(0,255,238,0.2);color:#00ffee;font-family:monospace;padding:8px 12px;font-size:12px;outline:none;width:320px" />
+  <div style="display:flex;gap:8px">
+    <input id="fbSession" placeholder="Session ID (number from app)"
+      style="background:rgba(0,255,238,0.04);border:1px solid rgba(0,255,238,0.2);color:#00ffee;font-family:monospace;padding:8px 12px;font-size:12px;outline:none;flex:1" />
+    <button class="gbtn" onclick="connectFirebase()">FIREBASE</button>
+  </div>
+
   <div id="ovSt"></div>
 </div>
 

@@ -8,15 +8,18 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -28,11 +31,12 @@ class MainActivity : AppCompatActivity() {
     private var service: RecordingService? = null
     private var bound = false
     private var appMode = "rollerblade"
+    private var role    = "sensor1"  // "sensor1" | "hub" | "cam"
 
     private val svcConn = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, b: IBinder) {
             service = (b as RecordingService.LocalBinder).get()
-            bound = true
+            bound   = true
             wireCallbacks()
             refreshUi()
         }
@@ -41,23 +45,37 @@ class MainActivity : AppCompatActivity() {
 
     private val permLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* permissions handled */ }
+    ) { granted ->
+        // After permissions granted, re-activate Nearby if already in that role
+        if (role == "sensor1" && service?.nearbyTransport == null) {
+            service?.startNearbyAdvertising()
+        } else if (role == "hub" && service?.nearbyReceiver == null) {
+            service?.startNearbyDiscovery()
+        }
+    }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Auth gate
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish(); return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        requestNeededPermissions()
         val intent = Intent(this, RecordingService::class.java)
         startService(intent)
         bindService(intent, svcConn, Context.BIND_AUTO_CREATE)
 
         setupClicks()
-        setMode("left")
-        updateLiveUrl()
+        setAppMode("rollerblade")
+        setRole("sensor1")
+        showUserInfo()
     }
 
     override fun onDestroy() {
@@ -65,36 +83,23 @@ class MainActivity : AppCompatActivity() {
         if (bound) unbindService(svcConn)
     }
 
-    // ── Permissions ───────────────────────────────────────────────────────────
+    // ── User info ─────────────────────────────────────────────────────────────
 
-    private fun requestNeededPermissions() {
-        val needed = mutableListOf<String>()
-        if (!has(Manifest.permission.ACCESS_FINE_LOCATION)) needed += Manifest.permission.ACCESS_FINE_LOCATION
-        if (needed.isNotEmpty()) permLauncher.launch(needed.toTypedArray())
+    private fun showUserInfo() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        binding.tvUserInfo.text = user.displayName?.takeIf { it.isNotEmpty() }
+            ?: user.email?.substringBefore('@') ?: "Signed in"
     }
 
-    private fun updateLiveUrl() {
-        val ip = service?.getLocalIp() ?: runCatching {
-            java.net.NetworkInterface.getNetworkInterfaces()?.toList()
-                ?.flatMap { it.inetAddresses.toList() }
-                ?.firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
-                ?.hostAddress
-        }.getOrNull() ?: "?"
-        binding.tvLiveUrl.text = "http://$ip:8080"
-    }
-
-    private fun has(p: String) =
-        ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
-
-    // ── Service wiring ────────────────────────────────────────────────────────
+    // ── Service callbacks ─────────────────────────────────────────────────────
 
     private fun wireCallbacks() {
         val svc = service ?: return
         svc.onStateChanged = { runOnUiThread { refreshUi() } }
-        svc.onTimerTick    = { elapsed, count, peak ->
+        svc.onTimerTick = { elapsed, count, peak ->
             runOnUiThread {
                 val min = elapsed / 60000; val sec = (elapsed / 1000) % 60
-                binding.tvTimer.text      = "%02d:%02d".format(min, sec)
+                binding.tvTimer.text       = "%02d:%02d".format(min, sec)
                 binding.tvSampleCount.text = "Samples: $count"
                 binding.tvPeakAccel.text   = "Peak: ${"%.2f".format(peak / 9.81)}g"
             }
@@ -112,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                     binding.tvGyroStatus.text = "GYRO: OK  ●"
                     binding.tvGyroStatus.setTextColor(getColor(R.color.green))
                 } else {
-                    binding.tvGyroStatus.text = "GYRO: DEAD  ✕  (orientation unavailable)"
+                    binding.tvGyroStatus.text = "GYRO: DEAD  ✕"
                     binding.tvGyroStatus.setTextColor(getColor(R.color.stop_red))
                 }
             }
@@ -132,22 +137,26 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 val m = secsLeft / 60; val s = secsLeft % 60
                 binding.tvRoundInfo.text = "ROUND $round"
-                binding.tvTimer.text = "%d:%02d".format(m, s)
+                binding.tvTimer.text     = "%d:%02d".format(m, s)
             }
         }
         svc.onPeerState = { state, msg ->
             runOnUiThread {
                 binding.tvRelayStatus.text = when (state) {
-                    PeerJSClient.State.CONNECTED  -> "Relay: streaming ●"
+                    PeerJSClient.State.CONNECTED  -> "Relay ●"
                     PeerJSClient.State.CONNECTING -> "Relay: connecting…"
                     PeerJSClient.State.ERROR      -> "Relay: $msg"
                     else                          -> "Relay: idle"
                 }
-                binding.btnConnect.text = if (
-                    state == PeerJSClient.State.CONNECTED ||
-                    state == PeerJSClient.State.CONNECTING
-                ) "DISCONNECT" else "CONNECT"
+                binding.btnConnect.text = if (state == PeerJSClient.State.CONNECTED ||
+                    state == PeerJSClient.State.CONNECTING) "DISCONNECT" else "CONNECT"
             }
+        }
+        svc.onNearbyState = { msg ->
+            runOnUiThread { binding.tvNearbyStatus.text = "Nearby: $msg" }
+        }
+        svc.onFirebaseState = { msg ->
+            runOnUiThread { binding.tvFirebaseStatus.text = msg }
         }
         updateLiveUrl()
     }
@@ -155,11 +164,20 @@ class MainActivity : AppCompatActivity() {
     // ── Clicks ────────────────────────────────────────────────────────────────
 
     private fun setupClicks() {
+        // Role buttons
+        binding.btnRoleSensor1.setOnClickListener { setRole("sensor1") }
+        binding.btnRoleHub.setOnClickListener     { setRole("hub") }
+        binding.btnRoleCam.setOnClickListener     { setRole("cam") }
+
+        // Sport mode
         binding.btnModeRollerblade.setOnClickListener { setAppMode("rollerblade") }
         binding.btnModeBoxing.setOnClickListener      { setAppMode("boxing") }
-        binding.btnLeft.setOnClickListener  { setMode("left") }
-        binding.btnRight.setOnClickListener { setMode("right") }
 
+        // Device side
+        binding.btnLeft.setOnClickListener  { setDeviceSide("left") }
+        binding.btnRight.setOnClickListener { setDeviceSide("right") }
+
+        // Relay fallback
         binding.btnConnect.setOnClickListener {
             val svc = service ?: return@setOnClickListener
             if (svc.isPeerConnected()) {
@@ -169,12 +187,12 @@ class MainActivity : AppCompatActivity() {
                 svc.connectToViewer(input.ifEmpty { "localhost" })
             }
         }
-
         binding.etRelayUrl.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) { binding.btnConnect.performClick(); true }
             else false
         }
 
+        // Record
         binding.btnRecord.setOnClickListener {
             val svc = service ?: return@setOnClickListener
             if (svc.recState == RecordingService.RecState.RECORDING) {
@@ -182,8 +200,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val input = EditText(this).apply {
                     hint = "Session name (optional)"
-                    setSingleLine(true)
-                    setPadding(48, 32, 48, 16)
+                    setSingleLine(true); setPadding(48, 32, 48, 16)
                 }
                 AlertDialog.Builder(this)
                     .setTitle("New Session")
@@ -193,7 +210,7 @@ class MainActivity : AppCompatActivity() {
                         val name = input.text.toString().trim()
                         svc.sendStartCommand(name)
                         svc.startRecording(name)
-                        showLiveQr(appMode == "boxing")
+                        if (role != "cam") showLiveQr(appMode == "boxing")
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
@@ -201,36 +218,81 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.tvLiveUrl.setOnClickListener { showLiveQr(appMode == "boxing") }
-
-        binding.btnSessions.setOnClickListener {
-            startActivity(Intent(this, SessionsActivity::class.java))
+        binding.btnSessions.setOnClickListener   { startActivity(Intent(this, SessionsActivity::class.java)) }
+        binding.btnSocial.setOnClickListener     { startActivity(Intent(this, SocialFeedActivity::class.java)) }
+        binding.btnChallenge.setOnClickListener  { startActivity(Intent(this, ChallengeActivity::class.java)) }
+        binding.btnSignOut.setOnClickListener    {
+            FirebaseAuth.getInstance().signOut()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
     }
 
-    // ── QR code ───────────────────────────────────────────────────────────────
+    // ── Role management ───────────────────────────────────────────────────────
 
-    private fun showLiveQr(boxing: Boolean = false) {
-        val ip = service?.getLocalIp() ?: "?"
-        if (ip == "?") { android.widget.Toast.makeText(this, "No WiFi IP yet", android.widget.Toast.LENGTH_SHORT).show(); return }
-        val url = if (boxing) "http://$ip:8080/boxing?live=1" else "http://$ip:8080/?live=1"
-        val label = if (boxing) "Scan to watch boxing live" else "Scan to watch live on any browser"
-        showQrDialog(url, label)
-    }
+    private fun setRole(r: String) {
+        // Stop previous Nearby
+        service?.stopNearby()
 
-    fun showQrDialog(url: String, subtitle: String) {
-        val qr = ImageView(this).apply {
-            setImageBitmap(generateQr(url, 512))
-            setPadding(48, 32, 48, 8)
+        role = r
+        service?.role = r
+
+        val accent  = getColor(R.color.accent)
+        val surface = getColor(R.color.surface)
+        val bg      = getColor(R.color.bg)
+
+        binding.btnRoleSensor1.setBackgroundColor(if (r == "sensor1") accent else surface)
+        binding.btnRoleSensor1.setTextColor(if (r == "sensor1") bg else accent)
+        binding.btnRoleHub.setBackgroundColor(if (r == "hub") accent else surface)
+        binding.btnRoleHub.setTextColor(if (r == "hub") bg else accent)
+        binding.btnRoleCam.setBackgroundColor(if (r == "cam") accent else surface)
+        binding.btnRoleCam.setTextColor(if (r == "cam") bg else accent)
+
+        // Show/hide sections
+        val isSensor = r == "sensor1" || r == "hub"
+        binding.sectionSensors.visibility = if (isSensor) android.view.View.VISIBLE else android.view.View.GONE
+        binding.sectionMode.visibility    = if (isSensor) android.view.View.VISIBLE else android.view.View.GONE
+        binding.sectionSide.visibility    = if (isSensor) android.view.View.VISIBLE else android.view.View.GONE
+
+        binding.tvNearbyStatus.text = "Nearby: idle"
+        binding.tvFirebaseStatus.text = if (r == "hub") "Firebase: idle" else ""
+
+        when (r) {
+            "sensor1" -> {
+                binding.tvRoleHint.text = "Phone 1 — IMU sensor, streams to HUB via Bluetooth"
+                requestNearbyPermissions { service?.startNearbyAdvertising() }
+            }
+            "hub" -> {
+                binding.tvRoleHint.text = "Phone 2 — own IMU + receives Sensor 1 + writes to Firebase"
+                requestNearbyPermissions { service?.startNearbyDiscovery() }
+            }
+            "cam" -> {
+                binding.tvRoleHint.text = "Phone 3 — video recording, uploads to Firebase Storage"
+                binding.tvNearbyStatus.text = ""
+            }
         }
-        AlertDialog.Builder(this)
-            .setTitle(subtitle)
-            .setMessage(url)
-            .setView(qr)
-            .setPositiveButton("OK", null)
-            .show()
     }
 
-    // ── App mode ──────────────────────────────────────────────────────────────
+    private fun requestNearbyPermissions(onGranted: () -> Unit) {
+        val needed = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!has(Manifest.permission.BLUETOOTH_SCAN))      needed += Manifest.permission.BLUETOOTH_SCAN
+            if (!has(Manifest.permission.BLUETOOTH_ADVERTISE)) needed += Manifest.permission.BLUETOOTH_ADVERTISE
+            if (!has(Manifest.permission.BLUETOOTH_CONNECT))   needed += Manifest.permission.BLUETOOTH_CONNECT
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!has(Manifest.permission.NEARBY_WIFI_DEVICES)) needed += Manifest.permission.NEARBY_WIFI_DEVICES
+        }
+        if (!has(Manifest.permission.ACCESS_FINE_LOCATION)) needed += Manifest.permission.ACCESS_FINE_LOCATION
+
+        if (needed.isEmpty()) {
+            onGranted()
+        } else {
+            permLauncher.launch(needed.toTypedArray())
+        }
+    }
+
+    // ── Sport mode ────────────────────────────────────────────────────────────
 
     private fun setAppMode(mode: String) {
         appMode = mode
@@ -240,35 +302,60 @@ class MainActivity : AppCompatActivity() {
         if (mode == "boxing") {
             binding.btnModeBoxing.setBackgroundColor(accent);       binding.btnModeBoxing.setTextColor(bg)
             binding.btnModeRollerblade.setBackgroundColor(surface); binding.btnModeRollerblade.setTextColor(accent)
-            binding.tvGpsStatus.visibility = android.view.View.GONE
-            binding.tvRoundInfo.visibility = android.view.View.VISIBLE
+            binding.tvGpsStatus.visibility  = android.view.View.GONE
+            binding.tvRoundInfo.visibility  = android.view.View.VISIBLE
         } else {
             binding.btnModeRollerblade.setBackgroundColor(accent);  binding.btnModeRollerblade.setTextColor(bg)
             binding.btnModeBoxing.setBackgroundColor(surface);      binding.btnModeBoxing.setTextColor(accent)
-            binding.tvGpsStatus.visibility = android.view.View.VISIBLE
-            binding.tvRoundInfo.visibility = android.view.View.GONE
+            binding.tvGpsStatus.visibility  = android.view.View.VISIBLE
+            binding.tvRoundInfo.visibility  = android.view.View.GONE
         }
-        setMode(if (service?.deviceSide != null) service!!.deviceSide else "left")
+        service?.appMode = mode
         updateLiveUrl()
     }
 
     // ── Device side ───────────────────────────────────────────────────────────
 
-    private fun setMode(side: String) {
+    private fun setDeviceSide(side: String) {
         service?.deviceSide = side
-        val accent   = getColor(R.color.accent)
-        val surface  = getColor(R.color.surface)
-        val bg       = getColor(R.color.bg)
-
+        val accent  = getColor(R.color.accent)
+        val surface = getColor(R.color.surface)
+        val bg      = getColor(R.color.bg)
         if (side == "left") {
             binding.btnLeft.setBackgroundColor(accent);   binding.btnLeft.setTextColor(bg)
             binding.btnRight.setBackgroundColor(surface); binding.btnRight.setTextColor(accent)
             binding.tvModeHint.text = if (appMode == "boxing") "Left wrist" else "Left pocket"
         } else {
-            binding.btnLeft.setBackgroundColor(surface); binding.btnLeft.setTextColor(accent)
-            binding.btnRight.setBackgroundColor(accent); binding.btnRight.setTextColor(bg)
+            binding.btnLeft.setBackgroundColor(surface);  binding.btnLeft.setTextColor(accent)
+            binding.btnRight.setBackgroundColor(accent);  binding.btnRight.setTextColor(bg)
             binding.tvModeHint.text = if (appMode == "boxing") "Right wrist" else "Right pocket"
         }
+    }
+
+    // ── Live URL / QR ─────────────────────────────────────────────────────────
+
+    private fun updateLiveUrl() {
+        val ip = service?.getLocalIp() ?: runCatching {
+            java.net.NetworkInterface.getNetworkInterfaces()?.toList()
+                ?.flatMap { it.inetAddresses.toList() }
+                ?.firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
+                ?.hostAddress
+        }.getOrNull() ?: "?"
+        binding.tvLiveUrl.text = "http://$ip:8080"
+    }
+
+    private fun showLiveQr(boxing: Boolean = false) {
+        val ip = service?.getLocalIp() ?: "?"
+        if (ip == "?") { toast("No WiFi IP yet"); return }
+        val url = if (boxing) "http://$ip:8080/boxing?live=1" else "http://$ip:8080/?live=1"
+        showQrDialog(url, if (boxing) "Scan to watch boxing live" else "Scan to watch live")
+    }
+
+    fun showQrDialog(url: String, subtitle: String) {
+        AlertDialog.Builder(this)
+            .setTitle(subtitle).setMessage(url)
+            .setView(ImageView(this).apply { setImageBitmap(generateQr(url, 512)); setPadding(48,32,48,8) })
+            .setPositiveButton("OK", null).show()
     }
 
     // ── UI refresh ────────────────────────────────────────────────────────────
@@ -276,9 +363,7 @@ class MainActivity : AppCompatActivity() {
     private fun refreshUi() {
         val recording = service?.recState == RecordingService.RecState.RECORDING
         binding.btnRecord.text = if (recording) "■  STOP" else "●  START RECORDING"
-        binding.btnRecord.setBackgroundColor(
-            getColor(if (recording) R.color.stop_red else R.color.accent)
-        )
+        binding.btnRecord.setBackgroundColor(getColor(if (recording) R.color.stop_red else R.color.accent))
         if (!recording) {
             binding.tvTimer.text       = if (appMode == "boxing") "3:00" else "00:00"
             binding.tvRoundInfo.text   = if (appMode == "boxing") "ROUND 1" else ""
@@ -288,10 +373,15 @@ class MainActivity : AppCompatActivity() {
         updateLiveUrl()
     }
 
+    private fun has(p: String) =
+        ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
+
+    private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
     companion object {
         fun generateQr(text: String, size: Int): Bitmap {
-            val hints = mapOf(EncodeHintType.MARGIN to 1)
-            val bits = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size, hints)
+            val bits = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size,
+                mapOf(EncodeHintType.MARGIN to 1))
             val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565)
             for (x in 0 until size) for (y in 0 until size)
                 bmp.setPixel(x, y, if (bits[x, y]) Color.BLACK else Color.WHITE)

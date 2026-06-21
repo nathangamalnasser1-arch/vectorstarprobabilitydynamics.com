@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>AccelPerformaceEXponential - Vector-Star Probability Dynamics</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        .apex-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .apex-card {
+            position: relative;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background: var(--bg-secondary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .apex-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .apex-card-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .apex-card-header h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .apex-sport-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: var(--cern-amber);
+            color: #0f172a;
+            font-weight: 700;
+        }
+        .apex-card-body { padding: 1.5rem 2rem 2rem; }
+        .apex-card-body p { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.6; }
+        .apex-btn {
+            display: inline-block;
+            padding: 0.65rem 1.5rem;
+            background: var(--cern-amber);
+            color: #0f172a;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .apex-btn:hover { background: var(--accent-hover); text-decoration: none; }
+        .apex-btn-secondary {
+            background: transparent;
+            border: 1px solid var(--cern-amber);
+            color: var(--cern-amber);
+        }
+        .apex-btn-secondary:hover { background: rgba(255,160,0,0.1); }
+        .apex-hero {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .apex-hero h1 span { color: var(--cern-amber); }
+        .apex-hero p { color: var(--text-secondary); max-width: 600px; margin-top: 0.75rem; line-height: 1.7; }
+        .apex-score-badge {
+            display: inline-block;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--cern-amber);
+            letter-spacing: -0.02em;
+        }
+        .apex-score-label { font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <button type="button" class="nav-mobile-toggle" id="nav-mobile-toggle" aria-expanded="false" aria-controls="vspd-sidebar-nav" aria-label="Open navigation menu">
+        <span class="nav-mobile-toggle-bar"></span>
+        <span class="nav-mobile-toggle-bar"></span>
+        <span class="nav-mobile-toggle-bar"></span>
+    </button>
+    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
+    <nav class="sidebar-nav" id="vspd-sidebar-nav" aria-label="Site navigation">
+        <h3>Navigation</h3>
+        <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="thought-experiment.html">Thought Experiment</a></li>
+            <li><a href="theory.html">Theory</a></li>
+            <li><a href="comparisons.html">Comparisons</a></li>
+            <li><a href="experiments.html">Experiments</a></li>
+        </ul>
+        <h3>Extensions</h3>
+        <ul>
+            <li><a href="vspd-demo.html">VSPD vs Hilbert Space</a></li>
+            <li><a href="double-slit-experiment.html">Double Slit Experiment</a></li>
+            <li><a href="quantum-radio.html">Quantum Radio</a></li>
+            <li><a href="periodic-table-poker.html">Periodic Table Poker</a></li>
+            <li><a href="einsteins-biggest-mistake/index.html">Einstein's Biggest Mistake</a></li>
+            <li><a href="skatepark-city.html">Skatepark City</a></li>
+            <li><a href="driftcity/index.html">Drift City</a></li>
+            <li><a href="competition%20coin%20paper/index.html">Competition Coin Paper</a></li>
+            <li><a href="bubbleboxing/dist/index.html">BubbleBoxing</a></li>
+            <li><a href="NatOS/natos.html">NatOS</a></li>
+            <li><a href="vspd-research-initiative.html">VSPD Research Initiative</a></li>
+        </ul>
+        <h3>Better Terminology</h3>
+        <ul>
+            <li><a href="better-terminology/index.html">Website</a></li>
+        </ul>
+        <h3>Applications</h3>
+        <ul>
+            <li><a href="hl-lhc-enrichment.html">HL-LHC Enrichment</a></li>
+            <li><a href="gravitational-time-microscope/index.html">Time Microscope</a></li>
+            <li><a href="seminar-hadronic-physics/index.html">Hadronic Physics</a></li>
+            <li><a href="vspd-hadronic/index.html">VSPD & Hadronic</a></li>
+            <li><a href="vspd-proof/index.html">VSPD Proof</a></li>
+        </ul>
+        <h3>Natapps</h3>
+        <ul>
+            <li><a href="natapps.html">Apps</a></li>
+            <li><a href="tracer-real.html">Skate Tracer</a></li>
+            <li><a href="boxing-sensor-lab.html">Boxing Sensor Lab</a></li>
+            <li><a href="boxing-trajectory-lab.html">Boxing Trajectory Lab</a></li>
+            <li><a href="boxing-realtime-viewer.html">Boxing Realtime Lab</a></li>
+            <li><a href="accelperformaceexponential.html" class="active">AccelPerformaceEXponential</a></li>
+        </ul>
+        <h3>About</h3>
+        <ul>
+            <li><a href="about.html">About VSPD</a></li>
+        </ul>
+    </nav>
+
+    <main class="natapps-page main-content-with-sidebar">
+
+        <div class="apex-hero">
+            <h1>Accel<span>Performace</span><strong style="color:var(--cern-amber)">EX</strong>ponential</h1>
+            <p>
+                Real-time motion intensity scoring for any sport. Two phones record acceleration and rotation
+                at 50 Hz — the APEX score (0–1000) captures exactly how hard you moved.
+                Challenge friends across sports on the same universal scale.
+            </p>
+            <div style="margin-top:1.5rem;display:flex;align-items:baseline;gap:1rem">
+                <div>
+                    <div class="apex-score-badge">APEX</div>
+                    <div class="apex-score-label">0 – 1000 universal score</div>
+                </div>
+                <div style="color:var(--text-secondary);font-size:0.85rem;max-width:360px">
+                    Powered by Mahony AHRS quaternion filter, ZUPT dead-reckoning, and a
+                    per-sport weighted intensity formula from live accelerometer + gyroscope data.
+                </div>
+            </div>
+        </div>
+
+        <div class="apex-grid">
+
+            <article class="apex-card">
+                <div class="apex-card-header">
+                    <span class="apex-sport-tag">Rollerblade</span>
+                    <h2>Skate Tracer</h2>
+                </div>
+                <div class="apex-card-body">
+                    <p>
+                        Strap a phone to each skate and record a session. The live viewer plots your
+                        3D route as a glowing Tron ribbon, shows G-force and rotation graphs, and
+                        scores the session with APEX weighting tuned for blade sports
+                        (w<sub>a</sub> = 0.45 / w<sub>g</sub> = 0.55).
+                    </p>
+                    <a href="tracer-real.html" class="apex-btn">Live Viewer</a>
+                    <a href="rollerblade-realtime-viewer.html" class="apex-btn apex-btn-secondary">Realtime Lab</a>
+                </div>
+            </article>
+
+            <article class="apex-card">
+                <div class="apex-card-header">
+                    <span class="apex-sport-tag">Boxing</span>
+                    <h2>Boxing Tracer</h2>
+                </div>
+                <div class="apex-card-body">
+                    <p>
+                        One phone per wrist. Watch fist arcs rendered in 3D as you punch — ghost
+                        overlay compares the previous round. Graphs show peak G and rotation per
+                        hand. APEX weights punching intensity over rotation
+                        (w<sub>a</sub> = 0.65 / w<sub>g</sub> = 0.35).
+                    </p>
+                    <a href="boxing-realtime-viewer.html" class="apex-btn">Live Viewer</a>
+                    <a href="boxing-sensor-lab.html" class="apex-btn apex-btn-secondary">Sensor Lab</a>
+                </div>
+            </article>
+
+        </div>
+
+        <section style="margin-top:3rem;border-top:1px solid var(--border-color);padding-top:2rem">
+            <h2 style="margin-bottom:1rem">How it works</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.5rem">
+                <div>
+                    <h3 style="font-size:0.9rem;color:var(--cern-amber);margin-bottom:0.5rem">1 — Record</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6">
+                        Install AccelPerformaceEXponential on two Android phones. Phone 1 is SENSOR 1,
+                        Phone 2 is HUB. They pair via Bluetooth (Nearby Connections). Press START on
+                        one — both begin recording at 50 Hz.
+                    </p>
+                </div>
+                <div>
+                    <h3 style="font-size:0.9rem;color:var(--cern-amber);margin-bottom:0.5rem">2 — Stream</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6">
+                        HUB writes both IMU streams to Firebase Realtime Database at 10 Hz.
+                        Anyone with the session ID can open the live viewer on this website and
+                        watch in real time from anywhere in the world.
+                    </p>
+                </div>
+                <div>
+                    <h3 style="font-size:0.9rem;color:var(--cern-amber);margin-bottom:0.5rem">3 — Score</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6">
+                        At session end the APEX score is computed:
+                        <em>APEX = (Σ|a−g|·w<sub>a</sub> + Σ|ω|·w<sub>g</sub>) / duration</em>,
+                        normalised 0–1000. Saved to Firestore and visible on the social feed.
+                    </p>
+                </div>
+                <div>
+                    <h3 style="font-size:0.9rem;color:var(--cern-amber);margin-bottom:0.5rem">4 — Challenge</h3>
+                    <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6">
+                        Send a "Beat My APEX" challenge to any user. Cross-sport challenges are
+                        valid — the formula is universal, only the sport weights differ.
+                        Follow other athletes and track their scores on the social feed.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const toggle = document.getElementById('nav-mobile-toggle')
+        const nav    = document.getElementById('vspd-sidebar-nav')
+        const overlay= document.getElementById('nav-overlay')
+        toggle.addEventListener('click', () => {
+            const open = nav.classList.toggle('open')
+            toggle.setAttribute('aria-expanded', open)
+            overlay.setAttribute('aria-hidden', !open)
+        })
+        overlay.addEventListener('click', () => {
+            nav.classList.remove('open')
+            toggle.setAttribute('aria-expanded', false)
+            overlay.setAttribute('aria-hidden', true)
+        })
+    </script>
+</body>
+</html>

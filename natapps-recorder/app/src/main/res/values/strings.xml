@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Natapps Recorder</string>
+    <string name="app_name">AccelPerformaceEXponential</string>
+    <!-- Overridden by google-services plugin once google-services.json is added to app/ -->
+    <string name="default_web_client_id" translatable="false">REPLACE_WITH_GOOGLE_SERVICES_JSON</string>
 </resources>

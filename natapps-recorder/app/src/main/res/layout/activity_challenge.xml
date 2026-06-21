@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg"
+    android:padding="16dp">
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="CHALLENGES" android:textColor="@color/accent" android:textSize="24sp"
+        android:fontFamily="sans-serif-condensed" android:letterSpacing="0.1"
+        android:layout_marginBottom="16dp" />
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="CHALLENGE SOMEONE" android:textColor="@color/muted"
+        android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="6dp" />
+
+    <EditText android:id="@+id/etChallengeTarget"
+        android:layout_width="match_parent" android:layout_height="48dp"
+        android:hint="Their UID" android:textSize="13sp"
+        android:textColor="@color/accent2" android:textColorHint="@color/muted"
+        android:background="@color/surface" android:paddingStart="12dp" android:paddingEnd="12dp"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner android:id="@+id/spinnerSport"
+        android:layout_width="match_parent" android:layout_height="48dp"
+        android:background="@color/surface" android:layout_marginBottom="10dp" />
+
+    <Button android:id="@+id/btnChallenge"
+        android:layout_width="match_parent" android:layout_height="52dp"
+        android:text="SEND CHALLENGE (uses your best score)" android:textSize="13sp"
+        android:textColor="@color/bg" android:background="@color/accent"
+        android:layout_marginBottom="24dp" />
+
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="@color/border" android:layout_marginBottom="10dp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="INCOMING CHALLENGES" android:textColor="@color/muted"
+        android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="8dp" />
+
+    <ListView android:id="@+id/listChallenges"
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:dividerHeight="1dp" android:divider="@color/border" />
+</LinearLayout>

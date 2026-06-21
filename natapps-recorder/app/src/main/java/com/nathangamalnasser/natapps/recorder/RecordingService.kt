@@ -19,6 +19,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -27,16 +28,32 @@ import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean  // Bug 4
+import java.util.concurrent.atomic.AtomicBoolean
 
 class RecordingService : Service(), SensorEventListener {
 
     companion object {
-        private const val CHANNEL_ID = "rec_channel"
-        private const val NOTIF_ID   = 1
-        private const val SAMPLE_MS  = 20L   // 50 Hz
-        private const val ROUND_SECS = 180L  // 3-minute boxing round
+        private const val CHANNEL_ID  = "rec_channel"
+        private const val NOTIF_ID    = 1
+        private const val SAMPLE_MS   = 20L   // 50 Hz
+        private const val ROUND_SECS  = 180L  // 3-minute boxing round
+        private const val RTDB_HZ_MS  = 100L  // write live data at 10 Hz
+
+        // UIS calibration (raw score → 0–1000)
+        private const val UIS_MAX_BOXING      = 200.0
+        private const val UIS_MAX_ROLLERBLADE = 100.0
+        private const val UIS_WA_BOXING       = 0.65
+        private const val UIS_WG_BOXING       = 0.35
+        private const val UIS_WA_ROLLER       = 0.45
+        private const val UIS_WG_ROLLER       = 0.55
     }
+
+    // ── Roles ─────────────────────────────────────────────────────────────────
+
+    /** "sensor1" = Phone 1 (IMU + Nearby advertise)
+     *  "hub"     = Phone 2 (IMU + Nearby receive + Firebase write)
+     *  "cam"     = Phone 3 (video only — handled by CamService) */
+    var role = "sensor1"
 
     // ── Binder ────────────────────────────────────────────────────────────────
 
@@ -50,22 +67,18 @@ class RecordingService : Service(), SensorEventListener {
 
     var recState   = RecState.IDLE; private set
     var deviceSide = "left"
-
-    var onStateChanged: ((RecState) -> Unit)?                                = null
-    var onTimerTick:    ((Long, Int, Double) -> Unit)?                       = null
-    var onSensorUpdate: ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
-    var onPeerState:    ((PeerJSClient.State, String) -> Unit)?              = null
-    var onGyroStatus:   ((Boolean) -> Unit)?                                 = null
-    var onGpsStatus:    ((Boolean, Int) -> Unit)?                            = null
-    var onRoundTick:    ((Int, Long) -> Unit)?                               = null  // (round, secsLeft)
-
+    var appMode    = "rollerblade"  // "rollerblade" or "boxing"
     var sessionName = ""
-    var appMode = "rollerblade"  // "rollerblade" or "boxing"
 
-    // Boxing round state
-    private var roundNumber   = 0
-    private var roundSecsLeft = 0L
-    private val roundEvents   = Collections.synchronizedList(mutableListOf<JSONObject>())
+    var onStateChanged: ((RecState) -> Unit)?                                 = null
+    var onTimerTick:    ((Long, Int, Double) -> Unit)?                        = null
+    var onSensorUpdate: ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
+    var onPeerState:    ((PeerJSClient.State, String) -> Unit)?               = null
+    var onNearbyState:  ((String) -> Unit)?                                   = null
+    var onFirebaseState:((String) -> Unit)?                                   = null
+    var onGyroStatus:   ((Boolean) -> Unit)?                                  = null
+    var onGpsStatus:    ((Boolean, Int) -> Unit)?                             = null
+    var onRoundTick:    ((Int, Long) -> Unit)?                                = null
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
@@ -77,23 +90,38 @@ class RecordingService : Service(), SensorEventListener {
     private lateinit var peerClient:      PeerJSClient
     private lateinit var relayServer:     RelayServer
 
+    // Nearby
+    private var nearbyTransport: NearbyTransport? = null
+    private var nearbyReceiver:  NearbyReceiver?  = null
+
+    // Firebase (hub role)
+    private var hubWriter: FirebaseHubWriter? = null
+
     @Volatile private var ax = 0f; @Volatile private var ay = 9.81f; @Volatile private var az = 0f
     @Volatile private var gx = 0f; @Volatile private var gy = 0f;    @Volatile private var gz = 0f
 
     private var startTime    = 0L
     private var lastSampleMs = 0L
+    private var lastRtdbMs   = 0L
+    private var lastRemoteRtdbMs = 0L
     private var peakAccel    = 0.0
     private var peakGyro     = 0.0
 
     private var gyroSampleCount  = 0
     private var gyroNonZeroCount = 0
-    private val gyroStatusFired  = AtomicBoolean(false)  // Bug 4 fix: was @Volatile Boolean
+    private val gyroStatusFired  = AtomicBoolean(false)
 
     private val localSamples = Collections.synchronizedList(mutableListOf<JSONObject>())
     private val gpsTrack     = Collections.synchronizedList(mutableListOf<JSONObject>())
     private var gpsFixCount  = 0
-    private var gpsRegistered   = false   // Bug 3 fix: track whether listener was registered
-    private var gpsOriginSent   = false   // Live streaming: send origin once per session
+    private var gpsRegistered   = false
+    private var gpsOriginSent   = false
+    private var remoteCount     = 0
+
+    // Boxing
+    private var roundNumber   = 0
+    private var roundSecsLeft = 0L
+    private val roundEvents   = Collections.synchronizedList(mutableListOf<JSONObject>())
 
     private val scope    = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var timerJob: Job? = null
@@ -105,23 +133,15 @@ class RecordingService : Service(), SensorEventListener {
             if (recState != RecState.RECORDING) return
             gpsFixCount++
             val t = System.currentTimeMillis() - startTime
-            val pt = JSONObject().apply {
-                put("t",   t)
-                put("lat", loc.latitude)
-                put("lng", loc.longitude)
-                put("alt", loc.altitude.round(1))
-                put("acc", loc.accuracy.toDouble().round(1))
-            }
-            gpsTrack.add(pt)
-
-            // Live streaming: send GPS origin on very first fix
+            gpsTrack.add(JSONObject().apply {
+                put("t",   t); put("lat", loc.latitude); put("lng", loc.longitude)
+                put("alt", loc.altitude.round(1)); put("acc", loc.accuracy.toDouble().round(1))
+            })
             if (!gpsOriginSent) {
                 gpsOriginSent = true
                 peerClient.sendGpsOrigin(loc.latitude, loc.longitude)
             }
-            // Live streaming: stream every GPS fix to viewer
             peerClient.sendGps(t, loc.latitude, loc.longitude, loc.altitude, loc.accuracy)
-
             scope.launch(Dispatchers.Main) { onGpsStatus?.invoke(true, gpsFixCount) }
         }
         @Deprecated("Deprecated in Java")
@@ -149,7 +169,6 @@ class RecordingService : Service(), SensorEventListener {
 
         relayServer = RelayServer(this)
         relayServer.start()
-
         createNotificationChannel()
     }
 
@@ -160,15 +179,84 @@ class RecordingService : Service(), SensorEventListener {
         stopRecording()
         peerClient.disconnect()
         relayServer.stop()
+        nearbyTransport?.stop()
+        nearbyReceiver?.stop()
         scope.cancel()
     }
 
-    // ── Viewer connection ─────────────────────────────────────────────────────
+    // ── Nearby setup ──────────────────────────────────────────────────────────
+
+    fun startNearbyAdvertising() {
+        val nt = NearbyTransport(this)
+        nearbyTransport = nt
+        nt.onStatusChange = { msg ->
+            scope.launch(Dispatchers.Main) { onNearbyState?.invoke(msg) }
+        }
+        nt.onConnected = {
+            scope.launch(Dispatchers.Main) { onNearbyState?.invoke("HUB connected ●") }
+        }
+        nt.onDisconnected = {
+            scope.launch(Dispatchers.Main) { onNearbyState?.invoke("HUB disconnected") }
+        }
+        nt.onCommandReceived = { json ->
+            try {
+                val obj = JSONObject(json)
+                if (obj.optString("type") == "cmd" && obj.optString("action") == "start") {
+                    if (recState != RecState.RECORDING) {
+                        scope.launch(Dispatchers.Main) { startRecording(obj.optString("session", "")) }
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+        nt.startAdvertising(deviceSide)
+    }
+
+    fun startNearbyDiscovery() {
+        val nr = NearbyReceiver(this)
+        nearbyReceiver = nr
+        nr.onStatusChange = { msg ->
+            scope.launch(Dispatchers.Main) { onNearbyState?.invoke(msg) }
+        }
+        nr.onConnected = {
+            scope.launch(Dispatchers.Main) { onNearbyState?.invoke("SENSOR 1 connected ●") }
+        }
+        nr.onDisconnected = {
+            scope.launch(Dispatchers.Main) { onNearbyState?.invoke("SENSOR 1 disconnected") }
+        }
+        nr.onDataReceived = { bytes ->
+            if (recState == RecState.RECORDING) {
+                try {
+                    val obj  = JSONObject(String(bytes))
+                    val side = obj.optString("device", "left")
+                    remoteCount++
+                    val now = System.currentTimeMillis()
+                    if (now - lastRemoteRtdbMs >= RTDB_HZ_MS) {
+                        lastRemoteRtdbMs = now
+                        hubWriter?.writeSample(side, obj)
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+        nr.startDiscovering()
+    }
+
+    fun stopNearby() {
+        nearbyTransport?.stop(); nearbyTransport = null
+        nearbyReceiver?.stop();  nearbyReceiver  = null
+    }
+
+    // ── Viewer connection (relay fallback) ────────────────────────────────────
 
     fun connectToViewer(ip: String) { peerClient.connect(ip, deviceSide) }
     fun disconnectFromViewer()      { peerClient.disconnect() }
     fun isPeerConnected()           = peerClient.isConnected()
-    fun sendStartCommand(name: String) { peerClient.sendStartCommand(name) }
+    fun sendStartCommand(name: String) {
+        peerClient.sendStartCommand(name)
+        // Also tell SENSOR 1 via Nearby (hub role)
+        nearbyReceiver?.sendToSensor(
+            JSONObject().apply { put("type","cmd"); put("action","start"); put("session",name) }.toString()
+        )
+    }
 
     // ── Recording ─────────────────────────────────────────────────────────────
 
@@ -183,21 +271,37 @@ class RecordingService : Service(), SensorEventListener {
     fun startRecording(name: String = "") {
         if (recState == RecState.RECORDING) return
         sessionName = name
+
         if (!peerClient.isConnected()) peerClient.connect("localhost", deviceSide)
+
+        // Firebase RTDB writer (hub role only)
+        if (role == "hub") {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val sid = System.currentTimeMillis()
+            startTime = sid
+            hubWriter = FirebaseHubWriter(sid, uid, appMode)
+            hubWriter?.writeSessionStart()
+            scope.launch(Dispatchers.Main) { onFirebaseState?.invoke("Firebase: recording ●") }
+        } else {
+            startTime = System.currentTimeMillis()
+        }
+
         recState         = RecState.RECORDING
-        startTime        = System.currentTimeMillis()
         lastSampleMs     = 0L
+        lastRtdbMs       = 0L
+        lastRemoteRtdbMs = 0L
         peakAccel        = 0.0
         peakGyro         = 0.0
         gyroSampleCount  = 0
         gyroNonZeroCount = 0
-        gyroStatusFired.set(false)   // Bug 4 fix
+        gyroStatusFired.set(false)
         gpsOriginSent    = false
+        remoteCount      = 0
         localSamples.clear()
         gpsTrack.clear()
-        gpsFixCount      = 0
-        roundNumber      = 0
-        roundSecsLeft    = 0L
+        gpsFixCount   = 0
+        roundNumber   = 0
+        roundSecsLeft = 0L
         roundEvents.clear()
 
         if (!wakeLock.isHeld) wakeLock.acquire(6 * 60 * 60 * 1000L)
@@ -205,11 +309,11 @@ class RecordingService : Service(), SensorEventListener {
         sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME)
         sensorManager.registerListener(this, gyroSensor,  SensorManager.SENSOR_DELAY_GAME)
 
-        if (appMode != "boxing" && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (appMode != "boxing" && ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 1000L, 1f, gpsListener, mainLooper)
-            gpsRegistered = true   // Bug 3 fix: track registration
+            gpsRegistered = true
             scope.launch(Dispatchers.Main) { onGpsStatus?.invoke(false, 0) }
         }
 
@@ -221,29 +325,27 @@ class RecordingService : Service(), SensorEventListener {
                 val elapsed = System.currentTimeMillis() - startTime
                 val min = elapsed / 60000; val sec = (elapsed / 1000) % 60
                 updateNotif("● Recording…  %02d:%02d".format(min, sec))
-                withContext(Dispatchers.Main) {
-                    onTimerTick?.invoke(elapsed, localSamples.size, peakAccel)
-                }
+                withContext(Dispatchers.Main) { onTimerTick?.invoke(elapsed, localSamples.size, peakAccel) }
+
                 if (appMode == "boxing") {
                     if (roundNumber == 0) {
                         roundNumber   = 1
                         roundSecsLeft = ROUND_SECS
                         peerClient.sendRoundStart(1, elapsed)
-                        roundEvents.add(JSONObject().apply { put("round", 1); put("t", elapsed); put("event", "start") })
+                        roundEvents.add(JSONObject().apply { put("round",1); put("t",elapsed); put("event","start") })
                     } else {
                         roundSecsLeft--
                         if (roundSecsLeft <= 0) {
                             peerClient.sendRoundEnd(roundNumber, elapsed)
-                            roundEvents.add(JSONObject().apply { put("round", roundNumber); put("t", elapsed); put("event", "end") })
+                            roundEvents.add(JSONObject().apply { put("round",roundNumber); put("t",elapsed); put("event","end") })
                             roundNumber++
                             roundSecsLeft = ROUND_SECS
                             peerClient.sendRoundStart(roundNumber, elapsed)
-                            roundEvents.add(JSONObject().apply { put("round", roundNumber); put("t", elapsed); put("event", "start") })
+                            roundEvents.add(JSONObject().apply { put("round",roundNumber); put("t",elapsed); put("event","start") })
                         }
                     }
-                    val capturedRound = roundNumber
-                    val capturedSecs  = roundSecsLeft
-                    withContext(Dispatchers.Main) { onRoundTick?.invoke(capturedRound, capturedSecs) }
+                    val r = roundNumber; val s = roundSecsLeft
+                    withContext(Dispatchers.Main) { onRoundTick?.invoke(r, s) }
                 }
             }
         }
@@ -255,15 +357,40 @@ class RecordingService : Service(), SensorEventListener {
         recState = RecState.IDLE
         timerJob?.cancel()
         sensorManager.unregisterListener(this)
-        // Bug 3 fix: only remove GPS updates if we actually registered
         if (gpsRegistered) {
             try { locationManager.removeUpdates(gpsListener) } catch (_: Exception) {}
             gpsRegistered = false
         }
         if (wakeLock.isHeld) wakeLock.release()
+
+        // UIS + Firebase session close (hub role)
+        if (role == "hub") {
+            val duration = System.currentTimeMillis() - startTime
+            val (uisRaw, uisScore) = computeUis(duration)
+            hubWriter?.writeSessionEnd(duration, uisRaw, uisScore, localSamples.size, remoteCount)
+            hubWriter = null
+            scope.launch(Dispatchers.Main) { onFirebaseState?.invoke("Firebase: session saved (UIS $uisScore)") }
+        }
+
         saveSession()
         stopForeground(STOP_FOREGROUND_REMOVE)
         onStateChanged?.invoke(recState)
+    }
+
+    private fun computeUis(durationMs: Long): Pair<Double, Int> {
+        val wa  = if (appMode == "boxing") UIS_WA_BOXING else UIS_WA_ROLLER
+        val wg  = if (appMode == "boxing") UIS_WG_BOXING else UIS_WG_ROLLER
+        val max = if (appMode == "boxing") UIS_MAX_BOXING else UIS_MAX_ROLLERBLADE
+        val durationS = durationMs / 1000.0
+        val sumAccel  = synchronized(localSamples) {
+            localSamples.sumOf { Math.abs(it.optDouble("accel_mag") - 9.81) }
+        }
+        val sumGyro   = synchronized(localSamples) {
+            localSamples.sumOf { it.optDouble("gyro_mag") }
+        }
+        val raw   = if (durationS > 0) (sumAccel * wa + sumGyro * wg) / durationS else 0.0
+        val score = (raw / max * 1000.0).coerceIn(0.0, 1000.0).toInt()
+        return Pair(raw, score)
     }
 
     // ── Sensor callbacks ──────────────────────────────────────────────────────
@@ -273,7 +400,6 @@ class RecordingService : Service(), SensorEventListener {
             Sensor.TYPE_ACCELEROMETER -> { ax = event.values[0]; ay = event.values[1]; az = event.values[2] }
             Sensor.TYPE_GYROSCOPE -> {
                 gx = event.values[0]; gy = event.values[1]; gz = event.values[2]
-                // Bug 4 fix: AtomicBoolean.compareAndSet prevents double-fire from concurrent callbacks
                 if (!gyroStatusFired.get()) {
                     gyroSampleCount++
                     if (gx != 0f || gy != 0f || gz != 0f) gyroNonZeroCount++
@@ -299,13 +425,27 @@ class RecordingService : Service(), SensorEventListener {
 
         val sample = JSONObject().apply {
             put("t",         now - startTime)
-            put("ax",        dax.round(3));  put("ay", day.round(3));  put("az", daz.round(3))
-            put("gx",        dgx.round(4));  put("gy", dgy.round(4));  put("gz", dgz.round(4))
+            put("ax",        dax.round(3)); put("ay", day.round(3)); put("az", daz.round(3))
+            put("gx",        dgx.round(4)); put("gy", dgy.round(4)); put("gz", dgz.round(4))
             put("accel_mag", accelMag.round(3))
             put("gyro_mag",  gyroMag.round(4))
         }
         localSamples.add(sample)
-        peerClient.send(sample.toString())   // stream to relay → viewer
+
+        // Relay stream (WebSocket fallback)
+        peerClient.send(sample.toString())
+
+        // Nearby stream (sensor1 role → HUB)
+        if (role == "sensor1" && nearbyTransport?.isConnected() == true) {
+            val toSend = JSONObject(sample.toString()).apply { put("device", deviceSide) }
+            nearbyTransport?.send(toSend.toString().toByteArray())
+        }
+
+        // Firebase RTDB live write at 10 Hz (hub role — own stream)
+        if (role == "hub" && now - lastRtdbMs >= RTDB_HZ_MS) {
+            lastRtdbMs = now
+            hubWriter?.writeSample(deviceSide, sample)
+        }
 
         scope.launch(Dispatchers.Main) { onSensorUpdate?.invoke(ax, ay, az, gx, gy, gz) }
     }
@@ -317,8 +457,7 @@ class RecordingService : Service(), SensorEventListener {
     private fun saveSession() {
         val duration = System.currentTimeMillis() - startTime
         val iso = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-            .also { it.timeZone = TimeZone.getTimeZone("UTC") }
-            .format(Date(startTime))
+            .also { it.timeZone = TimeZone.getTimeZone("UTC") }.format(Date(startTime))
 
         val arr = JSONArray()
         synchronized(localSamples) { localSamples.forEach { arr.put(it) } }
@@ -327,40 +466,37 @@ class RecordingService : Service(), SensorEventListener {
             val roundArr = JSONArray()
             synchronized(roundEvents) { roundEvents.forEach { roundArr.put(it) } }
             val session = JSONObject().apply {
-                put("format",        "boxing_session_v1")
-                put("mode",          "boxing")
-                put("id",            startTime)
-                put("device",        deviceSide)
+                put("format",         "boxing_session_v1")
+                put("mode",           "boxing")
+                put("id",             startTime)
+                put("device",         deviceSide)
+                put("role",           role)
                 if (sessionName.isNotEmpty()) put("name", sessionName)
-                put("timestamp",     iso)
-                put("duration_ms",   duration)
+                put("timestamp",      iso)
+                put("duration_ms",    duration)
                 put("peak_accel_ms2", peakAccel.round(3))
                 put("peak_gyro_rads", peakGyro.round(4))
-                put("sample_count",  localSamples.size)
-                put("rounds",        roundArr)
-                put("samples",       arr)
+                put("sample_count",   localSamples.size)
+                put("rounds",         roundArr)
+                put("samples",        arr)
             }
             File(filesDir, "boxing_session_${startTime}.json").writeText(JSONArray().put(session).toString())
         } else {
             val gpsArr = JSONArray()
             synchronized(gpsTrack) { gpsTrack.forEach { gpsArr.put(it) } }
             val session = JSONObject().apply {
-                put("id",            startTime);   put("device",       deviceSide)
+                put("id",             startTime); put("device", deviceSide); put("role", role)
                 if (sessionName.isNotEmpty()) put("name", sessionName)
-                put("timestamp",     iso);         put("duration_ms",  duration)
-                put("peak_accel_ms2", peakAccel.round(3))
-                put("peak_gyro_rads", peakGyro.round(4))
-                put("sample_count",  localSamples.size)
-                put("gps_count",     gpsTrack.size)
+                put("timestamp",      iso); put("duration_ms", duration)
+                put("peak_accel_ms2", peakAccel.round(3)); put("peak_gyro_rads", peakGyro.round(4))
+                put("sample_count",   localSamples.size); put("gps_count", gpsTrack.size)
                 if (gpsTrack.isNotEmpty()) {
                     val first = synchronized(gpsTrack) { gpsTrack[0] }
                     put("gps_origin", JSONObject().apply {
-                        put("lat", first.getDouble("lat"))
-                        put("lng", first.getDouble("lng"))
+                        put("lat", first.getDouble("lat")); put("lng", first.getDouble("lng"))
                     })
                 }
-                put("samples", arr)
-                put("gps",     gpsArr)
+                put("samples", arr); put("gps", gpsArr)
             }
             File(filesDir, "session_${startTime}.json").writeText(JSONArray().put(session).toString())
         }
@@ -379,7 +515,6 @@ class RecordingService : Service(), SensorEventListener {
         val ch = NotificationChannel(CHANNEL_ID, "Sensor Recording", NotificationManager.IMPORTANCE_LOW)
         getSystemService(NotificationManager::class.java).createNotificationChannel(ch)
     }
-
     private fun buildNotif(text: String): Notification {
         val pi = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE)
@@ -388,13 +523,10 @@ class RecordingService : Service(), SensorEventListener {
             .setSmallIcon(R.drawable.ic_record)
             .setContentIntent(pi).setOngoing(true).setSilent(true).build()
     }
-
-    private fun updateNotif(text: String) {
+    private fun updateNotif(text: String) =
         getSystemService(NotificationManager::class.java).notify(NOTIF_ID, buildNotif(text))
-    }
 }
 
 private fun Double.round(d: Int): Double {
-    val f = Math.pow(10.0, d.toDouble())
-    return Math.round(this * f) / f
+    val f = Math.pow(10.0, d.toDouble()); return Math.round(this * f) / f
 }
