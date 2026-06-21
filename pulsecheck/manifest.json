@@ -1,0 +1,11 @@
+{
+  "name": "PulseCheck",
+  "short_name": "PulseCheck",
+  "description": "The only app that won't let you lie to yourself.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "icons": []
+}

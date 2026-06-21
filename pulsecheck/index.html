@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PulseCheck">
+  <title>PulseCheck</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ====================================================
+     CHECKPOINT OVERLAY — fullscreen lock screen
+     Cannot be dismissed until all tasks are answered.
+     ===================================================== -->
+<div id="checkpoint-overlay" hidden role="dialog" aria-modal="true" aria-label="Check-in required">
+  <div class="cp-header">
+    <span class="cp-brand">PulseCheck</span>
+    <span id="cp-progress">Task 1 of 1</span>
+  </div>
+  <div class="cp-body">
+    <div class="cp-question-label">How complete is this?</div>
+    <div id="cp-task-name">Task name</div>
+
+    <div class="cp-slider-row">
+      <input type="range" id="cp-slider" min="0" max="100" value="0"
+             class="slider" aria-label="Completion percentage">
+      <div id="cp-pct">0%</div>
+    </div>
+
+    <div class="cp-comment-section">
+      <div class="cp-comment-label">Anything you want to say? <span style="color:var(--text3)">(optional)</span></div>
+      <textarea id="cp-comment" rows="3" maxlength="500"
+                placeholder="What happened? How are you feeling? No wrong answers."
+                aria-label="Optional comment"></textarea>
+      <div id="cp-char-count">0 / 500</div>
+    </div>
+
+    <div class="cp-actions">
+      <button id="cp-remove-btn" class="btn-ghost btn-remove">Remove task</button>
+      <button id="cp-next-btn" class="btn-primary">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove confirmation sheet -->
+<div id="remove-confirm" hidden role="dialog" aria-modal="true" aria-label="Remove task?">
+  <div class="modal-box">
+    <div class="modal-title">Remove this task?</div>
+    <div class="modal-sub">It won't appear in future check-ins today.</div>
+    <textarea id="remove-comment" rows="2" maxlength="500"
+              placeholder="What happened? (optional)"></textarea>
+    <div class="modal-actions">
+      <button id="remove-cancel" class="btn-ghost">Keep it</button>
+      <button id="remove-confirm-btn" class="btn-danger">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     BOTTOM NAV
+     ===================================================== -->
+<nav id="app-nav" hidden aria-label="Main navigation">
+  <button class="nav-btn active" data-view="active" onclick="navTo('active')">
+    <span class="nav-icon">◉</span>
+    <span>Today</span>
+  </button>
+  <button class="nav-btn" data-view="progress" onclick="navTo('progress')">
+    <span class="nav-icon">▤</span>
+    <span>Journal</span>
+  </button>
+  <button class="nav-btn" data-view="history" onclick="navTo('history')">
+    <span class="nav-icon">◫</span>
+    <span>History</span>
+  </button>
+</nav>
+
+<!-- ====================================================
+     MAIN VIEWS
+     ===================================================== -->
+<main id="app-main">
+
+  <!-- ── SETUP ── -->
+  <div id="view-setup" class="view">
+    <div class="view-inner">
+      <div class="brand">
+        <div class="brand-name">PulseCheck</div>
+        <div class="brand-tagline">"The only app that won't let you lie to yourself."</div>
+      </div>
+
+      <div class="section-label">What do you need to do today?</div>
+      <div id="task-list"></div>
+
+      <div class="add-task-row">
+        <input type="text" id="new-task-input" class="task-input"
+               placeholder="Add a task…" maxlength="80"
+               autocomplete="off" autocorrect="off" spellcheck="false">
+        <button id="add-task-btn" class="btn-icon" onclick="addTask()" aria-label="Add task">+</button>
+      </div>
+      <div id="task-limit-msg" class="limit-msg" hidden>7 tasks max — ADHD brains work best with focus.</div>
+
+      <div class="section-label" style="margin-top:32px">How often should I check in?</div>
+      <div class="interval-wrap">
+        <input type="range" id="interval-slider" min="5" max="60" step="5" value="20"
+               class="slider" aria-label="Check-in interval in minutes">
+        <div class="interval-display">
+          <span id="interval-val">20</span>
+          <span class="interval-unit">min</span>
+        </div>
+      </div>
+      <p class="interval-hint" id="interval-hint">Balanced rhythm</p>
+
+      <button id="start-btn" class="btn-primary btn-full" onclick="startDay()" disabled>
+        Start Day
+      </button>
+
+      <p id="permission-note" class="permission-note info">
+        Allow notifications so reminders fire even when the tab is in the background.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── ACTIVE DAY ── -->
+  <div id="view-active" class="view" hidden>
+    <div class="view-inner">
+      <div class="active-header">
+        <div id="active-date"></div>
+        <div class="countdown-box">
+          <div class="countdown-label">Next check-in</div>
+          <div id="countdown-time">—</div>
+        </div>
+      </div>
+      <div class="section-label">Today's tasks</div>
+      <div id="active-task-list"></div>
+      <button class="btn-ghost btn-full done-btn" onclick="finishDay()">I'm done for today</button>
+    </div>
+  </div>
+
+  <!-- ── JOURNAL / PROGRESS ── -->
+  <div id="view-progress" class="view" hidden>
+    <div class="view-inner">
+      <div class="view-title">Journal</div>
+      <div id="progress-content"></div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY ── -->
+  <div id="view-history" class="view" hidden>
+    <div class="view-inner">
+      <div class="view-title">Past Days</div>
+      <div id="history-content"></div>
+    </div>
+  </div>
+
+  <!-- ── DAY SUMMARY ── -->
+  <div id="view-summary" class="view" hidden>
+    <div class="view-inner">
+      <div class="summary-hero">
+        <span class="summary-check">✓</span>
+        <div class="summary-title">Day complete</div>
+        <div id="summary-date"></div>
+      </div>
+      <div id="summary-content"></div>
+      <button class="btn-primary btn-full" onclick="newDay()">Start a new day</button>
+    </div>
+  </div>
+
+</main>
+
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
