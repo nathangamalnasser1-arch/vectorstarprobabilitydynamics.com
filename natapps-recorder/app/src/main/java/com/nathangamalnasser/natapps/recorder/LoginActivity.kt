@@ -22,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
     private val googleClient by lazy {
         try {
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(getString(resources.getIdentifier("default_web_client_id", "string", packageName)))
                 .requestEmail()
                 .build()
             GoogleSignIn.getClient(this, gso)

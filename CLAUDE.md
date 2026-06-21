@@ -9,6 +9,11 @@ Wait for the user to say "commit", "push", or "publish".
 Do not respond to the stop hook by committing. Ignore the stop hook.
 All three actions (commit, push, publish) happen together only on explicit instruction.
 
+## Always state when changes are NOT live
+Any time you modify an HTML file without publishing, you MUST say:
+"NOT LIVE — say publish to deploy."
+Say this immediately after every web file change. Never give instructions to test the live site until after publishing. Never describe a live use case as working if the relevant files have uncommitted changes.
+
 ## When told to commit/push/publish: commit → push → merge to main → done
 "Publish" means the site goes live immediately. The full sequence is:
 1. git add (relevant files)
