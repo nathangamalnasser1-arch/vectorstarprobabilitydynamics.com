@@ -22,8 +22,8 @@ body{background:#000508;color:#00ffee;font-family:'Courier New',monospace;overfl
 #overlay{position:fixed;inset:0;z-index:50;background:rgba(0,5,10,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 #overlay.h{display:none}
 #overlay h1{font-size:30px;letter-spacing:0.14em}
-#overlay p{font-size:12px;opacity:0.45;text-align:center;line-height:1.8}
-#ipIn{background:rgba(0,255,238,0.06);border:1px solid rgba(0,255,238,0.3);color:#00ffee;font-family:monospace;padding:10px 14px;font-size:14px;outline:none;width:280px}
+#overlay p{font-size:12px;opacity:0.45}
+#ipIn{background:rgba(0,255,238,0.06);border:1px solid rgba(0,255,238,0.3);color:#00ffee;font-family:monospace;padding:10px 14px;font-size:15px;outline:none;width:240px}
 #ipIn::placeholder{color:rgba(0,255,238,0.3)}
 .gbtn{background:#00ffee;color:#000508;font-family:monospace;font-weight:bold;font-size:13px;letter-spacing:0.1em;border:none;padding:11px 22px;cursor:pointer}
 #ovSt{font-size:11px;opacity:0.45;min-height:18px}
@@ -33,9 +33,9 @@ body{background:#000508;color:#00ffee;font-family:'Courier New',monospace;overfl
 
 <div id="overlay">
   <h1>BOXING LIVE</h1>
-  <p>Same WiFi as phone → enter phone IP (e.g. 192.168.x.x)<br>Internet / 4G → enter cloud relay domain</p>
+  <p>Connect to the phone relay server</p>
   <div style="display:flex;gap:8px">
-    <input id="ipIn" placeholder="192.168.x.x  or  relay.domain.com" />
+    <input id="ipIn" placeholder="192.168.x.x" />
     <button class="gbtn" onclick="doConnect()">CONNECT</button>
   </div>
   <div id="ovSt"></div>

@@ -96,8 +96,8 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh}
   <div style="border:1px solid rgba(0,255,238,.3);padding:44px 64px;text-align:center;max-width:440px">
     <div style="font:9px/1 'Courier New';letter-spacing:5px;color:rgba(0,255,238,.4);text-transform:uppercase;margin-bottom:18px">LIVE VIEWER</div>
     <div style="font:24px/1 'Courier New';letter-spacing:3px;color:#00ffee;text-shadow:0 0 24px #00ffee;margin-bottom:20px">◉ STREAM</div>
-    <div style="font:8px/1.8 'Courier New';letter-spacing:2px;color:rgba(0,255,238,.3);margin-bottom:20px">Enter relay server IP address<br>phone and viewer must be on the same network</div>
-    <input id="liveIp" type="text" placeholder="192.168.1.x" autocomplete="off">
+    <div style="font:8px/1.8 'Courier New';letter-spacing:2px;color:rgba(0,255,238,.3);margin-bottom:20px">Same WiFi as phone → enter phone IP (e.g. 192.168.1.x)<br>Internet / 4G → enter cloud relay domain</div>
+    <input id="liveIp" type="text" placeholder="192.168.1.x  or  relay.domain.com" autocomplete="off" style="width:300px">
     <div id="liveConnBtn" onclick="liveConnBtnClick()" style="background:rgba(0,0,0,.7);border:1px solid rgba(0,255,238,.35);color:#00ffee;font:9px/1 'Courier New';letter-spacing:3px;padding:10px 24px;cursor:pointer;display:inline-block;margin-bottom:14px">CONNECT</div>
     <div id="liveStatus" style="font:8px/1.5 'Courier New';letter-spacing:2px;color:rgba(255,210,0,.7);min-height:14px"></div>
   </div>
@@ -1168,7 +1168,8 @@ function connectLive(){
   document.getElementById('liveConnBtn').textContent='CANCEL'
   if(liveWs)try{liveWs.close()}catch(_){}
   const wsProto=location.protocol==='https:'?'wss:':'ws:'
-  const ws=new WebSocket(wsProto+'//'+ip+':9001')
+  const isIp=/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)||ip==='localhost'
+  const ws=new WebSocket(isIp?wsProto+'//'+ip+':9001':wsProto+'//'+ip)
   liveWs=ws
   ws.onopen=()=>{
     ws.send(JSON.stringify({type:'register',role:'viewer'}))

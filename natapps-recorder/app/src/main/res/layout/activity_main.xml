@@ -20,7 +20,26 @@
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="sensor logger v2.0"
             android:textColor="@color/muted" android:textSize="11sp"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="12dp" />
+
+        <!-- APP MODE -->
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/border" android:layout_marginBottom="12dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="APP MODE" android:textColor="@color/muted"
+            android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="20dp">
+            <Button android:id="@+id/btnModeRollerblade"
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="ROLLERBLADE" android:textSize="12sp" android:letterSpacing="0.06"
+                android:layout_marginEnd="6dp"
+                android:textColor="@color/bg" android:background="@color/accent" />
+            <Button android:id="@+id/btnModeBoxing"
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="BOXING" android:textSize="12sp" android:letterSpacing="0.06"
+                android:textColor="@color/accent" android:background="@color/surface" />
+        </LinearLayout>
 
         <!-- DEVICE SIDE -->
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -101,6 +120,11 @@
             android:text="RECORDING" android:textColor="@color/muted"
             android:textSize="10sp" android:letterSpacing="0.15" android:layout_marginBottom="8dp" />
 
+        <TextView android:id="@+id/tvRoundInfo"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="" android:textColor="@color/accent" android:textSize="11sp"
+            android:fontFamily="monospace" android:gravity="center"
+            android:visibility="gone" android:layout_marginBottom="4dp" />
         <TextView android:id="@+id/tvTimer"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="00:00" android:textColor="@color/accent2" android:textSize="52sp"

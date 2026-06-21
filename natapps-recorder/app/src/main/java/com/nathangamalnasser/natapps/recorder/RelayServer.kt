@@ -33,7 +33,7 @@ class RelayServer(private val context: Context) {
             val uri = session.uri.trimStart('/')
             if (uri.startsWith("session/") && uri.endsWith(".json")) {
                 val filename = uri.removePrefix("session/")
-                if (filename.matches(Regex("session_\\d+\\.json"))) {
+                if (filename.matches(Regex("(boxing_)?session_\\d+\\.json"))) {
                     try {
                         val file = java.io.File(ctx.filesDir, filename)
                         if (file.exists()) {
@@ -49,8 +49,9 @@ class RelayServer(private val context: Context) {
                 }
                 return newFixedLengthResponse(Response.Status.NOT_FOUND, "application/json", "null")
             }
+            val htmlFile = if (session.uri.trimStart('/').startsWith("boxing")) "boxing-realtime-viewer.html" else "tracer-real.html"
             return try {
-                val stream = ctx.assets.open("tracer-real.html")
+                val stream = ctx.assets.open(htmlFile)
                 newChunkedResponse(Response.Status.OK, "text/html; charset=utf-8", stream)
             } catch (_: Exception) {
                 newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Not found")
@@ -64,6 +65,7 @@ class RelayServer(private val context: Context) {
         private val viewers = CopyOnWriteArraySet<WebSocket>()
         private val sensors = ConcurrentHashMap<String, WebSocket>()
         @Volatile var cachedOrigin: String? = null
+        @Volatile var cachedRound:  String? = null
 
         init { isReuseAddr = true }
 
@@ -87,6 +89,7 @@ class RelayServer(private val context: Context) {
                     if (role == "viewer") {
                         viewers.add(conn)
                         cachedOrigin?.let { try { conn.send(it) } catch (_: Exception) {} }
+                        cachedRound?.let  { try { conn.send(it) } catch (_: Exception) {} }
                     } else {
                         conn.setAttachment(device)
                         sensors[device] = conn
@@ -94,6 +97,8 @@ class RelayServer(private val context: Context) {
                     }
                 }
                 "gps_origin" -> { cachedOrigin = message; broadcastToViewers(message) }
+                "round_start" -> { cachedRound = message; broadcastToViewers(message) }
+                "round_end"   -> { cachedRound = message; broadcastToViewers(message) }
                 "sensor", "gps" -> broadcastToViewers(message)
             }
         }

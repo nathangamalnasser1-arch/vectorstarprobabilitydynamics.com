@@ -33,7 +33,8 @@ class PeerJSClient(private val context: Context) {
     fun connect(serverIp: String, side: String) {
         deviceSide = side
         setState(State.CONNECTING, "Connecting to $serverIp…")
-        val url = "ws://$serverIp:$PORT"
+        val isIp = serverIp.matches(Regex("\\d{1,3}(\\.\\d{1,3}){3}")) || serverIp == "localhost"
+        val url = if (isIp) "ws://$serverIp:$PORT" else "wss://$serverIp"
         ws = http.newWebSocket(Request.Builder().url(url).build(), wsListener)
     }
 
@@ -68,6 +69,28 @@ class PeerJSClient(private val context: Context) {
                 put("lng",    lng)
                 put("alt",    alt)
                 put("acc",    acc.toDouble())
+            }.toString())
+        } catch (_: Exception) {}
+    }
+
+    fun sendRoundStart(round: Int, t: Long) {
+        try {
+            ws?.send(JSONObject().apply {
+                put("type",   "round_start")
+                put("device", deviceSide)
+                put("round",  round)
+                put("t",      t)
+            }.toString())
+        } catch (_: Exception) {}
+    }
+
+    fun sendRoundEnd(round: Int, t: Long) {
+        try {
+            ws?.send(JSONObject().apply {
+                put("type",   "round_end")
+                put("device", deviceSide)
+                put("round",  round)
+                put("t",      t)
             }.toString())
         } catch (_: Exception) {}
     }

@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var service: RecordingService? = null
     private var bound = false
+    private var appMode = "rollerblade"
 
     private val svcConn = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, b: IBinder) {
@@ -127,6 +128,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        svc.onRoundTick = { round, secsLeft ->
+            runOnUiThread {
+                val m = secsLeft / 60; val s = secsLeft % 60
+                binding.tvRoundInfo.text = "ROUND $round"
+                binding.tvTimer.text = "%d:%02d".format(m, s)
+            }
+        }
         svc.onPeerState = { state, msg ->
             runOnUiThread {
                 binding.tvRelayStatus.text = when (state) {
@@ -147,6 +155,8 @@ class MainActivity : AppCompatActivity() {
     // ── Clicks ────────────────────────────────────────────────────────────────
 
     private fun setupClicks() {
+        binding.btnModeRollerblade.setOnClickListener { setAppMode("rollerblade") }
+        binding.btnModeBoxing.setOnClickListener      { setAppMode("boxing") }
         binding.btnLeft.setOnClickListener  { setMode("left") }
         binding.btnRight.setOnClickListener { setMode("right") }
 
@@ -179,15 +189,16 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("New Session")
                     .setView(input)
                     .setPositiveButton("START") { _, _ ->
+                        svc.appMode = appMode
                         svc.startRecording(input.text.toString().trim())
-                        showLiveQr()
+                        showLiveQr(appMode == "boxing")
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
             }
         }
 
-        binding.tvLiveUrl.setOnClickListener { showLiveQr() }
+        binding.tvLiveUrl.setOnClickListener { showLiveQr(appMode == "boxing") }
 
         binding.btnSessions.setOnClickListener {
             startActivity(Intent(this, SessionsActivity::class.java))
@@ -196,10 +207,12 @@ class MainActivity : AppCompatActivity() {
 
     // ── QR code ───────────────────────────────────────────────────────────────
 
-    private fun showLiveQr() {
+    private fun showLiveQr(boxing: Boolean = false) {
         val ip = service?.getLocalIp() ?: "?"
         if (ip == "?") { android.widget.Toast.makeText(this, "No WiFi IP yet", android.widget.Toast.LENGTH_SHORT).show(); return }
-        showQrDialog("http://$ip:8080/?live=1", "Scan to watch live on any browser")
+        val url = if (boxing) "http://$ip:8080/boxing?live=1" else "http://$ip:8080/?live=1"
+        val label = if (boxing) "Scan to watch boxing live" else "Scan to watch live on any browser"
+        showQrDialog(url, label)
     }
 
     fun showQrDialog(url: String, subtitle: String) {
@@ -215,7 +228,29 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // ── Mode ──────────────────────────────────────────────────────────────────
+    // ── App mode ──────────────────────────────────────────────────────────────
+
+    private fun setAppMode(mode: String) {
+        appMode = mode
+        val accent  = getColor(R.color.accent)
+        val surface = getColor(R.color.surface)
+        val bg      = getColor(R.color.bg)
+        if (mode == "boxing") {
+            binding.btnModeBoxing.setBackgroundColor(accent);       binding.btnModeBoxing.setTextColor(bg)
+            binding.btnModeRollerblade.setBackgroundColor(surface); binding.btnModeRollerblade.setTextColor(accent)
+            binding.tvGpsStatus.visibility = android.view.View.GONE
+            binding.tvRoundInfo.visibility = android.view.View.VISIBLE
+        } else {
+            binding.btnModeRollerblade.setBackgroundColor(accent);  binding.btnModeRollerblade.setTextColor(bg)
+            binding.btnModeBoxing.setBackgroundColor(surface);      binding.btnModeBoxing.setTextColor(accent)
+            binding.tvGpsStatus.visibility = android.view.View.VISIBLE
+            binding.tvRoundInfo.visibility = android.view.View.GONE
+        }
+        setMode(if (service?.deviceSide != null) service!!.deviceSide else "left")
+        updateLiveUrl()
+    }
+
+    // ── Device side ───────────────────────────────────────────────────────────
 
     private fun setMode(side: String) {
         service?.deviceSide = side
@@ -226,11 +261,11 @@ class MainActivity : AppCompatActivity() {
         if (side == "left") {
             binding.btnLeft.setBackgroundColor(accent);   binding.btnLeft.setTextColor(bg)
             binding.btnRight.setBackgroundColor(surface); binding.btnRight.setTextColor(accent)
-            binding.tvModeHint.text = "Left pocket"
+            binding.tvModeHint.text = if (appMode == "boxing") "Left wrist" else "Left pocket"
         } else {
             binding.btnLeft.setBackgroundColor(surface); binding.btnLeft.setTextColor(accent)
             binding.btnRight.setBackgroundColor(accent); binding.btnRight.setTextColor(bg)
-            binding.tvModeHint.text = "Right pocket"
+            binding.tvModeHint.text = if (appMode == "boxing") "Right wrist" else "Right pocket"
         }
     }
 
@@ -243,7 +278,8 @@ class MainActivity : AppCompatActivity() {
             getColor(if (recording) R.color.stop_red else R.color.accent)
         )
         if (!recording) {
-            binding.tvTimer.text       = "00:00"
+            binding.tvTimer.text       = if (appMode == "boxing") "3:00" else "00:00"
+            binding.tvRoundInfo.text   = if (appMode == "boxing") "ROUND 1" else ""
             binding.tvSampleCount.text = "Samples: 0"
             binding.tvPeakAccel.text   = "Peak: 0.0g"
         }

@@ -35,6 +35,7 @@ class RecordingService : Service(), SensorEventListener {
         private const val CHANNEL_ID = "rec_channel"
         private const val NOTIF_ID   = 1
         private const val SAMPLE_MS  = 20L   // 50 Hz
+        private const val ROUND_SECS = 180L  // 3-minute boxing round
     }
 
     // ── Binder ────────────────────────────────────────────────────────────────
@@ -50,14 +51,21 @@ class RecordingService : Service(), SensorEventListener {
     var recState   = RecState.IDLE; private set
     var deviceSide = "left"
 
-    var onStateChanged: ((RecState) -> Unit)?                           = null
-    var onTimerTick:    ((Long, Int, Double) -> Unit)?                  = null
+    var onStateChanged: ((RecState) -> Unit)?                                = null
+    var onTimerTick:    ((Long, Int, Double) -> Unit)?                       = null
     var onSensorUpdate: ((Float, Float, Float, Float, Float, Float) -> Unit)? = null
-    var onPeerState:    ((PeerJSClient.State, String) -> Unit)?         = null
-    var onGyroStatus:   ((Boolean) -> Unit)?                            = null
-    var onGpsStatus:    ((Boolean, Int) -> Unit)?                       = null
+    var onPeerState:    ((PeerJSClient.State, String) -> Unit)?              = null
+    var onGyroStatus:   ((Boolean) -> Unit)?                                 = null
+    var onGpsStatus:    ((Boolean, Int) -> Unit)?                            = null
+    var onRoundTick:    ((Int, Long) -> Unit)?                               = null  // (round, secsLeft)
 
     var sessionName = ""
+    var appMode = "rollerblade"  // "rollerblade" or "boxing"
+
+    // Boxing round state
+    private var roundNumber   = 0
+    private var roundSecsLeft = 0L
+    private val roundEvents   = Collections.synchronizedList(mutableListOf<JSONObject>())
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
@@ -182,13 +190,16 @@ class RecordingService : Service(), SensorEventListener {
         localSamples.clear()
         gpsTrack.clear()
         gpsFixCount      = 0
+        roundNumber      = 0
+        roundSecsLeft    = 0L
+        roundEvents.clear()
 
         if (!wakeLock.isHeld) wakeLock.acquire(6 * 60 * 60 * 1000L)
 
         sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME)
         sensorManager.registerListener(this, gyroSensor,  SensorManager.SENSOR_DELAY_GAME)
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (appMode != "boxing" && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 1000L, 1f, gpsListener, mainLooper)
@@ -206,6 +217,27 @@ class RecordingService : Service(), SensorEventListener {
                 updateNotif("● Recording…  %02d:%02d".format(min, sec))
                 withContext(Dispatchers.Main) {
                     onTimerTick?.invoke(elapsed, localSamples.size, peakAccel)
+                }
+                if (appMode == "boxing") {
+                    if (roundNumber == 0) {
+                        roundNumber   = 1
+                        roundSecsLeft = ROUND_SECS
+                        peerClient.sendRoundStart(1, elapsed)
+                        roundEvents.add(JSONObject().apply { put("round", 1); put("t", elapsed); put("event", "start") })
+                    } else {
+                        roundSecsLeft--
+                        if (roundSecsLeft <= 0) {
+                            peerClient.sendRoundEnd(roundNumber, elapsed)
+                            roundEvents.add(JSONObject().apply { put("round", roundNumber); put("t", elapsed); put("event", "end") })
+                            roundNumber++
+                            roundSecsLeft = ROUND_SECS
+                            peerClient.sendRoundStart(roundNumber, elapsed)
+                            roundEvents.add(JSONObject().apply { put("round", roundNumber); put("t", elapsed); put("event", "start") })
+                        }
+                    }
+                    val capturedRound = roundNumber
+                    val capturedSecs  = roundSecsLeft
+                    withContext(Dispatchers.Main) { onRoundTick?.invoke(capturedRound, capturedSecs) }
                 }
             }
         }
@@ -282,36 +314,56 @@ class RecordingService : Service(), SensorEventListener {
             .also { it.timeZone = TimeZone.getTimeZone("UTC") }
             .format(Date(startTime))
 
-        // Bug 5 fix: hold the list's own lock during iteration to prevent ConcurrentModificationException
         val arr = JSONArray()
         synchronized(localSamples) { localSamples.forEach { arr.put(it) } }
-        val gpsArr = JSONArray()
-        synchronized(gpsTrack) { gpsTrack.forEach { gpsArr.put(it) } }
 
-        val session = JSONObject().apply {
-            put("id",            startTime);   put("device",       deviceSide)
-            if (sessionName.isNotEmpty()) put("name", sessionName)
-            put("timestamp",     iso);         put("duration_ms",  duration)
-            put("peak_accel_ms2", peakAccel.round(3))
-            put("peak_gyro_rads", peakGyro.round(4))
-            put("sample_count",  localSamples.size)
-            put("gps_count",     gpsTrack.size)
-            if (gpsTrack.isNotEmpty()) {
-                val first = synchronized(gpsTrack) { gpsTrack[0] }
-                put("gps_origin", JSONObject().apply {
-                    put("lat", first.getDouble("lat"))
-                    put("lng", first.getDouble("lng"))
-                })
+        if (appMode == "boxing") {
+            val roundArr = JSONArray()
+            synchronized(roundEvents) { roundEvents.forEach { roundArr.put(it) } }
+            val session = JSONObject().apply {
+                put("format",        "boxing_session_v1")
+                put("mode",          "boxing")
+                put("id",            startTime)
+                put("device",        deviceSide)
+                if (sessionName.isNotEmpty()) put("name", sessionName)
+                put("timestamp",     iso)
+                put("duration_ms",   duration)
+                put("peak_accel_ms2", peakAccel.round(3))
+                put("peak_gyro_rads", peakGyro.round(4))
+                put("sample_count",  localSamples.size)
+                put("rounds",        roundArr)
+                put("samples",       arr)
             }
-            put("samples", arr)
-            put("gps",     gpsArr)
+            File(filesDir, "boxing_session_${startTime}.json").writeText(JSONArray().put(session).toString())
+        } else {
+            val gpsArr = JSONArray()
+            synchronized(gpsTrack) { gpsTrack.forEach { gpsArr.put(it) } }
+            val session = JSONObject().apply {
+                put("id",            startTime);   put("device",       deviceSide)
+                if (sessionName.isNotEmpty()) put("name", sessionName)
+                put("timestamp",     iso);         put("duration_ms",  duration)
+                put("peak_accel_ms2", peakAccel.round(3))
+                put("peak_gyro_rads", peakGyro.round(4))
+                put("sample_count",  localSamples.size)
+                put("gps_count",     gpsTrack.size)
+                if (gpsTrack.isNotEmpty()) {
+                    val first = synchronized(gpsTrack) { gpsTrack[0] }
+                    put("gps_origin", JSONObject().apply {
+                        put("lat", first.getDouble("lat"))
+                        put("lng", first.getDouble("lng"))
+                    })
+                }
+                put("samples", arr)
+                put("gps",     gpsArr)
+            }
+            File(filesDir, "session_${startTime}.json").writeText(JSONArray().put(session).toString())
         }
-        File(filesDir, "session_${startTime}.json").writeText(JSONArray().put(session).toString())
     }
 
     fun getSessionFiles(): List<File> =
-        filesDir.listFiles { f -> f.name.startsWith("session_") && f.name.endsWith(".json") }
-            ?.sortedByDescending { it.name } ?: emptyList()
+        filesDir.listFiles { f ->
+            (f.name.startsWith("session_") || f.name.startsWith("boxing_session_")) && f.name.endsWith(".json")
+        }?.sortedByDescending { it.name } ?: emptyList()
 
     fun deleteSession(file: File) { file.delete() }
 
