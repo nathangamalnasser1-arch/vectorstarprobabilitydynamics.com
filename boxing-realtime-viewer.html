@@ -72,6 +72,8 @@ canvas.show{display:block}
 #trailCtrl.show{display:flex}
 .tbtn{background:rgba(0,255,238,0.07);border:1px solid rgba(0,255,238,0.25);color:rgba(0,255,238,0.6);font-family:monospace;font-size:10px;letter-spacing:0.1em;padding:5px 12px;cursor:pointer;user-select:none}
 .tbtn.on{background:rgba(0,255,238,0.18);color:#00ffee;border-color:rgba(0,255,238,0.5)}
+/* No-data banner */
+#noDataBanner{display:none;position:fixed;top:36px;left:0;right:0;z-index:30;background:rgba(220,60,0,0.92);color:#fff;font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.08em;text-align:center;padding:7px 12px;pointer-events:none}
 /* Connect overlay */
 #overlay{position:fixed;inset:0;z-index:50;background:rgba(0,5,10,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 #overlay.h{display:none}
@@ -106,6 +108,8 @@ canvas.show{display:block}
 
   <div id="ovSt"></div>
 </div>
+
+<div id="noDataBanner">⚠ NO DATA — app must be in HUB role and recording · check Firebase status</div>
 
 <div id="tabBar">
   <div class="tab act" onclick="setTab('trail')">TRAIL</div>
@@ -174,7 +178,7 @@ let punchThresh=3
 let flashL=0,flashR=0,lastFrameT=0
 let sessionStart=null
 let roundNum=1,roundState='idle',roundStartWall=null
-let connL=false,connR=false
+let connL=false,connR=false,lastDataT=0
 let liveWs=null
 let sampleCntL=0,sampleCntR=0
 const waveL=[],waveR=[],allL=[],allR=[],punchL=[],punchR=[]
@@ -429,6 +433,7 @@ function handleMsg(msg){
       }
     }
     if(isR)connR=true;else connL=true
+    lastDataT=now
 
     // IMU dead-reckoning for TRAIL tab
     if(isFinite(+msg.ax)&&imu.prevT!==null){
@@ -465,6 +470,10 @@ function frame(ts){
   requestAnimationFrame(frame)
   const dt=Math.min(ts-lastFrameT,100)/1000; lastFrameT=ts
   flashL=Math.max(0,flashL-dt*6); flashR=Math.max(0,flashR-dt*6)
+  // Show no-data banner when overlay is hidden but no packets arriving
+  const overlayHidden=document.getElementById('overlay').classList.contains('h')
+  const stale=overlayHidden&&(lastDataT===0||(Date.now()-lastDataT>5000))
+  document.getElementById('noDataBanner').style.display=stale?'block':'none'
   const cutoff=Date.now()-WAVE_SECS*1000
   while(waveL.length>1&&waveL[0].t<cutoff)waveL.shift()
   while(waveR.length>1&&waveR[0].t<cutoff)waveR.shift()
