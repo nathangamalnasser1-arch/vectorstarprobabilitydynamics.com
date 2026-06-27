@@ -1496,6 +1496,8 @@ function handleLiveMsg(msg){
   // ?sid=SESSION_ID  — from APEX app QR code / shared link
   const sid=p.get('sid')
   if(sid){
+    // Clear demo data so the June-12 hardcoded session doesn't show while connecting
+    GPS=[]; IMU=[]; DUR=0
     const name=p.get('name')||''
     if(name) document.getElementById('sessionName').textContent='· '+decodeURIComponent(name)
     if(APEX_RTDB_URL){
