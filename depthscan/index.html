@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DepthScan — Scan parts to ±0.1mm with your phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B0D10;
+    --paper: #F5F3EC;
+    --signal: #FF5C35;
+    --verified: #3A8C7A;
+    --instrument: #6B6F76;
+    --ink-soft: #161A1F;
+    --line: rgba(245,243,236,0.12);
+    --line-strong: rgba(245,243,236,0.22);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter Tight', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  ::selection { background: var(--signal); color: var(--ink); }
+
+  /* ───────────────────── NAV ───────────────────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 5vw;
+    background: rgba(11,13,16,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--signal);
+    display: inline-block;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-size: 13px;
+    color: var(--instrument);
+    letter-spacing: 0.02em;
+  }
+  .nav-links a:hover { color: var(--paper); }
+
+  .lang-toggle {
+    display: flex;
+    gap: 2px;
+    background: rgba(245,243,236,0.06);
+    border-radius: 4px;
+    padding: 2px;
+  }
+  .lang-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: none;
+    background: transparent;
+    color: var(--instrument);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+  .lang-btn.active { background: var(--signal); color: var(--ink); font-weight: 600; }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /* ───────────────────── LIVE DEMO ───────────────────── */
+  .demo-section {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--ink-soft);
+  }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .demo-grid { grid-template-columns: 1fr; }
+  }
+
+  .demo-panel {
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .demo-panel-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--instrument);
+    padding: 14px 18px 0;
+  }
+  #sideCanvas { display: block; width: 100%; height: auto; aspect-ratio: 420 / 320; }
+
+  .demo-phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .demo-phone-frame {
+    width: 170px;
+    height: 306px;
+    background: #111118;
+    border-radius: 28px;
+    border: 3px solid #2a2a40;
+    position: relative;
+    box-shadow: 0 0 50px rgba(255,92,53,0.08);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .demo-phone-notch {
+    position: absolute;
+    top: 9px; left: 50%;
+    transform: translateX(-50%);
+    width: 48px; height: 11px;
+    background: #111118;
+    border-radius: 6px;
+    z-index: 10;
+  }
+  .demo-phone-screen { position: absolute; inset: 0; border-radius: 25px; overflow: hidden; }
+  #meshCanvas { width: 100%; height: 100%; display: block; }
+
+  .demo-phone-overlay { position: absolute; inset: 0; pointer-events: none; }
+  .demo-coverage-bar {
+    position: absolute;
+    bottom: 22px; left: 14px; right: 14px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+  }
+  .demo-coverage-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--signal), #ff8a5c);
+    transition: width 0.3s;
+  }
+  .demo-coverage-label {
+    position: absolute; bottom: 30px; right: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 0.06em;
+  }
+  .demo-scan-hint {
+    position: absolute; top: 20px; left: 0; right: 0;
+    text-align: center; font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: rgba(255,92,53,0.7); letter-spacing: 0.1em;
+  }
+
+  .demo-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .demo-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--ink);
+    border: 1px solid var(--line-strong);
+    color: var(--instrument);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+  }
+  .demo-btn:hover { border-color: var(--signal); color: var(--paper); }
+  .demo-btn.active { background: var(--signal); border-color: var(--signal); color: var(--ink); font-weight: 600; }
+
+  .field-strip {
+    margin-top: 24px;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .field-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--instrument);
+    margin-bottom: 10px;
+  }
+  .field-bars { display: flex; gap: 3px; align-items: flex-end; height: 36px; }
+  .field-bar { flex: 1; border-radius: 2px 2px 0 0; min-height: 2px; }
+
+  .nav-cta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    border: 1px solid var(--line-strong);
+    padding: 9px 18px;
+    letter-spacing: 0.02em;
+  }
+  .nav-cta:hover { border-color: var(--signal); color: var(--signal); }
+
+  /* ───────────────────── MAGNET CALIBRATION ───────────────────── */
+  .calibrate {
+    background: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .calib-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .calib-grid { grid-template-columns: 1fr; }
+  }
+
+  .calib-visual {
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    padding-bottom: 18px;
+  }
+
+  #calibCanvas { display: block; width: 100%; height: auto; }
+
+  .calib-progress {
+    padding: 0 18px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .calib-progress-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(245,243,236,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .calib-progress-fill {
+    height: 100%;
+    width: 16.6%;
+    background: linear-gradient(90deg, var(--verified), #5cc9ad);
+    transition: width 0.4s ease;
+  }
+  .calib-progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--instrument);
+    white-space: nowrap;
+  }
+
+  .calib-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .calib-step {
+    display: flex;
+    gap: 20px;
+  }
+
+  .calib-step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--verified);
+    flex-shrink: 0;
+    width: 28px;
+    padding-top: 2px;
+  }
+
+  .calib-step h4 {
+    font-size: 15.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .calib-step p {
+    font-size: 13.5px;
+    color: var(--instrument);
+    line-height: 1.6;
+  }
+
+  .calib-note {
+    margin-top: 56px;
+    font-size: 13px;
+    color: var(--instrument);
+    line-height: 1.7;
+    border-left: 2px solid var(--verified);
+    padding-left: 20px;
+    max-width: 80ch;
+  }
+  .calib-note strong { color: var(--paper); font-weight: 600; }
+
+  @media (max-width: 760px) {
+    .nav-links { display: none; }
+  }
+
+  /* ───────────────────── HERO ───────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 5vw 80px;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--signal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--signal);
+  }
+
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 96px);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--signal);
+  }
+
+  .hero-sub {
+    margin-top: 28px;
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--instrument);
+    max-width: 46ch;
+    line-height: 1.55;
+  }
+
+  .hero-ctas {
+    margin-top: 40px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 16px 28px;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--signal); transform: translateY(-1px); }
+
+  .btn-secondary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--line-strong);
+    padding: 16px 28px;
+    transition: border-color 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--paper); }
+
+  /* ───── Tolerance ruler — signature element ───── */
+  .ruler-wrap {
+    margin-top: 110px;
+    position: relative;
+  }
+
+  .ruler-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--instrument);
+    margin-bottom: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  .ruler {
+    position: relative;
+    height: 64px;
+    margin: 0 60px;
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .ruler-track {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .tick {
+    flex: 1;
+    border-left: 1px solid var(--line);
+    height: 14px;
+    position: relative;
+  }
+  .tick.major { height: 26px; border-left: 1px solid var(--line-strong); }
+  .tick:last-child { border-right: 1px solid var(--line); }
+
+  .ruler-markers {
+    position: absolute;
+    inset: 0;
+  }
+
+  .marker {
+    position: absolute;
+    top: -52px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+    width: 120px;
+  }
+
+  .marker-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    flex-shrink: 0;
+  }
+  .marker-line {
+    width: 1px;
+    height: 28px;
+    margin-top: -2px;
+    flex-shrink: 0;
+  }
+  .marker-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .marker-sub {
+    font-size: 9px;
+    color: var(--instrument);
+  }
+
+  .marker.depthscan .marker-dot { background: var(--signal); border-color: var(--signal); }
+  .marker.depthscan .marker-line { background: var(--signal); }
+  .marker.depthscan .marker-label { color: var(--signal); font-weight: 700; }
+
+  .marker.android .marker-dot { background: var(--instrument); }
+  .marker.android .marker-line { background: var(--line-strong); }
+  .marker.android .marker-label { color: var(--instrument); }
+
+  .marker.photogrammetry .marker-dot { background: var(--instrument); }
+  .marker.photogrammetry .marker-line { background: var(--line-strong); }
+  .marker.photogrammetry .marker-label { color: var(--instrument); }
+
+  .marker.cmm .marker-dot { background: var(--verified); border-color: var(--verified); }
+  .marker.cmm .marker-line { background: var(--verified); }
+  .marker.cmm .marker-label { color: var(--verified); }
+
+  /* Edge markers (CMM near 0%, Android near 100%) anchor their label to
+     the inside edge instead of centering, so the text can't run off the
+     ruler or collide with the axis labels above it. */
+  .marker.edge-left { transform: translateX(0); align-items: flex-start; }
+  .marker.edge-left .marker-label { text-align: left; }
+  .marker.edge-right { transform: translateX(-100%); align-items: flex-end; }
+  .marker.edge-right .marker-label { text-align: right; }
+
+  @media (max-width: 700px) {
+    .ruler-wrap { display: none; }
+  }
+
+  /* ───────────────────── SECTION SHARED ───────────────────── */
+  section { padding: 120px 5vw; }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 64px;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .section-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--signal);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .section-head h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+  }
+
+  .section-head p {
+    color: var(--instrument);
+    max-width: 38ch;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ───────────────────── HOW IT WORKS ───────────────────── */
+  .how {
+    background: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .step {
+    background: var(--ink-soft);
+    padding: 36px 28px;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--signal);
+    margin-bottom: 60px;
+  }
+
+  .step-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 24px;
+    color: var(--paper);
+  }
+
+  .step h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .step p {
+    font-size: 13.5px;
+    color: var(--instrument);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .steps { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .steps { grid-template-columns: 1fr; }
+  }
+
+  /* ───────────────────── SENSOR FUSION DIAGRAM ───────────────────── */
+  .fusion {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .fusion { grid-template-columns: 1fr; }
+  }
+
+  .fusion-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .fusion-row {
+    background: var(--ink);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: background 0.2s;
+  }
+  .fusion-row:hover { background: var(--ink-soft); }
+
+  .fusion-dot {
+    width: 8px; height: 8px;
+    flex-shrink: 0;
+  }
+  .fusion-dot.orange { background: var(--signal); }
+  .fusion-dot.teal { background: var(--verified); }
+  .fusion-dot.gray { background: var(--instrument); }
+
+  .fusion-row-text { flex: 1; }
+  .fusion-row-name {
+    font-size: 14.5px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .fusion-row-desc {
+    font-size: 12.5px;
+    color: var(--instrument);
+    line-height: 1.5;
+  }
+  .fusion-row-spec {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--verified);
+    white-space: nowrap;
+  }
+
+  .fusion-note {
+    font-size: 13px;
+    color: var(--instrument);
+    line-height: 1.7;
+    border-left: 2px solid var(--signal);
+    padding-left: 20px;
+  }
+  .fusion-note strong { color: var(--paper); font-weight: 600; }
+
+  /* ───────────────────── COMPARISON ───────────────────── */
+  .compare { background: var(--paper); color: var(--ink); }
+  .compare .section-eyebrow { color: var(--signal); }
+  .compare .section-head p { color: rgba(11,13,16,0.55); }
+
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .spec-table th, .spec-table td {
+    text-align: left;
+    padding: 18px 16px;
+    border-bottom: 1px solid rgba(11,13,16,0.1);
+  }
+
+  .spec-table thead th {
+    font-size: 11px;
+    color: rgba(11,13,16,0.5);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(11,13,16,0.25);
+    vertical-align: bottom;
+  }
+
+  .spec-table thead th.col-product {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .spec-table tbody th {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 500;
+    color: rgba(11,13,16,0.7);
+    font-size: 13.5px;
+  }
+
+  .spec-table tbody tr:hover { background: rgba(11,13,16,0.03); }
+
+  .col-depthscan { background: rgba(255,92,53,0.06); }
+  .col-depthscan-cell { font-weight: 700; color: var(--signal); }
+
+  .tag {
+    display: block;
+    font-size: 9.5px;
+    padding: 3px 0 0;
+    color: var(--signal);
+    letter-spacing: 0.03em;
+    font-weight: 500;
+    text-transform: none;
+  }
+
+  .check { color: var(--verified); }
+  .cross { color: rgba(11,13,16,0.3); }
+
+  .table-scroll {
+    overflow-x: auto;
+    margin: 0 -5vw;
+    padding: 0 5vw;
+  }
+
+  .compare-footnote {
+    margin-top: 32px;
+    font-size: 12.5px;
+    color: rgba(11,13,16,0.5);
+    line-height: 1.7;
+    max-width: 70ch;
+  }
+
+  /* ───────────────────── WHERE IT LOSES (honesty section) ───────────────────── */
+  .honest {
+    background: var(--ink);
+  }
+
+  .honest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  @media (max-width: 800px) {
+    .honest-grid { grid-template-columns: 1fr; }
+  }
+
+  .honest-col { background: var(--ink); padding: 44px; }
+  .honest-col h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .honest-col.win h3 { color: var(--verified); }
+  .honest-col.lose h3 { color: var(--signal); }
+
+  .honest-list { list-style: none; }
+  .honest-list li {
+    font-size: 14.5px;
+    color: var(--instrument);
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 14px;
+    line-height: 1.6;
+  }
+  .honest-list li:first-child { border-top: none; }
+  .honest-list strong { color: var(--paper); font-weight: 600; }
+
+  .honest-list .glyph {
+    flex-shrink: 0;
+    width: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .win .glyph { color: var(--verified); }
+  .lose .glyph { color: var(--signal); }
+
+  /* ───────────────────── HARDWARE REQS ───────────────────── */
+  .hardware {
+    border-top: 1px solid var(--line);
+  }
+
+  .hw-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 64px;
+  }
+  @media (max-width: 900px) {
+    .hw-grid { grid-template-columns: 1fr; }
+  }
+
+  .hw-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .hw-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-top: 1px solid var(--line);
+    gap: 20px;
+  }
+  .hw-item:last-child { border-bottom: 1px solid var(--line); }
+
+  .hw-name { font-size: 15px; font-weight: 500; }
+  .hw-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--instrument); text-align: right; }
+
+  .hw-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    letter-spacing: 0.03em;
+  }
+  .hw-status.yes { background: rgba(58,140,122,0.15); color: var(--verified); }
+  .hw-status.no { background: rgba(107,111,118,0.15); color: var(--instrument); }
+
+  .kit-box {
+    background: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 36px;
+  }
+  .kit-box h4 {
+    font-size: 15px;
+    margin-bottom: 18px;
+    font-weight: 600;
+  }
+  .kit-list { list-style: none; }
+  .kit-list li {
+    font-size: 13.5px;
+    color: var(--instrument);
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+  }
+  .kit-list li:first-child { border-top: none; }
+  .kit-list .price { font-family: 'JetBrains Mono', monospace; color: var(--paper); }
+
+  /* ───────────────────── CTA / FOOTER ───────────────────── */
+  .cta-section {
+    text-align: center;
+    padding: 160px 5vw;
+    position: relative;
+  }
+  .cta-section h2 {
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    max-width: 18ch;
+    margin: 0 auto 28px;
+  }
+  .cta-section h2 em { color: var(--signal); font-style: normal; }
+
+  .cta-section p {
+    color: var(--instrument);
+    font-size: 16px;
+    max-width: 44ch;
+    margin: 0 auto 40px;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 48px 5vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .footer-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--instrument);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    font-size: 13px;
+    color: var(--instrument);
+  }
+  .footer-links a:hover { color: var(--paper); }
+
+  /* reveal on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">DEPTHSCAN</div>
+  <div class="nav-links">
+    <a href="#how" data-en="How it works" data-fr="Fonctionnement">How it works</a>
+    <a href="#demo" data-en="Live demo" data-fr="Démo en direct">Live demo</a>
+    <a href="#calibrate" data-en="Calibration" data-fr="Calibrage">Calibration</a>
+    <a href="#compare" data-en="Comparison" data-fr="Comparaison">Comparison</a>
+    <a href="#honest" data-en="Tradeoffs" data-fr="Compromis">Tradeoffs</a>
+    <a href="#hardware" data-en="Hardware" data-fr="Matériel">Hardware</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+    <a href="#cta" class="nav-cta" data-en="Get the app →" data-fr="Obtenir l'app →">Get the app →</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<header class="hero">
+  <div class="hero-eyebrow" data-en="iOS · TrueDepth + magnetometer fusion" data-fr="iOS · Fusion TrueDepth + magnétomètre">iOS · TrueDepth + magnetometer fusion</div>
+  <h1 data-en-html="Scan a part to<br><em>±0.1mm</em>.<br>With the phone<br>already in your hand." data-fr-html="Numérisez une pièce à<br><em>±0,1mm</em>.<br>Avec le téléphone<br>déjà dans votre main.">Scan a part to<br><em>±0.1mm</em>.<br>With the phone<br>already in your hand.</h1>
+  <p class="hero-sub" data-en="DepthScan turns your iPhone's face-up TrueDepth camera into a contact-free structured-light scanner. Hold the part above the screen, rotate it freely — no turntable, no markers, no lab." data-fr="DepthScan transforme la caméra TrueDepth de votre iPhone, posé face vers le haut, en scanner à lumière structurée sans contact. Tenez la pièce au-dessus de l'écran, faites-la tourner librement — aucun plateau, aucun marqueur, aucun laboratoire.">
+    DepthScan turns your iPhone's face-up TrueDepth camera into a contact-free
+    structured-light scanner. Hold the part above the screen, rotate it freely —
+    no turntable, no markers, no lab.
+  </p>
+  <div class="hero-ctas">
+    <a href="#cta" class="btn-primary" data-en="Get the app →" data-fr="Obtenir l'app →">Get the app →</a>
+    <a href="#how" class="btn-secondary" data-en="See how it works" data-fr="Voir le fonctionnement">See how it works</a>
+  </div>
+
+  <div class="ruler-wrap reveal" id="ruler">
+    <div class="ruler-label-row">
+      <span>0.01mm</span>
+      <span data-en="SCANNING ACCURACY, LOG SCALE" data-fr="PRÉCISION DE NUMÉRISATION, ÉCHELLE LOG">SCANNING ACCURACY, LOG SCALE</span>
+      <span>50mm</span>
+    </div>
+    <div class="ruler">
+      <div class="ruler-track" id="rulerTicks"></div>
+      <div class="ruler-markers">
+        <div class="marker depthscan" style="left: 12%">
+          <span class="marker-label" data-en-html="DepthScan<br><span class=&quot;marker-sub&quot;>±0.1–0.2mm</span>" data-fr-html="DepthScan<br><span class=&quot;marker-sub&quot;>±0,1–0,2mm</span>">DepthScan<br><span class="marker-sub">±0.1–0.2mm</span></span>
+          <div class="marker-line"></div>
+          <div class="marker-dot"></div>
+        </div>
+        <div class="marker android edge-right" style="left: 70%">
+          <span class="marker-label" data-en-html="Android photogrammetry<br><span class=&quot;marker-sub&quot;>±2–5mm</span>" data-fr-html="Photogrammétrie Android<br><span class=&quot;marker-sub&quot;>±2–5mm</span>">Android photogrammetry<br><span class="marker-sub">±2–5mm</span></span>
+          <div class="marker-line" style="align-self: flex-end; margin-right: 4px;"></div>
+          <div class="marker-dot" style="align-self: flex-end; margin-right: 0;"></div>
+        </div>
+        <div class="marker photogrammetry" style="left: 38%">
+          <span class="marker-label" data-en-html="iPhone LiDAR<br><span class=&quot;marker-sub&quot;>±3–5mm</span>" data-fr-html="LiDAR iPhone<br><span class=&quot;marker-sub&quot;>±3–5mm</span>">iPhone LiDAR<br><span class="marker-sub">±3–5mm</span></span>
+          <div class="marker-line"></div>
+          <div class="marker-dot"></div>
+        </div>
+        <div class="marker cmm edge-left" style="left: 2%">
+          <span class="marker-label" data-en-html="Desktop CMM<br><span class=&quot;marker-sub&quot;>±0.01mm</span>" data-fr-html="MMT de bureau<br><span class=&quot;marker-sub&quot;>±0,01mm</span>">Desktop CMM<br><span class="marker-sub">±0.01mm</span></span>
+          <div class="marker-line" style="align-self: flex-start; margin-left: 4px;"></div>
+          <div class="marker-dot" style="align-self: flex-start; margin-left: 0;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ LIVE DEMO ═══════════════════════ -->
+<section class="demo-section" id="demo">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="See it scanning" data-fr="Voyez-le numériser">See it scanning</div>
+      <h2 data-en="What actually happens above the screen" data-fr="Ce qui se passe réellement au-dessus de l'écran">What actually happens above the screen</h2>
+    </div>
+    <p data-en="A simplified animation of the capture loop — the IR beam, the magnetic sticker, and the live mesh building on screen." data-fr="Une animation simplifiée de la boucle de capture — le faisceau infrarouge, le sticker magnétique et le maillage qui se construit en direct.">A simplified animation of the capture loop — the IR beam, the magnetic sticker, and the live mesh building on screen.</p>
+  </div>
+
+  <div class="demo-grid reveal">
+    <div class="demo-panel">
+      <div class="demo-panel-label" data-en="Side view" data-fr="Vue de profil">Side view</div>
+      <canvas id="sideCanvas" width="420" height="320"></canvas>
+    </div>
+
+    <div class="demo-phone-col">
+      <div class="demo-panel-label" data-en="What the user sees" data-fr="Ce que voit l'utilisateur">What the user sees</div>
+      <div class="demo-phone-frame">
+        <div class="demo-phone-notch"></div>
+        <div class="demo-phone-screen">
+          <canvas id="meshCanvas" width="300" height="540"></canvas>
+        </div>
+        <div class="demo-phone-overlay">
+          <div class="demo-scan-hint" data-en="SCANNING" data-fr="NUMÉRISATION">SCANNING</div>
+          <div class="demo-coverage-label" data-en="COVERAGE" data-fr="COUVERTURE">COVERAGE</div>
+          <div class="demo-coverage-bar"><div class="demo-coverage-fill" id="coverageFill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="demo-controls">
+        <button class="demo-btn active" id="btnAnim" data-en="▶ Animate" data-fr="▶ Animer">▶ Animate</button>
+        <button class="demo-btn" id="btnHands" data-en="Hand removal" data-fr="Suppression des mains">Hand removal</button>
+        <button class="demo-btn active" id="btnMagnet" data-en="Magnetic field" data-fr="Champ magnétique">Magnetic field</button>
+      </div>
+
+      <div class="field-strip">
+        <div class="field-title" data-en="Magnetometer signal" data-fr="Signal du magnétomètre">Magnetometer signal</div>
+        <div class="field-bars" id="fieldBars"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ HOW IT WORKS ═══════════════════════ -->
+<section class="how" id="how">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="Process" data-fr="Processus">Process</div>
+      <h2 data-en="No setup. No turntable. No lab." data-fr="Aucune installation. Aucun plateau. Aucun laboratoire.">No setup. No turntable. No lab.</h2>
+    </div>
+    <p data-en="Four sensors most apps ignore, working together instead of one at a time." data-fr="Quatre capteurs que la plupart des apps ignorent, travaillant ensemble plutôt qu'un à la fois.">Four sensors most apps ignore, working together instead of one at a time.</p>
+  </div>
+
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">01 / TABLE</div>
+      <svg class="step-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="6" y="14" width="28" height="18" rx="2"/>
+        <circle cx="20" cy="23" r="3" fill="currentColor" stroke="none"/>
+        <path d="M2 32h36" stroke-dasharray="2 3"/>
+      </svg>
+      <h3 data-en="Set it down" data-fr="Posez-le">Set it down</h3>
+      <p data-en="Place the phone face-up on any flat surface. CoreMotion confirms it's level and still before scanning begins — no held-camera shake to fight." data-fr="Posez le téléphone face vers le haut sur une surface plane. CoreMotion confirme qu'il est stable avant le début de la numérisation — aucun tremblement à compenser.">Place the phone face-up on any flat surface. CoreMotion confirms it's level and still before scanning begins — no held-camera shake to fight.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02 / DEPTH</div>
+      <svg class="step-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M20 32V8M12 16l8-8 8 8" />
+        <circle cx="20" cy="32" r="2" fill="currentColor" stroke="none"/>
+      </svg>
+      <h3 data-en="Hold the part above it" data-fr="Tenez la pièce au-dessus">Hold the part above it</h3>
+      <p data-en="TrueDepth fires 30,000 infrared points upward, reading the part's geometry at sub-millimeter precision — the same sensor that unlocks your phone." data-fr="TrueDepth émet 30 000 points infrarouges vers le haut, lisant la géométrie de la pièce avec une précision inférieure au millimètre — le même capteur qui déverrouille votre téléphone.">TrueDepth fires 30,000 infrared points upward, reading the part's geometry at sub-millimeter precision — the same sensor that unlocks your phone.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03 / ROTATE</div>
+      <svg class="step-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M28 12a10 10 0 1 1-3-7"/>
+        <path d="M25 3v6h6"/>
+      </svg>
+      <h3 data-en="Turn it freely" data-fr="Tournez-la librement">Turn it freely</h3>
+      <p data-en="A magnet stuck to the part lets the magnetometer track its rotation continuously — calibrated to your specific magnets, no factory part required." data-fr="Un aimant collé sur la pièce permet au magnétomètre de suivre sa rotation en continu — calibré pour vos aimants spécifiques, aucune pièce d'usine requise.">A magnet stuck to the part lets the magnetometer track its rotation continuously — calibrated to your specific magnets, no factory part required.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04 / MESH</div>
+      <svg class="step-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 30l8-20 8 12 8-16"/>
+        <circle cx="8" cy="30" r="2" fill="currentColor" stroke="none"/>
+        <circle cx="16" cy="10" r="2" fill="currentColor" stroke="none"/>
+        <circle cx="24" cy="22" r="2" fill="currentColor" stroke="none"/>
+        <circle cx="32" cy="6" r="2" fill="currentColor" stroke="none"/>
+      </svg>
+      <h3 data-en="Watch it build" data-fr="Regardez-le se construire">Watch it build</h3>
+      <p data-en="Hands are masked out live. Coverage fills in green as you rotate. When it's done, the captured frames run through Object Capture's photogrammetry for the final textured mesh." data-fr="Les mains sont masquées en direct. La couverture se remplit en vert à mesure que vous tournez. Une fois terminé, les images capturées passent par la photogrammétrie d'Object Capture pour le maillage texturé final.">Hands are masked out live. Coverage fills in green as you rotate. When it's done, the captured frames run through Object Capture's photogrammetry for the final textured mesh.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SENSOR FUSION ═══════════════════════ -->
+<section class="fusion-section">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="Under the hood" data-fr="Sous le capot">Under the hood</div>
+      <h2 data-en-html="Four sensors,<br>cross-checked" data-fr-html="Quatre capteurs,<br>vérifiés croisés">Four sensors,<br>cross-checked</h2>
+    </div>
+    <p data-en="No single sensor is trusted alone. Every frame is gated by the others before it touches the mesh." data-fr="Aucun capteur n'est jamais utilisé seul. Chaque image est validée par les autres avant de toucher le maillage.">No single sensor is trusted alone. Every frame is gated by the others before it touches the mesh.</p>
+  </div>
+
+  <div class="fusion reveal">
+    <div class="fusion-stack">
+      <div class="fusion-row">
+        <div class="fusion-dot orange"></div>
+        <div class="fusion-row-text">
+          <div class="fusion-row-name">TrueDepth camera</div>
+          <div class="fusion-row-desc" data-en="Structured-light depth map, primary geometry source" data-fr="Carte de profondeur à lumière structurée, source géométrique principale">Structured-light depth map, primary geometry source</div>
+        </div>
+        <div class="fusion-row-spec">±0.1mm</div>
+      </div>
+      <div class="fusion-row">
+        <div class="fusion-dot orange"></div>
+        <div class="fusion-row-text">
+          <div class="fusion-row-name" data-en="Photogrammetry (Object Capture)" data-fr="Photogrammétrie (Object Capture)">Photogrammetry (Object Capture)</div>
+          <div class="fusion-row-desc" data-en="RGB frames reconstructed into the final textured mesh" data-fr="Images RGB reconstruites en maillage texturé final">RGB frames reconstructed into the final textured mesh</div>
+        </div>
+        <div class="fusion-row-spec" data-en="final pass" data-fr="passe finale">final pass</div>
+      </div>
+      <div class="fusion-row">
+        <div class="fusion-dot teal"></div>
+        <div class="fusion-row-text">
+          <div class="fusion-row-name">Magnetometer</div>
+          <div class="fusion-row-desc" data-en="Tracks part rotation via a user-calibrated magnet" data-fr="Suit la rotation de la pièce via un aimant calibré par l'utilisateur">Tracks part rotation via a user-calibrated magnet</div>
+        </div>
+        <div class="fusion-row-spec" data-en="3-magnet solve" data-fr="résolution à 3 aimants">3-magnet solve</div>
+      </div>
+      <div class="fusion-row">
+        <div class="fusion-dot gray"></div>
+        <div class="fusion-row-text">
+          <div class="fusion-row-name">IMU</div>
+          <div class="fusion-row-desc" data-en="Confirms the phone hasn't moved mid-scan" data-fr="Confirme que le téléphone n'a pas bougé pendant la numérisation">Confirms the phone hasn't moved mid-scan</div>
+        </div>
+        <div class="fusion-row-spec" data-en="gates frames" data-fr="filtre les images">gates frames</div>
+      </div>
+      <div class="fusion-row">
+        <div class="fusion-dot gray"></div>
+        <div class="fusion-row-text">
+          <div class="fusion-row-name" data-en="Vision framework" data-fr="Framework Vision">Vision framework</div>
+          <div class="fusion-row-desc" data-en="Detects and masks hands out of every frame" data-fr="Détecte et masque les mains de chaque image">Detects and masks hands out of every frame</div>
+        </div>
+        <div class="fusion-row-spec" data-en="real-time" data-fr="temps réel">real-time</div>
+      </div>
+    </div>
+
+    <div class="fusion-note" data-en-html="TrueDepth gives geometry live, in real time, as you rotate the part — that's what drives the on-screen mesh and coverage map while scanning. <strong>Once coverage is complete, the saved RGB frames are handed to RealityKit's Object Capture</strong> for a full photogrammetry reconstruction pass — the same structure-from-motion pipeline Apple uses for its own scanning tools, run locally on the captured frames. TrueDepth gets you scanning instantly with no turntable; photogrammetry gets you the final textured, high-detail mesh.<br><br>A single magnet can't fully determine rotation — its field is symmetric around its own axis, the same ambiguity as gimbal lock. DepthScan asks for 2–3 ordinary magnets placed anywhere on the part, then runs a short calibration against TrueDepth's own geometry to solve for their exact position and strength." data-fr-html="TrueDepth fournit la géométrie en direct, en temps réel, pendant que vous faites tourner la pièce — c'est ce qui alimente le maillage à l'écran et la carte de couverture pendant la numérisation. <strong>Une fois la couverture terminée, les images RGB enregistrées sont transmises à Object Capture de RealityKit</strong> pour une passe complète de reconstruction par photogrammétrie — le même pipeline de structure-from-motion qu'Apple utilise pour ses propres outils de numérisation, exécuté localement sur les images capturées. TrueDepth vous permet de numériser instantanément sans plateau ; la photogrammétrie vous donne le maillage texturé final, haute définition.<br><br>Un seul aimant ne peut pas déterminer complètement la rotation — son champ est symétrique autour de son propre axe, la même ambiguïté qu'un blocage de cardan. DepthScan demande 2 à 3 aimants ordinaires placés n'importe où sur la pièce, puis effectue un court calibrage par rapport à la géométrie propre de TrueDepth pour résoudre leur position et leur force exactes.">
+      TrueDepth gives geometry live, in real time, as you rotate the part —
+      that's what drives the on-screen mesh and coverage map while scanning.
+      <strong>Once coverage is complete, the saved RGB frames are handed to
+      RealityKit's Object Capture</strong> for a full photogrammetry
+      reconstruction pass — the same structure-from-motion pipeline Apple uses
+      for its own scanning tools, run locally on the captured frames. TrueDepth
+      gets you scanning instantly with no turntable; photogrammetry gets you
+      the final textured, high-detail mesh.
+      <br><br>
+      A single magnet can't fully determine rotation — its field is symmetric
+      around its own axis, the same ambiguity as gimbal lock. DepthScan
+      asks for 2–3 ordinary magnets placed anywhere on the part, then
+      runs a short calibration against TrueDepth's own geometry to solve for
+      their exact position and strength.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ MAGNET CALIBRATION ═══════════════════════ -->
+<section class="calibrate" id="calibrate">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="One-time setup" data-fr="Configuration unique">One-time setup</div>
+      <h2 data-en-html="Any magnets.<br>Taught, not assumed." data-fr-html="N'importe quels aimants.<br>Appris, pas supposés.">Any magnets.<br>Taught, not assumed.</h2>
+    </div>
+    <p data-en="A single magnet can't fix rotation — its field is symmetric around its own axis. Three magnets, calibrated once against TrueDepth's own geometry, can." data-fr="Un seul aimant ne peut pas fixer la rotation — son champ est symétrique autour de son propre axe. Trois aimants, calibrés une fois par rapport à la géométrie de TrueDepth, le peuvent.">A single magnet can't fix rotation — its field is symmetric around its own axis. Three magnets, calibrated once against TrueDepth's own geometry, can.</p>
+  </div>
+
+  <div class="calib-grid reveal">
+    <div class="calib-visual">
+      <div class="demo-panel-label" data-en="Calibration poses" data-fr="Poses de calibrage">Calibration poses</div>
+      <canvas id="calibCanvas" width="440" height="360"></canvas>
+      <div class="calib-progress">
+        <div class="calib-progress-track">
+          <div class="calib-progress-fill" id="calibProgressFill"></div>
+        </div>
+        <span class="calib-progress-label" id="calibProgressLabel">Pose 1 / 6</span>
+      </div>
+    </div>
+
+    <div class="calib-steps">
+      <div class="calib-step">
+        <div class="calib-step-num">01</div>
+        <div>
+          <h4 data-en="Stick on 2–3 magnets" data-fr="Collez 2 à 3 aimants">Stick on 2–3 magnets</h4>
+          <p data-en="Any magnets you have — spread out, not in a straight line. Different sizes help, but aren't required." data-fr="N'importe quels aimants — répartis, pas en ligne droite. Des tailles différentes aident, sans être obligatoires.">Any magnets you have — spread out, not in a straight line. Different sizes help, but aren't required.</p>
+        </div>
+      </div>
+      <div class="calib-step">
+        <div class="calib-step-num">02</div>
+        <div>
+          <h4 data-en="Capture the Earth baseline" data-fr="Capturez la référence terrestre">Capture the Earth baseline</h4>
+          <p data-en="Move the part away for a second — the app reads the ambient magnetic field with no part nearby." data-fr="Éloignez la pièce un instant — l'app lit le champ magnétique ambiant sans pièce à proximité.">Move the part away for a second — the app reads the ambient magnetic field with no part nearby.</p>
+        </div>
+      </div>
+      <div class="calib-step">
+        <div class="calib-step-num">03</div>
+        <div>
+          <h4 data-en="Hold 6 reference poses" data-fr="Tenez 6 poses de référence">Hold 6 reference poses</h4>
+          <p data-en="TrueDepth reads the part's true orientation at each pose while the magnetometer records the field. ~20 seconds total." data-fr="TrueDepth lit l'orientation réelle de la pièce à chaque pose pendant que le magnétomètre enregistre le champ. ~20 secondes au total.">TrueDepth reads the part's true orientation at each pose while the magnetometer records the field. ~20 seconds total.</p>
+        </div>
+      </div>
+      <div class="calib-step">
+        <div class="calib-step-num">04</div>
+        <div>
+          <h4 data-en="Solve once, scan forever" data-fr="Résolu une fois, scanné pour toujours">Solve once, scan forever</h4>
+          <p data-en="The app fits each magnet's position and strength against the 6 samples. From here, rotation tracks from the magnetometer alone — no more vision needed." data-fr="L'app ajuste la position et la force de chaque aimant par rapport aux 6 échantillons. À partir de là, la rotation est suivie par le magnétomètre seul — plus besoin de vision.">The app fits each magnet's position and strength against the 6 samples. From here, rotation tracks from the magnetometer alone — no more vision needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calib-note" data-en-html="<strong>Why TrueDepth supplies the ground truth:</strong> the calibration solve needs to know the part's real orientation at each pose to back out the magnets' unknown position and strength. TrueDepth's geometry is precise enough to serve as that reference — the magnetometer is then trained against it, not the other way around." data-fr-html="<strong>Pourquoi TrueDepth fournit la référence :</strong> le calcul de calibrage doit connaître l'orientation réelle de la pièce à chaque pose pour déduire la position et la force inconnues des aimants. La géométrie de TrueDepth est assez précise pour servir de référence — le magnétomètre est ensuite entraîné par rapport à elle, et non l'inverse.">
+    <strong>Why TrueDepth supplies the ground truth:</strong> the calibration
+    solve needs to know the part's real orientation at each pose to back out
+    the magnets' unknown position and strength. TrueDepth's geometry is precise
+    enough to serve as that reference — the magnetometer is then trained
+    against it, not the other way around.
+  </div>
+</section>
+
+<!-- ═══════════════════════ COMPARISON TABLE ═══════════════════════ -->
+<section class="compare" id="compare">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="Spec sheet" data-fr="Fiche technique">Spec sheet</div>
+      <h2 data-en="How it stacks up" data-fr="Comment ça se compare">How it stacks up</h2>
+    </div>
+    <p data-en="Real numbers, not marketing rounding. DepthScan doesn't win every row — see where it doesn't, below." data-fr="Des chiffres réels, pas d'arrondis marketing. DepthScan ne gagne pas chaque ligne — voyez où ce n'est pas le cas, ci-dessous.">Real numbers, not marketing rounding. DepthScan doesn't win every row — see where it doesn't, below.</p>
+  </div>
+
+  <div class="table-scroll reveal">
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th data-en="Spec" data-fr="Spécification">Spec</th>
+          <th class="col-product">DepthScan<span class="tag" data-en="TrueDepth + Photogrammetry" data-fr="TrueDepth + Photogrammétrie">TrueDepth + Photogrammetry</span></th>
+          <th class="col-product" data-en="iPhone LiDAR apps" data-fr="Apps LiDAR iPhone">iPhone LiDAR apps</th>
+          <th class="col-product" data-en="Android (photogrammetry only)" data-fr="Android (photogrammétrie seule)">Android (photogrammetry only)</th>
+          <th class="col-product" data-en="Desktop structured-light" data-fr="Lumière structurée de bureau">Desktop structured-light</th>
+          <th class="col-product" data-en="CMM probe" data-fr="Sonde MMT">CMM probe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th data-en="Accuracy" data-fr="Précision">Accuracy</th>
+          <td class="col-depthscan col-depthscan-cell">±0.1–0.2mm</td>
+          <td>±3–5mm</td>
+          <td>±2–5mm</td>
+          <td>±0.05mm</td>
+          <td>±0.005mm</td>
+        </tr>
+        <tr>
+          <th data-en="Hardware cost" data-fr="Coût du matériel">Hardware cost</th>
+          <td class="col-depthscan col-depthscan-cell" data-en="phone + $2 magnets" data-fr="téléphone + aimants 2$">phone + $2 magnets</td>
+          <td data-en="phone you own" data-fr="téléphone déjà possédé">phone you own</td>
+          <td data-en="phone you own" data-fr="téléphone déjà possédé">phone you own</td>
+          <td>$800–4,000</td>
+          <td>$15,000+</td>
+        </tr>
+        <tr>
+          <th data-en="Setup time" data-fr="Temps d'installation">Setup time</th>
+          <td class="col-depthscan col-depthscan-cell" data-en="~30 sec" data-fr="~30 sec">~30 sec</td>
+          <td data-en="~10 sec" data-fr="~10 sec">~10 sec</td>
+          <td data-en="~10 sec" data-fr="~10 sec">~10 sec</td>
+          <td data-en="5–15 min" data-fr="5–15 min">5–15 min</td>
+          <td data-en="10–30 min" data-fr="10–30 min">10–30 min</td>
+        </tr>
+
+        <tr>
+          <th data-en="Turntable required" data-fr="Plateau tournant requis">Turntable required</th>
+          <td class="col-depthscan"><span class="check" data-en="✓ no" data-fr="✓ non">✓ no</span></td>
+          <td><span class="check" data-en="✓ no" data-fr="✓ non">✓ no</span></td>
+          <td><span class="check" data-en="✓ no" data-fr="✓ non">✓ no</span></td>
+          <td><span class="cross" data-en="often" data-fr="souvent">often</span></td>
+          <td><span class="cross" data-en="fixture" data-fr="montage">fixture</span></td>
+        </tr>
+        <tr>
+          <th data-en="Hand removal" data-fr="Suppression des mains">Hand removal</th>
+          <td class="col-depthscan"><span class="check" data-en="✓ live" data-fr="✓ en direct">✓ live</span></td>
+          <td><span class="cross">n/a</span></td>
+          <td><span class="cross">n/a</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <th data-en="Works on dark/black parts" data-fr="Fonctionne sur pièces sombres/noires">Works on dark/black parts</th>
+          <td class="col-depthscan"><span class="cross" data-en="limited" data-fr="limité">limited</span></td>
+          <td><span class="cross" data-en="limited" data-fr="limité">limited</span></td>
+          <td><span class="cross" data-en="poor" data-fr="faible">poor</span></td>
+          <td><span class="cross" data-en="needs spray" data-fr="spray requis">needs spray</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <th data-en="Texture / color capture" data-fr="Capture texture / couleur">Texture / color capture</th>
+          <td class="col-depthscan"><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✕</span></td>
+        </tr>
+        <tr>
+          <th data-en="Object size range" data-fr="Plage de taille d'objet">Object size range</th>
+          <td class="col-depthscan col-depthscan-cell">2–15cm</td>
+          <td data-en="any" data-fr="quelconque">any</td>
+          <td data-en="any" data-fr="quelconque">any</td>
+          <td>1cm–1m</td>
+          <td>1mm–500mm</td>
+        </tr>
+        <tr>
+          <th data-en="Output format" data-fr="Format de sortie">Output format</th>
+          <td class="col-depthscan col-depthscan-cell">.usdz / .obj</td>
+          <td>.usdz</td>
+          <td>.glb / .obj</td>
+          <td>.stl / .obj</td>
+          <td data-en="point data / .step" data-fr="données points / .step">point data / .step</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="compare-footnote" data-en="Accuracy figures are best-case, under good lighting, on rigid non-reflective parts within the stated size range — see the section below for where these
+    numbers degrade. Desktop and CMM figures are manufacturer-published specs
+    for mid-range commercial units, included for reference, not as a claim that
+    DepthScan replaces them." data-fr="Les chiffres de précision sont les meilleurs cas, sous bon éclairage, sur des pièces rigides non réfléchissantes dans la plage de taille indiquée — voir la section ci-dessous pour les cas où ces chiffres se dégradent. Les chiffres de bureau et MMT sont des spécifications publiées par les fabricants pour des unités commerciales de milieu de gamme, inclus à titre de référence, et non comme une affirmation que DepthScan les remplace.">
+    Accuracy figures are best-case, under good lighting, on rigid non-reflective
+    parts within the stated size range — see the section below for where these
+    numbers degrade. Desktop and CMM figures are manufacturer-published specs
+    for mid-range commercial units, included for reference, not as a claim that
+    DepthScan replaces them.
+  </p>
+</section>
+
+<!-- ═══════════════════════ HONEST TRADEOFFS ═══════════════════════ -->
+<section class="honest" id="honest">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="Where it actually stands" data-fr="Où il se situe réellement">Where it actually stands</div>
+      <h2 data-en-html="Not a CMM.<br>Not trying to be." data-fr-html="Pas une MMT.<br>Et ça ne cherche pas à l'être.">Not a CMM.<br>Not trying to be.</h2>
+    </div>
+    <p data-en="A precision tool has to be honest about its envelope. Here's ours." data-fr="Un outil de précision doit être honnête sur ses limites. Voici les nôtres.">A precision tool has to be honest about its envelope. Here's ours.</p>
+  </div>
+
+  <div class="honest-grid reveal">
+    <div class="honest-col win">
+      <h3 data-en="Where DepthScan wins" data-fr="Où DepthScan gagne">Where DepthScan wins</h3>
+      <ul class="honest-list">
+        <li><span class="glyph">＋</span><span data-en-html="<strong>Zero setup cost</strong> — no $800+ scanner, no turntable to buy or store." data-fr-html="<strong>Coût d'installation nul</strong> — aucun scanner à 800$+, aucun plateau à acheter ou ranger."><strong>Zero setup cost</strong> — no $800+ scanner, no turntable to buy or store.</span></li>
+        <li><span class="glyph">＋</span><span data-en-html="<strong>30-second capture</strong> for parts already in your pocket-sized workflow — fit checks, reverse-engineering reference, quick documentation." data-fr-html="<strong>Capture en 30 secondes</strong> pour des pièces déjà dans votre flux de travail de poche — vérifications d'ajustement, référence pour rétro-ingénierie, documentation rapide."><strong>30-second capture</strong> for parts already in your pocket-sized workflow — fit checks, reverse-engineering reference, quick documentation.</span></li>
+        <li><span class="glyph">＋</span><span data-en-html="<strong>No fixturing</strong> — hold the part in your hand, rotate it, done. Hands are removed automatically." data-fr-html="<strong>Aucun montage</strong> — tenez la pièce dans votre main, tournez-la, terminé. Les mains sont supprimées automatiquement."><strong>No fixturing</strong> — hold the part in your hand, rotate it, done. Hands are removed automatically.</span></li>
+        <li><span class="glyph">＋</span><span data-en-html="<strong>Already in your hand</strong> — the best scanner is the one you have on you when you need it." data-fr-html="<strong>Déjà dans votre main</strong> — le meilleur scanner est celui que vous avez sur vous quand vous en avez besoin."><strong>Already in your hand</strong> — the best scanner is the one you have on you when you need it.</span></li>
+      </ul>
+    </div>
+    <div class="honest-col lose">
+      <h3 data-en="Where it doesn't" data-fr="Où ce n'est pas le cas">Where it doesn't</h3>
+      <ul class="honest-list">
+        <li><span class="glyph">－</span><span data-en-html="<strong>10× less accurate</strong> than a desktop structured-light scanner, 50× less than a CMM. Don't use it for certified tolerances." data-fr-html="<strong>10× moins précis</strong> qu'un scanner à lumière structurée de bureau, 50× moins qu'une MMT. Ne l'utilisez pas pour des tolérances certifiées."><strong>10× less accurate</strong> than a desktop structured-light scanner, 50× less than a CMM. Don't use it for certified tolerances.</span></li>
+        <li><span class="glyph">－</span><span data-en-html="<strong>Dark and reflective surfaces</strong> still defeat TrueDepth, same physics that limits every consumer depth sensor." data-fr-html="<strong>Les surfaces sombres et réfléchissantes</strong> mettent toujours TrueDepth en échec, la même physique qui limite tout capteur de profondeur grand public."><strong>Dark and reflective surfaces</strong> still defeat TrueDepth, same physics that limits every consumer depth sensor.</span></li>
+        <li><span class="glyph">－</span><span data-en-html="<strong>Magnet calibration depends on real pose estimation</strong> — works best on parts with enough visible geometric detail for the system to lock onto during setup." data-fr-html="<strong>Le calibrage des aimants dépend d'une estimation de pose réelle</strong> — fonctionne mieux sur des pièces avec suffisamment de détails géométriques visibles pour que le système s'y accroche pendant l'installation."><strong>Magnet calibration depends on real pose estimation</strong> — works best on parts with enough visible geometric detail for the system to lock onto during setup.</span></li>
+        <li><span class="glyph">－</span><span data-en-html="<strong>Size-limited</strong> — built for small parts (2–15cm). A car bumper or a wedding ring are both out of range, for opposite reasons." data-fr-html="<strong>Taille limitée</strong> — conçu pour les petites pièces (2–15cm). Un pare-chocs de voiture et une bague de mariage sont tous deux hors de portée, pour des raisons opposées."><strong>Size-limited</strong> — built for small parts (2–15cm). A car bumper or a wedding ring are both out of range, for opposite reasons.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ HARDWARE ═══════════════════════ -->
+<section class="hardware" id="hardware">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow" data-en="What you need" data-fr="Ce dont vous avez besoin">What you need</div>
+      <h2 data-en-html="One requirement<br>that actually matters" data-fr-html="Une seule exigence<br>qui compte vraiment">One requirement<br>that actually matters</h2>
+    </div>
+    <p data-en="TrueDepth is the whole story. Everything else is software." data-fr="TrueDepth est toute l'histoire. Tout le reste est logiciel.">TrueDepth is the whole story. Everything else is software.</p>
+  </div>
+
+  <div class="hw-grid reveal">
+    <div class="hw-list">
+      <div class="hw-item">
+        <span class="hw-name">iPhone 12 Pro / Pro Max or later</span>
+        <span class="hw-status yes" data-en="SUPPORTED" data-fr="PRIS EN CHARGE">SUPPORTED</span>
+      </div>
+      <div class="hw-item">
+        <span class="hw-name">iPhone 15 Pro or later</span>
+        <span class="hw-meta" data-en="on-device Object Capture" data-fr="Object Capture sur l'appareil">on-device Object Capture</span>
+      </div>
+      <div class="hw-item">
+        <span class="hw-name" data-en="Any non-Pro iPhone" data-fr="Tout iPhone non-Pro">Any non-Pro iPhone</span>
+        <span class="hw-status no" data-en="NO TRUEDEPTH-CLASS SENSOR" data-fr="AUCUN CAPTEUR CLASSE TRUEDEPTH">NO TRUEDEPTH-CLASS SENSOR</span>
+      </div>
+      <div class="hw-item">
+        <span class="hw-name">Samsung Galaxy S20–S25 series</span>
+        <span class="hw-status no" data-en="NO DEPTH SENSOR ON DEVICE" data-fr="AUCUN CAPTEUR DE PROFONDEUR">NO DEPTH SENSOR ON DEVICE</span>
+      </div>
+      <div class="hw-item">
+        <span class="hw-name" data-en="Android, general" data-fr="Android, général">Android, general</span>
+        <span class="hw-meta" data-en-html="photogrammetry fallback only<br>±2–5mm, no TrueDepth-class hardware exists" data-fr-html="repli photogrammétrie uniquement<br>±2–5mm, aucun matériel classe TrueDepth n'existe">photogrammetry fallback only<br>±2–5mm, no TrueDepth-class hardware exists</span>
+      </div>
+    </div>
+
+    <div class="kit-box">
+      <h4 data-en="What's in the box (that you bring)" data-fr="Ce qu'il y a dans la boîte (que vous apportez)">What's in the box (that you bring)</h4>
+      <ul class="kit-list">
+        <li><span data-en="iPhone 12 Pro or newer" data-fr="iPhone 12 Pro ou plus récent">iPhone 12 Pro or newer</span><span class="price" data-en="you have it" data-fr="vous l'avez déjà">you have it</span></li>
+        <li><span data-en="2–3 small neodymium magnets" data-fr="2–3 petits aimants néodyme">2–3 small neodymium magnets</span><span class="price">~$3</span></li>
+        <li><span data-en="Flat, stable surface" data-fr="Surface plane et stable">Flat, stable surface</span><span class="price" data-en="your desk" data-fr="votre bureau">your desk</span></li>
+        <li><span>DepthScan app</span><span class="price" data-en="free" data-fr="gratuit">free</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CTA ═══════════════════════ -->
+<div class="cta-section" id="cta">
+  <h2 data-en-html="Your next part is<br><em>±0.1mm</em> away." data-fr-html="Votre prochaine pièce est<br>à <em>±0,1mm</em>.">Your next part is<br><em>±0.1mm</em> away.</h2>
+  <p data-en="No scanner to buy. No turntable to store. Just the phone already on your desk." data-fr="Aucun scanner à acheter. Aucun plateau à ranger. Juste le téléphone déjà sur votre bureau.">No scanner to buy. No turntable to store. Just the phone already on your desk.</p>
+  <a href="#" class="btn-primary" data-en="Download for iOS →" data-fr="Télécharger pour iOS →">Download for iOS →</a>
+</div>
+
+<footer>
+  <div class="footer-mono">DEPTHSCAN — TRUEDEPTH + MAGNETOMETER FUSION</div>
+  <div class="footer-links">
+    <a href="#how" data-en="How it works" data-fr="Fonctionnement">How it works</a>
+    <a href="#compare" data-en="Comparison" data-fr="Comparaison">Comparison</a>
+    <a href="#hardware" data-en="Hardware" data-fr="Matériel">Hardware</a>
+  </div>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════
+// TRANSLATION ENGINE
+// ════════════════════════════════════════════════════
+let currentLang = 'en';
+
+function applyTranslations() {
+  // Plain text swaps
+  document.querySelectorAll('[data-en]:not([data-en-html])').forEach(el => {
+    const text = currentLang === 'fr' ? el.dataset.fr : el.dataset.en;
+    if (text !== undefined) el.textContent = text;
+  });
+  // HTML swaps (for elements containing <br>, <em>, <strong>, nested spans)
+  document.querySelectorAll('[data-en-html]').forEach(el => {
+    const html = currentLang === 'fr' ? el.dataset.frHtml : el.dataset.enHtml;
+    if (html !== undefined) el.innerHTML = html;
+  });
+  document.documentElement.lang = currentLang;
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentLang = btn.dataset.lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b === btn));
+    applyTranslations();
+  });
+});
+
+// ════════════════════════════════════════════════════
+// RULER TICKS
+// ════════════════════════════════════════════════════
+const ticksContainer = document.getElementById('rulerTicks');
+const tickCount = 60;
+for (let i = 0; i < tickCount; i++) {
+  const tick = document.createElement('div');
+  tick.className = 'tick' + (i % 5 === 0 ? ' major' : '');
+  ticksContainer.appendChild(tick);
+}
+
+// ════════════════════════════════════════════════════
+// SCROLL REVEAL
+// ════════════════════════════════════════════════════
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => observer.observe(el));
+
+// ════════════════════════════════════════════════════
+// LIVE DEMO — side view + phone mesh canvas
+// (adapted from the standalone scanner visualization)
+// ════════════════════════════════════════════════════
+const sc = document.getElementById('sideCanvas');
+const sctx = sc.getContext('2d');
+const SW = 420, SH = 320;
+
+const mc = document.getElementById('meshCanvas');
+const mctx = mc.getContext('2d');
+const MW = 300, MH = 540;
+
+let demoAnimating = true;
+let demoShowHands = false;
+let demoShowMagnet = true;
+let dt = 0;
+let demoMeshTriangles = [];
+let demoCoverage = 0;
+
+const btnAnim = document.getElementById('btnAnim');
+const btnHands = document.getElementById('btnHands');
+const btnMagnet = document.getElementById('btnMagnet');
+
+if (btnAnim) btnAnim.addEventListener('click', function() {
+  demoAnimating = !demoAnimating;
+  const en = demoAnimating ? '▶ Animate' : '⏸ Paused';
+  const fr = demoAnimating ? '▶ Animer' : '⏸ Pause';
+  this.dataset.en = en; this.dataset.fr = fr;
+  this.textContent = currentLang === 'fr' ? fr : en;
+  this.classList.toggle('active', demoAnimating);
+});
+if (btnHands) btnHands.addEventListener('click', function() {
+  demoShowHands = !demoShowHands;
+  this.classList.toggle('active', demoShowHands);
+});
+if (btnMagnet) btnMagnet.addEventListener('click', function() {
+  demoShowMagnet = !demoShowMagnet;
+  this.classList.toggle('active', demoShowMagnet);
+});
+
+function generateDemoMeshSlice(phase, radius, cx, cy) {
+  const tris = [];
+  const segs = 10, h = 60;
+  for (let i = 0; i < segs; i++) {
+    const a1 = (i / segs) * Math.PI * 2 + phase;
+    const a2 = ((i+1) / segs) * Math.PI * 2 + phase;
+    const x1 = cx + Math.cos(a1) * radius, y1 = cy + Math.sin(a1) * radius * 0.4;
+    const x2 = cx + Math.cos(a2) * radius, y2 = cy + Math.sin(a2) * radius * 0.4;
+    tris.push({ p: [{x:x1,y:y1},{x:x2,y:y2},{x:x2,y:y2-h*0.6}], age: 0 });
+    tris.push({ p: [{x:x1,y:y1},{x:x2,y:y2-h*0.6},{x:x1,y:y1-h*0.6}], age: 0 });
+  }
+  return tris;
+}
+
+function drawDemoHand(ctx, x, y, rot, removed, t) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot + Math.sin(t * 0.5) * 0.05);
+  if (removed) { ctx.globalAlpha = 0.25; ctx.fillStyle = '#ff4040'; ctx.strokeStyle = '#ff6060'; }
+  else { ctx.globalAlpha = 0.75; ctx.fillStyle = '#c8906a'; ctx.strokeStyle = '#e0a880'; }
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(-14, -9, 28, 24, 7); ctx.fill(); ctx.stroke();
+  [-9,-4,1,7].forEach((fx, i) => {
+    const fh = 15 - i * 1.6;
+    ctx.beginPath(); ctx.roundRect(fx, -9 - fh, 7, fh + 3, 3); ctx.fill(); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.roundRect(rot > 0 ? 14 : -22, -3, 9, 14, 4); ctx.fill(); ctx.stroke();
+  if (removed) {
+    ctx.globalAlpha = 0.8; ctx.strokeStyle = '#ff3030'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-7,-7); ctx.lineTo(7,7); ctx.moveTo(7,-7); ctx.lineTo(-7,7); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+function drawDemoSideView() {
+  sctx.clearRect(0, 0, SW, SH);
+
+  const phoneY = SH - 50, phoneW = 300, phoneH = 13, phoneCX = SW / 2;
+
+  const floorGrad = sctx.createLinearGradient(0, phoneY + phoneH, 0, SH);
+  floorGrad.addColorStop(0, 'rgba(255,92,53,0.08)');
+  floorGrad.addColorStop(1, 'rgba(11,13,16,0)');
+  sctx.fillStyle = floorGrad;
+  sctx.fillRect(0, phoneY + phoneH, SW, SH - phoneY - phoneH);
+
+  sctx.fillStyle = '#13131a'; sctx.strokeStyle = '#2a2a38'; sctx.lineWidth = 1.5;
+  sctx.beginPath(); sctx.roundRect(phoneCX - phoneW/2, phoneY, phoneW, phoneH, 4); sctx.fill(); sctx.stroke();
+
+  const screenGrad = sctx.createLinearGradient(phoneCX - phoneW/2, phoneY, phoneCX + phoneW/2, phoneY);
+  screenGrad.addColorStop(0, 'rgba(255,92,53,0.15)');
+  screenGrad.addColorStop(0.5, 'rgba(255,92,53,0.4)');
+  screenGrad.addColorStop(1, 'rgba(255,92,53,0.15)');
+  sctx.fillStyle = screenGrad; sctx.strokeStyle = 'rgba(255,92,53,0.5)'; sctx.lineWidth = 1.5;
+  sctx.beginPath(); sctx.roundRect(phoneCX - phoneW/2 + 4, phoneY, phoneW - 8, 3, 1); sctx.fill(); sctx.stroke();
+
+  // TrueDepth sits in the notch near the TOP edge of the phone — when the
+  // phone lies face-up, that's offset toward one end of the body in this
+  // side view, not centered on it. Placed at ~78% along the phone length
+  // (leaving room for the beam cone to stay on-canvas on that side).
+  const camX = phoneCX - phoneW * 0.5 + phoneW * 0.78;
+  sctx.beginPath(); sctx.arc(camX, phoneY + 2, 3.5, 0, Math.PI*2);
+  sctx.fillStyle = 'rgba(255,92,53,0.9)'; sctx.fill();
+
+  const beamSpread = 110 + Math.sin(dt * 0.5) * 5;
+  const beamHeight = 170;
+  const beamGrad = sctx.createLinearGradient(0, phoneY, 0, phoneY - beamHeight);
+  beamGrad.addColorStop(0, 'rgba(255,200,60,0.08)');
+  beamGrad.addColorStop(1, 'rgba(255,200,60,0.0)');
+  sctx.fillStyle = beamGrad;
+  sctx.beginPath();
+  sctx.moveTo(camX, phoneY); sctx.lineTo(camX - beamSpread, phoneY - beamHeight); sctx.lineTo(camX + beamSpread, phoneY - beamHeight);
+  sctx.closePath(); sctx.fill();
+
+  for (let d = 0; d < 14; d++) {
+    const progress = ((dt * 0.8 + d * 0.22) % 1);
+    const spread = progress * beamSpread * 0.85;
+    const side = (d % 2 === 0 ? 1 : -1) * (0.3 + (d % 5) * 0.14);
+    const dx = camX + side * spread;
+    const dy = phoneY - progress * beamHeight * 0.9;
+    const alpha = progress < 0.6 ? progress / 0.6 : (1 - progress) / 0.4;
+    sctx.beginPath(); sctx.arc(dx, dy, 1.3, 0, Math.PI*2);
+    sctx.fillStyle = `rgba(255,200,60,${alpha * 0.8})`; sctx.fill();
+  }
+
+  // Part hovers inside the beam — wobble is small and centered on camX so it
+  // never drifts outside the cone, with vertical position kept within the
+  // beam's effective height range.
+  const partCY = phoneY - 110 + Math.sin(dt * 0.7) * 5;
+  const partCX = camX + Math.sin(dt * 0.4) * 8;
+  const tilt = Math.sin(dt * 0.5) * 0.3;
+  const partW = 46, partH2 = 26;
+
+  sctx.fillStyle = 'rgba(0,0,0,0.25)';
+  sctx.beginPath(); sctx.ellipse(partCX, phoneY + 1, 26, 4, 0, 0, Math.PI*2); sctx.fill();
+
+  sctx.save();
+  sctx.translate(partCX, partCY);
+  sctx.rotate(tilt);
+
+  const boltHeadGrad = sctx.createLinearGradient(-partW/2, 0, partW/2, 0);
+  boltHeadGrad.addColorStop(0, 'rgba(58,140,122,0.6)');
+  boltHeadGrad.addColorStop(0.4, 'rgba(90,200,170,0.9)');
+  boltHeadGrad.addColorStop(1, 'rgba(30,100,85,0.7)');
+  sctx.fillStyle = boltHeadGrad; sctx.strokeStyle = 'rgba(100,220,190,0.5)'; sctx.lineWidth = 1.5;
+  sctx.beginPath(); sctx.roundRect(-partW/2, -partH2/2, partW, partH2, 4); sctx.fill(); sctx.stroke();
+
+  sctx.fillStyle = 'rgba(50,150,125,0.7)'; sctx.strokeStyle = 'rgba(70,170,145,0.4)'; sctx.lineWidth = 1;
+  sctx.beginPath(); sctx.roundRect(-10, partH2/2, 20, 30, 2); sctx.fill(); sctx.stroke();
+
+  if (demoShowMagnet) {
+    const stickerX = partW/2 - 7, stickerY = 0;
+    const pulse = 5 + Math.sin(dt * 4) * 2.5;
+    for (let r = 0; r < 3; r++) {
+      const ringR = pulse + r * 7 + (dt * 18) % 7;
+      const ringAlpha = Math.max(0, 0.3 - r * 0.08 - ((dt*18)%7)/7 * 0.18);
+      sctx.beginPath();
+      sctx.arc(stickerX, stickerY, ringR, 0, Math.PI*2);
+      sctx.strokeStyle = `rgba(255,80,140,${ringAlpha})`;
+      sctx.lineWidth = 1;
+      sctx.stroke();
+    }
+    sctx.beginPath();
+    sctx.arc(stickerX, stickerY, 4, 0, Math.PI*2);
+    sctx.fillStyle = 'rgba(255,60,120,0.95)';
+    sctx.fill();
+  }
+
+  sctx.restore();
+
+  drawDemoHand(sctx, partCX - 32, partCY + 9, -0.3, demoShowHands, dt);
+  drawDemoHand(sctx, partCX + 32, partCY + 9, 0.3, demoShowHands, dt);
+}
+
+function drawDemoPhoneScreen() {
+  mctx.fillStyle = '#080812'; mctx.fillRect(0, 0, MW, MH);
+  const cx = MW / 2, cy = MH / 2 - 20;
+
+  mctx.strokeStyle = 'rgba(40,30,40,0.4)'; mctx.lineWidth = 1;
+  for (let gx = 0; gx < MW; gx += 24) { mctx.beginPath(); mctx.moveTo(gx,0); mctx.lineTo(gx,MH); mctx.stroke(); }
+  for (let gy = 0; gy < MH; gy += 24) { mctx.beginPath(); mctx.moveTo(0,gy); mctx.lineTo(MW,gy); mctx.stroke(); }
+
+  demoMeshTriangles.forEach(tri => {
+    tri.age = (tri.age || 0) + 1;
+    const alpha = Math.min(1, tri.age / 20);
+    mctx.beginPath();
+    mctx.moveTo(tri.p[0].x, tri.p[0].y); mctx.lineTo(tri.p[1].x, tri.p[1].y); mctx.lineTo(tri.p[2].x, tri.p[2].y);
+    mctx.closePath();
+    mctx.fillStyle = `hsla(14,80%,55%,${alpha * 0.55})`; mctx.fill();
+    mctx.strokeStyle = `hsla(14,90%,65%,${alpha*0.4})`; mctx.lineWidth = 0.5; mctx.stroke();
+  });
+
+  const previewR = 55, previewCY = cy - 30, spin = dt * 0.8, segs = 12;
+
+  mctx.beginPath();
+  for (let i = 0; i <= segs; i++) {
+    const a = (i / segs) * Math.PI * 2 + spin;
+    const px = cx + Math.cos(a) * previewR, py = previewCY + Math.sin(a) * previewR * 0.35;
+    i === 0 ? mctx.moveTo(px,py) : mctx.lineTo(px,py);
+  }
+  mctx.strokeStyle = 'rgba(255,140,100,0.5)'; mctx.lineWidth = 1; mctx.stroke();
+
+  mctx.beginPath();
+  for (let i = 0; i <= segs; i++) {
+    const a = (i / segs) * Math.PI * 2 + spin;
+    const px = cx + Math.cos(a) * previewR, py = previewCY + 70 + Math.sin(a) * previewR * 0.35;
+    i === 0 ? mctx.moveTo(px,py) : mctx.lineTo(px,py);
+  }
+  mctx.stroke();
+
+  for (let i = 0; i < segs; i += 2) {
+    const a = (i / segs) * Math.PI * 2 + spin;
+    const px = cx + Math.cos(a) * previewR;
+    const py1 = previewCY + Math.sin(a) * previewR * 0.35, py2 = previewCY + 70 + Math.sin(a) * previewR * 0.35;
+    mctx.beginPath(); mctx.moveTo(px,py1); mctx.lineTo(px,py2);
+    mctx.strokeStyle = 'rgba(200,100,70,0.25)'; mctx.stroke();
+  }
+
+  if (demoShowMagnet) {
+    const stickerA = spin + 0.4;
+    const stx = cx + Math.cos(stickerA) * previewR;
+    const sty = previewCY + 35 + Math.sin(stickerA) * previewR * 0.35;
+    mctx.beginPath(); mctx.arc(stx, sty, 4, 0, Math.PI*2);
+    mctx.fillStyle = 'rgba(255,80,140,0.9)'; mctx.fill();
+  }
+
+  const pulseR = previewR + 10 + Math.sin(dt * 3) * 8;
+  const pulseAlpha = 0.3 + Math.sin(dt * 3) * 0.2;
+  mctx.beginPath(); mctx.ellipse(cx, previewCY+35, pulseR, pulseR*0.35, 0, 0, Math.PI*2);
+  mctx.strokeStyle = `rgba(255,140,90,${pulseAlpha})`; mctx.lineWidth = 1.5; mctx.stroke();
+
+  if (demoCoverage < 95) {
+    const missingStart = (demoCoverage / 100) * Math.PI * 2;
+    mctx.beginPath(); mctx.ellipse(cx, previewCY+35, previewR+18, (previewR+18)*0.35, 0, missingStart, Math.PI*2);
+    mctx.strokeStyle = 'rgba(255,60,60,0.4)'; mctx.lineWidth = 3; mctx.stroke();
+  }
+  if (demoCoverage > 0) {
+    mctx.beginPath(); mctx.ellipse(cx, previewCY+35, previewR+18, (previewR+18)*0.35, 0, 0, (demoCoverage/100)*Math.PI*2);
+    mctx.strokeStyle = 'rgba(58,140,122,0.8)'; mctx.lineWidth = 3; mctx.stroke();
+  }
+
+  mctx.fillStyle = `rgba(255,140,90,0.85)`;
+  mctx.font = '700 11px -apple-system, sans-serif'; mctx.textAlign = 'center';
+  mctx.fillText(`${Math.round(demoCoverage)}%`, cx, MH - 44);
+
+  if (demoShowHands) {
+    mctx.fillStyle = 'rgba(255,60,60,0.7)'; mctx.font = '9px monospace';
+    mctx.fillText(currentLang === 'fr' ? '✕ MAINS MASQUÉES' : '✕ HANDS MASKED', cx, 44);
+  }
+  mctx.textAlign = 'left';
+}
+
+const fieldBarsContainer = document.getElementById('fieldBars');
+const DEMO_BAR_COUNT = 36;
+if (fieldBarsContainer) {
+  for (let i = 0; i < DEMO_BAR_COUNT; i++) {
+    const b = document.createElement('div');
+    b.className = 'field-bar';
+    fieldBarsContainer.appendChild(b);
+  }
+}
+const demoBars = fieldBarsContainer ? fieldBarsContainer.querySelectorAll('.field-bar') : [];
+
+function updateDemoFieldBars() {
+  demoBars.forEach((bar, i) => {
+    const phase = (i / DEMO_BAR_COUNT) * Math.PI * 2;
+    const val = Math.sin(phase + dt * 0.8) * 0.5 + Math.sin(phase * 2 - dt * 0.5) * 0.3;
+    const norm = (val + 1) / 2;
+    const h = Math.max(2, norm * 34);
+    bar.style.height = h + 'px';
+    bar.style.background = demoShowMagnet
+      ? `rgba(255,${Math.round(90 + norm*60)},${Math.round(60 + norm*60)},${0.4 + norm*0.5})`
+      : 'rgba(80,80,90,0.3)';
+  });
+}
+
+let lastDemoTs = 0, demoMeshTimer = 0;
+function demoLoop(ts) {
+  const frameDt = (ts - lastDemoTs) / 1000;
+  lastDemoTs = ts;
+  if (demoAnimating) {
+    dt += frameDt; demoMeshTimer += frameDt;
+    if (demoMeshTimer > 0.4 && demoMeshTriangles.length < 400) {
+      demoMeshTimer = 0;
+      const cx = MW/2, cy = MH/2 - 20;
+      demoMeshTriangles.push(...generateDemoMeshSlice(dt*0.8, 55, cx, cy-30));
+      demoCoverage = Math.min(98, demoCoverage + 2.8);
+      const fill = document.getElementById('coverageFill');
+      if (fill) fill.style.width = demoCoverage + '%';
+    }
+  }
+  drawDemoSideView();
+  drawDemoPhoneScreen();
+  updateDemoFieldBars();
+  requestAnimationFrame(demoLoop);
+}
+requestAnimationFrame(demoLoop);
+
+// ════════════════════════════════════════════════════
+// MAGNET CALIBRATION VISUAL
+// ════════════════════════════════════════════════════
+const cc = document.getElementById('calibCanvas');
+const cctx = cc ? cc.getContext('2d') : null;
+const CW = 440, CH = 300;
+
+// 6 target poses, expressed as simple pitch/roll offsets (degrees) for the
+// illustrative wireframe — spread across orientation space so the solve
+// is well-conditioned, matching MagnetTracker's requiredCalibrationPoses.
+const calibPoses = [
+  { pitch: 0,   roll: 0,   labelEn: 'Pose 1 — flat', labelFr: 'Pose 1 — à plat' },
+  { pitch: 35,  roll: 0,   labelEn: 'Pose 2 — tilt forward', labelFr: 'Pose 2 — inclinaison avant' },
+  { pitch: -35, roll: 0,   labelEn: 'Pose 3 — tilt back', labelFr: 'Pose 3 — inclinaison arrière' },
+  { pitch: 0,   roll: 40,  labelEn: 'Pose 4 — roll right', labelFr: 'Pose 4 — roulis droite' },
+  { pitch: 0,   roll: -40, labelEn: 'Pose 5 — roll left', labelFr: 'Pose 5 — roulis gauche' },
+  { pitch: 25,  roll: 25,  labelEn: 'Pose 6 — diagonal', labelFr: 'Pose 6 — diagonale' },
+];
+
+let calibPoseIndex = 0;
+let calibPoseT = 0;          // 0-1 progress within current pose hold
+let calibTransitioning = false;
+let calibFromPose = calibPoses[0];
+let calibToPose = calibPoses[0];
+const calibHoldDuration = 1.6;   // seconds holding still at each pose
+const calibTransitionDuration = 0.7;
+
+function calibLerp(a, b, t) { return a + (b - a) * t; }
+
+function calibEllipseAt(ctx, x, y, rx, ry, fill, stroke, lineWidth) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lineWidth || 1; ctx.stroke(); }
+}
+
+function easeInOutCalib(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2) / 2; }
+
+function drawCalibFrame() {
+  if (!cctx) return;
+  cctx.clearRect(0, 0, CW, CH);
+
+  const cx = CW / 2, cy = CH / 2 + 10;
+
+  const pitch = calibLerp(calibFromPose.pitch, calibToPose.pitch, calibTransitioning ? easeInOutCalib(calibPoseT) : 1) * Math.PI / 180;
+  const roll  = calibLerp(calibFromPose.roll,  calibToPose.roll,  calibTransitioning ? easeInOutCalib(calibPoseT) : 1) * Math.PI / 180;
+
+  // TrueDepth scan cone beneath the part
+  const beamGrad = cctx.createLinearGradient(0, cy + 90, 0, cy + 10);
+  beamGrad.addColorStop(0, 'rgba(255,92,53,0.0)');
+  beamGrad.addColorStop(1, 'rgba(255,92,53,0.10)');
+  cctx.fillStyle = beamGrad;
+  cctx.beginPath();
+  cctx.moveTo(cx - 14, cy + 95);
+  cctx.lineTo(cx - 60, cy + 8);
+  cctx.lineTo(cx + 60, cy + 8);
+  cctx.lineTo(cx + 14, cy + 95);
+  cctx.closePath();
+  cctx.fill();
+
+  calibEllipseAt(cctx, cx, cy + 96, 5, 2, 'rgba(255,92,53,0.8)', null);
+
+  const size = 46;
+  const corners3D = [
+    [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],
+    [-1,-1, 1],[1,-1, 1],[1,1, 1],[-1,1, 1],
+  ];
+
+  function project(p) {
+    let [x, y, z] = p;
+    let y1 = y * Math.cos(pitch) - z * Math.sin(pitch);
+    let z1 = y * Math.sin(pitch) + z * Math.cos(pitch);
+    let x2 = x * Math.cos(roll) - y1 * Math.sin(roll);
+    let y2 = x * Math.sin(roll) + y1 * Math.cos(roll);
+    const scale = size * (1 + z1 * 0.15);
+    return { x: cx + x2 * scale, y: cy - 10 - y2 * scale * 0.6, z: z1 };
+  }
+
+  const projected = corners3D.map(project);
+  const edges = [
+    [0,1],[1,2],[2,3],[3,0],
+    [4,5],[5,6],[6,7],[7,4],
+    [0,4],[1,5],[2,6],[3,7],
+  ];
+
+  const edgeDepths = edges.map(([a,b]) => (projected[a].z + projected[b].z) / 2);
+  const order = edges.map((_, i) => i).sort((i,j) => edgeDepths[i] - edgeDepths[j]);
+
+  for (const idx of order) {
+    const [a, b] = edges[idx];
+    const depth = edgeDepths[idx];
+    const alpha = 0.35 + (depth + 1) / 2 * 0.45;
+    cctx.beginPath();
+    cctx.moveTo(projected[a].x, projected[a].y);
+    cctx.lineTo(projected[b].x, projected[b].y);
+    cctx.strokeStyle = `rgba(90,200,170,${alpha})`;
+    cctx.lineWidth = 1.6;
+    cctx.stroke();
+  }
+
+  const magnetLocal = [
+    [-0.7, 0.6, 1.05],
+    [0.8, -0.3, 1.05],
+    [0.1, 0.85, -1.05],
+  ];
+  const magnetColors = ['rgba(255,80,140,0.95)', 'rgba(255,140,90,0.95)', 'rgba(255,200,100,0.95)'];
+
+  magnetLocal.forEach((m, i) => {
+    const p = project(m);
+    const pulse = 4 + Math.sin(dt * 4 + i) * 1.5;
+    for (let r = 0; r < 2; r++) {
+      const ringR = pulse + r * 6 + (dt * 14) % 6;
+      const ringAlpha = Math.max(0, 0.3 - r * 0.1 - ((dt*14)%6)/6 * 0.18);
+      cctx.beginPath();
+      cctx.arc(p.x, p.y, ringR, 0, Math.PI * 2);
+      cctx.strokeStyle = magnetColors[i].replace('0.95', String(ringAlpha));
+      cctx.lineWidth = 1;
+      cctx.stroke();
+    }
+    cctx.beginPath();
+    cctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+    cctx.fillStyle = magnetColors[i];
+    cctx.fill();
+  });
+
+  const dotSpacing = 36;
+  const startX = cx - dotSpacing * (calibPoses.length - 1) / 2;
+  calibPoses.forEach((pose, i) => {
+    const dx = startX + i * dotSpacing;
+    const dy = CH - 26;
+    const done = i < calibPoseIndex || (i === calibPoseIndex && !calibTransitioning && calibPoseT > 0.5);
+    const isCurrent = i === calibPoseIndex;
+
+    cctx.beginPath();
+    cctx.arc(dx, dy, isCurrent ? 6 : 4.5, 0, Math.PI * 2);
+    cctx.fillStyle = done ? 'rgba(58,140,122,0.9)' : (isCurrent ? 'rgba(255,92,53,0.9)' : 'rgba(245,243,236,0.15)');
+    cctx.fill();
+    if (isCurrent) {
+      cctx.beginPath();
+      cctx.arc(dx, dy, 10, 0, Math.PI * 2);
+      cctx.strokeStyle = 'rgba(255,92,53,0.4)';
+      cctx.lineWidth = 1;
+      cctx.stroke();
+    }
+  });
+
+  cctx.fillStyle = 'rgba(245,243,236,0.55)';
+  cctx.font = '11px "JetBrains Mono", monospace';
+  cctx.textAlign = 'center';
+  const labelPose = calibTransitioning ? calibToPose : calibPoses[calibPoseIndex];
+  cctx.fillText(currentLang === 'fr' ? labelPose.labelFr : labelPose.labelEn, cx, 28);
+  cctx.textAlign = 'left';
+}
+
+function updateCalibration(frameDt) {
+  if (!cctx) return;
+
+  if (calibTransitioning) {
+    calibPoseT += frameDt / calibTransitionDuration;
+    if (calibPoseT >= 1) {
+      calibPoseT = 0;
+      calibTransitioning = false;
+      calibFromPose = calibToPose;
+    }
+  } else {
+    calibPoseT += frameDt / calibHoldDuration;
+    if (calibPoseT >= 1) {
+      calibPoseT = 0;
+      calibPoseIndex = (calibPoseIndex + 1) % calibPoses.length;
+      calibToPose = calibPoses[calibPoseIndex];
+      calibTransitioning = true;
+    }
+  }
+
+  const fill = document.getElementById('calibProgressFill');
+  const label = document.getElementById('calibProgressLabel');
+  if (fill) {
+    const pct = ((calibPoseIndex % calibPoses.length) + 1) / calibPoses.length * 100;
+    fill.style.width = pct + '%';
+  }
+  if (label) {
+    const poseNum = (calibPoseIndex % calibPoses.length) + 1;
+    label.textContent = `Pose ${poseNum} / ${calibPoses.length}`;
+  }
+}
+
+let lastCalibTs = 0;
+function calibLoop(ts) {
+  const frameDt = (ts - lastCalibTs) / 1000;
+  lastCalibTs = ts;
+  if (cctx) {
+    updateCalibration(Math.min(frameDt, 0.05));
+    drawCalibFrame();
+  }
+  requestAnimationFrame(calibLoop);
+}
+requestAnimationFrame(calibLoop);
+</script>
+
+</body>
+</html>
