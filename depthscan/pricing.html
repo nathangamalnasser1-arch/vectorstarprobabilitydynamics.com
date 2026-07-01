@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DepthScan — Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0B0D10;
+  --ink-2: #141720;
+  --ink-3: #1A1F2E;
+  --paper: #F5F3EC;
+  --signal: #FF5C35;
+  --teal: #3A8C7A;
+  --yellow: #F5C842;
+  --gray: #6B6F76;
+  --line: rgba(245,243,236,0.10);
+  --line-2: rgba(245,243,236,0.20);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter Tight', sans-serif;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: var(--signal); color: var(--ink); }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 20px 5vw;
+  background: rgba(11,13,16,0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.logo {
+  font-family: var(--mono); font-weight:700; font-size:14px;
+  letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;
+  color: inherit; text-decoration: none;
+}
+.logo::before {
+  content:''; width:7px; height:7px; background:var(--signal); display:inline-block;
+}
+.nav-links { display:flex; gap:32px; font-size:13px; color:var(--gray); }
+.nav-links a { text-decoration:none; color:inherit; transition:color .15s; }
+.nav-links a:hover { color:var(--paper); }
+.nav-back {
+  font-family:var(--mono); font-size:12px; color:var(--gray);
+  text-decoration:none; transition:color .15s;
+}
+.nav-back:hover { color:var(--signal); }
+@media(max-width:700px){ .nav-links{ display:none; } }
+
+/* ── HERO ── */
+.hero {
+  padding: 160px 5vw 80px;
+  text-align: center;
+  position: relative;
+}
+.hero-eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--signal); margin-bottom:20px;
+  display:inline-flex; align-items:center; gap:10px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content:''; width:20px; height:1px; background:var(--signal);
+}
+.hero h1 {
+  font-size: clamp(36px,6vw,72px); font-weight:800;
+  letter-spacing:-0.03em; line-height:0.97; margin-bottom:24px;
+}
+.hero h1 em { font-style:normal; color:var(--signal); }
+.hero-sub {
+  font-size:clamp(15px,1.8vw,18px); color:var(--gray);
+  max-width:52ch; margin:0 auto 40px; line-height:1.6;
+}
+
+/* billing toggle */
+.billing-toggle {
+  display:inline-flex; align-items:center; gap:0;
+  background:rgba(245,243,236,0.06); border:1px solid var(--line-2);
+  padding:3px; border-radius:6px; margin-bottom:64px;
+}
+.billing-btn {
+  font-family:var(--mono); font-size:12px; padding:8px 20px;
+  border:none; background:transparent; color:var(--gray);
+  cursor:pointer; border-radius:4px; letter-spacing:0.03em;
+  transition: all .15s; position:relative;
+}
+.billing-btn.active {
+  background:var(--ink-3); color:var(--paper);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.save-badge {
+  position:absolute; top:-10px; right:-10px;
+  background:var(--teal); color:var(--ink); font-size:9px;
+  font-weight:700; padding:2px 6px; border-radius:3px;
+  letter-spacing:0.04em;
+}
+
+/* ── PRICING CARDS ── */
+.cards-section { padding: 0 5vw 120px; }
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media(max-width:1100px){ .cards-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:640px){ .cards-grid{ grid-template-columns:1fr; } }
+
+.card {
+  background: var(--ink);
+  padding: 36px 28px 32px;
+  position: relative;
+  display: flex; flex-direction: column;
+  transition: background .2s;
+}
+.card:hover { background: var(--ink-2); }
+
+/* recommended card */
+.card.recommended {
+  background: var(--ink-3);
+  border: 1px solid rgba(255,92,53,0.35);
+  margin: -1px;
+  z-index: 2;
+}
+.card.recommended:hover { background: #1f253a; }
+
+/* calibration sticker */
+.cal-stamp {
+  position:absolute; top:20px; right:20px;
+  width:54px; height:54px;
+  border:2px solid var(--yellow); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  transform: rotate(12deg);
+  flex-direction:column; gap:1px;
+}
+.cal-stamp-text {
+  font-family:var(--mono); font-size:6.5px; font-weight:700;
+  color:var(--yellow); letter-spacing:0.08em; text-align:center;
+  line-height:1.3; text-transform:uppercase;
+}
+
+.card-tier {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--gray); margin-bottom:18px;
+}
+.card.recommended .card-tier { color:var(--signal); }
+
+.card-price {
+  margin-bottom:6px; display:flex; align-items:baseline; gap:4px;
+}
+.price-amount {
+  font-family:var(--mono); font-size:48px; font-weight:700;
+  letter-spacing:-0.03em; line-height:1;
+}
+.price-currency {
+  font-family:var(--mono); font-size:18px; color:var(--gray);
+  align-self:flex-start; margin-top:8px;
+}
+.price-per {
+  font-family:var(--mono); font-size:12px; color:var(--gray);
+}
+.price-annual {
+  font-family:var(--mono); font-size:11px; color:var(--teal);
+  margin-bottom:20px; min-height:16px;
+}
+
+.card-desc {
+  font-size:13.5px; color:var(--gray); line-height:1.55;
+  margin-bottom:28px; flex-shrink:0;
+}
+
+.card-cta {
+  display:block; text-align:center; text-decoration:none;
+  font-family:var(--mono); font-size:13px; font-weight:600;
+  padding:13px 20px; letter-spacing:0.02em;
+  transition: all .15s; margin-bottom:28px; border-radius:2px;
+}
+.card-cta-outline {
+  border:1px solid var(--line-2); color:var(--paper);
+}
+.card-cta-outline:hover { border-color:var(--paper); }
+.card-cta-filled {
+  background:var(--signal); color:var(--ink); border:1px solid var(--signal);
+}
+.card-cta-filled:hover { background:#ff7a5a; }
+.card-cta-dark {
+  background:var(--paper); color:var(--ink); border:1px solid var(--paper);
+}
+.card-cta-dark:hover { background:var(--signal); border-color:var(--signal); }
+
+.feature-divider {
+  height:1px; background:var(--line); margin-bottom:22px;
+}
+
+.feature-label {
+  font-family:var(--mono); font-size:10px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--gray); margin-bottom:14px;
+}
+
+.features { list-style:none; display:flex; flex-direction:column; gap:11px; flex:1; }
+
+.feature {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:13.5px; line-height:1.45; color:rgba(245,243,236,0.75);
+}
+.feature.locked { color:rgba(107,111,118,0.6); }
+
+.feature-icon {
+  flex-shrink:0; width:16px; height:16px; margin-top:1px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:12px;
+}
+.feature-icon.check { color:var(--teal); }
+.feature-icon.cross { color:rgba(107,111,118,0.5); }
+.feature-icon.signal { color:var(--signal); }
+
+.feature strong { color:var(--paper); font-weight:600; }
+
+/* ── FORMAT SECTION ── */
+.formats-section {
+  padding:120px 5vw;
+  background:var(--ink-2);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.section-eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--signal); margin-bottom:14px;
+}
+.section-head {
+  display:flex; justify-content:space-between; align-items:flex-end;
+  margin-bottom:56px; gap:40px; flex-wrap:wrap;
+}
+.section-head h2 {
+  font-size:clamp(28px,4vw,44px); font-weight:700;
+  letter-spacing:-0.02em; max-width:14ch;
+}
+.section-head p {
+  color:var(--gray); font-size:15px; line-height:1.6; max-width:40ch;
+}
+
+.formats-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+  background:var(--line); border:1px solid var(--line);
+  max-width:1200px; margin:0 auto;
+}
+@media(max-width:900px){ .formats-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:560px){ .formats-grid{ grid-template-columns:1fr; } }
+
+.format-card {
+  background:var(--ink); padding:32px 28px;
+  transition: background .2s;
+}
+.format-card:hover { background:var(--ink-2); }
+
+.format-ext {
+  font-family:var(--mono); font-size:22px; font-weight:700;
+  letter-spacing:-0.02em; margin-bottom:10px;
+}
+.format-ext.orange { color:var(--signal); }
+.format-ext.teal { color:var(--teal); }
+.format-ext.gray { color:var(--gray); }
+.format-ext.yellow { color:var(--yellow); }
+
+.format-name { font-size:13px; font-weight:600; margin-bottom:8px; }
+.format-desc { font-size:13px; color:var(--gray); line-height:1.55; margin-bottom:14px; }
+.format-who {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.04em;
+  color:var(--gray); display:flex; align-items:center; gap:8px;
+}
+.format-who::before { content:'→'; color:var(--signal); }
+
+.format-tier {
+  display:inline-block; font-family:var(--mono); font-size:10px;
+  letter-spacing:0.06em; padding:3px 8px; margin-top:10px;
+  text-transform:uppercase;
+}
+.format-tier.free { background:rgba(107,111,118,0.15); color:var(--gray); }
+.format-tier.pro { background:rgba(255,92,53,0.12); color:var(--signal); }
+.format-tier.studio { background:rgba(58,140,122,0.12); color:var(--teal); }
+.format-tier.business { background:rgba(245,200,66,0.12); color:var(--yellow); }
+
+/* ── ANCHOR SECTION (price anchoring vs hardware) ── */
+.anchor-section {
+  padding:120px 5vw;
+  max-width:1200px; margin:0 auto;
+}
+.anchor-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:var(--line); border:1px solid var(--line);
+}
+@media(max-width:800px){ .anchor-grid{ grid-template-columns:1fr; } }
+
+.anchor-col { background:var(--ink); padding:48px 40px; }
+.anchor-col.theirs { background:var(--ink-2); }
+
+.anchor-label {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--gray); margin-bottom:28px;
+  display:flex; align-items:center; gap:10px;
+}
+.anchor-label::after { content:''; flex:1; height:1px; background:var(--line); }
+
+.anchor-item {
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:14px 0; border-top:1px solid var(--line);
+  gap:20px;
+}
+.anchor-item:first-of-type { border-top:none; }
+.anchor-item-name { font-size:14px; color:rgba(245,243,236,0.7); }
+.anchor-item-price {
+  font-family:var(--mono); font-size:16px; font-weight:600;
+  white-space:nowrap;
+}
+.anchor-item-price.expensive { color:var(--gray); }
+.anchor-item-price.cheap { color:var(--teal); }
+
+.anchor-note {
+  margin-top:32px; font-size:13px; color:var(--gray); line-height:1.65;
+  border-left:2px solid var(--signal); padding-left:16px;
+}
+.anchor-note strong { color:var(--paper); }
+
+/* ── FAQ ── */
+.faq-section {
+  padding:120px 5vw;
+  background:var(--ink-2);
+  border-top:1px solid var(--line);
+}
+.faq-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:var(--line); border:1px solid var(--line);
+  max-width:1200px; margin:40px auto 0;
+}
+@media(max-width:800px){ .faq-grid{ grid-template-columns:1fr; } }
+
+.faq-item {
+  background:var(--ink); padding:32px 28px;
+  cursor:pointer; transition:background .15s;
+}
+.faq-item:hover { background:var(--ink-2); }
+.faq-q {
+  font-size:15px; font-weight:600; margin-bottom:12px;
+  display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+}
+.faq-toggle {
+  font-family:var(--mono); color:var(--signal); flex-shrink:0; font-size:18px;
+}
+.faq-a {
+  font-size:13.5px; color:var(--gray); line-height:1.65;
+  display:none;
+}
+.faq-item.open .faq-a { display:block; }
+.faq-item.open .faq-toggle { transform:rotate(45deg); }
+
+/* ── CTA ── */
+.final-cta {
+  padding:160px 5vw;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.final-cta::before {
+  content:'';
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:600px; height:600px;
+  background: radial-gradient(circle, rgba(255,92,53,0.06) 0%, transparent 70%);
+  pointer-events:none;
+}
+.final-cta h2 {
+  font-size:clamp(32px,5vw,60px); font-weight:800;
+  letter-spacing:-0.03em; margin-bottom:16px;
+}
+.final-cta h2 em { font-style:normal; color:var(--signal); }
+.final-cta p { font-size:16px; color:var(--gray); margin-bottom:40px; }
+.cta-buttons { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.btn-primary {
+  font-family:var(--mono); font-size:13px; font-weight:600;
+  background:var(--paper); color:var(--ink);
+  padding:16px 32px; text-decoration:none;
+  transition:all .15s; display:inline-block;
+}
+.btn-primary:hover { background:var(--signal); }
+.btn-secondary {
+  font-family:var(--mono); font-size:13px;
+  border:1px solid var(--line-2); color:var(--paper);
+  padding:16px 32px; text-decoration:none;
+  transition:border-color .15s; display:inline-block;
+}
+.btn-secondary:hover { border-color:var(--paper); }
+
+/* ── FOOTER ── */
+footer {
+  border-top:1px solid var(--line); padding:40px 5vw;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:16px;
+}
+.footer-mono { font-family:var(--mono); font-size:11px; color:var(--gray); }
+.footer-links { display:flex; gap:24px; font-size:13px; }
+.footer-links a { color:var(--gray); text-decoration:none; }
+.footer-links a:hover { color:var(--paper); }
+
+/* reveal */
+.reveal { opacity:0; transform:translateY(14px); transition:opacity .55s, transform .55s; }
+.reveal.visible { opacity:1; transform:none; }
+@media(prefers-reduced-motion:reduce){ .reveal{ opacity:1; transform:none; transition:none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">DEPTHSCAN</a>
+  <div class="nav-links">
+    <a href="#plans">Plans</a>
+    <a href="#formats">File formats</a>
+    <a href="#compare">vs. hardware</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="index.html" class="nav-back">← Back to product</a>
+</nav>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="hero-eyebrow">Pricing</div>
+  <h1>Pay for the scan.<br>Not the <em>scanner.</em></h1>
+  <p class="hero-sub">
+    A Revopoint Miraco costs $1,199 upfront. DepthScan Pro is $179/year.
+    You already own the phone.
+  </p>
+
+  <div class="billing-toggle" id="billingToggle">
+    <button class="billing-btn" id="btnMonthly" onclick="setBilling('monthly')">Monthly</button>
+    <button class="billing-btn active" id="btnAnnual" onclick="setBilling('annual')">
+      Annual
+      <span class="save-badge">–25%</span>
+    </button>
+  </div>
+</header>
+
+<!-- ── PRICING CARDS ── -->
+<div class="cards-section" id="plans">
+  <div class="cards-grid">
+
+    <!-- FREE -->
+    <div class="card">
+      <div class="card-tier">Free</div>
+      <div class="card-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount">0</span>
+      </div>
+      <div class="price-annual">&nbsp;</div>
+      <p class="card-desc">Try the scanner before you commit. Good for occasional reference scans where exact tolerance doesn't matter.</p>
+      <a href="#" class="card-cta card-cta-outline">Get started free</a>
+      <div class="feature-divider"></div>
+      <div class="feature-label">What's included</div>
+      <ul class="features">
+        <li class="feature"><span class="feature-icon check">✓</span><span><strong>5 scans/month</strong></span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Live mesh preview on screen</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Hand removal</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>.usdz export (watermarked)</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>STL / OBJ export</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>Magnet rotation tracking</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>2-pass magnet relocation</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>Measurement tools</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>Cloud backup</span></li>
+      </ul>
+    </div>
+
+    <!-- PRO — recommended -->
+    <div class="card recommended">
+      <div class="cal-stamp">
+        <span class="cal-stamp-text">MOST<br>POPULAR</span>
+      </div>
+      <div class="card-tier">Pro</div>
+      <div class="card-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount" id="pro-price">14</span>
+        <span class="price-per">/mo</span>
+      </div>
+      <div class="price-annual" id="pro-annual">Billed $179/year · save $49</div>
+      <p class="card-desc">The full scanning pipeline. Unlimited scans, all export formats including STL for 3D printing, and magnet rotation tracking.</p>
+      <a href="#" class="card-cta card-cta-filled">Start Pro free for 14 days</a>
+      <div class="feature-divider"></div>
+      <div class="feature-label">Everything in Free, plus</div>
+      <ul class="features">
+        <li class="feature"><span class="feature-icon signal">◆</span><span><strong>Unlimited scans</strong></span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span><strong>.stl export</strong> — scan it, print it</span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span>.obj export (textured)</span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span>.ply point cloud export</span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span>No watermarks</span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span>Magnet rotation tracking</span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span>2-pass magnet relocation</span></li>
+        <li class="feature"><span class="feature-icon signal">◆</span><span>In-app measurement tools</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>Cloud backup & history</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>Team sharing</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>API access</span></li>
+      </ul>
+    </div>
+
+    <!-- STUDIO -->
+    <div class="card">
+      <div class="card-tier">Studio</div>
+      <div class="card-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount" id="studio-price">37</span>
+        <span class="price-per">/mo</span>
+      </div>
+      <div class="price-annual" id="studio-annual">Billed $449/year · save $95</div>
+      <p class="card-desc">For design studios and small teams that need shared scan libraries, cloud backup, and API access to post-process meshes.</p>
+      <a href="#" class="card-cta card-cta-outline">Start Studio free for 14 days</a>
+      <div class="feature-divider"></div>
+      <div class="feature-label">Everything in Pro, plus</div>
+      <ul class="features">
+        <li class="feature"><span class="feature-icon check">✓</span><span><strong>Cloud backup</strong> — all scans synced</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Scan history (unlimited)</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Team sharing (up to 3 seats)</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>API access to mesh exports</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>.glb / .gltf export</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Priority export queue</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>Multi-seat admin dashboard</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>STEP export (cloud)</span></li>
+        <li class="feature locked"><span class="feature-icon cross">✕</span><span>SLA support</span></li>
+      </ul>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="card">
+      <div class="card-tier">Business</div>
+      <div class="card-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount" id="biz-price">149</span>
+        <span class="price-per">/mo</span>
+      </div>
+      <div class="price-annual" id="biz-annual">Billed $1,490/year · save $298</div>
+      <p class="card-desc">For manufacturing shops, QC teams, and anyone who needs multi-seat access, STEP export, and a support SLA.</p>
+      <a href="#" class="card-cta card-cta-dark">Contact sales</a>
+      <div class="feature-divider"></div>
+      <div class="feature-label">Everything in Studio, plus</div>
+      <ul class="features">
+        <li class="feature"><span class="feature-icon check">✓</span><span><strong>Up to 10 seats</strong></span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Admin dashboard + usage logs</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span><strong>STEP export</strong> (cloud-processed)</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Custom export pipelines</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>SLA support (next business day)</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Onboarding call</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Invoice billing available</span></li>
+        <li class="feature"><span class="feature-icon check">✓</span><span>Volume discount above 10 seats</span></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── FILE FORMATS ── -->
+<section class="formats-section" id="formats">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow">Export formats</div>
+      <h2>Scan it once.<br>Use it anywhere.</h2>
+    </div>
+    <p>Every format has a job. STL for printing, OBJ for editing, STEP for CAD. Know which tier unlocks what before you need it.</p>
+  </div>
+
+  <div class="formats-grid reveal">
+
+    <div class="format-card">
+      <div class="format-ext orange">.usdz</div>
+      <div class="format-name">Apple Universal Scene</div>
+      <div class="format-desc">Textured 3D model in Apple's AR format. Preview in Quick Look, share via AirDrop, view in AR. The default output of Object Capture.</div>
+      <div class="format-who">AR preview, client sharing</div>
+      <span class="format-tier free">Free — watermarked</span>
+      <span class="format-tier pro">Pro — clean</span>
+    </div>
+
+    <div class="format-card">
+      <div class="format-ext orange">.stl</div>
+      <div class="format-name">Stereolithography</div>
+      <div class="format-desc">Geometry only, no texture. The universal language of 3D printing — drag directly into Bambu Studio, PrusaSlicer, or Cura and print.</div>
+      <div class="format-who">3D printing slicers</div>
+      <span class="format-tier pro">Pro and above</span>
+    </div>
+
+    <div class="format-card">
+      <div class="format-ext orange">.obj</div>
+      <div class="format-name">Wavefront OBJ</div>
+      <div class="format-desc">Mesh with texture maps. Opens in Blender, Cinema4D, Maya, ZBrush. The best starting point for editing or rendering the scanned geometry.</div>
+      <div class="format-who">3D software, rendering</div>
+      <span class="format-tier pro">Pro and above</span>
+    </div>
+
+    <div class="format-card">
+      <div class="format-ext teal">.ply</div>
+      <div class="format-name">Polygon File Format</div>
+      <div class="format-desc">Point cloud with per-point color. Opens in CloudCompare, MeshLab, Open3D. Used for research pipelines, custom processing, and deviation analysis.</div>
+      <div class="format-who">Research, CloudCompare, Open3D</div>
+      <span class="format-tier pro">Pro and above</span>
+    </div>
+
+    <div class="format-card">
+      <div class="format-ext teal">.glb / .gltf</div>
+      <div class="format-name">GL Transmission Format</div>
+      <div class="format-desc">Web-optimized textured mesh. Embeds in websites, loads in Three.js, works natively in Sketchfab, Unity, and Unreal Engine.</div>
+      <div class="format-who">Web, game engines, Sketchfab</div>
+      <span class="format-tier studio">Studio and above</span>
+    </div>
+
+    <div class="format-card">
+      <div class="format-ext yellow">.step / .stp</div>
+      <div class="format-name">Standard for Exchange of Product Data</div>
+      <div class="format-desc">Parametric CAD solid — the format Fusion 360, SolidWorks, and FreeCAD actually want. Mesh-to-BRep conversion runs cloud-side; results flagged where surface fitting was uncertain.</div>
+      <div class="format-who">Fusion 360, SolidWorks, FreeCAD</div>
+      <span class="format-tier business">Business only</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── ANCHOR vs HARDWARE ── -->
+<section style="padding:120px 5vw; background:var(--ink);" id="compare">
+  <div class="anchor-section" style="padding:0; max-width:1200px; margin:0 auto;">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-eyebrow">Price comparison</div>
+        <h2>What you'd pay<br>for the same job</h2>
+      </div>
+      <p>A scanner that sits on a shelf between uses costs money whether it scans or not. DepthScan costs nothing when you don't need it.</p>
+    </div>
+
+    <div class="anchor-grid reveal">
+      <div class="anchor-col theirs">
+        <div class="anchor-label">Hardware scanners</div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Revopoint Miraco</span>
+          <span class="anchor-item-price expensive">$1,199</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Shining3D EinScan SE</span>
+          <span class="anchor-item-price expensive">$1,299</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Artec Leo</span>
+          <span class="anchor-item-price expensive">$28,500</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Faro Focus laser scanner</span>
+          <span class="anchor-item-price expensive">$40,000+</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Desktop CMM</span>
+          <span class="anchor-item-price expensive">$15,000+</span>
+        </div>
+      </div>
+      <div class="anchor-col">
+        <div class="anchor-label">DepthScan</div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Free tier</span>
+          <span class="anchor-item-price cheap">$0</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Pro — annual</span>
+          <span class="anchor-item-price cheap">$179/yr</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Studio — annual</span>
+          <span class="anchor-item-price cheap">$449/yr</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Business — annual</span>
+          <span class="anchor-item-price cheap">$1,490/yr</span>
+        </div>
+        <div class="anchor-item">
+          <span class="anchor-item-name">Hardware required</span>
+          <span class="anchor-item-price cheap">phone you own</span>
+        </div>
+        <div class="anchor-note">
+          <strong>DepthScan isn't a replacement for a CMM.</strong> It's what you reach for when you don't have one nearby, don't want to spend 20 minutes setting one up, or need a quick reference scan in the field. The accuracy is ±0.1–0.2mm — honest about it, not marketing-rounded to something it isn't.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="faq-section" id="faq">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-eyebrow">Questions</div>
+        <h2>The ones people actually ask</h2>
+      </div>
+    </div>
+
+    <div class="faq-grid reveal">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What iPhone do I need? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">iPhone 12 Pro or later for full scanning. iPhone 15 Pro or later for on-device Object Capture processing — older Pro models export the frames and process via the app's cloud pipeline instead. Non-Pro iPhones and Android devices don't have TrueDepth-class depth sensors and aren't supported.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Is ±0.1mm actually useful? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">For fit-checking, reverse-engineering reference, replacement part documentation, and client visualization — yes, absolutely. For certified dimensional inspection or anything that will be stamped with a tolerance spec — no. DepthScan is a field tool, not a CMM replacement.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What's the magnet tracking about? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">Stick 2–3 ordinary magnets to the part before scanning. The magnetometer reads their rotation as you move the part — the app calibrates to your specific magnets in about 20 seconds and tracks orientation from there. Works on any part that isn't itself strongly ferrous. A two-pass flow fills the small spots the magnets physically covered during scan 1.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Why is STL paywalled and not free? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">STL is the format that makes a scan immediately actionable — drop it into a slicer and print. Making that free would remove the most natural reason to upgrade. The free tier lets you verify the scan is good (live preview + .usdz to view and share); Pro lets you do something with it.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What does STEP conversion actually do? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">STEP is the parametric CAD format that Fusion 360, SolidWorks, and FreeCAD actually want — not a mesh, but a solid with recognizable geometry (planes, cylinders, fillets). Converting a scan mesh to STEP requires fitting geometric primitives to the point cloud, which runs on our servers. Regions where the fit was uncertain are flagged in the output rather than silently smoothed over.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Can I cancel anytime? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">Yes. Annual plans renew once per year; cancel before renewal and you keep access until the period ends. Monthly plans cancel immediately. No cancellation fees, no "are you sure" dark patterns.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Is there a lifetime deal? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">No, and there won't be. Lifetime deals devalue the product, attract the wrong customers, and make it impossible to fund ongoing development. Annual Pro at $179 is the best long-term value we offer.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Does the free trial require a credit card? <span class="faq-toggle">+</span></div>
+        <div class="faq-a">No card required for the 14-day Pro trial. You'll be asked to add one at the end of the trial if you want to continue. No automatic charges until you explicitly confirm.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<div class="final-cta">
+  <h2>Start scanning.<br><em>Free, today.</em></h2>
+  <p>No hardware to buy. No credit card for the free tier. Just install and scan.</p>
+  <div class="cta-buttons">
+    <a href="#" class="btn-primary">Download for iOS →</a>
+    <a href="#plans" class="btn-secondary">Compare plans</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-mono">DEPTHSCAN · PRICING</div>
+  <div class="footer-links">
+    <a href="index.html">Product</a>
+    <a href="../natapps.html">Natapps</a>
+    <a href="#">Terms</a>
+    <a href="#">Privacy</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+
+<script>
+// ── BILLING TOGGLE ──
+const prices = {
+  monthly: { pro: 19, studio: 49, biz: 149 },
+  annual:  { pro: 14, studio: 37, biz: 124 },
+};
+const annualLabels = {
+  pro:    'Billed $179/year · save $49',
+  studio: 'Billed $449/year · save $95',
+  biz:    'Billed $1,490/year · save $298',
+};
+const monthlyLabels = {
+  pro: '', studio: '', biz: '',
+};
+
+let billing = 'annual';
+
+function setBilling(mode) {
+  billing = mode;
+  document.getElementById('btnMonthly').classList.toggle('active', mode === 'monthly');
+  document.getElementById('btnAnnual').classList.toggle('active', mode === 'annual');
+
+  document.getElementById('pro-price').textContent    = prices[mode].pro;
+  document.getElementById('studio-price').textContent = prices[mode].studio;
+  document.getElementById('biz-price').textContent    = prices[mode].biz;
+
+  document.getElementById('pro-annual').textContent    = mode === 'annual' ? annualLabels.pro    : '\u00a0';
+  document.getElementById('studio-annual').textContent = mode === 'annual' ? annualLabels.studio : '\u00a0';
+  document.getElementById('biz-annual').textContent    = mode === 'annual' ? annualLabels.biz    : '\u00a0';
+}
+
+// ── FAQ ──
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+
+// ── SCROLL REVEAL ──
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

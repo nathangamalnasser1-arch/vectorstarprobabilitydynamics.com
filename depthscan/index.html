@@ -60,6 +60,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    color: inherit;
   }
   .logo::before {
     content: '';
@@ -237,6 +238,16 @@
     letter-spacing: 0.02em;
   }
   .nav-cta:hover { border-color: var(--signal); color: var(--signal); }
+
+  .nav-natapps {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    border: 1px solid var(--line);
+    padding: 9px 18px;
+    color: var(--instrument);
+    letter-spacing: 0.02em;
+  }
+  .nav-natapps:hover { border-color: var(--paper); color: var(--paper); }
 
   /* ───────────────────── MAGNET CALIBRATION ───────────────────── */
   .calibrate {
@@ -940,7 +951,7 @@
 <body>
 
 <nav>
-  <div class="logo">DEPTHSCAN</div>
+  <a href="index.html" class="logo">DEPTHSCAN</a>
   <div class="nav-links">
     <a href="#how" data-en="How it works" data-fr="Fonctionnement">How it works</a>
     <a href="#demo" data-en="Live demo" data-fr="Démo en direct">Live demo</a>
@@ -948,13 +959,15 @@
     <a href="#compare" data-en="Comparison" data-fr="Comparaison">Comparison</a>
     <a href="#honest" data-en="Tradeoffs" data-fr="Compromis">Tradeoffs</a>
     <a href="#hardware" data-en="Hardware" data-fr="Matériel">Hardware</a>
+    <a href="pricing.html" data-en="Pricing" data-fr="Tarifs">Pricing</a>
   </div>
   <div class="nav-right">
+    <a href="../natapps.html" class="nav-natapps" data-en="← Natapps" data-fr="← Natapps">← Natapps</a>
     <div class="lang-toggle">
       <button class="lang-btn active" data-lang="en">EN</button>
       <button class="lang-btn" data-lang="fr">FR</button>
     </div>
-    <a href="#cta" class="nav-cta" data-en="Get the app →" data-fr="Obtenir l'app →">Get the app →</a>
+    <a href="pricing.html" class="nav-cta" data-en="Get the app →" data-fr="Obtenir l'app →">Get the app →</a>
   </div>
 </nav>
 
@@ -968,7 +981,7 @@
     no turntable, no markers, no lab.
   </p>
   <div class="hero-ctas">
-    <a href="#cta" class="btn-primary" data-en="Get the app →" data-fr="Obtenir l'app →">Get the app →</a>
+    <a href="pricing.html" class="btn-primary" data-en="Get the app →" data-fr="Obtenir l'app →">Get the app →</a>
     <a href="#how" class="btn-secondary" data-en="See how it works" data-fr="Voir le fonctionnement">See how it works</a>
   </div>
 
@@ -1434,12 +1447,14 @@
 <div class="cta-section" id="cta">
   <h2 data-en-html="Your next part is<br><em>±0.1mm</em> away." data-fr-html="Votre prochaine pièce est<br>à <em>±0,1mm</em>.">Your next part is<br><em>±0.1mm</em> away.</h2>
   <p data-en="No scanner to buy. No turntable to store. Just the phone already on your desk." data-fr="Aucun scanner à acheter. Aucun plateau à ranger. Juste le téléphone déjà sur votre bureau.">No scanner to buy. No turntable to store. Just the phone already on your desk.</p>
-  <a href="#" class="btn-primary" data-en="Download for iOS →" data-fr="Télécharger pour iOS →">Download for iOS →</a>
+  <a href="pricing.html" class="btn-primary" data-en="Download for iOS →" data-fr="Télécharger pour iOS →">Download for iOS →</a>
 </div>
 
 <footer>
   <div class="footer-mono">DEPTHSCAN — TRUEDEPTH + MAGNETOMETER FUSION</div>
   <div class="footer-links">
+    <a href="../natapps.html" data-en="Natapps" data-fr="Natapps">Natapps</a>
+    <a href="pricing.html" data-en="Pricing" data-fr="Tarifs">Pricing</a>
     <a href="#how" data-en="How it works" data-fr="Fonctionnement">How it works</a>
     <a href="#compare" data-en="Comparison" data-fr="Comparaison">Comparison</a>
     <a href="#hardware" data-en="Hardware" data-fr="Matériel">Hardware</a>
