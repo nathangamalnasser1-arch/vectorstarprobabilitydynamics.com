@@ -1238,12 +1238,22 @@ function connectFirebaseTracer(overrideSid,overrideDb){
     setLiveStatus('Listening to Firebase…')
     db.ref(base+'/left/latest').on('value',function(snap){
       var d=snap.val(); if(!d) return
-      d.device='left'
+      d.type='sensor'; d.device='left'
       handleLiveMsg(d)
     })
     db.ref(base+'/right/latest').on('value',function(snap){
       var d=snap.val(); if(!d) return
-      d.device='right'
+      d.type='sensor'; d.device='right'
+      handleLiveMsg(d)
+    })
+    db.ref(base+'/gps/origin').once('value',function(snap){
+      var d=snap.val(); if(!d) return
+      d.type='gps_origin'
+      handleLiveMsg(d)
+    })
+    db.ref(base+'/gps/latest').on('value',function(snap){
+      var d=snap.val(); if(!d) return
+      d.type='gps'
       handleLiveMsg(d)
     })
     db.ref(base+'/meta').once('value',function(snap){
