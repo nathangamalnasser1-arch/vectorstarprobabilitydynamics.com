@@ -1533,6 +1533,35 @@ let dt = 0;
 let demoMeshTriangles = [];
 let demoCoverage = 0;
 
+const DEMO_MAGNET_COLORS = [
+  'rgba(255,80,140,0.95)',
+  'rgba(255,140,90,0.95)',
+  'rgba(255,200,100,0.95)',
+];
+const DEMO_SIDE_MAGNETS = [
+  { x: -14, y: -6 },
+  { x: 10, y: 4 },
+  { x: 2, y: -10 },
+];
+const DEMO_MESH_MAGNET_ANGLES = [0.4, 2.1, 4.3];
+
+function drawDemoMagnetSticker(ctx, x, y, color, i, dotRadius = 4) {
+  const pulse = 5 + Math.sin(dt * 4 + i) * 2.5;
+  for (let r = 0; r < 3; r++) {
+    const ringR = pulse + r * 7 + (dt * 18 + i * 2) % 7;
+    const ringAlpha = Math.max(0, 0.3 - r * 0.08 - ((dt * 18 + i * 2) % 7) / 7 * 0.18);
+    ctx.beginPath();
+    ctx.arc(x, y, ringR, 0, Math.PI * 2);
+    ctx.strokeStyle = color.replace('0.95', String(ringAlpha)).replace('0.9', String(ringAlpha));
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
 const btnAnim = document.getElementById('btnAnim');
 const btnHands = document.getElementById('btnHands');
 const btnMagnet = document.getElementById('btnMagnet');
@@ -1665,21 +1694,9 @@ function drawDemoSideView() {
   sctx.beginPath(); sctx.roundRect(-10, partH2/2, 20, 30, 2); sctx.fill(); sctx.stroke();
 
   if (demoShowMagnet) {
-    const stickerX = partW/2 - 7, stickerY = 0;
-    const pulse = 5 + Math.sin(dt * 4) * 2.5;
-    for (let r = 0; r < 3; r++) {
-      const ringR = pulse + r * 7 + (dt * 18) % 7;
-      const ringAlpha = Math.max(0, 0.3 - r * 0.08 - ((dt*18)%7)/7 * 0.18);
-      sctx.beginPath();
-      sctx.arc(stickerX, stickerY, ringR, 0, Math.PI*2);
-      sctx.strokeStyle = `rgba(255,80,140,${ringAlpha})`;
-      sctx.lineWidth = 1;
-      sctx.stroke();
-    }
-    sctx.beginPath();
-    sctx.arc(stickerX, stickerY, 4, 0, Math.PI*2);
-    sctx.fillStyle = 'rgba(255,60,120,0.95)';
-    sctx.fill();
+    DEMO_SIDE_MAGNETS.forEach((magnet, i) => {
+      drawDemoMagnetSticker(sctx, magnet.x, magnet.y, DEMO_MAGNET_COLORS[i], i);
+    });
   }
 
   sctx.restore();
@@ -1733,11 +1750,12 @@ function drawDemoPhoneScreen() {
   }
 
   if (demoShowMagnet) {
-    const stickerA = spin + 0.4;
-    const stx = cx + Math.cos(stickerA) * previewR;
-    const sty = previewCY + 35 + Math.sin(stickerA) * previewR * 0.35;
-    mctx.beginPath(); mctx.arc(stx, sty, 4, 0, Math.PI*2);
-    mctx.fillStyle = 'rgba(255,80,140,0.9)'; mctx.fill();
+    DEMO_MESH_MAGNET_ANGLES.forEach((angleOffset, i) => {
+      const stickerA = spin + angleOffset;
+      const stx = cx + Math.cos(stickerA) * previewR;
+      const sty = previewCY + 35 + Math.sin(stickerA) * previewR * 0.35;
+      drawDemoMagnetSticker(mctx, stx, sty, DEMO_MAGNET_COLORS[i], i, 3.5);
+    });
   }
 
   const pulseR = previewR + 10 + Math.sin(dt * 3) * 8;
