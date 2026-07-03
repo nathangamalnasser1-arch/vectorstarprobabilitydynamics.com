@@ -893,6 +893,11 @@ function applySession(sessions){
   document.getElementById('sessionName').textContent = sname ? '· '+sname : ''
   setLoadStatus('Loaded: '+primary.device+' · '+(dur/60000|0)+'m '+(dur/1000%60|0)+'s · '+GPS.length+' GPS pts')
   setTimeout(()=>setLoadStatus(''),4000)
+  // Persist processed session so page refresh restores it
+  try{localStorage.setItem('apex_tracer_cache',JSON.stringify({
+    GPS,IMU,DUR,G_PROFILE,R_PROFILE,SPIN_EVENTS,GPS_SC,MAX_G,MAX_ROT,OV_Y,FIT,
+    sname:document.getElementById('sessionName').textContent
+  }))}catch(_){}
 }
 
 const fileInputEl=document.getElementById('fileInput')
@@ -1506,6 +1511,25 @@ function handleLiveMsg(msg){
 
   // ?sid=SESSION_ID  — from APEX app QR code / shared link
   const sid=p.get('sid')
+
+  // Restore last loaded session from localStorage (only when not in live mode)
+  if(!sid){
+    try{
+      const raw=localStorage.getItem('apex_tracer_cache')
+      if(raw){
+        const c=JSON.parse(raw)
+        if(c.GPS&&c.GPS.length>1){
+          GPS=c.GPS;IMU=c.IMU||[];DUR=c.DUR||0
+          G_PROFILE=c.G_PROFILE||G_PROFILE;R_PROFILE=c.R_PROFILE||R_PROFILE
+          SPIN_EVENTS=c.SPIN_EVENTS||[];GPS_SC=c.GPS_SC||1
+          MAX_G=c.MAX_G||15;MAX_ROT=c.MAX_ROT||1000;OV_Y=c.OV_Y||0;FIT=c.FIT||FIT
+          document.getElementById('sessionName').textContent=c.sname||''
+          computeGPeaks();computeTrailData();drawTimelineGraph()
+        }
+      }
+    }catch(_){}
+  }
+
   if(sid){
     const name=p.get('name')||''
     if(name) document.getElementById('sessionName').textContent='· '+decodeURIComponent(name)
