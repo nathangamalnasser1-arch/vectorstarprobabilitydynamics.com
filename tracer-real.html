@@ -585,13 +585,14 @@ tstrip.addEventListener('pointermove',e=>{if(e.buttons)seekClick(e,tstrip)})
 tstrip.addEventListener('click',e=>seekClick(e,e.currentTarget))
 
 // ── Draw helpers ─────────────────────────────────────────────
-function drawGhost(pfn){
+function drawGhost(pfn,alpha){
+  alpha=alpha||0.4
   ctx.beginPath();let first=true
   for(const pt of GPS){
     const p=pfn([pt[1],pt[2],pt[3]]);if(!p){first=true;continue}
     first?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]);first=false
   }
-  ctx.strokeStyle='rgba(0,255,220,.4)';ctx.lineWidth=1.5*DPR;ctx.stroke()
+  ctx.strokeStyle='rgba(0,255,220,'+alpha+')';ctx.lineWidth=1.5*DPR;ctx.stroke()
 }
 function drawLiveTrack(pfn){
   if(liveGPS.length<2)return
@@ -600,7 +601,7 @@ function drawLiveTrack(pfn){
     const p=pfn(pt);if(!p){first=true;continue}
     first?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]);first=false
   }
-  ctx.strokeStyle='rgba(0,255,200,.3)';ctx.lineWidth=1.2*DPR;ctx.stroke()
+  ctx.strokeStyle='rgba(0,255,200,.9)';ctx.lineWidth=2*DPR;ctx.stroke()
 }
 function drawGrid(pfn,gcx,gcz){
   const ext=Math.ceil(FIT.r)+1
@@ -716,6 +717,7 @@ function frame(ts){
 
   if(liveMode){
     drawGrid(pfn,liveLastPos[0],liveLastPos[2])
+    if(showGhost&&GPS.length>1)drawGhost(pfn,0.15)
     drawLiveTrack(pfn)
     drawRibbon(bL,0,220,90,pfn)
     drawRibbon(bR,0,255,150,pfn)
@@ -1506,8 +1508,6 @@ function handleLiveMsg(msg){
   // ?sid=SESSION_ID  — from APEX app QR code / shared link
   const sid=p.get('sid')
   if(sid){
-    // Clear demo data so the June-12 hardcoded session doesn't show while connecting
-    GPS=[]; IMU=[]; DUR=0
     const name=p.get('name')||''
     if(name) document.getElementById('sessionName').textContent='· '+decodeURIComponent(name)
     if(APEX_RTDB_URL){
