@@ -4,61 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Boxing Live</title>
-<!-- Firebase SDK (only loaded when user chooses Firebase mode) -->
-<script>
-// ── Set your Firebase RTDB URL once (Firebase Console → Realtime Database → copy URL) ──
-var APEX_RTDB_URL = 'https://accelperformaceexponentialapex-default-rtdb.firebaseio.com'
-
-var _fbApp=null,_fbListeners=[]
-function loadFirebase(cb){
-  if(window.firebase){cb();return}
-  var s1=document.createElement('script')
-  s1.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js'
-  s1.onload=function(){
-    var s2=document.createElement('script')
-    s2.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js'
-    s2.onload=cb; document.head.appendChild(s2)
-  }
-  document.head.appendChild(s1)
-}
-function connectFirebase(overrideSid,overrideDb){
-  var dbUrl=overrideDb||document.getElementById('fbDbUrl').value.trim()
-  var sid  =overrideSid||document.getElementById('fbSession').value.trim()
-  if(!dbUrl||!sid){setSt('Enter Firebase DB URL and Session ID');return}
-  setSt('Loading Firebase SDK…')
-  loadFirebase(function(){
-    try{
-      if(_fbApp) firebase.app().delete()
-      _fbApp=firebase.initializeApp({databaseURL:dbUrl},'boxing-viewer')
-    }catch(e){
-      try{_fbApp=firebase.app('boxing-viewer')}catch(e2){}
-    }
-    var db=firebase.app('boxing-viewer').database()
-    var basePath='sessions/'+sid
-    setSt('Connecting to Firebase…')
-    ;['left','right'].forEach(function(side){
-      db.ref(basePath+'/'+side+'/latest').on('value',function(snap){
-        var d=snap.val(); if(!d) return
-        d.type='sensor'; d.device=side
-        handleMsg(d)
-      })
-    })
-    db.ref(basePath+'/meta').once('value',function(snap){
-      var m=snap.val()
-      if(m&&m.status==='recording') setSt('Firebase: live ●')
-      else setSt('Firebase: connected (waiting for session)')
-      document.getElementById('overlay').classList.add('h')
-    })
-  })
-}
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#000508;color:#00ffee;font-family:'Courier New',monospace;overflow:hidden;height:100vh;width:100vw}
-canvas{position:fixed;top:0;left:0;width:100%;height:100%;display:none}
-canvas.show{display:block}
+#waveCanvas{position:fixed;top:0;left:0;width:100%;height:100%;display:none}
+#graphCanvas{position:fixed;top:0;left:0;width:100%;height:100%;display:none}
+#trailCanvas{position:fixed;top:0;left:0;width:100%;height:100%}
 #tabBar{position:fixed;top:0;left:0;right:0;z-index:20;height:36px;display:flex;background:rgba(0,5,10,0.92);border-bottom:1px solid rgba(0,255,238,0.08)}
-.tab{padding:0 18px;display:flex;align-items:center;font-size:11px;letter-spacing:0.12em;cursor:pointer;opacity:0.45;border-bottom:2px solid transparent;user-select:none}
+.tab{padding:0 20px;display:flex;align-items:center;font-size:11px;letter-spacing:0.12em;cursor:pointer;opacity:0.45;border-bottom:2px solid transparent;user-select:none}
 .tab.act{opacity:1;border-bottom-color:#00ffee}
 #pill{position:fixed;top:44px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,5,10,0.88);border:1px solid rgba(0,255,238,0.3);border-radius:24px;padding:5px 24px;font-size:26px;letter-spacing:0.06em;white-space:nowrap;text-align:center;transition:color .3s,border-color .3s;pointer-events:none}
 #pill.rest{color:#ff6600;border-color:rgba(255,102,0,0.45)}
@@ -67,14 +20,9 @@ canvas.show{display:block}
 #thLbl{font-size:10px;opacity:0.45;white-space:nowrap}
 #thSlider{width:88px;accent-color:#00ffee;cursor:pointer}
 #liveSt{font-size:10px;opacity:0.45;margin-left:auto}
-/* Trail controls */
-#trailCtrl{position:fixed;bottom:50px;left:0;right:0;z-index:20;height:36px;display:none;align-items:center;justify-content:center;gap:8px;background:rgba(0,5,10,0.82);border-top:1px solid rgba(0,255,238,0.06)}
-#trailCtrl.show{display:flex}
-.tbtn{background:rgba(0,255,238,0.07);border:1px solid rgba(0,255,238,0.25);color:rgba(0,255,238,0.6);font-family:monospace;font-size:10px;letter-spacing:0.1em;padding:5px 12px;cursor:pointer;user-select:none}
-.tbtn.on{background:rgba(0,255,238,0.18);color:#00ffee;border-color:rgba(0,255,238,0.5)}
-/* No-data banner */
-#noDataBanner{display:none;position:fixed;top:36px;left:0;right:0;z-index:30;background:rgba(220,60,0,0.92);color:#fff;font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.08em;text-align:center;padding:7px 12px;pointer-events:none}
-/* Connect overlay */
+#sportBadge{font-size:9px;letter-spacing:0.1em;color:#000;background:#00ffee;padding:3px 8px;border-radius:3px;margin-left:auto;display:none;align-self:center}
+#btnGhost{font-size:9px;letter-spacing:0.1em;color:rgba(0,255,238,.7);border:1px solid rgba(0,255,238,.3);padding:3px 8px;border-radius:3px;margin-left:10px;align-self:center;cursor:pointer;user-select:none}
+#sportWarn{position:fixed;top:44px;left:50%;transform:translateX(-50%);z-index:21;font-size:11px;letter-spacing:0.04em;color:#ffb400;background:rgba(255,180,0,.12);border:1px solid rgba(255,180,0,.4);padding:6px 14px;border-radius:4px;white-space:nowrap;display:none}
 #overlay{position:fixed;inset:0;z-index:50;background:rgba(0,5,10,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 #overlay.h{display:none}
 #overlay h1{font-size:30px;letter-spacing:0.14em}
@@ -89,47 +37,28 @@ canvas.show{display:block}
 
 <div id="overlay">
   <h1>BOXING LIVE</h1>
-
-  <p style="font-size:11px;opacity:0.6">— WebSocket relay —</p>
-  <p>Same WiFi → phone IP (192.168.x.x)&nbsp;&nbsp;|&nbsp;&nbsp;Internet → relay domain</p>
+  <p>Anywhere → enter the short code or session ID shown in the app<br>Same WiFi as phone → enter phone IP (e.g. 192.168.x.x)</p>
   <div style="display:flex;gap:8px">
-    <input id="ipIn" placeholder="192.168.x.x  or  relay.domain.com" />
+    <input id="ipIn" placeholder="session ID  or  192.168.x.x" />
     <button class="gbtn" onclick="doConnect()">CONNECT</button>
   </div>
-
-  <p style="font-size:11px;opacity:0.4;margin-top:8px">— or — Firebase RTDB —</p>
-  <input id="fbDbUrl" placeholder="https://your-project-default-rtdb.firebaseio.com"
-    style="background:rgba(0,255,238,0.04);border:1px solid rgba(0,255,238,0.2);color:#00ffee;font-family:monospace;padding:8px 12px;font-size:12px;outline:none;width:320px" />
-  <div style="display:flex;gap:8px">
-    <input id="fbSession" placeholder="Session ID (number from app)"
-      style="background:rgba(0,255,238,0.04);border:1px solid rgba(0,255,238,0.2);color:#00ffee;font-family:monospace;padding:8px 12px;font-size:12px;outline:none;flex:1" />
-    <button class="gbtn" onclick="connectFirebase()">FIREBASE</button>
-  </div>
-
   <div id="ovSt"></div>
 </div>
 
-<div id="noDataBanner">⚠ NO DATA — app must be in HUB role and recording · check Firebase status</div>
-
 <div id="tabBar">
-  <div class="tab act" onclick="setTab('trail')">TRAIL</div>
-  <div class="tab" onclick="setTab('live')">LIVE</div>
+  <div class="tab" onclick="setTab('wave')">WAVE</div>
+  <div class="tab act" onclick="setTab('3d')">3D</div>
   <div class="tab" onclick="setTab('graphs')">GRAPHS</div>
+  <span id="sportBadge"></span>
+  <div id="btnGhost" onclick="toggleGhost()">GHOST ON</div>
 </div>
+<div id="sportWarn"></div>
 
 <div id="pill">ROUND 1  3:00</div>
 
 <canvas id="trailCanvas"></canvas>
 <canvas id="waveCanvas"></canvas>
 <canvas id="graphCanvas"></canvas>
-
-<div id="trailCtrl">
-  <div class="tbtn on"  id="btn3d"     onclick="setView('3d')">3D</div>
-  <div class="tbtn"     id="btn2d"     onclick="setView('2d')">TOP</div>
-  <div class="tbtn"     id="btnFollow" onclick="toggleFollow()">FOLLOW</div>
-  <div class="tbtn on"  id="btnGhost"  onclick="toggleGhost()">GHOST</div>
-  <div class="tbtn"     id="btnClear"  onclick="clearTrail()">CLEAR</div>
-</div>
 
 <div id="botBar">
   <span class="pc" style="color:#00e5ff">L ✦ <span id="pL">0</span></span>
@@ -139,317 +68,184 @@ canvas.show{display:block}
   <span id="liveSt">—</span>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 const DPR=devicePixelRatio||1
+const PI=Math.PI
 const CYAN='#00e5ff',ORANGE='#ff6d00'
-const WAVE_SECS=10,MAX_G=15,ROUND_MS=180000,G=9.81
+const WAVE_SECS=10,MAX_G=15,ROUND_MS=180000
 
-// ── Tabs & canvases ──────────────────────────────────────────
-let tab='trail'
-const tc=document.getElementById('trailCanvas')
-const tx=tc.getContext('2d')
+let tab='3d',punchThresh=3
+let flashL=0,flashR=0,lastFrameT=0
+let sessionStart=null
+let roundNum=1,roundState='idle',roundStartWall=null
+let connL=false,connR=false
+let liveWs=null
+let sampleCntL=0,sampleCntR=0
+
+const waveL=[],waveR=[]      // [{t,g,rot}] — 10s ring buffer
+const allL=[],allR=[]        // thinned (1 per 5 samples) full history
+const punchL=[],punchR=[]    // [{t,g}]
+const MAX_ALL=36000          // ~1h at 10/s; decimate by 2 when exceeded so memory stays bounded
+function pushAll(arr,entry){
+  arr.push(entry)
+  if(arr.length>MAX_ALL){
+    for(let i=0,j=0;i<arr.length;i+=2,j++)arr[j]=arr[i]
+    arr.length=Math.ceil(arr.length/2)
+  }
+}
+
 const wc=document.getElementById('waveCanvas')
 const wx=wc.getContext('2d')
 const gc=document.getElementById('graphCanvas')
 const gx=gc.getContext('2d')
+const tc=document.getElementById('trailCanvas')
+const tcx=tc.getContext('2d')
+
+// ── Resize ───────────────────────────────────────────────────
 
 function resize(){
-  ;[tc,wc,gc].forEach(c=>{
-    c.width=innerWidth*DPR;c.height=innerHeight*DPR
-    c.style.width=innerWidth+'px';c.style.height=innerHeight+'px'
-  })
+  wc.width=gc.width=tc.width=innerWidth*DPR
+  wc.height=gc.height=tc.height=innerHeight*DPR
+  wc.style.width=gc.style.width=tc.style.width=innerWidth+'px'
+  wc.style.height=gc.style.height=tc.style.height=innerHeight+'px'
 }
 addEventListener('resize',resize);resize()
+
+// ── Tab ──────────────────────────────────────────────────────
 
 function setTab(t){
   tab=t
   document.querySelectorAll('.tab').forEach(el=>{
     el.classList.toggle('act',el.textContent.trim().toLowerCase()===t)
   })
-  tc.classList.toggle('show',t==='trail')
-  wc.classList.toggle('show',t==='live')
-  gc.classList.toggle('show',t==='graphs')
-  document.getElementById('trailCtrl').classList.toggle('show',t==='trail')
-}
-setTab('trail')
-
-// ── Live & graph state ───────────────────────────────────────
-let punchThresh=3
-let flashL=0,flashR=0,lastFrameT=0
-let sessionStart=null
-let roundNum=1,roundState='idle',roundStartWall=null
-let connL=false,connR=false,lastDataT=0
-let liveWs=null
-let sampleCntL=0,sampleCntR=0
-const waveL=[],waveR=[],allL=[],allR=[],punchL=[],punchR=[]
-
-// ── IMU state (per hand) ─────────────────────────────────────
-function makeImu(){
-  return {
-    q:[1,0,0,0],          // quaternion [w,x,y,z]
-    ib:[0,0,0],           // Mahony integral feedback
-    vel:[0,0,0],          // world-frame velocity m/s
-    pos:[0,0,0],          // world-frame position m (resets at ZUPT)
-    prevT:null,
-    zupt:true,
-    zuptMs:0,
-    arc:[],               // current punch arc {x,y,z} points
-    arcs:[],              // completed arcs this round
-    ghost:[]              // arcs from previous round
-  }
-}
-const imuL=makeImu(), imuR=makeImu()
-
-// ── Mahony AHRS ──────────────────────────────────────────────
-function mahony(imu, ax, ay, az, gx_, gy_, gz_, dt){
-  let [qw,qx,qy,qz]=imu.q
-  const Kp=imu.zupt?10:0.5, Ki=0.02
-  const aMag=Math.sqrt(ax*ax+ay*ay+az*az)
-  if(aMag>0.1){
-    const nx=ax/aMag,ny=ay/aMag,nz=az/aMag
-    // estimated gravity direction in body frame
-    const vx=2*(qx*qz-qw*qy)
-    const vy=2*(qw*qx+qy*qz)
-    const vz=1-2*(qx*qx+qy*qy)
-    // error: cross product
-    const ex=ny*vz-nz*vy, ey=nz*vx-nx*vz, ez=nx*vy-ny*vx
-    imu.ib[0]+=Ki*ex*dt; imu.ib[1]+=Ki*ey*dt; imu.ib[2]+=Ki*ez*dt
-    gx_+=Kp*ex+imu.ib[0]; gy_+=Kp*ey+imu.ib[1]; gz_+=Kp*ez+imu.ib[2]
-  }
-  const ht=0.5*dt
-  const dw=(-qx*gx_-qy*gy_-qz*gz_)*ht
-  const dx=(qw*gx_+qy*gz_-qz*gy_)*ht
-  const dy=(qw*gy_-qx*gz_+qz*gx_)*ht
-  const dz=(qw*gz_+qx*gy_-qy*gx_)*ht
-  qw+=dw;qx+=dx;qy+=dy;qz+=dz
-  const n=Math.sqrt(qw*qw+qx*qx+qy*qy+qz*qz)
-  imu.q=[qw/n,qx/n,qy/n,qz/n]
+  wc.style.display=t==='wave'?'block':'none'
+  gc.style.display=t==='graphs'?'block':'none'
+  tc.style.display=t==='3d'?'block':'none'
 }
 
-// ── IMU step: update orientation + integrate position ────────
-function imuStep(imu, ax, ay, az, gx_, gy_, gz_, dt){
-  mahony(imu,ax,ay,az,gx_,gy_,gz_,dt)
-  const [qw,qx,qy,qz]=imu.q
-  const aMag=Math.sqrt(ax*ax+ay*ay+az*az)
-  const gMag=Math.sqrt(gx_*gx_+gy_*gy_+gz_*gz_)
-  const quiet=Math.abs(aMag/G-1)<0.15&&gMag<0.3
-  if(quiet){
-    imu.zuptMs+=dt*1000
-    if(imu.zuptMs>80){
-      if(!imu.zupt){
-        // Commit arc
-        if(imu.arc.length>4){
-          imu.arcs.push([...imu.arc])
-          if(imu.arcs.length>60)imu.arcs.shift()
-        }
-        imu.arc=[]
-      }
-      imu.zupt=true
-      imu.vel=[0,0,0]
-      imu.pos=[0,0,0]
+// ── Auto-connect on ?live=1 ──────────────────────────────────
+
+const params=new URLSearchParams(location.search)
+if(params.has('live')){
+  const host=params.get('host')||location.hostname||'localhost'
+  connectTo(host)
+}
+const sid=params.get('sid')
+if(sid)connectFirebaseLive(sid)
+
+function connectFirebaseLive(sid){
+  if(!/^\d+$/.test(sid)){setSt('Invalid session ID');return}
+  if(liveWs){try{liveWs.close()}catch(_){};liveWs=null}
+  const app=firebase.apps.find(a=>a.name==='boxing')||firebase.initializeApp({databaseURL:'https://accelperformaceexponentialapex-default-rtdb.firebaseio.com'},'boxing')
+  const db=firebase.database(app)
+  const ref=db.ref('sessions/'+sid)
+  setSt('Connected ●')
+  document.getElementById('ovSt').textContent=''
+  document.getElementById('overlay').classList.add('h')
+  ref.child('left/latest').on('value',snap=>{
+    const v=snap.val();if(v)handleMsg(Object.assign({type:'sensor',device:'left'},v))
+  })
+  ref.child('right/latest').on('value',snap=>{
+    const v=snap.val();if(v)handleMsg(Object.assign({type:'sensor',device:'right'},v))
+  })
+  ref.child('meta/status').on('value',snap=>{
+    if(snap.val()==='ended')setSt('Session ended')
+  })
+  ref.child('meta/sport').once('value',snap=>{
+    const sport=snap.val()
+    const badge=document.getElementById('sportBadge'),warn=document.getElementById('sportWarn')
+    if(!sport)return
+    badge.textContent=sport.toUpperCase();badge.style.display='inline-block'
+    if(sport!=='boxing'){
+      warn.textContent='⚠ THIS IS A '+sport.toUpperCase()+' SESSION — open tracer-real.html instead'
+      warn.style.display='block'
     }
-  }else{
-    imu.zuptMs=0
-    imu.zupt=false
-    // Gravity vector in body frame
-    const gvx=G*2*(qx*qz-qw*qy)
-    const gvy=G*2*(qw*qx+qy*qz)
-    const gvz=G*(1-2*(qx*qx+qy*qy))
-    // Linear accel in body frame (remove gravity)
-    const lx=ax-gvx, ly=ay-gvy, lz=az-gvz
-    // Rotate to world frame
-    const R00=1-2*(qy*qy+qz*qz), R01=2*(qx*qy-qw*qz), R02=2*(qx*qz+qw*qy)
-    const R10=2*(qx*qy+qw*qz),   R11=1-2*(qx*qx+qz*qz), R12=2*(qy*qz-qw*qx)
-    const R20=2*(qx*qz-qw*qy),   R21=2*(qy*qz+qw*qx),   R22=1-2*(qx*qx+qy*qy)
-    const wx=R00*lx+R01*ly+R02*lz
-    const wy=R10*lx+R11*ly+R12*lz
-    const wz=R20*lx+R21*ly+R22*lz
-    // Integrate velocity & position
-    imu.vel[0]+=wx*dt; imu.vel[1]+=wy*dt; imu.vel[2]+=wz*dt
-    imu.pos[0]+=imu.vel[0]*dt; imu.pos[1]+=imu.vel[1]*dt; imu.pos[2]+=imu.vel[2]*dt
-    // Clamp drift
-    const pm=Math.sqrt(imu.pos[0]**2+imu.pos[1]**2+imu.pos[2]**2)
-    if(pm>1.5){const s=1.5/pm;imu.pos[0]*=s;imu.pos[1]*=s;imu.pos[2]*=s}
-    imu.arc.push([...imu.pos])
-    if(imu.arc.length>300)imu.arc.shift()
-  }
-}
-
-// ── Trail view state ─────────────────────────────────────────
-let trailTheta=0.5, trailPhi=0.4, viewMode='3d', followOn=false, ghostOn=true
-let dragX=0,dragY=0,dragging=false
-
-function setView(v){
-  viewMode=v
-  document.getElementById('btn3d').classList.toggle('on',v==='3d')
-  document.getElementById('btn2d').classList.toggle('on',v==='2d')
-}
-function toggleFollow(){
-  followOn=!followOn
-  document.getElementById('btnFollow').classList.toggle('on',followOn)
-}
-function toggleGhost(){
-  ghostOn=!ghostOn
-  document.getElementById('btnGhost').classList.toggle('on',ghostOn)
-}
-function clearTrail(){
-  imuL.arcs=[];imuL.arc=[];imuL.ghost=[]
-  imuR.arcs=[];imuR.arc=[];imuR.ghost=[]
-}
-
-// Drag to orbit
-tc.addEventListener('pointerdown',e=>{dragging=true;dragX=e.clientX;dragY=e.clientY})
-addEventListener('pointerup',()=>dragging=false)
-addEventListener('pointermove',e=>{
-  if(!dragging||viewMode==='2d')return
-  trailTheta+=(e.clientX-dragX)*0.007
-  trailPhi+=  (e.clientY-dragY)*0.007
-  trailPhi=Math.max(-1.2,Math.min(1.2,trailPhi))
-  dragX=e.clientX;dragY=e.clientY
-})
-
-// ── 3D projection ─────────────────────────────────────────────
-function project(x,y,z,W,H,scale){
-  const ct=Math.cos(trailTheta),st=Math.sin(trailTheta)
-  const cp=Math.cos(trailPhi),  sp=Math.sin(trailPhi)
-  const rx=x*ct+z*st
-  const ry2=y*cp-((-x*st+z*ct))*sp
-  const rz2=y*sp+((-x*st+z*ct))*cp
-  const fov=500
-  const d=fov+rz2
-  return {sx:W/2+rx/d*fov*scale, sy:H/2-ry2/d*fov*scale, z:rz2}
-}
-
-function project2d(x,y,z,W,H,scale){
-  return {sx:W/2+x*scale, sy:H/2-z*scale, z:0}
-}
-
-// ── Draw one arc (array of [x,y,z]) ─────────────────────────
-function drawArc(pts,color,alpha,W,H,scale,lineW){
-  if(pts.length<2)return
-  const proj=viewMode==='2d'?project2d:project
-  tx.save()
-  tx.strokeStyle=color; tx.lineWidth=lineW*DPR; tx.globalAlpha=alpha
-  tx.beginPath()
-  let first=true
-  for(let i=0;i<pts.length;i++){
-    const p=proj(pts[i][0],pts[i][1],pts[i][2],W,H,scale)
-    if(first){tx.moveTo(p.sx,p.sy);first=false}else tx.lineTo(p.sx,p.sy)
-  }
-  tx.stroke()
-  // Endpoint dot
-  const last=pts[pts.length-1]
-  const lp=proj(last[0],last[1],last[2],W,H,scale)
-  tx.fillStyle=color; tx.globalAlpha=alpha
-  tx.beginPath(); tx.arc(lp.sx,lp.sy,3*DPR,0,Math.PI*2); tx.fill()
-  tx.restore()
-}
-
-// ── Draw TRAIL tab ────────────────────────────────────────────
-function drawTrail(){
-  const W=tc.width,H=tc.height
-  const CTRL=36*DPR,BOT=86*DPR
-  const aH=H-CTRL-BOT
-  tx.fillStyle='#000205'; tx.fillRect(0,0,W,H)
-
-  // Compute center for follow cam
-  let scale=DPR*300
-  if(followOn){
-    const lp=imuL.pos, rp=imuR.pos
-    const cx=(lp[0]+rp[0])/2, cy=(lp[1]+rp[1])/2, cz=(lp[2]+rp[2])/2
-    // shift origin to midpoint between hands (shift all projections)
-    // For simplicity, apply offset directly
-    const proj=viewMode==='2d'?project2d:project
-    const c=proj(-cx,-cy,-cz,W,H,scale)
-    // We'll translate canvas
-    tx.save(); tx.translate(c.sx-W/2, c.sy-H/2)
-  }
-
-  // Reference axes at origin (faint)
-  const len=0.15, proj=viewMode==='2d'?project2d:project
-  const O=proj(0,0,0,W,H,scale)
-  ;[[len,0,0,'rgba(255,80,80,0.25)'],[0,len,0,'rgba(80,255,80,0.25)'],[0,0,len,'rgba(80,80,255,0.25)']].forEach(([dx,dy,dz,c])=>{
-    const P=proj(dx,dy,dz,W,H,scale)
-    tx.beginPath();tx.strokeStyle=c;tx.lineWidth=DPR;tx.globalAlpha=1
-    tx.moveTo(O.sx,O.sy);tx.lineTo(P.sx,P.sy);tx.stroke()
   })
+}
 
-  // Ghost arcs (previous round)
-  if(ghostOn){
-    imuL.ghost.forEach(arc=>drawArc(arc,'rgba(0,200,220,0.28)',0.28,W,H,scale,1))
-    imuR.ghost.forEach(arc=>drawArc(arc,'rgba(255,120,0,0.28)',0.28,W,H,scale,1))
+function doConnect(){
+  const input=document.getElementById('ipIn').value.trim()
+  if(/^\d+$/.test(input)){connectFirebaseLive(input);return}
+  if(input&&!input.includes('.')&&input.length<=8){resolveShortCode(input,'boxing',connectFirebaseLive);return}
+  connectTo(input||'localhost')
+}
+
+function resolveShortCode(code,appName,onResolved){
+  setSt('Looking up code…')
+  const app=firebase.apps.find(a=>a.name===appName)||firebase.initializeApp({databaseURL:'https://accelperformaceexponentialapex-default-rtdb.firebaseio.com'},appName)
+  firebase.database(app).ref('codes/'+code.toUpperCase()).once('value').then(snap=>{
+    const sid=snap.val()
+    if(sid)onResolved(String(sid))
+    else setSt('Code not found')
+  }).catch(()=>setSt('Code not found'))
+}
+
+function connectTo(ip){
+  if(liveWs){try{liveWs.close()}catch(_){}}
+  setSt('Connecting…')
+  document.getElementById('ovSt').textContent='Connecting…'
+  const proto=location.protocol==='https:'?'wss:':'ws:'
+  const isIp=/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)||ip==='localhost'
+  liveWs=new WebSocket(isIp?proto+'//'+ip+':9001':proto+'//'+ip)
+  liveWs.onopen=()=>{
+    liveWs.send(JSON.stringify({type:'register',role:'viewer',mode:'boxing'}))
+    setSt('Connected ●')
+    document.getElementById('ovSt').textContent=''
+    document.getElementById('overlay').classList.add('h')
   }
-
-  // Current round arcs
-  imuL.arcs.forEach((arc,i)=>{
-    const a=0.35+0.65*(i/Math.max(1,imuL.arcs.length-1))
-    drawArc(arc,CYAN,a,W,H,scale,1.6)
-  })
-  imuR.arcs.forEach((arc,i)=>{
-    const a=0.35+0.65*(i/Math.max(1,imuR.arcs.length-1))
-    drawArc(arc,ORANGE,a,W,H,scale,1.6)
-  })
-
-  // Live arcs (in-progress punch)
-  if(imuL.arc.length>1)drawArc(imuL.arc,CYAN,1,W,H,scale,2.2)
-  if(imuR.arc.length>1)drawArc(imuR.arc,ORANGE,1,W,H,scale,2.2)
-
-  if(followOn)tx.restore()
-
-  // Labels
-  tx.fillStyle='rgba(0,255,238,0.25)';tx.font=`${8*DPR}px Courier New`
-  tx.fillText(viewMode==='2d'?'TOP VIEW':'3D VIEW — drag to orbit',8*DPR,(CTRL+14*DPR))
-  const lc=imuL.arcs.length+imuL.ghost.length, rc=imuR.arcs.length+imuR.ghost.length
-  tx.fillStyle=CYAN; tx.fillText(`L ${lc} arcs`,8*DPR,(H-BOT-8*DPR))
-  tx.fillStyle=ORANGE; tx.fillText(`R ${rc} arcs`,60*DPR,(H-BOT-8*DPR))
-
-  if(ghostOn&&(imuL.ghost.length||imuR.ghost.length)){
-    tx.fillStyle='rgba(180,180,180,0.4)'; tx.fillText('GHOST prev round',W-100*DPR,(H-BOT-8*DPR))
+  liveWs.onmessage=e=>{try{handleMsg(JSON.parse(e.data))}catch(_){}}
+  liveWs.onerror=()=>setSt('Cannot reach relay')
+  liveWs.onclose=()=>{
+    setSt('Disconnected')
+    document.getElementById('overlay').classList.remove('h')
   }
 }
+
+function setSt(s){document.getElementById('liveSt').textContent=s}
+function setThresh(v){punchThresh=parseFloat(v);document.getElementById('thV').textContent=(+v).toFixed(1)}
 
 // ── Messages ─────────────────────────────────────────────────
+
 function handleMsg(msg){
   const now=Date.now()
   if(!sessionStart)sessionStart=now
 
   if(msg.type==='sensor'){
     const isR=msg.device==='right'
-    const imu=isR?imuR:imuL
-    const g_=isFinite(+msg.accel_mag)?(+msg.accel_mag)/G:1
+    processImuSample(isR?'right':'left',msg)
+    const g=isFinite(+msg.accel_mag)?(+msg.accel_mag)/9.81:1
     const rot=isFinite(+msg.gyro_mag)?(+msg.gyro_mag)*(180/Math.PI):0
-    const entry={t:now,g:g_,rot}
-    if(isR){waveR.push(entry);sampleCntR++;if(sampleCntR%5===0)allR.push(entry)}
-    else   {waveL.push(entry);sampleCntL++;if(sampleCntL%5===0)allL.push(entry)}
-
-    // Punch detection for LIVE tab
+    const entry={t:now,g,rot}
+    if(isR){
+      waveR.push(entry)
+      sampleCntR++
+      if(sampleCntR%5===0)pushAll(allR,entry)
+    }else{
+      waveL.push(entry)
+      sampleCntL++
+      if(sampleCntL%5===0)pushAll(allL,entry)
+    }
+    // Punch detection with 150ms debounce
     const pArr=isR?punchR:punchL
-    if(g_>punchThresh){
+    if(g>punchThresh){
       const last=pArr.length>0?pArr[pArr.length-1]:null
       if(!last||now-last.t>150){
-        pArr.push({t:now,g:g_})
+        pArr.push({t:now,g})
         document.getElementById(isR?'pR':'pL').textContent=pArr.length
-        if(isR)flashR=1;else flashL=1
+        if(isR){flashR=1;ghostR=trailR.slice()}else{flashL=1;ghostL=trailL.slice()}
       }
     }
     if(isR)connR=true;else connL=true
-    lastDataT=now
-
-    // IMU dead-reckoning for TRAIL tab
-    if(isFinite(+msg.ax)&&imu.prevT!==null){
-      const dt=Math.min((now-imu.prevT)/1000,0.05)
-      imuStep(imu,+msg.ax,+msg.ay,+msg.az,+msg.gx,+msg.gy,+msg.gz,dt)
-    }
-    imu.prevT=now
-
   }else if(msg.type==='round_start'){
     roundNum=+msg.round||roundNum
-    roundState='active'; roundStartWall=Date.now(); updatePill()
+    roundState='active'
+    roundStartWall=Date.now()
+    updatePill()
   }else if(msg.type==='round_end'){
-    roundState='rest'; updatePill()
-    // Move current arcs to ghost
-    imuL.ghost=[...imuL.arcs]; imuL.arcs=[]; imuL.arc=[]
-    imuR.ghost=[...imuR.arcs]; imuR.arcs=[]; imuR.arc=[]
+    roundState='rest'
+    updatePill()
   }else if(msg.type==='status'){
     if(msg.device==='left')connL=msg.connected===true
     else if(msg.device==='right')connR=msg.connected===true
@@ -457,50 +253,256 @@ function handleMsg(msg){
 }
 
 // ── Round pill ───────────────────────────────────────────────
+
 function updatePill(){
   const el=document.getElementById('pill')
   if(roundState==='rest'){el.className='rest';el.textContent='REST  ●';return}
-  const secsLeft=roundStartWall?Math.max(0,Math.round((ROUND_MS-(Date.now()-roundStartWall))/1000)):180
+  const secsLeft=roundStartWall
+    ?Math.max(0,Math.round((ROUND_MS-(Date.now()-roundStartWall))/1000))
+    :180
   const m=Math.floor(secsLeft/60),s=secsLeft%60
-  el.className=secsLeft<=30?'rest':''; el.textContent=`ROUND ${roundNum}  ${m}:${s.toString().padStart(2,'0')}`
+  el.className=secsLeft<=30?'rest':''
+  el.textContent=`ROUND ${roundNum}  ${m}:${s.toString().padStart(2,'0')}`
+}
+
+// ── 3D motion trail (dead-reckoning from IMU, no GPS) ─────────
+// Live analogue of boxing-trajectory-lab.html's Madgwick + double-integration,
+// adapted to run one sample at a time instead of looping a pre-recorded array.
+
+const GRAV=9.81, BETA=0.1, BETA_INIT=5.0, INIT_SAMPLES=20
+const GV=[0,0,GRAV]            // this Madgwick formula's internal reference direction is +Z, not Y — verified empirically
+const TRAIL_MS_3D=4000         // rolling window per hand so old drifted segments age out
+const ZUPT_SPEED=0.5           // soft damping threshold (m/s), matches lab tool's during-motion smoothing
+
+let qL=[1,0,0,0],qR=[1,0,0,0]
+let vL=[0,0,0],vR=[0,0,0]
+let pL=[0,0,0],pR=[0,0,0]
+const lastImuT={left:null,right:null}
+const imuSampleCount={left:0,right:0}   // first INIT_SAMPLES use a high beta to snap orientation to gravity fast
+const trailL=[],trailR=[]      // each entry [x,y,z,t,gMag]
+let ghostL=[],ghostR=[]         // snapshot of the previous punch's trail, for comparison
+let showGhost=true
+
+function toggleGhost(){
+  showGhost=!showGhost
+  const b=document.getElementById('btnGhost')
+  b.textContent=showGhost?'GHOST ON':'GHOST OFF'
+  b.style.color=showGhost?'rgba(0,255,238,.7)':'rgba(0,255,238,.3)'
+}
+
+function madgwick(q,gx,gy,gz,ax,ay,az,dt,beta){
+  let [q0,q1,q2,q3]=q
+  let qDot0=0.5*(-q1*gx-q2*gy-q3*gz)
+  let qDot1=0.5*( q0*gx+q2*gz-q3*gy)
+  let qDot2=0.5*( q0*gy-q1*gz+q3*gx)
+  let qDot3=0.5*( q0*gz+q1*gy-q2*gx)
+  let norm=Math.sqrt(ax*ax+ay*ay+az*az)
+  if(norm>0.01){
+    ax/=norm;ay/=norm;az/=norm
+    const _2q0=2*q0,_2q1=2*q1,_2q2=2*q2,_2q3=2*q3
+    const q0q0=q0*q0,q1q1=q1*q1,q2q2=q2*q2,q3q3=q3*q3
+    const s0=_2q0*q2q2+_2q2*ax+_2q0*q1q1-_2q1*ay
+    const s1=_2q1*q3q3-_2q3*ax+4*q0q0*q1-_2q0*ay-4*q1+8*q1*q1q1+8*q1*q2q2+4*q1*az
+    const s2=4*q0q0*q2+_2q0*ax+_2q2*q3q3-_2q3*ay-4*q2+8*q2*q1q1+8*q2*q2q2+4*q2*az
+    const s3=4*q1q1*q3-_2q1*ax+4*q2q2*q3-_2q2*ay
+    norm=Math.sqrt(s0*s0+s1*s1+s2*s2+s3*s3)
+    if(norm>0){
+      qDot0-=beta*s0/norm;qDot1-=beta*s1/norm
+      qDot2-=beta*s2/norm;qDot3-=beta*s3/norm
+    }
+  }
+  q0+=qDot0*dt;q1+=qDot1*dt;q2+=qDot2*dt;q3+=qDot3*dt
+  norm=Math.sqrt(q0*q0+q1*q1+q2*q2+q3*q3)
+  return[q0/norm,q1/norm,q2/norm,q3/norm]
+}
+
+function rotByQ([q0,q1,q2,q3],[vx,vy,vz]){
+  return[
+    (1-2*(q2*q2+q3*q3))*vx+2*(q1*q2-q0*q3)*vy+2*(q1*q3+q0*q2)*vz,
+        2*(q1*q2+q0*q3)*vx+(1-2*(q1*q1+q3*q3))*vy+2*(q2*q3-q0*q1)*vz,
+        2*(q1*q3-q0*q2)*vx+2*(q2*q3+q0*q1)*vy+(1-2*(q1*q1+q2*q2))*vz
+  ]
+}
+
+function processImuSample(side,msg){
+  const ax=+msg.ax,ay=+msg.ay,az=+msg.az,gx=+msg.gx,gy=+msg.gy,gz=+msg.gz,t=+msg.t
+  if(![ax,ay,az,gx,gy,gz,t].every(isFinite))return
+  const last=lastImuT[side]
+  lastImuT[side]=t
+  if(last===null)return
+  const dt=(t-last)/1000
+  if(dt<=0||dt>0.3)return
+
+  imuSampleCount[side]++
+  const beta=imuSampleCount[side]<=INIT_SAMPLES?BETA_INIT:BETA
+  let q=side==='left'?qL:qR
+  q=madgwick(q,gx,gy,gz,ax,ay,az,dt,beta)
+  if(side==='left')qL=q;else qR=q
+
+  const [wx,wy,wz]=rotByQ(q,[ax,ay,az])
+  const lax=wx-GV[0],lay=wy-GV[1],laz=wz-GV[2]
+
+  let v=side==='left'?vL:vR
+  const speed=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])
+  const damping=speed>ZUPT_SPEED?1.0:0.98
+  v=[(v[0]+lax*dt)*damping,(v[1]+lay*dt)*damping,(v[2]+laz*dt)*damping]
+
+  // ZUPT per CLAUDE.md: detect "quiet" from raw sensor magnitudes directly (not the
+  // integrated velocity, which can never settle if there's a sustained convergence bias)
+  const aMagG=isFinite(+msg.accel_mag)?(+msg.accel_mag)/GRAV:1
+  const gMagRaw=isFinite(+msg.gyro_mag)?+msg.gyro_mag:0
+  if(Math.abs(aMagG-1)<0.15&&gMagRaw<0.3)v=[0,0,0]
+
+  let p=side==='left'?pL:pR
+  p=[p[0]+v[0]*dt,p[1]+v[1]*dt,p[2]+v[2]*dt]
+  if(side==='left'){vL=v;pL=p}else{vR=v;pR=p}
+
+  const gMag=isFinite(+msg.accel_mag)?(+msg.accel_mag)/GRAV:1
+  const trail=side==='left'?trailL:trailR
+  // swap Y/Z: the integrator's vertical axis is Z (Madgwick's native convention), the renderer's is Y
+  trail.push([p[0],p[2],p[1],t,gMag])
+  while(trail.length>1&&(t-trail[0][3])>TRAIL_MS_3D)trail.shift()
+}
+
+// ── 3D math primitives (same hand-rolled projection as tracer-real.html) ──
+
+function lookAt(e,c,u){const f=norm3(sub3(c,e)),s=norm3(cross3(f,u)),uu=cross3(s,f);return[s[0],uu[0],-f[0],0,s[1],uu[1],-f[1],0,s[2],uu[2],-f[2],0,-dot3(s,e),-dot3(uu,e),dot3(f,e),1]}
+function persp(fov,asp,n,fa){const t=Math.tan(fov/2);return[1/(asp*t),0,0,0,0,1/t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0]}
+function mul(a,b){const r=new Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[i*4+k]*b[k*4+j];r[i*4+j]=s}return r}
+function mulV(m,v){return[m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12]*v[3],m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13]*v[3],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]*v[3],m[3]*v[0]+m[7]*v[1]+m[11]*v[2]+m[15]*v[3]]}
+function proj3d(p,mvp,W,H){const r=mulV(mvp,[p[0],p[1],p[2],1]);if(r[3]<=0.01)return null;return[(r[0]/r[3]*.5+.5)*W,(1-r[1]/r[3]*.5-.5)*H,r[3]]}
+function sub3(a,b){return[a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+function cross3(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function dot3(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function norm3(a){const l=Math.sqrt(dot3(a,a))||1;return[a[0]/l,a[1]/l,a[2]/l]}
+
+// ── 3D trail rendering ────────────────────────────────────────
+
+function gColor(t){
+  t=Math.max(0,Math.min(1,t))
+  const S=[[0,120,255],[0,220,220],[0,220,90],[255,220,0],[255,50,30]]
+  const idx=t*(S.length-1),i=Math.min(Math.floor(idx),S.length-2),f=idx-i
+  return[Math.round(S[i][0]+(S[i+1][0]-S[i][0])*f),Math.round(S[i][1]+(S[i+1][1]-S[i][1])*f),Math.round(S[i][2]+(S[i+1][2]-S[i][2])*f)]
+}
+
+let theta3d=0.6,phi3d=1.15,camR3d=1.6
+
+function drawGrid3d(pfn){
+  const ext=0.5,step=0.1,y=-0.35
+  tcx.lineWidth=0.5*DPR
+  for(let x=-ext;x<=ext+1e-9;x+=step){
+    const a=pfn([x,y,-ext]),b=pfn([x,y,ext]);if(!a||!b)continue
+    tcx.strokeStyle=Math.abs(x)<1e-6?'rgba(0,255,220,.3)':'rgba(0,255,220,.08)'
+    tcx.beginPath();tcx.moveTo(a[0],a[1]);tcx.lineTo(b[0],b[1]);tcx.stroke()
+  }
+  for(let z=-ext;z<=ext+1e-9;z+=step){
+    const a=pfn([-ext,y,z]),b=pfn([ext,y,z]);if(!a||!b)continue
+    tcx.strokeStyle=Math.abs(z)<1e-6?'rgba(0,255,220,.3)':'rgba(0,255,220,.08)'
+    tcx.beginPath();tcx.moveTo(a[0],a[1]);tcx.lineTo(b[0],b[1]);tcx.stroke()
+  }
+}
+
+function drawTrailRibbon(buf,pfn,baseColor){
+  if(buf.length<2)return
+  for(const[lw,al] of[[16,.03],[8,.08],[3,.22]]){
+    tcx.beginPath();let first=true
+    for(const p of buf){
+      const pt=pfn(p);if(!pt){first=true;continue}
+      first?tcx.moveTo(pt[0],pt[1]):tcx.lineTo(pt[0],pt[1]);first=false
+    }
+    tcx.strokeStyle=hexA(baseColor,al)
+    tcx.lineWidth=lw*DPR;tcx.lineJoin='round';tcx.lineCap='round';tcx.stroke()
+  }
+  let prevPt=null
+  for(const p of buf){
+    const pt=pfn(p)
+    if(!pt){prevPt=null;continue}
+    if(prevPt){
+      const c=gColor(p[4]/MAX_G)
+      tcx.beginPath();tcx.moveTo(prevPt[0],prevPt[1]);tcx.lineTo(pt[0],pt[1])
+      tcx.strokeStyle=`rgba(${c[0]},${c[1]},${c[2]},0.9)`;tcx.lineWidth=2*DPR;tcx.lineJoin='round';tcx.lineCap='round';tcx.stroke()
+    }
+    prevPt=pt
+  }
+  const last=buf[buf.length-1],h=pfn(last)
+  if(h){
+    const c=gColor(last[4]/MAX_G)
+    const gr=tcx.createRadialGradient(h[0],h[1],0,h[0],h[1],20*DPR)
+    gr.addColorStop(0,`rgba(${c[0]},${c[1]},${c[2]},1)`)
+    gr.addColorStop(1,`rgba(${c[0]},${c[1]},${c[2]},0)`)
+    tcx.beginPath();tcx.arc(h[0],h[1],20*DPR,0,PI*2);tcx.fillStyle=gr;tcx.fill()
+    tcx.beginPath();tcx.arc(h[0],h[1],3*DPR,0,PI*2);tcx.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`;tcx.fill()
+  }
+}
+
+function drawGhostTrail(buf,pfn,baseColor){
+  if(buf.length<2)return
+  tcx.beginPath();let first=true
+  for(const p of buf){
+    const pt=pfn(p);if(!pt){first=true;continue}
+    first?tcx.moveTo(pt[0],pt[1]):tcx.lineTo(pt[0],pt[1]);first=false
+  }
+  tcx.strokeStyle=hexA(baseColor,.35);tcx.lineWidth=1.5*DPR;tcx.lineJoin='round';tcx.lineCap='round';tcx.stroke()
+}
+
+function drawTrail(){
+  const W=tc.width,H=tc.height
+  tcx.fillStyle='#000508';tcx.fillRect(0,0,W,H)
+  theta3d+=0.0025
+  const eye=[camR3d*Math.sin(phi3d)*Math.sin(theta3d),camR3d*Math.cos(phi3d),camR3d*Math.sin(phi3d)*Math.cos(theta3d)]
+  const mvp=mul(lookAt(eye,[0,0,0],[0,1,0]),persp(0.75,W/H,0.01,10))
+  const pfn=p=>proj3d(p,mvp,W,H)
+  drawGrid3d(pfn)
+  if(showGhost){
+    drawGhostTrail(ghostL,pfn,CYAN)
+    drawGhostTrail(ghostR,pfn,ORANGE)
+  }
+  drawTrailRibbon(trailL,pfn,CYAN)
+  drawTrailRibbon(trailR,pfn,ORANGE)
 }
 
 // ── Animation loop ────────────────────────────────────────────
+
 function frame(ts){
   requestAnimationFrame(frame)
-  const dt=Math.min(ts-lastFrameT,100)/1000; lastFrameT=ts
-  flashL=Math.max(0,flashL-dt*6); flashR=Math.max(0,flashR-dt*6)
-  // Show no-data banner when overlay is hidden but no packets arriving
-  const overlayHidden=document.getElementById('overlay').classList.contains('h')
-  const stale=overlayHidden&&(lastDataT===0||(Date.now()-lastDataT>5000))
-  document.getElementById('noDataBanner').style.display=stale?'block':'none'
+  const dt=Math.min(ts-lastFrameT,100)/1000;lastFrameT=ts
+  flashL=Math.max(0,flashL-dt*6)
+  flashR=Math.max(0,flashR-dt*6)
   const cutoff=Date.now()-WAVE_SECS*1000
   while(waveL.length>1&&waveL[0].t<cutoff)waveL.shift()
   while(waveR.length>1&&waveR[0].t<cutoff)waveR.shift()
   if(roundState==='active')updatePill()
-  if(tab==='trail')drawTrail()
-  else if(tab==='live')drawWave()
+  if(tab==='wave')drawWave()
+  else if(tab==='3d')drawTrail()
   else drawGraphs()
 }
 requestAnimationFrame(frame)
 
-// ── Waveform (LIVE tab) ───────────────────────────────────────
+// ── Waveform ─────────────────────────────────────────────────
+
 function drawWave(){
-  const W=wc.width,H=wc.height,TAB=36*DPR,BOT=46*DPR
-  const drawH=H-TAB-BOT,lH=drawH/2
-  wx.fillStyle='#000508'; wx.fillRect(0,0,W,H)
+  const W=wc.width,H=wc.height
+  const TAB=36*DPR,BOT=46*DPR
+  const drawH=H-TAB-BOT
+  const lH=drawH/2
+
+  wx.fillStyle='#000508';wx.fillRect(0,0,W,H)
+
   const divY=TAB+lH
-  wx.strokeStyle='rgba(255,255,255,0.1)'; wx.lineWidth=DPR
-  wx.beginPath(); wx.moveTo(0,divY); wx.lineTo(W,divY); wx.stroke()
+  wx.strokeStyle='rgba(255,255,255,0.1)';wx.lineWidth=DPR
+  wx.beginPath();wx.moveTo(0,divY);wx.lineTo(W,divY);wx.stroke()
+
   drawLane(waveL,W,TAB,lH,CYAN,flashL,connL,'L')
   drawLane(waveR,W,TAB+lH,lH,ORANGE,flashR,connR,'R')
+
+  // Punch stamps on divider line
   const now=Date.now()
   ;[{arr:punchL,col:CYAN},{arr:punchR,col:ORANGE}].forEach(({arr,col})=>{
     arr.forEach(p=>{
-      const age=(now-p.t)/1000; if(age>WAVE_SECS)return
+      const age=(now-p.t)/1000;if(age>WAVE_SECS)return
       const x=W*(1-age/WAVE_SECS)
-      wx.fillStyle=col; wx.globalAlpha=Math.max(0,0.9*(1-age/WAVE_SECS))
-      wx.beginPath(); wx.arc(x,divY,3.5*DPR,0,Math.PI*2); wx.fill()
+      wx.fillStyle=col;wx.globalAlpha=Math.max(0,0.9*(1-age/WAVE_SECS))
+      wx.beginPath();wx.arc(x,divY,3.5*DPR,0,Math.PI*2);wx.fill()
       wx.globalAlpha=1
     })
   })
@@ -508,85 +510,130 @@ function drawWave(){
 
 function drawLane(data,W,y0,lH,color,flash,conn,label){
   const now=Date.now()
-  if(flash>0){wx.fillStyle=`rgba(255,255,255,${flash*0.11})`; wx.fillRect(0,y0,W,lH)}
+  // Flash overlay on punch
+  if(flash>0){wx.fillStyle=`rgba(255,255,255,${flash*0.11})`;wx.fillRect(0,y0,W,lH)}
+  // Status label
   wx.font=`bold ${11*DPR}px Courier New`
   wx.fillStyle=conn?color:'rgba(120,120,120,0.4)'
   wx.fillText(label+(conn?' ●':' ○'),10*DPR,y0+18*DPR)
+  // Threshold dashed line
   const tY=y0+lH-(punchThresh/MAX_G)*lH*0.88
-  wx.strokeStyle='rgba(255,255,255,0.15)'; wx.lineWidth=DPR*0.75
+  wx.strokeStyle='rgba(255,255,255,0.15)';wx.lineWidth=DPR*0.75
   wx.setLineDash([4*DPR,4*DPR])
-  wx.beginPath(); wx.moveTo(0,tY); wx.lineTo(W,tY); wx.stroke()
+  wx.beginPath();wx.moveTo(0,tY);wx.lineTo(W,tY);wx.stroke()
   wx.setLineDash([])
   if(data.length<2)return
-  wx.beginPath(); wx.moveTo(W,y0+lH)
+  // Fill (newest→right, oldest→left; iterate newest-first for right-to-left path)
+  wx.beginPath();wx.moveTo(W,y0+lH)
   for(let i=data.length-1;i>=0;i--){
     const x=W*(1-(now-data[i].t)/1000/WAVE_SECS)
     wx.lineTo(x,y0+lH-(Math.min(data[i].g,MAX_G)/MAX_G)*lH*0.88)
   }
   const oldX=W*(1-(now-data[0].t)/1000/WAVE_SECS)
-  wx.lineTo(oldX,y0+lH); wx.closePath()
-  wx.fillStyle=hexA(color,0.2); wx.fill()
+  wx.lineTo(oldX,y0+lH);wx.closePath()
+  wx.fillStyle=hexA(color,0.2);wx.fill()
+  // Line
   wx.beginPath()
   for(let i=data.length-1;i>=0;i--){
     const x=W*(1-(now-data[i].t)/1000/WAVE_SECS)
     const y=y0+lH-(Math.min(data[i].g,MAX_G)/MAX_G)*lH*0.88
     i===data.length-1?wx.moveTo(x,y):wx.lineTo(x,y)
   }
-  wx.strokeStyle=color; wx.lineWidth=1.8*DPR; wx.stroke()
+  wx.strokeStyle=color;wx.lineWidth=1.8*DPR;wx.stroke()
 }
 
-// ── Graphs tab ───────────────────────────────────────────────
+// ── Graphs ───────────────────────────────────────────────────
+
 function drawGraphs(){
-  const W=gc.width,H=gc.height,TAB=36*DPR,rH=(H-TAB)/4
-  gx.fillStyle='#000103'; gx.fillRect(0,0,W,H)
+  const W=gc.width,H=gc.height
+  const TAB=36*DPR,rH=(H-TAB)/4
+  gx.fillStyle='#000103';gx.fillRect(0,0,W,H)
   if(!sessionStart||(allL.length+allR.length===0)){
-    gx.fillStyle='rgba(0,255,238,0.28)'; gx.font=`${12*DPR}px Courier New`
-    gx.textAlign='center'; gx.fillText('No data yet',W/2,H/2); gx.textAlign='left'; return
+    gx.fillStyle='rgba(0,255,238,0.28)';gx.font=`${12*DPR}px Courier New`
+    gx.textAlign='center';gx.fillText('No data yet',W/2,H/2);gx.textAlign='left';return
   }
-  const latest=Math.max(allL.length?allL[allL.length-1].t:sessionStart,allR.length?allR[allR.length-1].t:sessionStart)
+  const latest=Math.max(
+    allL.length?allL[allL.length-1].t:sessionStart,
+    allR.length?allR[allR.length-1].t:sessionStart
+  )
   const DUR=Math.max(1,latest-sessionStart)
-  drawLineRow(0,rH,W,TAB,'G-FORCE',DUR,allL.map(d=>[(d.t-sessionStart)/DUR,d.g]),allR.map(d=>[(d.t-sessionStart)/DUR,d.g]),MAX_G)
+
+  // Row 1: G-FORCE
+  drawLineRow(0,rH,W,TAB,'G-FORCE',DUR,
+    allL.map(d=>[(d.t-sessionStart)/DUR,d.g]),
+    allR.map(d=>[(d.t-sessionStart)/DUR,d.g]),
+    MAX_G)
+
+  // Row 2: PUNCH COUNT (5s buckets)
   drawPunchRow(1,rH,W,TAB,DUR)
+
+  // Row 3: ROTATION
   const maxRot=Math.max(1,...allL.map(d=>d.rot),...allR.map(d=>d.rot))
-  drawLineRow(2,rH,W,TAB,'ROTATION (°/s)',DUR,allL.map(d=>[(d.t-sessionStart)/DUR,d.rot]),allR.map(d=>[(d.t-sessionStart)/DUR,d.rot]),maxRot)
+  drawLineRow(2,rH,W,TAB,'ROTATION (°/s)',DUR,
+    allL.map(d=>[(d.t-sessionStart)/DUR,d.rot]),
+    allR.map(d=>[(d.t-sessionStart)/DUR,d.rot]),
+    maxRot)
+
+  // Row 4: IMPACT RATE
   drawImpactRow(3,rH,W,TAB,DUR)
+
+  // Round boundary lines across all rows
   if(roundStartWall&&roundState!=='idle'){
     const roundEndMs=roundStartWall-sessionStart+ROUND_MS
     const rx=Math.min(roundEndMs/DUR,1)*W
-    gx.strokeStyle='rgba(255,102,0,0.3)'; gx.lineWidth=DPR; gx.setLineDash([3*DPR,3*DPR])
-    gx.beginPath(); gx.moveTo(rx,TAB); gx.lineTo(rx,H); gx.stroke(); gx.setLineDash([])
+    gx.strokeStyle='rgba(255,102,0,0.3)';gx.lineWidth=DPR
+    gx.setLineDash([3*DPR,3*DPR])
+    gx.beginPath();gx.moveTo(rx,TAB);gx.lineTo(rx,H);gx.stroke()
+    gx.setLineDash([])
   }
 }
 
-function rowHeader(ri,rH,W,TAB,label){
-  const y0=TAB+ri*rH
-  if(ri>0){gx.strokeStyle='rgba(0,255,238,0.07)';gx.lineWidth=1;gx.beginPath();gx.moveTo(0,y0);gx.lineTo(W,y0);gx.stroke()}
-  gx.fillStyle='rgba(0,255,238,0.28)'; gx.font=`bold ${7*DPR}px Courier New`
-  gx.fillText(label,8*DPR,y0+13*DPR); return y0
+function rowHeader(rowIdx,rH,W,TAB,label){
+  const y0=TAB+rowIdx*rH
+  if(rowIdx>0){
+    gx.strokeStyle='rgba(0,255,238,0.07)';gx.lineWidth=1
+    gx.beginPath();gx.moveTo(0,y0);gx.lineTo(W,y0);gx.stroke()
+  }
+  gx.fillStyle='rgba(0,255,238,0.28)';gx.font=`bold ${7*DPR}px Courier New`
+  gx.fillText(label,8*DPR,y0+13*DPR)
+  return y0
 }
+
 function drawSeries(pts,col,W,DY,DH,maxV){
   if(pts.length<2)return
-  gx.beginPath(); gx.moveTo(pts[0][0]*W,DY+DH)
+  // fill
+  gx.beginPath();gx.moveTo(pts[0][0]*W,DY+DH)
   pts.forEach(([fx,v])=>gx.lineTo(fx*W,DY+DH-Math.min(v,maxV)/maxV*DH))
-  gx.lineTo(pts[pts.length-1][0]*W,DY+DH); gx.closePath()
-  gx.fillStyle=hexA(col,0.18); gx.fill()
+  gx.lineTo(pts[pts.length-1][0]*W,DY+DH);gx.closePath()
+  gx.fillStyle=hexA(col,0.18);gx.fill()
+  // line
   gx.beginPath()
-  pts.forEach(([fx,v],i)=>{const x=fx*W,y=DY+DH-Math.min(v,maxV)/maxV*DH;i===0?gx.moveTo(x,y):gx.lineTo(x,y)})
-  gx.strokeStyle=col; gx.lineWidth=1.5*DPR; gx.stroke()
+  pts.forEach(([fx,v],i)=>{
+    const x=fx*W,y=DY+DH-Math.min(v,maxV)/maxV*DH
+    i===0?gx.moveTo(x,y):gx.lineTo(x,y)
+  })
+  gx.strokeStyle=col;gx.lineWidth=1.5*DPR;gx.stroke()
 }
-function drawLineRow(ri,rH,W,TAB,label,DUR,ptL,ptR,maxV){
-  const y0=rowHeader(ri,rH,W,TAB,label),DH=rH-22*DPR,DY=y0+20*DPR
-  drawSeries(ptL,CYAN,W,DY,DH,maxV); drawSeries(ptR,ORANGE,W,DY,DH,maxV)
+
+function drawLineRow(rowIdx,rH,W,TAB,label,DUR,ptL,ptR,maxV){
+  const y0=rowHeader(rowIdx,rH,W,TAB,label)
+  const DH=rH-22*DPR,DY=y0+20*DPR
+  drawSeries(ptL,CYAN,W,DY,DH,maxV)
+  drawSeries(ptR,ORANGE,W,DY,DH,maxV)
+  // Legend
   gx.font=`${6.5*DPR}px Courier New`
   if(ptL.length){gx.fillStyle=CYAN; gx.fillText('L',W-20*DPR,y0+13*DPR)}
   if(ptR.length){gx.fillStyle=ORANGE;gx.fillText('R',W-12*DPR,y0+13*DPR)}
 }
-function drawPunchRow(ri,rH,W,TAB,DUR){
-  const y0=rowHeader(ri,rH,W,TAB,'PUNCH COUNT  (5s buckets)'),DH=rH-22*DPR,DY=y0+20*DPR
-  const nB=Math.max(1,Math.ceil(DUR/5000))
+
+function drawPunchRow(rowIdx,rH,W,TAB,DUR){
+  const y0=rowHeader(rowIdx,rH,W,TAB,'PUNCH COUNT  (5s buckets)')
+  const DH=rH-22*DPR,DY=y0+20*DPR
+  const BUCKET_MS=5000
+  const nB=Math.max(1,Math.ceil(DUR/BUCKET_MS))
   const buckL=new Array(nB).fill(0),buckR=new Array(nB).fill(0)
-  punchL.forEach(p=>{const bi=Math.min(nB-1,Math.floor((p.t-sessionStart)/5000));if(bi>=0)buckL[bi]++})
-  punchR.forEach(p=>{const bi=Math.min(nB-1,Math.floor((p.t-sessionStart)/5000));if(bi>=0)buckR[bi]++})
+  punchL.forEach(p=>{const bi=Math.min(nB-1,Math.floor((p.t-sessionStart)/BUCKET_MS));if(bi>=0)buckL[bi]++})
+  punchR.forEach(p=>{const bi=Math.min(nB-1,Math.floor((p.t-sessionStart)/BUCKET_MS));if(bi>=0)buckR[bi]++})
   const maxP=Math.max(1,...buckL,...buckR)
   const bW=W/nB
   for(let i=0;i<nB;i++){
@@ -595,68 +642,39 @@ function drawPunchRow(ri,rH,W,TAB,DUR){
     if(buckR[i]>0){const bh=buckR[i]/maxP*DH;gx.fillStyle=hexA(ORANGE,0.75);gx.fillRect(bx+half,DY+DH-bh,half,bh)}
   }
 }
-function drawImpactRow(ri,rH,W,TAB,DUR){
-  const y0=rowHeader(ri,rH,W,TAB,'IMPACT RATE  (punches/min, 30s window)'),DH=rH-22*DPR,DY=y0+20*DPR
+
+function drawImpactRow(rowIdx,rH,W,TAB,DUR){
+  const y0=rowHeader(rowIdx,rH,W,TAB,'IMPACT RATE  (punches/min, 30s window)')
+  const DH=rH-22*DPR,DY=y0+20*DPR
+  const WINDOW_MS=30000,STEP_MS=3000
   const all=[...punchL,...punchR].sort((a,b)=>a.t-b.t)
   if(all.length<1)return
   const pts=[]
-  for(let t=0;t<=DUR;t+=3000){
-    const abs=sessionStart+t; let cnt=0
-    for(const p of all){if(p.t>abs)break;if(p.t>abs-30000)cnt++}
-    pts.push({x:t/DUR*W,r:cnt*2})
+  for(let t=0;t<=DUR;t+=STEP_MS){
+    const abs=sessionStart+t
+    let cnt=0;for(const p of all){if(p.t>abs)break;if(p.t>abs-WINDOW_MS)cnt++}
+    pts.push({x:t/DUR*W,r:cnt*(60000/WINDOW_MS)})
   }
   const maxR=Math.max(1,...pts.map(p=>p.r))
-  gx.beginPath(); gx.moveTo(pts[0].x,DY+DH)
+  // fill
+  gx.beginPath();gx.moveTo(pts[0].x,DY+DH)
   pts.forEach(p=>gx.lineTo(p.x,DY+DH-p.r/maxR*DH))
-  gx.lineTo(pts[pts.length-1].x,DY+DH); gx.closePath()
-  gx.fillStyle='rgba(0,255,238,0.1)'; gx.fill()
+  gx.lineTo(pts[pts.length-1].x,DY+DH);gx.closePath()
+  gx.fillStyle='rgba(0,255,238,0.1)';gx.fill()
+  // line
   gx.beginPath()
   pts.forEach((p,i)=>i===0?gx.moveTo(p.x,DY+DH-p.r/maxR*DH):gx.lineTo(p.x,DY+DH-p.r/maxR*DH))
-  gx.strokeStyle='rgba(0,255,238,0.75)'; gx.lineWidth=1.5*DPR; gx.stroke()
+  gx.strokeStyle='rgba(0,255,238,0.75)';gx.lineWidth=1.5*DPR;gx.stroke()
 }
 
-// ── Connect ──────────────────────────────────────────────────
-const params=new URLSearchParams(location.search)
+// ── Helpers ──────────────────────────────────────────────────
 
-// ?sid=SESSION_ID — from APEX app QR code / shared link
-;(function(){
-  const sid=params.get('sid')
-  if(sid){
-    const name=params.get('name')||''
-    if(name){
-      const pill=document.getElementById('pill')
-      if(pill) pill.title=decodeURIComponent(name)
-    }
-    if(APEX_RTDB_URL){
-      document.getElementById('overlay').classList.add('h')
-      setTimeout(()=>connectFirebase(sid,APEX_RTDB_URL),400)
-    } else {
-      document.getElementById('fbSession').value=sid
-    }
-  }
-})()
-
-if(params.has('live')&&!params.has('sid')){const host=params.get('host')||location.hostname||'localhost';connectTo(host)}
-
-function doConnect(){const ip=document.getElementById('ipIn').value.trim()||'localhost';connectTo(ip)}
-function connectTo(ip){
-  if(liveWs){try{liveWs.close()}catch(_){}}
-  setSt('Connecting…'); document.getElementById('ovSt').textContent='Connecting…'
-  const proto=location.protocol==='https:'?'wss:':'ws:'
-  const isIp=/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)||ip==='localhost'
-  liveWs=new WebSocket(isIp?proto+'//'+ip+':9001':proto+'//'+ip)
-  liveWs.onopen=()=>{
-    liveWs.send(JSON.stringify({type:'register',role:'viewer',mode:'boxing'}))
-    setSt('Connected ●'); document.getElementById('ovSt').textContent=''
-    document.getElementById('overlay').classList.add('h')
-  }
-  liveWs.onmessage=e=>{try{handleMsg(JSON.parse(e.data))}catch(_){}}
-  liveWs.onerror=()=>setSt('Cannot reach relay')
-  liveWs.onclose=()=>{setSt('Disconnected');document.getElementById('overlay').classList.remove('h')}
+function hexA(hex,a){
+  const r=parseInt(hex.slice(1,3),16)
+  const g=parseInt(hex.slice(3,5),16)
+  const b=parseInt(hex.slice(5,7),16)
+  return `rgba(${r},${g},${b},${a})`
 }
-function setSt(s){document.getElementById('liveSt').textContent=s}
-function setThresh(v){punchThresh=parseFloat(v);document.getElementById('thV').textContent=(+v).toFixed(1)}
-function hexA(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`}
 </script>
 </body>
 </html>
