@@ -30,6 +30,8 @@ const patterns = {
   hallpassLabel: />Hall Pass</,
   vspdResearchHref: /vspd-research-initiative\.html/,
   vspdResearchLabel: />VSPD Research Initiative</,
+  unikguitHref: /unikguit\.html/,
+  unikguitLabel: />Unikguit</,
 };
 const absentPatterns = {
   hallpassHref: /hallpassapp\//,
