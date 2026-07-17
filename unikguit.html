@@ -404,18 +404,23 @@ document.querySelector('.tab[data-tab="config"]').click();
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const INSTRUMENTS = {
-  guitar6: { name:"6-string guitar", scaleIn:25.5, nut:42.86, end:54.0,
+  guitar6: { name:"6-string guitar", scaleIn:25.5, nut:42.86, end:54.0, frets:24,
     strings:["E","A","D","G","B","e"],
     stiff:{E:1.0, A:0.6, D:0.38, G:0.6, B:0.25, e:0.145} },
-  guitar7: { name:"7-string guitar", scaleIn:25.5, nut:48.0, end:60.0,
+  guitar7: { name:"7-string guitar", scaleIn:25.5, nut:48.0, end:60.0, frets:24,
     strings:["B0","E","A","D","G","B","e"],
     stiff:{B0:1.35, E:1.0, A:0.6, D:0.38, G:0.6, B:0.25, e:0.145} },
-  bass4: { name:"4-string bass", scaleIn:34, nut:38.0, end:58.0,
+  bass4: { name:"4-string bass", scaleIn:34, nut:38.0, end:58.0, frets:24,
     strings:["E","A","D","G"],
     stiff:{E:1.6, A:1.15, D:0.85, G:0.6} },
-  bass5: { name:"5-string bass", scaleIn:34, nut:45.0, end:65.0,
+  bass5: { name:"5-string bass", scaleIn:34, nut:45.0, end:65.0, frets:24,
     strings:["B","E","A","D","G"],
     stiff:{B:1.9, E:1.6, A:1.15, D:0.85, G:0.6} },
+  classical: { name:"Classical (nylon)", scaleIn:25.59, nut:51.0, end:62.5, frets:19,
+    strings:["E","A","D","G","B","e"],
+    // Nylon is far more compliant than steel (~5 GPa vs ~200 GPa) -- compensation is proportionally
+    // much smaller. These are scaled-down approximations, not measured nylon string data.
+    stiff:{E:0.15, A:0.10, D:0.08, G:0.09, B:0.05, e:0.025} },
 };
 
 let currentInstrument = "guitar6";
@@ -426,14 +431,14 @@ function applyInstrument(key){
   currentInstrument = key;
   const inst = INSTRUMENTS[key];
   SCALE = inst.scaleIn * 25.4;
-  N_FRETS = 24;
+  N_FRETS = inst.frets;
   NUT_W = inst.nut;
   END_W = inst.end;
   STRINGS = inst.strings;
   STIFF = inst.stiff;
   state = {};
   STRINGS.forEach(s => { state[s] = {}; for(let n=1;n<=N_FRETS;n++) state[s][n] = false; });
-  fret24Pos = fretPos(24);
+  fret24Pos = fretPos(N_FRETS);
   BOARD_LEN = fret24Pos + 12;
 }
 applyInstrument("guitar6");
@@ -636,6 +641,87 @@ function pushBox(tris, x0,x1,y0,y1,z0,z1){
   quad('100','101','111','110');
 }
 
+// Smooth fret crown: semicircular cross-section that tapers to ZERO height at both edges
+// (no flat top, no hard vertical side walls -- the profile itself curves down to meet the
+// board surface smoothly). Swept along the segment's long axis, with rounded end caps.
+// This replaces pushBox for fret geometry -- the 90 degree jogs stay in the top-down path,
+// but every cross-section is now a smooth dome, not a box.
+// Builds ONE continuous swept crown along a full zigzag path (all active-string lanes + corner
+// jogs for a single contiguous run), instead of separate independently-capped pieces. Corners
+// bend the path, not the profile -- same rounded cross-section the entire way. Only the two true
+// outer ends of the whole run taper to zero height; every interior joint just continues.
+function buildContinuousFretPath(tris, waypoints, height, width, arcSegs=8){
+  // dedupe consecutive identical points (can happen at corners)
+  const pts = [waypoints[0]];
+  for(let i=1;i<waypoints.length;i++){
+    const p = waypoints[i], prev = pts[pts.length-1];
+    if(Math.abs(p[0]-prev[0]) > 1e-9 || Math.abs(p[1]-prev[1]) > 1e-9) pts.push(p);
+  }
+  const n = pts.length;
+  if(n < 2) return;
+
+  const sub = (a,b) => [a[0]-b[0], a[1]-b[1]];
+  const norm = (v) => { const m = Math.hypot(v[0],v[1]); return m>1e-12 ? [v[0]/m, v[1]/m] : [0,0]; };
+
+  // direction at each waypoint: endpoints use their single adjoining segment,
+  // interior points use the averaged (mitered) direction of both adjoining segments
+  const dirs = pts.map((p,i) => {
+    if(i===0) return norm(sub(pts[1], pts[0]));
+    if(i===n-1) return norm(sub(pts[n-1], pts[n-2]));
+    const d1 = norm(sub(pts[i], pts[i-1]));
+    const d2 = norm(sub(pts[i+1], pts[i]));
+    return norm([d1[0]+d2[0], d1[1]+d2[1]]);
+  });
+  const perps = dirs.map(d => [-d[1], d[0]]);
+
+  const arcT = Array.from({length:arcSegs+1}, (_,i) => (i/arcSegs)*Math.PI);
+
+  const realRings = pts.map((p,i) => {
+    const perp = perps[i];
+    const w = widthAt(p[0]);
+    const zBase = topZ3D(p[0], p[1], w);
+    return arcT.map(theta => {
+      const offset = -Math.cos(theta)*(width/2);
+      const h = Math.sin(theta)*height;
+      return [p[0]+perp[0]*offset, p[1]+perp[1]*offset, zBase+h];
+    });
+  });
+
+  // tube walls between consecutive rings (this is what makes it ONE continuous connected mesh)
+  for(let i=0;i<n-1;i++){
+    const A = realRings[i], B = realRings[i+1];
+    for(let k=0;k<arcSegs;k++){
+      tris.push([A[k], B[k], B[k+1]]);
+      tris.push([A[k], B[k+1], A[k+1]]);
+    }
+  }
+  // bottom (belly) face along the whole path, closing the underside
+  for(let i=0;i<n-1;i++){
+    const p0=pts[i], p1=pts[i+1], perp0=perps[i], perp1=perps[i+1];
+    const w0=widthAt(p0[0]), w1=widthAt(p1[0]);
+    const z0=topZ3D(p0[0],p0[1],w0), z1=topZ3D(p1[0],p1[1],w1);
+    const a0=[p0[0]-perp0[0]*width/2, p0[1]-perp0[1]*width/2, z0];
+    const a1=[p0[0]+perp0[0]*width/2, p0[1]+perp0[1]*width/2, z0];
+    const b0=[p1[0]-perp1[0]*width/2, p1[1]-perp1[1]*width/2, z1];
+    const b1=[p1[0]+perp1[0]*width/2, p1[1]+perp1[1]*width/2, z1];
+    tris.push([a0,b0,b1]); tris.push([a0,b1,a1]);
+  }
+  // end caps: only at the two true outer ends of the whole run, tapered fan to a zero-height point
+  const capEnd = (ringIdx, ptIdx, flip) => {
+    const ring = realRings[ringIdx];
+    const p = pts[ptIdx];
+    const w = widthAt(p[0]);
+    const zBase = topZ3D(p[0], p[1], w);
+    const centerPt = [p[0], p[1], zBase];
+    for(let k=0;k<arcSegs;k++){
+      if(flip) tris.push([centerPt, ring[k+1], ring[k]]);
+      else tris.push([centerPt, ring[k], ring[k+1]]);
+    }
+  };
+  capEnd(0, 0, true);
+  capEnd(n-1, n-1, false);
+}
+
 function buildSelectionMesh(){
   const FRET_H = 1.4, FRET_W = 1.2;
   const tris = [];
@@ -653,16 +739,15 @@ function buildSelectionMesh(){
     let i = 0;
     while(i < NS){
       if(!state[STRINGS[i]][n]){ i++; continue; }
-      const y0 = edges[i], y1 = edges[i+1], x = xs[STRINGS[i]];
-      const zSurf = topZ3D(x, (y0+y1)/2, w);
-      pushBox(tris, x-FRET_W/2, x+FRET_W/2, y0, y1, zSurf, zSurf+FRET_H);
-      if(i+1 < NS && state[STRINGS[i+1]][n]){
-        const xNext = xs[STRINGS[i+1]];
-        const xlo = Math.min(x,xNext), xhi = Math.max(x,xNext);
-        const zj = topZ3D((xlo+xhi)/2, edges[i+1], w);
-        pushBox(tris, xlo-FRET_W/2, xhi+FRET_W/2, edges[i+1]-FRET_W/2, edges[i+1]+FRET_W/2, zj, zj+FRET_H);
+      let j = i;
+      const waypoints = [[xs[STRINGS[j]], edges[j]], [xs[STRINGS[j]], edges[j+1]]];
+      while(j+1 < NS && state[STRINGS[j+1]][n]){
+        j++;
+        waypoints.push([xs[STRINGS[j]], edges[j]]);
+        waypoints.push([xs[STRINGS[j]], edges[j+1]]);
       }
-      i++;
+      buildContinuousFretPath(tris, waypoints, FRET_H, FRET_W);
+      i = j + 1;
     }
   }
   return tris;
@@ -695,16 +780,15 @@ function buildSelectionMeshPacked(){
     let i = 0;
     while(i < NS){
       if(!state[STRINGS[i]][n]){ i++; continue; }
-      const y0 = edges[i], y1 = edges[i+1], x = xs[STRINGS[i]];
-      const zSurf = topZ3D(x, (y0+y1)/2, w);
-      pushBox(rowTris, x-FRET_W/2, x+FRET_W/2, y0, y1, zSurf, zSurf+FRET_H);
-      if(i+1 < NS && state[STRINGS[i+1]][n]){
-        const xNext = xs[STRINGS[i+1]];
-        const xlo = Math.min(x,xNext), xhi = Math.max(x,xNext);
-        const zj = topZ3D((xlo+xhi)/2, edges[i+1], w);
-        pushBox(rowTris, xlo-FRET_W/2, xhi+FRET_W/2, edges[i+1]-FRET_W/2, edges[i+1]+FRET_W/2, zj, zj+FRET_H);
+      let j = i;
+      const waypoints = [[xs[STRINGS[j]], edges[j]], [xs[STRINGS[j]], edges[j+1]]];
+      while(j+1 < NS && state[STRINGS[j+1]][n]){
+        j++;
+        waypoints.push([xs[STRINGS[j]], edges[j]]);
+        waypoints.push([xs[STRINGS[j]], edges[j+1]]);
       }
-      i++;
+      buildContinuousFretPath(rowTris, waypoints, FRET_H, FRET_W);
+      i = j + 1;
     }
     // recenter this row's own local X around xAvg -> [0, pieceW], and record its true Y width
     let ry0=Infinity, ry1=-Infinity;
