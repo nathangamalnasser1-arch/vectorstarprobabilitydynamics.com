@@ -32,6 +32,8 @@ const patterns = {
   vspdResearchLabel: />VSPD Research Initiative</,
   unikguitHref: /unikguit\.html/,
   unikguitLabel: />Unikguit</,
+  cleankeyHref: /cleankey\/index\.html/,
+  cleankeyLabel: />Clean Key</,
 };
 const absentPatterns = {
   hallpassHref: /hallpassapp\//,

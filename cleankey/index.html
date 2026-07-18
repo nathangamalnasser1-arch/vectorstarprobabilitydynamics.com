@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Clean Key — Cleaning Booking with Mess Detection</title>
+<meta name="description" content="Book a cleaning with The Clean Key. Optional AI mess-detection estimate from photos.">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<script src="/cleankey/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F6F2E9; }
+    * { box-sizing: border-box; font-family: 'Work Sans', sans-serif; }
+    input, textarea { font-family: 'Work Sans', sans-serif; }
+    @keyframes ck-spin { to { transform: rotate(360deg); } }
+    @keyframes ck-pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; background: #F6F2E9; display: flex; flex-direction: column; align-items: center;">
+
+  <!-- Header -->
+  <div style="width: 100%; max-width: 640px; padding: 20px 24px 0 24px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: #16332A; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <span style="color: #C7A64B; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">CK</span>
+      </div>
+      <div style="display: flex; flex-direction: column; line-height: 1.1;">
+        <span style="font-size: 17px; font-weight: 700; color: #16332A;">The Clean Key</span>
+        <span style="font-size: 11px; color: #7C8B82; font-style: italic; font-family: 'Lora', serif;">the key to a cleaner home</span>
+      </div>
+    </div>
+
+    <sc-if value="{{ showProgress }}">
+      <div style="margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #7C8B82; margin-bottom: 6px;">
+          <span>{{ stepLabel }}</span>
+          <span>Step {{ stepNumberDisplay }} of {{ totalStepsDisplay }}</span>
+        </div>
+        <div style="width: 100%; height: 5px; background: #E4DFD0; border-radius: 3px; overflow: hidden;">
+          <div style="height: 100%; background: {{ progressColor }}; border-radius: 3px; width: {{ progressPct }}%; transition: width 0.35s ease;"></div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- Main content -->
+  <div style="width: 100%; max-width: 640px; flex: 1; padding: 24px; padding-bottom: 120px;">
+
+    <!-- START -->
+    <sc-if value="{{ isStart }}" hint-placeholder-val="{{ true }}">
+      <div style="padding-top: 24px; text-align: center;">
+        <div style="font-family: 'Lora', serif; font-style: italic; font-size: 20px; color: #C7A64B; margin-bottom: 4px;">A cleaner home,</div>
+        <h1 style="font-size: 36px; font-weight: 700; color: #16332A; margin: 0 0 12px 0; line-height: 1.15;">starts with one click</h1>
+        <p style="color: #5B6B63; font-size: 16px; max-width: 460px; margin: 0 auto 32px auto; line-height: 1.5;">Tell us about your space, pick a schedule, and we'll take it from there.</p>
+
+        <button onclick="{{ startNormal }}" style="width: 100%; max-width: 380px; padding: 18px 24px; background: #1F4D3D; color: #FBF8F1; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer;" style-hover="background: #16332A;">
+          Book a cleaning
+        </button>
+
+        <div style="margin-top: 40px; padding-top: 28px; border-top: 1px solid #E4DFD0;">
+          <button onclick="{{ startBigMess }}" style="background: none; border: none; color: #9C7A3F; font-size: 14px; font-style: italic; font-family: 'Lora', serif; cursor: pointer; padding: 8px;" style-hover="color: #7C5F2E;">
+            ...dealing with a bigger mess? →
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- BIG MESS UPLOAD -->
+    <sc-if value="{{ isUpload }}">
+      <div style="text-align: center; padding-top: 8px;">
+        <h2 style="font-size: 26px; font-weight: 700; color: #16332A; margin: 0 0 8px 0;">No judgment. Just help.</h2>
+        <p style="color: #5B6B63; font-size: 15px; max-width: 440px; margin: 0 auto 28px auto; line-height: 1.5;">Snap a few photos and our AI will size up the job — no human ever has to see them first.</p>
+
+        <div onclick="{{ addDemoPhoto }}" style="border: 2px dashed #D8B769; border-radius: 16px; padding: 36px 20px; cursor: pointer; background: #FBF6EA;" style-hover="background: #F7EFDC;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #EFDFAF; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 20px; height: 16px; border: 2px solid #9C7A3F; border-radius: 3px;"></div>
+          </div>
+          <div style="color: #9C7A3F; font-weight: 600; font-size: 15px;">Tap to add photos</div>
+          <div style="color: #B3A276; font-size: 12px; margin-top: 4px;">(demo — adds a sample photo)</div>
+        </div>
+
+        <sc-if value="{{ hasPhotos }}">
+          <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; justify-content: center;">
+            <sc-for list="{{ photos }}" as="photo" hint-placeholder-count="2">
+              <div style="width: 72px; height: 72px; border-radius: 10px; background: linear-gradient(135deg, #E8DFC6, #D6C9A2); display: flex; align-items: center; justify-content: center; color: #8A7B4E; font-size: 11px;">photo</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ANALYZING -->
+    <sc-if value="{{ isAnalyzing }}">
+      <div style="text-align: center; padding-top: 60px;">
+        <div style="width: 64px; height: 64px; border: 4px solid #E4DFD0; border-top-color: #1F4D3D; border-radius: 50%; margin: 0 auto 24px auto; animation: ck-spin 1s linear infinite;"></div>
+        <h2 style="font-size: 22px; font-weight: 700; color: #16332A; margin: 0 0 8px 0;">Taking a look...</h2>
+        <p style="color: #5B6B63; font-size: 14px; font-style: italic; font-family: 'Lora', serif; animation: ck-pulse 1.6s ease infinite;">Our AI doesn't judge. It just measures.</p>
+      </div>
+    </sc-if>
+
+    <!-- ESTIMATE -->
+    <sc-if value="{{ isEstimate }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 4px 0;">Here's what we found</h2>
+        <p style="color: #5B6B63; font-size: 14px; margin: 0 0 24px 0;">Estimate based on your photos — final price confirmed on arrival.</p>
+
+        <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 20px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 13px; color: #7C8B82; font-weight: 600;">MESS LEVEL</span>
+            <span style="font-size: 14px; color: #16332A; font-weight: 700;">{{ bigMessSeverity }}</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: #E4DFD0; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
+            <div style="height: 100%; width: {{ bigMessSeverityPct }}%; background: #C97B4A; border-radius: 4px;"></div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <div style="font-size: 12px; color: #7C8B82;">Items detected</div>
+              <div style="font-size: 20px; font-weight: 700; color: #16332A;">{{ bigMessItems }}</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: #7C8B82;">Extra time needed</div>
+              <div style="font-size: 20px; font-weight: 700; color: #16332A;">{{ bigMessHours }} hrs</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px;">
+          <div style="display: flex; justify-content: space-between; font-size: 14px; color: #16332A; margin-bottom: 8px;">
+            <span>Deep clean estimate</span>
+            <span style="font-weight: 600;">${{ bigMessAddon }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 14px; color: #7C8B82;">
+            <span>AI analysis fee</span>
+            <span>$1</span>
+          </div>
+          <div style="font-size: 11px; color: #9C9484; margin-top: 6px; line-height: 1.4;">This covers the AI's time looking at your photos — not judging them.</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- LOCATION -->
+    <sc-if value="{{ isLocation }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 4px 0;">Where's the job?</h2>
+        <p style="color: #5B6B63; font-size: 14px; margin: 0 0 24px 0;">We'll route our team from here.</p>
+
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin-bottom: 6px;">Street address</label>
+        <input value="{{ address.line1 }}" oninput="{{ onAddressLine1 }}" placeholder="123 Maple Street" style="width: 100%; padding: 14px; border: 1px solid #D8D2BE; border-radius: 10px; font-size: 15px; margin-bottom: 16px; background: #FBF8F1;" />
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin-bottom: 6px;">City</label>
+            <input value="{{ address.city }}" oninput="{{ onAddressCity }}" placeholder="Houston" style="width: 100%; padding: 14px; border: 1px solid #D8D2BE; border-radius: 10px; font-size: 15px; background: #FBF8F1;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin-bottom: 6px;">ZIP</label>
+            <input value="{{ address.zip }}" oninput="{{ onAddressZip }}" placeholder="77002" style="width: 100%; padding: 14px; border: 1px solid #D8D2BE; border-radius: 10px; font-size: 15px; background: #FBF8F1;" />
+          </div>
+        </div>
+
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin-bottom: 6px;">Access notes (optional)</label>
+        <textarea value="{{ address.notes }}" oninput="{{ onAddressNotes }}" placeholder="Gate code, parking, pets, etc." rows="3" style="width: 100%; padding: 14px; border: 1px solid #D8D2BE; border-radius: 10px; font-size: 15px; resize: vertical; background: #FBF8F1;"></textarea>
+      </div>
+    </sc-if>
+
+    <!-- ROOMS -->
+    <sc-if value="{{ isRooms }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 4px 0;">How much space?</h2>
+        <p style="color: #5B6B63; font-size: 14px; margin: 0 0 24px 0;">This is how we size the crew and the clock.</p>
+
+        <sc-for list="{{ roomsList }}" as="room" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #E4DFD0;">
+            <span style="font-size: 15px; color: #16332A; font-weight: 500;">{{ room.label }}</span>
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <button onclick="{{ room.dec }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #D8D2BE; background: #FBF8F1; font-size: 18px; color: #16332A; cursor: pointer; line-height: 1;">–</button>
+              <span style="font-size: 16px; font-weight: 600; color: #16332A; min-width: 18px; text-align: center;">{{ room.value }}</span>
+              <button onclick="{{ room.inc }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #D8D2BE; background: #FBF8F1; font-size: 18px; color: #16332A; cursor: pointer; line-height: 1;">+</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- RECURRENCE -->
+    <sc-if value="{{ isRecurrence }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 4px 0;">How often?</h2>
+        <p style="color: #5B6B63; font-size: 14px; margin: 0 0 24px 0;">Recurring visits save you money.</p>
+
+        <sc-for list="{{ recurrenceList }}" as="opt" hint-placeholder-count="4">
+          <div onclick="{{ opt.select }}" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border: 2px solid {{ opt.borderColor }}; background: {{ opt.bg }}; border-radius: 12px; margin-bottom: 12px; cursor: pointer;">
+            <div>
+              <div style="font-size: 15px; font-weight: 600; color: #16332A;">{{ opt.label }}</div>
+              <div style="font-size: 13px; color: #7C8B82;">{{ opt.sub }}</div>
+            </div>
+            <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid {{ opt.dotBorder }}; background: {{ opt.dotFill }};"></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- SCHEDULE -->
+    <sc-if value="{{ isSchedule }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 4px 0;">Pick a day and time</h2>
+        <p style="color: #5B6B63; font-size: 14px; margin: 0 0 24px 0;">{{ scheduleSubtitle }}</p>
+
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin-bottom: 6px;">Date</label>
+        <input type="date" value="{{ date }}" oninput="{{ onDate }}" style="width: 100%; padding: 14px; border: 1px solid #D8D2BE; border-radius: 10px; font-size: 15px; margin-bottom: 20px; background: #FBF8F1;" />
+
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin-bottom: 10px;">Time window</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <sc-for list="{{ timeSlotsList }}" as="slot" hint-placeholder-count="5">
+            <div onclick="{{ slot.select }}" style="padding: 14px; text-align: center; border-radius: 10px; border: 2px solid {{ slot.borderColor }}; background: {{ slot.bg }}; color: {{ slot.textColor }}; font-size: 14px; font-weight: 600; cursor: pointer;">
+              {{ slot.label }}
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- PRODUCTS -->
+    <sc-if value="{{ isProducts }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 4px 0;">Pick your products</h2>
+        <p style="color: #5B6B63; font-size: 14px; margin: 0 0 24px 0;">Choose what our crew should use — or leave a special note.</p>
+
+        <sc-for list="{{ productsList }}" as="p" hint-placeholder-count="6">
+          <div onclick="{{ p.toggle }}" style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 2px solid {{ p.borderColor }}; background: {{ p.bg }}; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+            <div style="width: 22px; height: 22px; border-radius: 6px; border: 2px solid {{ p.checkBorder }}; background: {{ p.checkFill }}; flex-shrink: 0;"></div>
+            <div>
+              <div style="font-size: 15px; font-weight: 600; color: #16332A;">{{ p.name }}</div>
+              <div style="font-size: 13px; color: #7C8B82;">{{ p.tag }}</div>
+            </div>
+          </div>
+        </sc-for>
+
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #16332A; margin: 20px 0 6px 0;">Special instructions</label>
+        <textarea value="{{ comment }}" oninput="{{ onComment }}" placeholder='e.g. "please only use the wood polish on my grand piano"' rows="3" style="width: 100%; padding: 14px; border: 1px solid #D8D2BE; border-radius: 10px; font-size: 15px; resize: vertical; background: #FBF8F1;"></textarea>
+      </div>
+    </sc-if>
+
+    <!-- REVIEW -->
+    <sc-if value="{{ isReview }}">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #16332A; margin: 0 0 20px 0;">Review your booking</h2>
+
+        <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;">
+          <div style="font-size: 12px; color: #7C8B82; font-weight: 600; margin-bottom: 4px;">LOCATION</div>
+          <div style="font-size: 15px; color: #16332A;">{{ addressSummary }}</div>
+        </div>
+
+        <sc-if value="{{ isBigMess }}">
+          <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;">
+            <div style="font-size: 12px; color: #7C8B82; font-weight: 600; margin-bottom: 4px;">BIG MESS ESTIMATE</div>
+            <div style="font-size: 15px; color: #16332A;">{{ bigMessSeverity }} · {{ bigMessItems }} items · {{ bigMessHours }} extra hrs</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isBigMess === false }}">
+          <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;">
+            <div style="font-size: 12px; color: #7C8B82; font-weight: 600; margin-bottom: 4px;">ROOMS</div>
+            <div style="font-size: 15px; color: #16332A;">{{ roomsSummary }}</div>
+          </div>
+          <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;">
+            <div style="font-size: 12px; color: #7C8B82; font-weight: 600; margin-bottom: 4px;">RECURRENCE</div>
+            <div style="font-size: 15px; color: #16332A;">{{ selectedRecurrenceLabel }}</div>
+          </div>
+        </sc-if>
+
+        <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;">
+          <div style="font-size: 12px; color: #7C8B82; font-weight: 600; margin-bottom: 4px;">SCHEDULE</div>
+          <div style="font-size: 15px; color: #16332A;">{{ scheduleSummary }}</div>
+        </div>
+
+        <div style="background: #FBF8F1; border: 1px solid #E4DFD0; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px;">
+          <div style="font-size: 12px; color: #7C8B82; font-weight: 600; margin-bottom: 4px;">PRODUCTS</div>
+          <div style="font-size: 15px; color: #16332A;">{{ productsSummary }}</div>
+          <sc-if value="{{ hasComment }}">
+            <div style="font-size: 13px; color: #7C8B82; font-style: italic; font-family: 'Lora', serif; margin-top: 6px;">"{{ comment }}"</div>
+          </sc-if>
+        </div>
+
+        <div style="background: #16332A; border-radius: 14px; padding: 18px 20px;">
+          <div style="display: flex; justify-content: space-between; font-size: 14px; color: #C9D6CE; margin-bottom: 6px;">
+            <span>Estimated total</span>
+            <span></span>
+          </div>
+          <div style="font-size: 30px; font-weight: 700; color: #FBF8F1;">${{ totalPrice }}</div>
+          <sc-if value="{{ isBigMess }}">
+            <div style="font-size: 12px; color: #9DB0A5; margin-top: 4px;">includes $1 AI analysis fee</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- SUCCESS -->
+    <sc-if value="{{ isSuccess }}">
+      <div style="text-align: center; padding-top: 40px;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #1F4D3D; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 24px; height: 12px; border-left: 3px solid #FBF8F1; border-bottom: 3px solid #FBF8F1; transform: rotate(-45deg) translate(2px, -2px);"></div>
+        </div>
+        <h2 style="font-size: 26px; font-weight: 700; color: #16332A; margin: 0 0 8px 0;">You're booked!</h2>
+        <p style="color: #5B6B63; font-size: 15px; margin: 0 0 4px 0;">Confirmation <strong style="color: #16332A;">{{ bookingRef }}</strong></p>
+        <p style="color: #5B6B63; font-size: 14px; max-width: 380px; margin: 8px auto 32px auto; line-height: 1.5;">{{ scheduleSummary }} at {{ addressSummary }}</p>
+        <button onclick="{{ resetAll }}" style="padding: 14px 28px; background: none; border: 1px solid #D8D2BE; color: #16332A; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">Book another cleaning</button>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- Bottom nav -->
+  <sc-if value="{{ showNav }}">
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #F6F2E9; border-top: 1px solid #E4DFD0; padding: 16px 24px; display: flex; justify-content: center;">
+      <div style="width: 100%; max-width: 640px; display: flex; gap: 12px;">
+        <sc-if value="{{ showBack }}">
+          <button onclick="{{ back }}" style="padding: 15px 20px; background: none; border: 1px solid #D8D2BE; color: #16332A; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;">Back</button>
+        </sc-if>
+        <button onclick="{{ primaryAction }}" disabled="{{ primaryDisabled }}" style="flex: 1; padding: 15px 20px; background: {{ primaryBg }}; color: {{ primaryColor }}; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; opacity: {{ primaryOpacity }};">{{ primaryLabel }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ROOM_META = [
+  { key: 'bedroom', label: 'Bedrooms', price: 25 },
+  { key: 'bathroom', label: 'Bathrooms', price: 20 },
+  { key: 'kitchen', label: 'Kitchen', price: 30 },
+  { key: 'living', label: 'Living / common areas', price: 25 },
+  { key: 'other', label: 'Other rooms', price: 20 },
+];
+const RECURRENCE_META = [
+  { id: 'onetime', label: 'One-time', sub: 'Just this once', discount: 0 },
+  { id: 'weekly', label: 'Weekly', sub: 'Save 20%', discount: 0.2 },
+  { id: 'biweekly', label: 'Bi-weekly', sub: 'Save 15%', discount: 0.15 },
+  { id: 'monthly', label: 'Monthly', sub: 'Save 10%', discount: 0.1 },
+];
+const TIME_SLOTS = [
+  { id: '8-10', label: '8 – 10 AM' },
+  { id: '10-12', label: '10 AM – 12 PM' },
+  { id: '12-2', label: '12 – 2 PM' },
+  { id: '2-4', label: '2 – 4 PM' },
+  { id: '4-6', label: '4 – 6 PM' },
+];
+const PRODUCTS_META = [
+  { id: 'sevengen', name: 'Seventh Generation', tag: 'All-purpose cleaner' },
+  { id: 'method', name: 'Method', tag: 'Wood & surface polish' },
+  { id: 'branchbasics', name: 'Branch Basics', tag: 'Concentrate, fragrance-free' },
+  { id: 'mrsmeyers', name: "Mrs. Meyer's", tag: 'Multi-surface, scented' },
+  { id: 'bkf', name: 'Bar Keeper\'s Friend', tag: 'Stainless & tile' },
+  { id: 'own', name: 'My own supplies', tag: 'We\'ll use what you provide' },
+];
+const BIG_MESS_ESTIMATE = { severity: 'Heavy-duty', severityPct: 78, items: 14, hours: 2.5, addon: 85 };
+
+class Component extends DCLogic {
+  state = {
+    mode: null,
+    step: 0,
+    address: { line1: '', city: '', zip: '', notes: '' },
+    rooms: { bedroom: 1, bathroom: 1, kitchen: 1, living: 1, other: 0 },
+    recurrence: 'onetime',
+    date: '',
+    timeSlot: null,
+    products: [],
+    comment: '',
+    photos: [],
+    confirmed: false,
+    bookingRef: null,
+  };
+
+  getOrder() {
+    if (this.state.mode === 'bigmess') {
+      return ['start', 'upload', 'analyzing', 'estimate', 'location', 'schedule', 'products', 'review', 'success'];
+    }
+    return ['start', 'location', 'rooms', 'recurrence', 'schedule', 'products', 'review', 'success'];
+  }
+
+  startNormal = () => this.setState({ mode: 'normal', step: 1 });
+  startBigMess = () => this.setState({ mode: 'bigmess', step: 1, recurrence: 'onetime' });
+
+  next = () => { const order = this.getOrder(); this.setState(s => ({ step: Math.min(s.step + 1, order.length - 1) })); };
+  back = () => this.setState(s => ({ step: Math.max(s.step - 1, 0) }));
+
+  addDemoPhoto = () => this.setState(s => ({ photos: [...s.photos, s.photos.length] }));
+
+  runAnalysis = () => {
+    this.next();
+    setTimeout(() => { this.next(); }, 1800);
+  };
+
+  onAddressLine1 = (e) => this.setState(s => ({ address: { ...s.address, line1: e.target.value } }));
+  onAddressCity = (e) => this.setState(s => ({ address: { ...s.address, city: e.target.value } }));
+  onAddressZip = (e) => this.setState(s => ({ address: { ...s.address, zip: e.target.value } }));
+  onAddressNotes = (e) => this.setState(s => ({ address: { ...s.address, notes: e.target.value } }));
+
+  incRoom = (key) => this.setState(s => ({ rooms: { ...s.rooms, [key]: s.rooms[key] + 1 } }));
+  decRoom = (key) => this.setState(s => ({ rooms: { ...s.rooms, [key]: Math.max(0, s.rooms[key] - 1) } }));
+
+  setRecurrence = (id) => this.setState({ recurrence: id });
+  onDate = (e) => this.setState({ date: e.target.value });
+  setTimeSlot = (id) => this.setState({ timeSlot: id });
+  toggleProduct = (id) => this.setState(s => ({ products: s.products.includes(id) ? s.products.filter(p => p !== id) : [...s.products, id] }));
+  onComment = (e) => this.setState({ comment: e.target.value });
+
+  confirmBooking = () => {
+    const ref = 'CK-' + Math.floor(100000 + Math.random() * 900000);
+    this.setState({ confirmed: true, bookingRef: ref });
+    this.next();
+  };
+
+  resetAll = () => this.setState({
+    mode: null, step: 0,
+    address: { line1: '', city: '', zip: '', notes: '' },
+    rooms: { bedroom: 1, bathroom: 1, kitchen: 1, living: 1, other: 0 },
+    recurrence: 'onetime', date: '', timeSlot: null, products: [], comment: '',
+    photos: [], confirmed: false, bookingRef: null,
+  });
+
+  renderVals() {
+    const s = this.state;
+    const order = this.getOrder();
+    const stepName = order[s.step];
+    const isBigMess = s.mode === 'bigmess';
+    const analyzed = stepName === 'estimate' || (order.indexOf('estimate') >= 0 && s.step > order.indexOf('analyzing'));
+
+    const roomsSubtotal = ROOM_META.reduce((sum, r) => sum + r.price * s.rooms[r.key], 0);
+    const selectedRecurrence = RECURRENCE_META.find(r => r.id === s.recurrence) || RECURRENCE_META[0];
+
+    const roomsList = ROOM_META.map(r => ({
+      key: r.key, label: r.label, value: s.rooms[r.key],
+      inc: () => this.incRoom(r.key), dec: () => this.decRoom(r.key),
+    }));
+
+    const recurrenceList = RECURRENCE_META.map(r => {
+      const active = s.recurrence === r.id;
+      return {
+        id: r.id, label: r.label, sub: r.sub, select: () => this.setRecurrence(r.id),
+        borderColor: active ? '#1F4D3D' : '#E4DFD0', bg: active ? '#EEF3EF' : '#FBF8F1',
+        dotBorder: active ? '#1F4D3D' : '#D8D2BE', dotFill: active ? '#1F4D3D' : 'transparent',
+      };
+    });
+
+    const timeSlotsList = TIME_SLOTS.map(t => {
+      const active = s.timeSlot === t.id;
+      return {
+        id: t.id, label: t.label, select: () => this.setTimeSlot(t.id),
+        borderColor: active ? '#1F4D3D' : '#E4DFD0', bg: active ? '#1F4D3D' : '#FBF8F1',
+        textColor: active ? '#FBF8F1' : '#16332A',
+      };
+    });
+
+    const productsList = PRODUCTS_META.map(p => {
+      const active = s.products.includes(p.id);
+      return {
+        id: p.id, name: p.name, tag: p.tag, toggle: () => this.toggleProduct(p.id),
+        borderColor: active ? '#1F4D3D' : '#E4DFD0', bg: active ? '#EEF3EF' : '#FBF8F1',
+        checkBorder: active ? '#1F4D3D' : '#D8D2BE', checkFill: active ? '#1F4D3D' : 'transparent',
+      };
+    });
+
+    const photos = s.photos.map(i => ({ id: i }));
+
+    const addressSummary = s.address.line1 ? `${s.address.line1}${s.address.city ? ', ' + s.address.city : ''}${s.address.zip ? ' ' + s.address.zip : ''}` : 'No address yet';
+    const totalRooms = ROOM_META.reduce((sum, r) => sum + s.rooms[r.key], 0);
+    const roomsSummary = `${totalRooms} rooms total`;
+    const scheduleDateLabel = s.date ? new Date(s.date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) : 'No date yet';
+    const timeLabel = s.timeSlot ? (TIME_SLOTS.find(t => t.id === s.timeSlot) || {}).label : 'No time yet';
+    const scheduleSummary = `${scheduleDateLabel}, ${timeLabel}`;
+    const selectedProductNames = PRODUCTS_META.filter(p => s.products.includes(p.id)).map(p => p.name);
+    const productsSummary = selectedProductNames.length ? selectedProductNames.join(', ') : 'No preference — crew\'s choice';
+
+    const total = isBigMess ? (BIG_MESS_ESTIMATE.addon + 1) : Math.round(roomsSubtotal * (1 - selectedRecurrence.discount));
+
+    const stepMeta = {
+      start: { label: 'Get started', progress: false },
+      upload: { label: 'Show us the mess', progress: true },
+      analyzing: { label: 'Analyzing', progress: true },
+      estimate: { label: 'Your estimate', progress: true },
+      location: { label: 'Location', progress: true },
+      rooms: { label: 'Rooms', progress: true },
+      recurrence: { label: 'Frequency', progress: true },
+      schedule: { label: 'Schedule', progress: true },
+      products: { label: 'Products', progress: true },
+      review: { label: 'Review', progress: true },
+      success: { label: 'Confirmed', progress: false },
+    }[stepName];
+
+    let primaryLabel = 'Continue', primaryAction = this.next, primaryDisabled = false;
+    if (stepName === 'upload') { primaryLabel = 'Get AI estimate • $1'; primaryAction = this.runAnalysis; primaryDisabled = s.photos.length === 0; }
+    else if (stepName === 'analyzing') { primaryLabel = 'Analyzing...'; primaryAction = () => {}; primaryDisabled = true; }
+    else if (stepName === 'location') { primaryDisabled = !s.address.line1; }
+    else if (stepName === 'schedule') { primaryDisabled = !s.date || !s.timeSlot; }
+    else if (stepName === 'review') { primaryLabel = 'Confirm booking'; primaryAction = this.confirmBooking; }
+    else if (stepName === 'start' || stepName === 'success') { primaryAction = this.next; }
+
+    const showNav = stepName !== 'start' && stepName !== 'success';
+    const showBack = showNav && stepName !== 'analyzing';
+
+    return {
+      isStart: stepName === 'start',
+      isUpload: stepName === 'upload',
+      isAnalyzing: stepName === 'analyzing',
+      isEstimate: stepName === 'estimate',
+      isLocation: stepName === 'location',
+      isRooms: stepName === 'rooms',
+      isRecurrence: stepName === 'recurrence',
+      isSchedule: stepName === 'schedule',
+      isProducts: stepName === 'products',
+      isReview: stepName === 'review',
+      isSuccess: stepName === 'success',
+      isBigMess,
+      hasPhotos: s.photos.length > 0,
+      hasComment: !!s.comment,
+      showProgress: stepMeta.progress,
+      showNav, showBack,
+      stepLabel: stepMeta.label,
+      stepNumberDisplay: Math.max(1, order.slice(0, s.step + 1).filter(n => stepMeta && (n !== 'start')).length),
+      totalStepsDisplay: order.filter(n => n !== 'start' && n !== 'success').length,
+      progressPct: Math.round(((s.step) / (order.length - 1)) * 100),
+      progressColor: isBigMess ? '#C97B4A' : '#1F4D3D',
+
+      startNormal: this.startNormal, startBigMess: this.startBigMess,
+      back: this.back, primaryAction, primaryLabel, primaryDisabled,
+      primaryBg: primaryDisabled ? '#E4DFD0' : '#1F4D3D',
+      primaryColor: primaryDisabled ? '#9C9484' : '#FBF8F1',
+      primaryOpacity: primaryDisabled ? 0.7 : 1,
+
+      addDemoPhoto: this.addDemoPhoto, photos,
+
+      bigMessSeverity: BIG_MESS_ESTIMATE.severity, bigMessSeverityPct: BIG_MESS_ESTIMATE.severityPct,
+      bigMessItems: BIG_MESS_ESTIMATE.items, bigMessHours: BIG_MESS_ESTIMATE.hours, bigMessAddon: BIG_MESS_ESTIMATE.addon,
+
+      address: s.address, onAddressLine1: this.onAddressLine1, onAddressCity: this.onAddressCity,
+      onAddressZip: this.onAddressZip, onAddressNotes: this.onAddressNotes, addressSummary,
+
+      roomsList, roomsSummary,
+      recurrenceList, selectedRecurrenceLabel: selectedRecurrence.label,
+
+      date: s.date, onDate: this.onDate, timeSlotsList, scheduleSummary,
+      scheduleSubtitle: isBigMess ? 'We\'ll send a crew sized for the job.' : 'Pick what works for your first visit.',
+
+      productsList, comment: s.comment, onComment: this.onComment, productsSummary,
+
+      totalPrice: total,
+      bookingRef: s.bookingRef, resetAll: this.resetAll,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
