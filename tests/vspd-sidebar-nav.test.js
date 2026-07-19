@@ -32,10 +32,10 @@ const patterns = {
   vspdResearchLabel: />VSPD Research Initiative</,
   unikguitHref: /unikguit\.html/,
   unikguitLabel: />Unikguit</,
-  cleankeyHref: /cleankey\/index\.html/,
-  cleankeyLabel: />Clean Key</,
 };
 const absentPatterns = {
+  cleankeyHref: /cleankey\/index\.html/,
+  cleankeyLabel: />Clean Key</,
   hallpassHref: /hallpassapp\//,
   hallpassLabel: />Hall Pass</,
   jaydenLabel: />Jayden E-Commerce</i,
