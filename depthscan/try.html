@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DepthScan — Try the beta</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0B0D10;
+  --ink-2: #141720;
+  --ink-3: #1A1F2E;
+  --paper: #F5F3EC;
+  --signal: #FF5C35;
+  --teal: #3A8C7A;
+  --yellow: #F5C842;
+  --gray: #6B6F76;
+  --line: rgba(245,243,236,0.10);
+  --line-2: rgba(245,243,236,0.20);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter Tight', sans-serif;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: var(--signal); color: var(--ink); }
+a { color: inherit; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 20px 5vw;
+  background: rgba(11,13,16,0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.logo {
+  font-family: var(--mono); font-weight:700; font-size:14px;
+  letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;
+  color: inherit; text-decoration: none;
+}
+.logo::before { content:''; width:7px; height:7px; background:var(--signal); display:inline-block; }
+.nav-right { display:flex; align-items:center; gap:20px; }
+.lang-toggle { display:flex; border:1px solid var(--line-2); }
+.lang-btn {
+  font-family:var(--mono); font-size:11px; padding:5px 10px;
+  background:transparent; border:none; color:var(--gray); cursor:pointer;
+}
+.lang-btn.active { background:var(--paper); color:var(--ink); }
+.nav-back {
+  font-family:var(--mono); font-size:12px; color:var(--gray);
+  text-decoration:none; transition:color .15s;
+}
+.nav-back:hover { color:var(--signal); }
+
+/* ── HERO ── */
+.hero { padding: 150px 5vw 56px; text-align: center; }
+.hero-eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--signal); margin-bottom:20px;
+  display:inline-flex; align-items:center; gap:10px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after { content:''; width:20px; height:1px; background:var(--signal); }
+.hero h1 {
+  font-size: clamp(34px,6vw,64px); font-weight:800;
+  letter-spacing:-0.03em; line-height:1; margin-bottom:22px;
+}
+.hero h1 em { font-style:normal; color:var(--signal); }
+.hero-sub {
+  font-size:clamp(15px,1.8vw,18px); color:var(--gray);
+  max-width:56ch; margin:0 auto 36px; line-height:1.6;
+}
+.btn-primary {
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  background: var(--paper); color: var(--ink);
+  padding: 16px 28px; letter-spacing: 0.01em; text-decoration:none;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: background 0.15s, transform 0.15s;
+}
+.btn-primary:hover { background: var(--signal); transform: translateY(-1px); }
+.dl-meta { margin-top:14px; font-family:var(--mono); font-size:11px; color:var(--gray); }
+
+/* ── CONTENT ── */
+.wrap { max-width: 820px; margin: 0 auto; padding: 0 5vw 100px; }
+
+.notice {
+  border:1px solid var(--line-2); border-left:3px solid var(--yellow);
+  background:var(--ink-2); padding:18px 22px; margin-bottom:48px;
+  font-size:14px; line-height:1.6; color:rgba(245,243,236,0.85);
+}
+.notice strong { color:var(--paper); }
+
+h2 {
+  font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--signal); margin:56px 0 20px;
+}
+
+.req-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:1px;
+  background:var(--line); border:1px solid var(--line);
+}
+.req { background:var(--ink); padding:18px 20px; }
+.req-label { font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray); margin-bottom:6px; }
+.req-val { font-size:15px; font-weight:600; }
+.req-val small { display:block; font-weight:400; font-size:13px; color:var(--gray); margin-top:3px; }
+
+ol.steps { list-style:none; counter-reset: step; }
+ol.steps > li {
+  counter-increment: step; position:relative;
+  padding: 26px 0 26px 64px; border-top:1px solid var(--line);
+}
+ol.steps > li:last-child { border-bottom:1px solid var(--line); }
+ol.steps > li::before {
+  content: counter(step, decimal-leading-zero);
+  position:absolute; left:0; top:26px;
+  font-family:var(--mono); font-size:13px; font-weight:700; color:var(--signal);
+  border:1px solid var(--line-2); width:40px; height:40px;
+  display:flex; align-items:center; justify-content:center;
+}
+.step-title { font-size:19px; font-weight:700; letter-spacing:-0.01em; margin-bottom:8px; }
+.step-body { font-size:15px; line-height:1.65; color:rgba(245,243,236,0.78); }
+.step-body p + p, .step-body p + ul, .step-body ul + p { margin-top:10px; }
+.step-body ul { padding-left:18px; }
+.step-body li { margin:4px 0; }
+.step-body a { color:var(--signal); }
+.path {
+  font-family:var(--mono); font-size:12.5px; color:var(--paper);
+  background:var(--ink-3); padding:2px 7px; white-space:nowrap;
+}
+.tip { margin-top:10px; font-size:13px; color:var(--gray); }
+.tip::before { content:'→ '; color:var(--teal); }
+
+.faq-item { border-top:1px solid var(--line); padding:18px 0; }
+.faq-item:last-child { border-bottom:1px solid var(--line); }
+.faq-q { font-weight:600; font-size:15px; margin-bottom:6px; }
+.faq-a { font-size:14px; line-height:1.6; color:rgba(245,243,236,0.72); }
+
+footer {
+  border-top:1px solid var(--line); padding:28px 5vw;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+}
+.footer-mono { font-family:var(--mono); font-size:11px; color:var(--gray); letter-spacing:0.08em; }
+.footer-links { display:flex; gap:24px; font-size:13px; }
+.footer-links a { color:var(--gray); text-decoration:none; }
+.footer-links a:hover { color:var(--paper); }
+
+@media(max-width:640px){
+  .req-grid { grid-template-columns:1fr; }
+  ol.steps > li { padding-left:0; padding-top:76px; }
+  .path { white-space:normal; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">DEPTHSCAN</a>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+    <a href="index.html" class="nav-back" data-en="← Back to product" data-fr="← Retour au produit">← Back to product</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow" data-en="Early beta · iPhone" data-fr="Bêta anticipée · iPhone">Early beta · iPhone</div>
+  <h1 data-en-html="Try DepthScan<br><em>on your iPhone</em>." data-fr-html="Essayez DepthScan<br><em>sur votre iPhone</em>.">Try DepthScan<br><em>on your iPhone</em>.</h1>
+  <p class="hero-sub" data-en="DepthScan isn't on the App Store yet. You can install the beta yourself in about 10 minutes with a free tool called Sideloadly and your own Apple ID — no paid account needed." data-fr="DepthScan n'est pas encore sur l'App Store. Vous pouvez installer la bêta vous-même en 10 minutes environ avec un outil gratuit appelé Sideloadly et votre propre identifiant Apple — aucun compte payant requis.">DepthScan isn't on the App Store yet. You can install the beta yourself in about 10 minutes with a free tool called Sideloadly and your own Apple ID — no paid account needed.</p>
+  <a class="btn-primary" href="https://github.com/nathangamalnasser1-arch/vectorstarprobabilitydynamics.com/releases/download/depthscan-beta/DepthScan.ipa" download data-en="Download DepthScan.ipa ↓" data-fr="Télécharger DepthScan.ipa ↓">Download DepthScan.ipa ↓</a>
+  <div class="dl-meta" data-en="Beta build · 0.4 MB · iOS 17+" data-fr="Version bêta · 0,4 Mo · iOS 17+">Beta build · 0.4 MB · iOS 17+</div>
+</header>
+
+<main class="wrap">
+
+  <div class="notice" data-en-html="<strong>This is an early beta.</strong> Scanning, hand removal, coverage tracking and 3D export work. Magnet-based rotation calibration is still being finished, so accuracy claims on the product page don't apply to this build yet." data-fr-html="<strong>Ceci est une bêta anticipée.</strong> La numérisation, la suppression des mains, le suivi de couverture et l'export 3D fonctionnent. Le calibrage de rotation par aimants est encore en cours de finition : les chiffres de précision de la page produit ne s'appliquent pas encore à cette version."><strong>This is an early beta.</strong> Scanning, hand removal, coverage tracking and 3D export work. Magnet-based rotation calibration is still being finished, so accuracy claims on the product page don't apply to this build yet.</div>
+
+  <h2 data-en="What you need" data-fr="Ce qu'il vous faut">What you need</h2>
+  <div class="req-grid">
+    <div class="req">
+      <div class="req-label" data-en="Phone" data-fr="Téléphone">Phone</div>
+      <div class="req-val" data-en-html="iPhone 12 Pro or newer<small>Needs the front TrueDepth camera · iOS 17 or later</small>" data-fr-html="iPhone 12 Pro ou plus récent<small>Caméra TrueDepth avant requise · iOS 17 ou plus</small>">iPhone 12 Pro or newer<small>Needs the front TrueDepth camera · iOS 17 or later</small></div>
+    </div>
+    <div class="req">
+      <div class="req-label" data-en="Computer" data-fr="Ordinateur">Computer</div>
+      <div class="req-val" data-en-html="Windows or Mac<small>Only needed for the install, not to use the app</small>" data-fr-html="Windows ou Mac<small>Seulement pour l'installation, pas pour utiliser l'app</small>">Windows or Mac<small>Only needed for the install, not to use the app</small></div>
+    </div>
+    <div class="req">
+      <div class="req-label" data-en="Cable" data-fr="Câble">Cable</div>
+      <div class="req-val" data-en-html="USB cable for your iPhone<small>Lightning or USB-C</small>" data-fr-html="Câble USB pour votre iPhone<small>Lightning ou USB-C</small>">USB cable for your iPhone<small>Lightning or USB-C</small></div>
+    </div>
+    <div class="req">
+      <div class="req-label" data-en="Account" data-fr="Compte">Account</div>
+      <div class="req-val" data-en-html="A free Apple ID<small>The one on your phone works fine</small>" data-fr-html="Un identifiant Apple gratuit<small>Celui de votre téléphone convient</small>">A free Apple ID<small>The one on your phone works fine</small></div>
+    </div>
+  </div>
+
+  <h2 data-en="Install in 8 steps" data-fr="Installation en 8 étapes">Install in 8 steps</h2>
+  <ol class="steps">
+
+    <li>
+      <div class="step-title" data-en="Download the app file" data-fr="Téléchargez le fichier de l'app">Download the app file</div>
+      <div class="step-body" data-en-html="<p>Click <strong>Download DepthScan.ipa</strong> at the top of this page and save it somewhere easy to find, like your Desktop.</p>" data-fr-html="<p>Cliquez sur <strong>Télécharger DepthScan.ipa</strong> en haut de cette page et enregistrez-le dans un endroit facile à retrouver, comme le Bureau.</p>"><p>Click <strong>Download DepthScan.ipa</strong> at the top of this page and save it somewhere easy to find, like your Desktop.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Windows only: install iTunes and iCloud" data-fr="Windows seulement : installez iTunes et iCloud">Windows only: install iTunes and iCloud</div>
+      <div class="step-body" data-en-html="<p>Sideloadly needs Apple's drivers to talk to your iPhone. Install <strong>iTunes</strong> and <strong>iCloud</strong> using the download links on <a href=&quot;https://sideloadly.io&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>sideloadly.io</a> (the versions from Apple's website, not the Microsoft Store).</p><p class=&quot;tip&quot;>On a Mac, skip this step.</p>" data-fr-html="<p>Sideloadly a besoin des pilotes d'Apple pour communiquer avec votre iPhone. Installez <strong>iTunes</strong> et <strong>iCloud</strong> avec les liens de téléchargement sur <a href=&quot;https://sideloadly.io&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>sideloadly.io</a> (les versions du site d'Apple, pas celles du Microsoft Store).</p><p class=&quot;tip&quot;>Sur Mac, sautez cette étape.</p>"><p>Sideloadly needs Apple's drivers to talk to your iPhone. Install <strong>iTunes</strong> and <strong>iCloud</strong> using the download links on <a href="https://sideloadly.io" target="_blank" rel="noopener">sideloadly.io</a> (the versions from Apple's website, not the Microsoft Store).</p><p class="tip">On a Mac, skip this step.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Install Sideloadly" data-fr="Installez Sideloadly">Install Sideloadly</div>
+      <div class="step-body" data-en-html="<p>Download Sideloadly for Windows or Mac from <a href=&quot;https://sideloadly.io&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>sideloadly.io</a> and install it. It's free.</p>" data-fr-html="<p>Téléchargez Sideloadly pour Windows ou Mac sur <a href=&quot;https://sideloadly.io&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>sideloadly.io</a> et installez-le. C'est gratuit.</p>"><p>Download Sideloadly for Windows or Mac from <a href="https://sideloadly.io" target="_blank" rel="noopener">sideloadly.io</a> and install it. It's free.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Connect your iPhone" data-fr="Branchez votre iPhone">Connect your iPhone</div>
+      <div class="step-body" data-en-html="<p>Plug your iPhone into the computer with the cable and unlock it. If it asks <strong>“Trust This Computer?”</strong>, tap <strong>Trust</strong> and enter your passcode.</p>" data-fr-html="<p>Branchez votre iPhone à l'ordinateur avec le câble et déverrouillez-le. S'il demande <strong>« Se fier à cet ordinateur ? »</strong>, touchez <strong>Se fier</strong> et entrez votre code.</p>"><p>Plug your iPhone into the computer with the cable and unlock it. If it asks <strong>“Trust This Computer?”</strong>, tap <strong>Trust</strong> and enter your passcode.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Install DepthScan with Sideloadly" data-fr="Installez DepthScan avec Sideloadly">Install DepthScan with Sideloadly</div>
+      <div class="step-body" data-en-html="<ul><li>Open Sideloadly. Your iPhone should appear in the <strong>iDevice</strong> list.</li><li>Drag <span class=&quot;path&quot;>DepthScan.ipa</span> onto the IPA icon in the top-left.</li><li>Type your Apple ID email in the <strong>Apple account</strong> box.</li><li>Click <strong>Start</strong>, then enter your Apple ID password and the 6-digit code Apple sends you if asked.</li></ul><p>Wait until the log at the bottom says <strong>Done</strong>. The app icon now appears on your iPhone, but it won't open yet.</p><p class=&quot;tip&quot;>Your password goes only to Apple, to create a free signing certificate. If you'd rather not use your main Apple ID, a second free Apple ID works too.</p>" data-fr-html="<ul><li>Ouvrez Sideloadly. Votre iPhone devrait apparaître dans la liste <strong>iDevice</strong>.</li><li>Glissez <span class=&quot;path&quot;>DepthScan.ipa</span> sur l'icône IPA en haut à gauche.</li><li>Tapez l'adresse de votre identifiant Apple dans la case <strong>Apple account</strong>.</li><li>Cliquez sur <strong>Start</strong>, puis entrez votre mot de passe Apple et le code à 6 chiffres envoyé par Apple si demandé.</li></ul><p>Attendez que le journal en bas affiche <strong>Done</strong>. L'icône de l'app apparaît maintenant sur votre iPhone, mais elle ne s'ouvre pas encore.</p><p class=&quot;tip&quot;>Votre mot de passe est envoyé uniquement à Apple, pour créer un certificat de signature gratuit. Si vous préférez ne pas utiliser votre identifiant principal, un deuxième identifiant Apple gratuit fonctionne aussi.</p>"><ul><li>Open Sideloadly. Your iPhone should appear in the <strong>iDevice</strong> list.</li><li>Drag <span class="path">DepthScan.ipa</span> onto the IPA icon in the top-left.</li><li>Type your Apple ID email in the <strong>Apple account</strong> box.</li><li>Click <strong>Start</strong>, then enter your Apple ID password and the 6-digit code Apple sends you if asked.</li></ul><p>Wait until the log at the bottom says <strong>Done</strong>. The app icon now appears on your iPhone, but it won't open yet.</p><p class="tip">Your password goes only to Apple, to create a free signing certificate. If you'd rather not use your main Apple ID, a second free Apple ID works too.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Turn on Developer Mode" data-fr="Activez le mode développeur">Turn on Developer Mode</div>
+      <div class="step-body" data-en-html="<p>On your iPhone open <span class=&quot;path&quot;>Settings → Privacy &amp; Security → Developer Mode</span>, switch it on and tap <strong>Restart</strong>. After the restart, tap <strong>Turn On</strong> and enter your passcode.</p><p class=&quot;tip&quot;>The Developer Mode option only shows up after step 5. You only do this once.</p>" data-fr-html="<p>Sur votre iPhone, ouvrez <span class=&quot;path&quot;>Réglages → Confidentialité et sécurité → Mode développeur</span>, activez-le et touchez <strong>Redémarrer</strong>. Après le redémarrage, touchez <strong>Activer</strong> et entrez votre code.</p><p class=&quot;tip&quot;>L'option Mode développeur n'apparaît qu'après l'étape 5. À faire une seule fois.</p>"><p>On your iPhone open <span class="path">Settings → Privacy &amp; Security → Developer Mode</span>, switch it on and tap <strong>Restart</strong>. After the restart, tap <strong>Turn On</strong> and enter your passcode.</p><p class="tip">The Developer Mode option only shows up after step 5. You only do this once.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Trust your Apple ID" data-fr="Faites confiance à votre identifiant Apple">Trust your Apple ID</div>
+      <div class="step-body" data-en-html="<p>Open <span class=&quot;path&quot;>Settings → General → VPN &amp; Device Management</span>, tap your Apple ID email under <strong>Developer App</strong>, then tap <strong>Trust</strong> and confirm.</p>" data-fr-html="<p>Ouvrez <span class=&quot;path&quot;>Réglages → Général → VPN et gestion de l'appareil</span>, touchez votre adresse Apple sous <strong>App de développeur</strong>, puis touchez <strong>Faire confiance</strong> et confirmez.</p>"><p>Open <span class="path">Settings → General → VPN &amp; Device Management</span>, tap your Apple ID email under <strong>Developer App</strong>, then tap <strong>Trust</strong> and confirm.</p></div>
+    </li>
+
+    <li>
+      <div class="step-title" data-en="Open DepthScan" data-fr="Ouvrez DepthScan">Open DepthScan</div>
+      <div class="step-body" data-en-html="<p>Tap the DepthScan icon. Allow <strong>Camera</strong>, <strong>Motion</strong> and <strong>Local Network</strong> when asked — the app needs them to scan. Lay the phone face-up on a table to begin.</p>" data-fr-html="<p>Touchez l'icône DepthScan. Autorisez <strong>Caméra</strong>, <strong>Mouvements</strong> et <strong>Réseau local</strong> quand c'est demandé — l'app en a besoin pour numériser. Posez le téléphone face vers le haut sur une table pour commencer.</p>"><p>Tap the DepthScan icon. Allow <strong>Camera</strong>, <strong>Motion</strong> and <strong>Local Network</strong> when asked — the app needs them to scan. Lay the phone face-up on a table to begin.</p></div>
+    </li>
+
+  </ol>
+
+  <h2 data-en="Good to know" data-fr="Bon à savoir">Good to know</h2>
+  <div class="faq-item">
+    <div class="faq-q" data-en="The app stopped opening after a week." data-fr="L'app ne s'ouvre plus après une semaine.">The app stopped opening after a week.</div>
+    <div class="faq-a" data-en="Apps installed with a free Apple ID expire after 7 days. Plug in your phone and repeat step 5 — your scans stay on the phone. Sideloadly can also refresh it automatically while your phone and computer are on the same Wi-Fi." data-fr="Les apps installées avec un identifiant Apple gratuit expirent après 7 jours. Rebranchez votre téléphone et refaites l'étape 5 — vos numérisations restent sur le téléphone. Sideloadly peut aussi la renouveler automatiquement quand le téléphone et l'ordinateur sont sur le même Wi-Fi.">Apps installed with a free Apple ID expire after 7 days. Plug in your phone and repeat step 5 — your scans stay on the phone. Sideloadly can also refresh it automatically while your phone and computer are on the same Wi-Fi.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-en="Sideloadly doesn't see my iPhone." data-fr="Sideloadly ne voit pas mon iPhone.">Sideloadly doesn't see my iPhone.</div>
+    <div class="faq-a" data-en="Unlock the phone, accept “Trust This Computer”, and try another cable or USB port. On Windows, make sure iTunes is the version from Apple's website (step 2), then restart Sideloadly." data-fr="Déverrouillez le téléphone, acceptez « Se fier à cet ordinateur » et essayez un autre câble ou port USB. Sur Windows, vérifiez qu'iTunes est la version du site d'Apple (étape 2), puis redémarrez Sideloadly.">Unlock the phone, accept “Trust This Computer”, and try another cable or USB port. On Windows, make sure iTunes is the version from Apple's website (step 2), then restart Sideloadly.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-en="It says “Untrusted Developer” or the app closes right away." data-fr="Le message « Développeur non approuvé » s'affiche ou l'app se ferme aussitôt.">It says “Untrusted Developer” or the app closes right away.</div>
+    <div class="faq-a" data-en="Steps 6 and 7 aren't done yet — turn on Developer Mode and trust your Apple ID, then open the app again." data-fr="Les étapes 6 et 7 ne sont pas encore faites — activez le mode développeur et faites confiance à votre identifiant Apple, puis rouvrez l'app.">Steps 6 and 7 aren't done yet — turn on Developer Mode and trust your Apple ID, then open the app again.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" data-en="“Maximum number of apps” error." data-fr="Erreur « nombre maximal d'apps ».">“Maximum number of apps” error.</div>
+    <div class="faq-a" data-en="A free Apple ID can have 3 sideloaded apps on a phone at once. Delete one you don't use, then try again." data-fr="Un identifiant Apple gratuit permet 3 apps installées ainsi sur un téléphone à la fois. Supprimez-en une que vous n'utilisez pas, puis réessayez.">A free Apple ID can have 3 sideloaded apps on a phone at once. Delete one you don't use, then try again.</div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-mono">DEPTHSCAN · BETA</div>
+  <div class="footer-links">
+    <a href="index.html" data-en="Product" data-fr="Produit">Product</a>
+    <a href="pricing.html" data-en="Pricing" data-fr="Tarifs">Pricing</a>
+    <a href="../natapps.html">Natapps</a>
+  </div>
+</footer>
+
+<script>
+// ── LANGUAGE TOGGLE (same data-en / data-fr convention as index.html) ──
+function setLang(lang) {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-' + lang + ']').forEach(el => { el.textContent = el.getAttribute('data-' + lang); });
+  document.querySelectorAll('[data-' + lang + '-html]').forEach(el => { el.innerHTML = el.getAttribute('data-' + lang + '-html'); });
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  try { localStorage.setItem('depthscan-lang', lang); } catch (e) {}
+}
+document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+try { const saved = localStorage.getItem('depthscan-lang'); if (saved && saved !== 'en') setLang(saved); } catch (e) {}
+</script>
+</body>
+</html>
