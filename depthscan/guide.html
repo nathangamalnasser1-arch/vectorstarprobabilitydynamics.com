@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DepthScan — How to use the app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0B0D10;
+  --ink-2: #141720;
+  --paper: #F5F3EC;
+  --signal: #FF5C35;
+  --teal: #3A8C7A;
+  --blue: #3B82F6;
+  --purple: #A855F7;
+  --green: #22C55E;
+  --orange: #F59E0B;
+  --gray: #6B6F76;
+  --line: rgba(245,243,236,0.10);
+  --line-2: rgba(245,243,236,0.20);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter Tight', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--signal); color: var(--ink); }
+a { color: inherit; text-decoration: none; }
+
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 20px 5vw;
+  background: rgba(11,13,16,0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.logo {
+  font-family: var(--mono); font-weight:700; font-size:14px;
+  letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;
+}
+.logo::before { content:''; width:7px; height:7px; background:var(--signal); display:inline-block; }
+.nav-links { display:flex; gap:28px; font-size:13px; color:var(--gray); }
+.nav-links a:hover { color:var(--paper); }
+.nav-back {
+  font-family:var(--mono); font-size:12px; color:var(--gray);
+}
+.nav-back:hover { color:var(--signal); }
+@media(max-width:800px){ .nav-links { display:none; } }
+
+.hero {
+  padding: 140px 5vw 48px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+.hero-eyebrow {
+  font-family:var(--mono); font-size:11px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--signal); margin-bottom:18px;
+}
+.hero h1 {
+  font-size: clamp(34px, 5.5vw, 60px); font-weight:800;
+  letter-spacing:-0.03em; line-height:1; margin-bottom:18px;
+}
+.hero h1 em { font-style:normal; color:var(--signal); }
+.hero-sub {
+  max-width: 560px; margin: 0 auto 28px;
+  color: var(--gray); font-size: 17px; line-height: 1.45;
+}
+.hero-note {
+  display:inline-block;
+  font-family:var(--mono); font-size:11px; color:var(--gray);
+  border: 1px solid var(--line-2); padding: 8px 14px;
+}
+.hero-note strong { color: var(--paper); font-weight: 600; }
+
+.toc {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  padding: 28px 5vw 8px;
+}
+.toc a {
+  font-family: var(--mono); font-size: 11px; color: var(--gray);
+  border: 1px solid var(--line); padding: 8px 12px;
+}
+.toc a:hover { color: var(--paper); border-color: var(--line-2); }
+
+.step {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 48px;
+  align-items: center;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 64px 5vw;
+  border-bottom: 1px solid var(--line);
+}
+.step:nth-child(even) { grid-template-columns: 280px minmax(0, 1fr); }
+.step:nth-child(even) .step-copy { order: 2; }
+.step:nth-child(even) .phone-wrap { order: 1; }
+@media (max-width: 820px) {
+  .step,
+  .step:nth-child(even) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .step:nth-child(even) .step-copy,
+  .step:nth-child(even) .phone-wrap { order: unset; }
+  .step-copy { max-width: 520px; }
+}
+
+.step-num {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+  color: var(--signal); margin-bottom: 12px;
+}
+.step h2 {
+  font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 14px; line-height: 1.1;
+}
+.step p {
+  color: var(--gray); font-size: 16px; line-height: 1.55; margin-bottom: 14px;
+}
+.step ul {
+  list-style: none; text-align: left;
+  display: grid; gap: 8px; margin-top: 8px;
+}
+.step li {
+  color: var(--paper); font-size: 14px; line-height: 1.4;
+  padding-left: 18px; position: relative;
+}
+.step li::before {
+  content: ''; position: absolute; left: 0; top: 7px;
+  width: 7px; height: 7px; background: var(--signal);
+}
+.step .tip {
+  margin-top: 16px;
+  font-family: var(--mono); font-size: 12px; color: var(--teal);
+  border-left: 2px solid var(--teal); padding-left: 12px; line-height: 1.5;
+}
+
+/* Phone frame + screen mocks (from ScanView.swift UI) */
+.phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.phone-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gray);
+}
+.phone {
+  width: 250px; height: 510px;
+  border-radius: 36px;
+  border: 2px solid #2a2d36;
+  background: #000;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45), inset 0 0 0 1px #111;
+  position: relative;
+  overflow: hidden;
+}
+.phone::before {
+  content: ''; position: absolute; top: 10px; left: 50%;
+  transform: translateX(-50%); width: 70px; height: 8px;
+  background: #1a1a1a; border-radius: 8px; z-index: 5;
+}
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 42px 18px 28px;
+  text-align: center;
+  background: #000;
+}
+.screen-icon {
+  width: 48px; height: 48px; margin-bottom: 18px;
+  display: grid; place-items: center;
+  font-size: 28px; line-height: 1;
+}
+.screen-title {
+  color: #fff; font-size: 15px; font-weight: 600;
+  line-height: 1.25; margin-bottom: 8px;
+}
+.screen-sub {
+  color: #8a8a8a; font-size: 12px; line-height: 1.4;
+  margin-bottom: 18px; max-width: 190px;
+}
+.screen-footnote {
+  color: #6b6b6b; font-size: 10px; line-height: 1.4;
+  max-width: 180px; margin-bottom: 16px;
+}
+.btn-primary-mock, .btn-secondary-mock {
+  display: inline-block; border-radius: 999px;
+  font-size: 12px; font-weight: 600; padding: 10px 18px; margin: 4px 0;
+}
+.btn-primary-mock { background: var(--blue); color: #fff; }
+.btn-secondary-mock { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+.pill {
+  display: inline-block; border-radius: 999px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 4px 8px;
+}
+.pill-blue { background: rgba(59,130,246,0.25); color: var(--blue); }
+.pill-purple { background: rgba(168,85,247,0.25); color: var(--purple); }
+.coverage {
+  width: 100%; height: 5px; border-radius: 999px;
+  background: rgba(255,255,255,0.1); overflow: hidden; margin: 8px 0;
+}
+.coverage > span {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), rgba(59,130,246,0.7));
+}
+.mesh-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255,92,53,0.18), transparent 55%),
+    linear-gradient(#080812, #000);
+}
+.mesh-bg::after {
+  content: ''; position: absolute; left: 50%; top: 38%;
+  width: 110px; height: 140px; transform: translate(-50%, -50%);
+  border: 1px solid rgba(255,140,100,0.45);
+  border-radius: 40% 40% 35% 35%;
+  box-shadow: 0 0 0 18px rgba(255,92,53,0.05);
+}
+.scan-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 36px 14px 24px;
+  z-index: 2;
+}
+.progress-line {
+  width: 140px; height: 4px; border-radius: 999px;
+  background: rgba(255,255,255,0.12); overflow: hidden; margin: 8px auto 16px;
+}
+.progress-line > span {
+  display: block; height: 100%; width: 40%;
+  background: var(--purple);
+}
+.check-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(34,197,94,0.15); color: var(--green);
+  display: grid; place-items: center; font-size: 28px; margin-bottom: 14px;
+}
+
+.before {
+  max-width: 860px; margin: 0 auto; padding: 56px 5vw;
+  border-bottom: 1px solid var(--line);
+}
+.before h2 {
+  font-size: 28px; letter-spacing: -0.02em; margin-bottom: 12px;
+}
+.before p { color: var(--gray); margin-bottom: 18px; line-height: 1.5; }
+.before-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+@media (max-width: 720px) { .before-grid { grid-template-columns: 1fr; } }
+.before-card {
+  border: 1px solid var(--line); background: var(--ink-2);
+  padding: 18px;
+}
+.before-card h3 {
+  font-family: var(--mono); font-size: 12px; color: var(--signal);
+  margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.before-card p { font-size: 13px; color: var(--gray); margin: 0; line-height: 1.45; }
+.before-card a { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
+
+.cta {
+  text-align: center; padding: 72px 5vw;
+}
+.cta h2 {
+  font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.03em;
+  margin-bottom: 14px;
+}
+.cta h2 em { font-style: normal; color: var(--signal); }
+.cta p { color: var(--gray); margin-bottom: 24px; }
+.cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  font-family: var(--mono); font-size: 13px; padding: 12px 20px;
+  border: 1px solid var(--line-2);
+}
+.btn-fill { background: var(--signal); color: var(--ink); border-color: var(--signal); font-weight: 700; }
+.btn-ghost:hover { border-color: var(--paper); }
+
+footer {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; flex-wrap: wrap;
+  padding: 22px 5vw; border-top: 1px solid var(--line);
+  color: var(--gray); font-size: 12px;
+}
+.footer-mono { font-family: var(--mono); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a:hover { color: var(--paper); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">DEPTHSCAN</a>
+  <div class="nav-links">
+    <a href="#before">Before you start</a>
+    <a href="#step-1">Steps</a>
+    <a href="try.html">Install beta</a>
+    <a href="pricing.html">Pricing</a>
+  </div>
+  <a href="index.html" class="nav-back">← Back to product</a>
+</nav>
+
+<header class="hero">
+  <div class="hero-eyebrow">App guide</div>
+  <h1>How to use<br><em>DepthScan</em></h1>
+  <p class="hero-sub">
+    Screen-by-screen walkthrough of the iOS app — from laying the phone down
+    to exporting the mesh. UI frames match the live ScanView flow.
+  </p>
+  <div class="hero-note"><strong>UI mocks</strong> from the current app screens · replace with device photos when available</div>
+</header>
+
+<nav class="toc" aria-label="Guide sections">
+  <a href="#before">0 · Before you start</a>
+  <a href="#step-1">1 · Face-up</a>
+  <a href="#step-2">2 · Magnets</a>
+  <a href="#step-3">3 · Baseline</a>
+  <a href="#step-4">4 · Poses</a>
+  <a href="#step-5">5 · Scan</a>
+  <a href="#step-6">6 · Coverage</a>
+  <a href="#step-7">7 · Fill gaps</a>
+  <a href="#step-8">8 · Export</a>
+</nav>
+
+<section class="before" id="before">
+  <h2>Before you start</h2>
+  <p>DepthScan needs a TrueDepth iPhone and a few ordinary magnets. If you sideloaded the beta, trust the developer profile first.</p>
+  <div class="before-grid">
+    <div class="before-card">
+      <h3>Hardware</h3>
+      <p>iPhone 12 Pro or later · 2–3 small magnets · flat desk · part roughly 2–15 cm</p>
+    </div>
+    <div class="before-card">
+      <h3>Install / trust</h3>
+      <p>Developer Mode on + restart, then Settings → General → VPN &amp; Device Management → Trust the DepthScan developer. Full install steps: <a href="try.html">Try the beta</a>.</p>
+    </div>
+    <div class="before-card">
+      <h3>Permissions</h3>
+      <p>Allow Camera and Motion when prompted — TrueDepth + magnetometer won’t start without them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 1 -->
+<article class="step" id="step-1">
+  <div class="step-copy">
+    <div class="step-num">01 / PLACE</div>
+    <h2>Lay the phone face-up</h2>
+    <p>Open DepthScan and put the phone flat on the table, screen facing up. Keep it still — CoreMotion waits until the device is level and steady.</p>
+    <ul>
+      <li>Screen faces the ceiling</li>
+      <li>No wobble — the app advances automatically when stable</li>
+      <li>Don’t hold the phone in your hand for scanning</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: waiting for table">
+      <div class="screen">
+        <div class="screen-icon" style="color:var(--blue)">📱</div>
+        <div class="screen-title">Place phone face-up<br>on a flat surface</div>
+        <div class="screen-sub">Hold it still once it's down</div>
+      </div>
+    </div>
+    <div class="phone-label">WaitingForTableView</div>
+  </div>
+</article>
+
+<!-- 2 -->
+<article class="step" id="step-2">
+  <div class="step-copy">
+    <div class="step-num">02 / MAGNETS</div>
+    <h2>Stick 2–3 magnets on the part</h2>
+    <p>When the phone is steady, DepthScan asks you to attach magnets. Spread them out — not in a straight line — so rotation can be solved uniquely.</p>
+    <ul>
+      <li>Any small neodymium magnets / stickers work</li>
+      <li>Tap <strong>Magnets attached</strong> when ready</li>
+      <li>Or skip and track rotation visually only (less robust)</li>
+    </ul>
+    <p class="tip">Tip: different sizes help, but aren’t required.</p>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: magnet instructions">
+      <div class="screen">
+        <div class="screen-icon" style="color:var(--purple)">⠿</div>
+        <div class="screen-title">Stick 3 magnets on your part, spread out and not in a straight line.</div>
+        <div class="screen-footnote">Use 2–3 small magnets (stickers work). Spread them out — avoid placing them in a straight line.</div>
+        <div class="btn-primary-mock">Magnets attached</div>
+        <div class="btn-secondary-mock">Skip — track rotation visually instead</div>
+      </div>
+    </div>
+    <div class="phone-label">Calibration · instructions</div>
+  </div>
+</article>
+
+<!-- 3 -->
+<article class="step" id="step-3">
+  <div class="step-copy">
+    <div class="step-num">03 / BASELINE</div>
+    <h2>Capture the Earth baseline</h2>
+    <p>Move the part away for a moment so the magnetometer reads ambient field with no magnets nearby. The app does this automatically after you confirm magnets are attached.</p>
+    <ul>
+      <li>Hold the part clear of the phone</li>
+      <li>Wait for the spinner to finish</li>
+      <li>Then bring the part back for pose capture</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: capturing baseline">
+      <div class="screen">
+        <div class="screen-icon" style="color:#fff">◌</div>
+        <div class="screen-title">Move the part away from the phone for a moment…</div>
+        <div class="screen-sub">Capturing Earth baseline</div>
+      </div>
+    </div>
+    <div class="phone-label">Calibration · capturingBaseline</div>
+  </div>
+</article>
+
+<!-- 4 -->
+<article class="step" id="step-4">
+  <div class="step-copy">
+    <div class="step-num">04 / POSES</div>
+    <h2>Hold 6 reference poses</h2>
+    <p>Rotate the part to clearly different angles. At each pose, hold steady and tap <strong>Capture pose</strong>. TrueDepth supplies orientation ground truth while the magnetometer records the field.</p>
+    <ul>
+      <li>6 poses total (~20 seconds)</li>
+      <li>Change angle a lot between captures</li>
+      <li>App then solves magnet positions &amp; strengths</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: capture calibration pose">
+      <div class="screen">
+        <div class="screen-sub" style="margin-bottom:4px">Pose 2 of 6</div>
+        <div class="progress-line"><span></span></div>
+        <div class="screen-title">Hold the part steady in pose 2 of 6, then tap Capture.</div>
+        <div class="btn-primary-mock">Capture pose</div>
+      </div>
+    </div>
+    <div class="phone-label">Calibration · awaitingPose</div>
+  </div>
+</article>
+
+<!-- 5 -->
+<article class="step" id="step-5">
+  <div class="step-copy">
+    <div class="step-num">05 / SCAN</div>
+    <h2>Hold the part above the screen</h2>
+    <p>After calibration, the live mesh builds on screen. Hold the part in the TrueDepth beam and rotate slowly. Hands can stay in frame — Vision masks them out.</p>
+    <ul>
+      <li>Watch coverage fill on the bar</li>
+      <li>Optional: Add another phone / Join a session for multi-phone coverage</li>
+      <li>Keep the desk phone still the whole time</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: scanning">
+      <div class="mesh-bg"></div>
+      <div class="scan-overlay">
+        <div style="display:flex;justify-content:space-between;width:100%">
+          <span class="pill pill-blue">SCANNING</span>
+        </div>
+        <div>
+          <div class="screen-sub" style="margin:0 auto 6px">Rotate the part slowly above the screen</div>
+          <div class="coverage"><span style="width:62%"></span></div>
+          <div style="display:flex;justify-content:center;gap:14px;color:#8a8a8a;font-size:10px;margin-top:8px">
+            <span>12.4k pts</span>
+            <span>87% track</span>
+          </div>
+          <div style="display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <span class="btn-secondary-mock" style="font-size:10px;padding:6px 10px">+ Add another phone</span>
+            <span class="btn-secondary-mock" style="font-size:10px;padding:6px 10px">Join a session</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">ScanningView</div>
+  </div>
+</article>
+
+<!-- 6 -->
+<article class="step" id="step-6">
+  <div class="step-copy">
+    <div class="step-num">06 / REVIEW</div>
+    <h2>Review coverage</h2>
+    <p>When coverage looks solid, DepthScan offers to finish or keep scanning. Magnets leave tiny shadows — you can relocate them for a second pass, or finish now.</p>
+    <ul>
+      <li><strong>Keep scanning</strong> — fill more angles</li>
+      <li><strong>Move magnets &amp; fill gaps</strong> — second pass</li>
+      <li><strong>Finish</strong> — start export</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: review coverage">
+      <div class="mesh-bg"></div>
+      <div class="scan-overlay" style="justify-content:flex-end">
+        <div>
+          <div class="screen-title">Coverage: 91%</div>
+          <div class="screen-sub">Looks good. You can finish now or keep scanning to fill any gaps.</div>
+          <div class="screen-footnote" style="margin:0 auto 12px">The magnets covered a few small spots while scanning.</div>
+          <div class="btn-secondary-mock">Move magnets &amp; fill gaps</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+            <span class="btn-secondary-mock">Keep scanning</span>
+            <span class="btn-primary-mock">Finish</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">ReviewCoverageView</div>
+  </div>
+</article>
+
+<!-- 7 -->
+<article class="step" id="step-7">
+  <div class="step-copy">
+    <div class="step-num">07 / FILL GAPS</div>
+    <h2>Move magnets, scan again</h2>
+    <p>Optional but recommended. Move the magnets to new spots (still spread out), tap <strong>I moved them</strong>, hold still while DepthScan confirms, then rotate again under <strong>FILLING GAPS</strong>.</p>
+    <ul>
+      <li>Exact new positions don’t matter</li>
+      <li>You can skip and finish with small gaps</li>
+      <li>Tap Finish when the second pass looks good</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: relocate magnets">
+      <div class="mesh-bg"></div>
+      <div class="scan-overlay" style="justify-content:flex-end">
+        <div>
+          <div class="screen-icon" style="color:var(--purple);margin:0 auto 10px">↻</div>
+          <div class="screen-title">Move the magnets to new spots on the part</div>
+          <div class="screen-footnote">Keep them spread out and not in a line — exact placement doesn't matter.</div>
+          <div class="btn-primary-mock">I moved them</div>
+          <div class="btn-secondary-mock">Skip — finish without filling gaps</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">RelocateMagnetsView</div>
+  </div>
+</article>
+
+<!-- 8 -->
+<article class="step" id="step-8">
+  <div class="step-copy">
+    <div class="step-num">08 / EXPORT</div>
+    <h2>Build the final mesh</h2>
+    <p>DepthScan runs Object Capture on the saved frames and writes the mesh. When done you’ll see <strong>Scan complete</strong> — start a new scan anytime.</p>
+    <ul>
+      <li>Progress shows while the mesh builds</li>
+      <li>Output lands as a saved mesh file on device</li>
+      <li>Pro / Studio unlock more export formats — see Pricing</li>
+    </ul>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" aria-label="App screen: scan complete">
+      <div class="screen">
+        <div class="check-icon">✓</div>
+        <div class="screen-title">Scan complete</div>
+        <div class="screen-sub">Saved to DepthScanMesh.usdz</div>
+        <div class="btn-primary-mock">New scan</div>
+      </div>
+    </div>
+    <div class="phone-label">CompleteView</div>
+  </div>
+</article>
+
+<section class="cta">
+  <h2>Ready to <em>scan</em>?</h2>
+  <p>Install the beta, trust the developer, then follow the steps above.</p>
+  <div class="cta-row">
+    <a class="btn btn-fill" href="try.html">Try the app (beta) →</a>
+    <a class="btn btn-ghost" href="pricing.html">See pricing</a>
+    <a class="btn btn-ghost" href="index.html">Product overview</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-mono">DEPTHSCAN · HOW TO USE</div>
+  <div class="footer-links">
+    <a href="index.html">Product</a>
+    <a href="try.html">Beta install</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="../natapps.html">Natapps</a>
+  </div>
+</footer>
+
+</body>
+</html>
